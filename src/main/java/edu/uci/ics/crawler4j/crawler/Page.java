@@ -29,17 +29,17 @@ import edu.uci.ics.crawler4j.url.WebURL;
  */
 public class Page {
 
-	private WebURL url;
+	protected WebURL url;
 
-	private byte[] contentData;
+    protected byte[] contentData;
 
-	private String contentEncoding;
+    protected String contentEncoding;
 
-	private String contentCharset;
+    protected String contentCharset;
 
-	private String contentType;
+    protected String contentType;
 
-	private ParseData parseData;
+    protected ParseData parseData;
 
 	public Page(WebURL url) {
 		this.url = url;
