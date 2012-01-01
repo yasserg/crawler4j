@@ -33,6 +33,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * The controller that manages a crawling session. This class creates
+ * the crawler threads and monitors their progress.
+ *
  * @author Yasser Ganjisaffar <lastname at gmail dot com>
  */
 public class CrawlController extends Configurable {
@@ -45,19 +48,31 @@ public class CrawlController extends Configurable {
 	 */
 	protected Object customData;
 
-	protected Environment env;
-	protected List<Object> crawlersLocalData = new ArrayList<Object>();
-	protected List<Thread> threads;
-	protected PageFetcher pageFetcher;
-	protected RobotstxtServer robotstxtServer;
+    /**
+     * Once the crawling session finishes the controller
+     * collects the local data of the crawler threads and stores
+     * them in this List.
+     */
+    protected List<Object> crawlersLocalData = new ArrayList<Object>();
 
+    /**
+     * Is the crawling of this session finished?
+     */
+    protected boolean finished;
+
+    /**
+     * Is the crawling session set to 'shutdown'.
+     * Crawler threads monitor this flag and when it is set
+     * they will no longer process new pages.
+     */
+    protected boolean shuttingDown;
+
+    protected PageFetcher pageFetcher;
+	protected RobotstxtServer robotstxtServer;
 	protected Frontier frontier;
 	protected DocIDServer docIdServer;
 
 	protected final Object waitingLock = new Object();
-	protected boolean finished;
-
-	protected boolean shuttingDown;
 
 	public CrawlController(CrawlConfig config, PageFetcher pageFetcher, RobotstxtServer robotstxtServer)
 			throws Exception {
@@ -88,7 +103,7 @@ public class CrawlController extends Configurable {
 			IO.deleteFolderContents(envHome);
 		}
 
-		env = new Environment(envHome, envConfig);
+		Environment env = new Environment(envHome, envConfig);
 		docIdServer = new DocIDServer(env, config);
 		frontier = new Frontier(env, config, docIdServer);
 
@@ -99,10 +114,24 @@ public class CrawlController extends Configurable {
 		shuttingDown = false;
 	}
 
+    /**
+     * Start the crawling session and wait for it to finish.
+     *
+     * @param _c  the class that implements the logic for crawler threads
+     * @param numberOfCrawlers the number of concurrent threads that will be
+     *                         contributing in this crawling session.
+     */
 	public <T extends WebCrawler> void start(final Class<T> _c, final int numberOfCrawlers) {
 		this.start(_c, numberOfCrawlers, true);
 	}
 
+    /**
+     * Start the crawling session and return immediately.
+     *
+     * @param _c  the class that implements the logic for crawler threads
+     * @param numberOfCrawlers the number of concurrent threads that will be
+     *                         contributing in this crawling session.
+     */
 	public <T extends WebCrawler> void startNonBlocking(final Class<T> _c, final int numberOfCrawlers) {
 		this.start(_c, numberOfCrawlers, false);
 	}
@@ -111,7 +140,7 @@ public class CrawlController extends Configurable {
 		try {
 			finished = false;
 			crawlersLocalData.clear();
-			threads = new ArrayList<Thread>();
+			final List<Thread> threads = new ArrayList<Thread>();
 			final List<T> crawlers = new ArrayList<T>();
 
 			for (int i = 1; i <= numberOfCrawlers; i++) {
@@ -227,6 +256,9 @@ public class CrawlController extends Configurable {
 		}
 	}
 
+    /**
+     * Wait until this crawling session finishes.
+     */
 	public void waitUntilFinish() {
 		while (!finished) {
 			synchronized (waitingLock) {
@@ -242,6 +274,12 @@ public class CrawlController extends Configurable {
 		}
 	}
 
+    /**
+     * Once the crawling session finishes the controller
+     * collects the local data of the crawler threads and stores
+     * them in a List. This function returns the reference to this
+     * list.
+     */
 	public List<Object> getCrawlersLocalData() {
 		return crawlersLocalData;
 	}
@@ -253,6 +291,13 @@ public class CrawlController extends Configurable {
 		}
 	}
 
+    /**
+     * Adds a new seed URL. A seed URL is a URL that
+     * is fetched by the crawler to extract new URLs
+     * in it and follow them for crawling.
+     *
+     * @param pageUrl the URL of the seed
+     */
 	public void addSeed(String pageUrl) {
 		String canonicalUrl = URLCanonicalizer.getCanonicalURL(pageUrl);
 		if (canonicalUrl == null) {
@@ -325,6 +370,11 @@ public class CrawlController extends Configurable {
 		return shuttingDown;
 	}
 
+    /**
+     * Set the current crawling session set to 'shutdown'.
+     * Crawler threads monitor the shutdown flag and when it is set
+     * to true, they will no longer process new pages.
+     */
 	public void Shutdown() {
 		logger.info("Shutting down...");
 		this.shuttingDown = true;
