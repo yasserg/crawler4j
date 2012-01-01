@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package edu.uci.ics.crawler4j.multiple;
+package edu.uci.ics.crawler4j.examples.multiple;
 
 import java.util.List;
 import java.util.regex.Pattern;

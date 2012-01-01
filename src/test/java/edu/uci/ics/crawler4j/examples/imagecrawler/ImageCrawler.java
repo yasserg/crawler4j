@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package edu.uci.ics.crawler4j.imagecrawler;
+package edu.uci.ics.crawler4j.examples.imagecrawler;
 
 import java.io.File;
 import java.util.regex.Pattern;
@@ -76,8 +76,8 @@ public class ImageCrawler extends WebCrawler {
 
 	@Override
 	public void visit(Page page) {
-        String url = page.getWebURL().getURL();
-        
+		String url = page.getWebURL().getURL();
+
 		// We are only interested in processing images
 		if (!(page.getParseData() instanceof BinaryParseData)) {
 			return;

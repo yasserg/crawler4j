@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package edu.uci.ics.crawler4j.advanced;
+package edu.uci.ics.crawler4j.examples.localdata;
 
 import edu.uci.ics.crawler4j.crawler.Page;
 import edu.uci.ics.crawler4j.crawler.WebCrawler;
@@ -26,22 +26,22 @@ import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.regex.Pattern;
 
-public class MyCrawler extends WebCrawler {
+public class LocalDataCollectorCrawler extends WebCrawler {
 
 	Pattern filters = Pattern.compile(".*(\\.(css|js|bmp|gif|jpe?g" + "|png|tiff?|mid|mp2|mp3|mp4"
 			+ "|wav|avi|mov|mpeg|ram|m4v|pdf" + "|rm|smil|wmv|swf|wma|zip|rar|gz))$");
 
 	CrawlStat myCrawlStat;
 
-	public MyCrawler() {
+	public LocalDataCollectorCrawler() {
 		myCrawlStat = new CrawlStat();
 	}
 
 	@Override
 	public boolean shouldVisit(WebURL url) {
 		String href = url.getURL().toLowerCase();
-        return !filters.matcher(href).matches() && href.startsWith("http://www.ics.uci.edu/");
-    }
+		return !filters.matcher(href).matches() && href.startsWith("http://www.ics.uci.edu/");
+	}
 
 	@Override
 	public void visit(Page page) {

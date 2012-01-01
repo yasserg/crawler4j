@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package edu.uci.ics.crawler4j.basic;
+package edu.uci.ics.crawler4j.examples.basic;
 
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.crawler.CrawlController;
@@ -29,8 +29,10 @@ import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
 public class BasicCrawlController {
 
 	public static void main(String[] args) throws Exception {
-		if (args.length < 2) {
-			System.out.println("Please specify 'root folder' and 'number of crawlers'.");
+		if (args.length != 2) {
+			System.out.println("Needed parameters: ");
+			System.out.println("\t rootFolder (it will contain intermediate crawl data)");
+			System.out.println("\t numberOfCralwers (number of concurrent threads)");
 			return;
 		}
 

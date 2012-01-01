@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package edu.uci.ics.crawler4j.shutdown;
+package edu.uci.ics.crawler4j.examples.shutdown;
 
 import edu.uci.ics.crawler4j.crawler.Page;
 import edu.uci.ics.crawler4j.crawler.WebCrawler;
@@ -39,8 +39,8 @@ public class BasicCrawler extends WebCrawler {
 	@Override
 	public boolean shouldVisit(WebURL url) {
 		String href = url.getURL().toLowerCase();
-        return !FILTERS.matcher(href).matches() && href.startsWith(DOMAIN);
-    }
+		return !FILTERS.matcher(href).matches() && href.startsWith(DOMAIN);
+	}
 
 	@Override
 	public void visit(Page page) {

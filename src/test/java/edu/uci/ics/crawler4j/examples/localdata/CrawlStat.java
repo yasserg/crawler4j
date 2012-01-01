@@ -15,14 +15,13 @@
  * limitations under the License.
  */
 
-package edu.uci.ics.crawler4j.advanced;
+package edu.uci.ics.crawler4j.examples.localdata;
 
 public class CrawlStat {
 	private int totalProcessedPages;
 	private long totalLinks;
 	private long totalTextSize;
 
-	
 	public int getTotalProcessedPages() {
 		return totalProcessedPages;
 	}
@@ -30,7 +29,7 @@ public class CrawlStat {
 	public void setTotalProcessedPages(int totalProcessedPages) {
 		this.totalProcessedPages = totalProcessedPages;
 	}
-	
+
 	public void incProcessedPages() {
 		this.totalProcessedPages++;
 	}
@@ -50,11 +49,11 @@ public class CrawlStat {
 	public void setTotalTextSize(long totalTextSize) {
 		this.totalTextSize = totalTextSize;
 	}
-	
+
 	public void incTotalLinks(int count) {
 		this.totalLinks += count;
 	}
-	
+
 	public void incTotalTextSize(int count) {
 		this.totalTextSize += count;
 	}

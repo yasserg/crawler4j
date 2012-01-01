@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package edu.uci.ics.crawler4j.imagecrawler;
+package edu.uci.ics.crawler4j.examples.imagecrawler;
 
 import java.security.MessageDigest;
 
@@ -24,7 +24,8 @@ import java.security.MessageDigest;
  */
 public class Cryptography {
 
-	private static final char[] hexChars = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e',	'f' };
+	private static final char[] hexChars = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e',
+			'f' };
 
 	public static String MD5(String str) {
 		try {

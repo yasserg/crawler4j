@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package edu.uci.ics.crawler4j.multiple;
+package edu.uci.ics.crawler4j.examples.multiple;
 
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.crawler.CrawlController;
@@ -30,8 +30,9 @@ import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
 public class MultipleCrawlerController {
 
 	public static void main(String[] args) throws Exception {
-		if (args.length < 1) {
-			System.out.println("Please specify 'root folder'.");
+		if (args.length != 1) {
+			System.out.println("Needed parameter: ");
+			System.out.println("\t rootFolder (it will contain intermediate crawl data)");
 			return;
 		}
 
@@ -74,14 +75,14 @@ public class MultipleCrawlerController {
 
 		String[] crawler1Domains = new String[] { "http://www.ics.uci.edu/", "http://www.cnn.com/" };
 		String[] crawler2Domains = new String[] { "http://en.wikipedia.org/" };
-		
+
 		controller1.setCustomData(crawler1Domains);
 		controller2.setCustomData(crawler2Domains);
 
 		controller1.addSeed("http://www.ics.uci.edu/");
 		controller1.addSeed("http://www.cnn.com/");
 		controller1.addSeed("http://www.ics.uci.edu/~yganjisa/");
-		controller1.addSeed("http://www.cnn.com/POLITICS/");		
+		controller1.addSeed("http://www.cnn.com/POLITICS/");
 
 		controller2.addSeed("http://en.wikipedia.org/wiki/Main_Page");
 		controller2.addSeed("http://en.wikipedia.org/wiki/Obama");
@@ -96,7 +97,7 @@ public class MultipleCrawlerController {
 
 		controller1.waitUntilFinish();
 		System.out.println("Crawler 1 is finished.");
-		
+
 		controller2.waitUntilFinish();
 		System.out.println("Crawler 2 is finished.");
 	}
