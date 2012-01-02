@@ -223,6 +223,8 @@ public class CrawlConfig {
     /**
      * Politeness delay in milliseconds (delay between sending two requests to
      * the same host).
+     * 
+     * @param politenessDelay the delay in milliseconds.
      */
 	public void setPolitenessDelay(int politenessDelay) {
 		this.politenessDelay = politenessDelay;
