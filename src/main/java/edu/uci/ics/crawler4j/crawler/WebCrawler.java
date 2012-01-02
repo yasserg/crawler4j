@@ -32,78 +32,78 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * WebCrawler class in the Runnable class that is executed by each
- * crawler thread.
- *
+ * WebCrawler class in the Runnable class that is executed by each crawler
+ * thread.
+ * 
  * @author Yasser Ganjisaffar <lastname at gmail dot com>
  */
 public class WebCrawler implements Runnable {
 
 	protected static final Logger logger = Logger.getLogger(WebCrawler.class.getName());
 
-    /**
-     * The id associated to the crawler thread running this instance
-     */
-    protected int myId;
+	/**
+	 * The id associated to the crawler thread running this instance
+	 */
+	protected int myId;
 
-    /**
-     * The controller instance that has created this crawler thread.
-     * This reference to the controller can be used for getting
-     * configurations of the current crawl or adding new seeds
-     * during runtime.
-     */
-    protected CrawlController myController;
+	/**
+	 * The controller instance that has created this crawler thread. This
+	 * reference to the controller can be used for getting configurations of the
+	 * current crawl or adding new seeds during runtime.
+	 */
+	protected CrawlController myController;
 
-    /**
-     * The thread within which this crawler instance is running.
-     */
+	/**
+	 * The thread within which this crawler instance is running.
+	 */
 	private Thread myThread;
 
-    /**
-     * The parser that is used by this crawler instance to parse
-     * the content of the fetched pages.
-     */
+	/**
+	 * The parser that is used by this crawler instance to parse the content of
+	 * the fetched pages.
+	 */
 	private Parser parser;
 
-    /**
-     * The fetcher that is used by this crawler instance to fetch
-     * the content of pages from the web.
-     */
+	/**
+	 * The fetcher that is used by this crawler instance to fetch the content of
+	 * pages from the web.
+	 */
 	private PageFetcher pageFetcher;
 
-    /**
-     * The RobotstxtServer instance that is used by this crawler
-     * instance to determine whether the crawler is allowed to crawl
-     * the content of each page.
-     */
-    private RobotstxtServer robotstxtServer;
+	/**
+	 * The RobotstxtServer instance that is used by this crawler instance to
+	 * determine whether the crawler is allowed to crawl the content of each
+	 * page.
+	 */
+	private RobotstxtServer robotstxtServer;
 
-    /**
-     * The DocIDServer that is used by this crawler instance to map
-     * each URL to a unique docid.
-      */
-    private DocIDServer docIdServer;
+	/**
+	 * The DocIDServer that is used by this crawler instance to map each URL to
+	 * a unique docid.
+	 */
+	private DocIDServer docIdServer;
 
-    /**
-     * The Frontier object that manages the crawl queue.
-     */
-    private Frontier frontier;
+	/**
+	 * The Frontier object that manages the crawl queue.
+	 */
+	private Frontier frontier;
 
-    /**
-     * Is the current crawler instance waiting for new URLs?
-     * This field is mainly used by the controller to detect
-     * whether all of the crawler instances are waiting for
-     * new URLs and therefore there is no more work and crawling
-     * can be stopped.
-     */
-    private boolean isWaitingForNewURLs;
+	/**
+	 * Is the current crawler instance waiting for new URLs? This field is
+	 * mainly used by the controller to detect whether all of the crawler
+	 * instances are waiting for new URLs and therefore there is no more work
+	 * and crawling can be stopped.
+	 */
+	private boolean isWaitingForNewURLs;
 
-    /**
-     * Initializes the current instance of the crawler
-     *
-     * @param myId the id of this crawler instance
-     * @param crawlController the controller that manages this crawling session
-     */
+	/**
+	 * Initializes the current instance of the crawler
+	 * 
+	 * @param myId
+	 *            the id of this crawler instance
+	 * @param crawlController
+	 *            the controller that manages this crawling session
+	 */
 	public void init(int myId, CrawlController crawlController) {
 		this.myId = myId;
 		this.pageFetcher = crawlController.getPageFetcher();
@@ -115,10 +115,11 @@ public class WebCrawler implements Runnable {
 		this.isWaitingForNewURLs = false;
 	}
 
-    /**
-     * Get the id of the current crawler instance
-     * @return the id of the current crawler instance
-     */
+	/**
+	 * Get the id of the current crawler instance
+	 * 
+	 * @return the id of the current crawler instance
+	 */
 	public int getMyId() {
 		return myId;
 	}
@@ -127,30 +128,30 @@ public class WebCrawler implements Runnable {
 		return myController;
 	}
 
-    /**
-     * This function is called just before starting the crawl by this
-     * crawler instance. It can be used for setting up the data structures
-     * or initializations needed by this crawler instance.
-     */
+	/**
+	 * This function is called just before starting the crawl by this crawler
+	 * instance. It can be used for setting up the data structures or
+	 * initializations needed by this crawler instance.
+	 */
 	public void onStart() {
 	}
 
-    /**
-     * This function is called just before the termination of the current
-     * crawler instance. It can be used for persisting in-memory data or other
-     * finalization tasks.
-     */
+	/**
+	 * This function is called just before the termination of the current
+	 * crawler instance. It can be used for persisting in-memory data or other
+	 * finalization tasks.
+	 */
 	public void onBeforeExit() {
 	}
 
-    /**
-     * The CrawlController instance that has created this crawler instance
-     * will call this function just before terminating this crawler thread.
-     * Classes that extend WebCrawler can override this function to pass
-     * their local data to their controller. The controller then puts these
-     * local data in a List that can then be used for processing the local data
-     * of crawlers (if needed).
-     */
+	/**
+	 * The CrawlController instance that has created this crawler instance will
+	 * call this function just before terminating this crawler thread. Classes
+	 * that extend WebCrawler can override this function to pass their local
+	 * data to their controller. The controller then puts these local data in a
+	 * List that can then be used for processing the local data of crawlers (if
+	 * needed).
+	 */
 	public Object getMyLocalData() {
 		return null;
 	}
@@ -186,26 +187,28 @@ public class WebCrawler implements Runnable {
 		}
 	}
 
-    /**
-     * Classes that extends WebCrawler can overwrite this function to tell the
-     * crawler whether the given url should be crawled or not. The following
-     * implementation indicates that all urls should be included in the crawl.
-     *
-     * @param url the url which we are interested to know whether it should be
-     *            included in the crawl or not.
-     * @return if the url should be included in the crawl it returns true, otherwise
-     * false is returned.
-     */
+	/**
+	 * Classes that extends WebCrawler can overwrite this function to tell the
+	 * crawler whether the given url should be crawled or not. The following
+	 * implementation indicates that all urls should be included in the crawl.
+	 * 
+	 * @param url
+	 *            the url which we are interested to know whether it should be
+	 *            included in the crawl or not.
+	 * @return if the url should be included in the crawl it returns true,
+	 *         otherwise false is returned.
+	 */
 	public boolean shouldVisit(WebURL url) {
 		return true;
 	}
 
-    /**
-     * Classes that extends WebCrawler can overwrite this function to process
-     * the content of the fetched and parsed page.
-     *
-     * @param page the page object that is just fetched and parsed.
-     */
+	/**
+	 * Classes that extends WebCrawler can overwrite this function to process
+	 * the content of the fetched and parsed page.
+	 * 
+	 * @param page
+	 *            the page object that is just fetched and parsed.
+	 */
 	public void visit(Page page) {
 	}
 
@@ -266,14 +269,15 @@ public class WebCrawler implements Runnable {
 						int newdocid = docIdServer.getDocId(webURL.getURL());
 						if (newdocid > 0) {
 							// This is not the first time that this Url is
-							// visited. So, we set the depth to a negative number.
+							// visited. So, we set the depth to a negative
+							// number.
 							webURL.setDepth((short) -1);
 							webURL.setDocid(newdocid);
 						} else {
 							webURL.setDocid(-1);
 							webURL.setDepth((short) (curURL.getDepth() + 1));
-							if (shouldVisit(webURL) && robotstxtServer.allows(webURL)) {
-								if (maxCrawlDepth == -1 || curURL.getDepth() < maxCrawlDepth) {
+							if (maxCrawlDepth == -1 || curURL.getDepth() < maxCrawlDepth) {
+								if (shouldVisit(webURL) && robotstxtServer.allows(webURL)) {
 									webURL.setDocid(docIdServer.getNewDocID(webURL.getURL()));
 									toSchedule.add(webURL);
 								}
