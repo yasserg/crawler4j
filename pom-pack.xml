@@ -16,9 +16,9 @@
 		</license>
 	</licenses>
 	<scm>
-		<connection>scm:git:http://crawler4j.googlecode.com/git/</connection>
-		<developerConnection>scm:git:http://crawler4j.googlecode.com/git/</developerConnection>
-		<url>http://crawler4j.googlecode.com/git/</url>		
+		<connection>scm:git:https://crawler4j.googlecode.com/git/</connection>
+		<developerConnection>scm:git:https://crawler4j.googlecode.com/git/</developerConnection>
+		<url>https://crawler4j.googlecode.com/git/</url>
 	</scm>
 	<developers>
 		<developer>
