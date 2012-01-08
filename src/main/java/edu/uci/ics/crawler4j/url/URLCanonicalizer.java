@@ -25,14 +25,13 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
 /**
- * See http://en.wikipedia.org/wiki/URL_normalization for a reference
- * Note: some parts of the code are adapted from: http://stackoverflow.com/a/4057470/405418
+ * See http://en.wikipedia.org/wiki/URL_normalization for a reference Note: some
+ * parts of the code are adapted from: http://stackoverflow.com/a/4057470/405418
  * 
  * @author Yasser Ganjisaffar <lastname at gmail dot com>
  */
@@ -48,13 +47,8 @@ public class URLCanonicalizer {
 
 	public static URL getCanonicalURL(String href, String context) {
 
-		/*
-		 * Lower case the URL
-		 */
-		href = href.toLowerCase();
-
 		try {
-			
+
 			URL canonicalURL;
 			if (context == null) {
 				canonicalURL = new URL(href);
@@ -108,28 +102,6 @@ public class URLCanonicalizer {
 			}
 
 			/*
-			 * Fix '?' and '&' problems
-			 */
-			/*int index = path.lastIndexOf('?');
-			if (index > 0) {
-				if (index == (path.length() - 1)) {
-					// '?' is the last char. Drop it.
-					path = path.substring(0, path.length() - 1);
-				} else if (path.charAt(index + 1) == '&') {
-					// Next char is '&'. Strip it.
-					if (path.length() == (index + 2)) {
-						// Then url ends with '?&'. Strip them.
-						path = path.substring(0, path.length() - 2);
-					} else {
-						// The '&' is redundant. Strip it.
-						path = path.substring(0, index + 1) + path.substring(index + 2);
-					}
-				} else if (path.charAt(path.length() - 1) == '&') {
-					path = path.substring(0, path.length() - 1);
-				}
-			}*/
-
-			/*
 			 * Add starting slash if needed
 			 */
 			if (path.length() == 0) {
@@ -144,7 +116,14 @@ public class URLCanonicalizer {
 				port = -1;
 			}
 
-			return new URL(canonicalURL.getProtocol(), canonicalURL.getHost(), port, path + queryString);
+			/*
+			 * Lowercasing protocol and host
+			 */
+			String protocol = canonicalURL.getProtocol().toLowerCase();
+			String host = canonicalURL.getHost().toLowerCase();
+			String pathAndQueryString = normalizePath(path) + queryString;
+
+			return new URL(protocol, host, port, pathAndQueryString);
 
 		} catch (MalformedURLException ex) {
 			return null;
@@ -168,31 +147,22 @@ public class URLCanonicalizer {
 		final Map<String, String> params = new HashMap<String, String>(pairs.length);
 
 		for (final String pair : pairs) {
-			if (pair.length() < 1) {
+			if (pair.length() == 0) {
 				continue;
 			}
 
 			String[] tokens = pair.split("=", 2);
-			for (int j = 0; j < tokens.length; j++) {
-				try {
-					tokens[j] = URLDecoder.decode(tokens[j], "UTF-8");
-				} catch (UnsupportedEncodingException ex) {
-					ex.printStackTrace();
-				}
-			}
 			switch (tokens.length) {
-			case 1: {
+			case 1:
 				if (pair.charAt(0) == '=') {
 					params.put("", tokens[0]);
 				} else {
 					params.put(tokens[0], "");
 				}
 				break;
-			}
-			case 2: {
+			case 2: 
 				params.put(tokens[0], tokens[1]);
 				break;
-			}
 			}
 		}
 		return new TreeMap<String, String>(params);
@@ -210,19 +180,17 @@ public class URLCanonicalizer {
 			return "";
 		}
 
-		final StringBuffer sb = new StringBuffer(350);
-		final Iterator<Map.Entry<String, String>> iter = sortedParamMap.entrySet().iterator();
-
-		while (iter.hasNext()) {
-			final Map.Entry<String, String> pair = iter.next();
-			sb.append(percentEncodeRfc3986(pair.getKey()));
-			sb.append('=');
-			sb.append(percentEncodeRfc3986(pair.getValue()));
-			if (iter.hasNext()) {
+		final StringBuffer sb = new StringBuffer(100);
+		for (Map.Entry<String, String> pair : sortedParamMap.entrySet()) {
+			if (sb.length() > 0) {
 				sb.append('&');
 			}
+			sb.append(percentEncodeRfc3986(pair.getKey()));
+			if (!pair.getValue().isEmpty()) {
+				sb.append('=');
+				sb.append(percentEncodeRfc3986(pair.getValue()));
+			}
 		}
-
 		return sb.toString();
 	}
 
@@ -235,11 +203,18 @@ public class URLCanonicalizer {
 	 *            Decoded string.
 	 * @return Encoded string per RFC 3986.
 	 */
-	private static String percentEncodeRfc3986(final String string) {
+	private static String percentEncodeRfc3986(String string) {
 		try {
-			return URLEncoder.encode(string, "UTF-8").replace("+", "%20").replace("*", "%2A").replace("%7E", "~");
+			string = string.replace("+", "%2B");
+			string = URLDecoder.decode(string, "UTF-8");
+			string = URLEncoder.encode(string, "UTF-8");
+			return string.replace("+", "%20").replace("*", "%2A").replace("%7E", "~");
 		} catch (UnsupportedEncodingException e) {
 			return string;
 		}
+	}
+
+	private static String normalizePath(final String path) {
+		return path.replace("%7E", "~").replace(" ", "%20");
 	}
 }
