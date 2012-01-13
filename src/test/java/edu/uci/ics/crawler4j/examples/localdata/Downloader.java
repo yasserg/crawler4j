@@ -19,6 +19,7 @@ package edu.uci.ics.crawler4j.examples.localdata;
 
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.crawler.Page;
+import edu.uci.ics.crawler4j.fetcher.PageFetchResult;
 import edu.uci.ics.crawler4j.fetcher.PageFetchStatus;
 import edu.uci.ics.crawler4j.fetcher.PageFetcher;
 import edu.uci.ics.crawler4j.parser.HtmlParseData;
@@ -44,12 +45,13 @@ public class Downloader {
 	private Page download(String url) {
 		WebURL curURL = new WebURL();
 		curURL.setURL(url);
+		PageFetchResult fetchResult = null;
 		try {
-			int statusCode = pageFetcher.fetchHeader(curURL);
-			if (statusCode == PageFetchStatus.OK) {
+			fetchResult = pageFetcher.fetchHeader(curURL);
+			if (fetchResult.getStatusCode() == PageFetchStatus.OK) {
 				try {
 					Page page = new Page(curURL);
-					pageFetcher.fetchContent(page);
+					fetchResult.fetchContent(page);
 					if (parser.parse(page, curURL.getURL())) {
 						return page;
 					}
@@ -58,7 +60,7 @@ public class Downloader {
 				}
 			}
 		} finally {
-			pageFetcher.discardContentIfNotConsumed();
+			fetchResult.discardContentIfNotConsumed();
 		}
 		return null;
 	}

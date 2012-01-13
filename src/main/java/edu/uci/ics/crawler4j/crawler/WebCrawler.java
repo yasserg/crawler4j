@@ -17,6 +17,7 @@
 
 package edu.uci.ics.crawler4j.crawler;
 
+import edu.uci.ics.crawler4j.fetcher.PageFetchResult;
 import edu.uci.ics.crawler4j.fetcher.PageFetchStatus;
 import edu.uci.ics.crawler4j.fetcher.PageFetcher;
 import edu.uci.ics.crawler4j.frontier.DocIDServer;
@@ -216,10 +217,11 @@ public class WebCrawler implements Runnable {
 		if (curURL == null) {
 			return -1;
 		}
+		PageFetchResult fetchResult = null;
 		try {
-			int statusCode = pageFetcher.fetchHeader(curURL);
-			if (statusCode != PageFetchStatus.OK) {
-				if (statusCode == PageFetchStatus.Moved) {
+			fetchResult = pageFetcher.fetchHeader(curURL);
+			if (fetchResult.getStatusCode() != PageFetchStatus.OK) {
+				if (fetchResult.getStatusCode() == PageFetchStatus.Moved) {
 					if (myController.getConfig().isFollowRedirects()) {
 						String movedToUrl = curURL.getURL();
 						if (movedToUrl == null) {
@@ -241,23 +243,23 @@ public class WebCrawler implements Runnable {
 						}
 					}
 					return PageFetchStatus.Moved;
-				} else if (statusCode == PageFetchStatus.PageTooBig) {
+				} else if (fetchResult.getStatusCode() == PageFetchStatus.PageTooBig) {
 					logger.info("Skipping a page which was bigger than max allowed size: " + curURL.getURL());
 				}
-				return statusCode;
+				return fetchResult.getStatusCode();
 			}
 
-			if (!curURL.getURL().equals(pageFetcher.getFetchedUrl())) {
-				if (docIdServer.isSeenBefore(pageFetcher.getFetchedUrl())) {
+			if (!curURL.getURL().equals(fetchResult.getFetchedUrl())) {
+				if (docIdServer.isSeenBefore(fetchResult.getFetchedUrl())) {
 					return PageFetchStatus.RedirectedPageIsSeen;
 				}
-				curURL.setURL(pageFetcher.getFetchedUrl());
-				curURL.setDocid(docIdServer.getNewDocID(pageFetcher.getFetchedUrl()));
+				curURL.setURL(fetchResult.getFetchedUrl());
+				curURL.setDocid(docIdServer.getNewDocID(fetchResult.getFetchedUrl()));
 			}
 
 			Page page = new Page(curURL);
 			int docid = curURL.getDocid();
-			if (pageFetcher.fetchContent(page) && parser.parse(page, curURL.getURL())) {
+			if (fetchResult.fetchContent(page) && parser.parse(page, curURL.getURL())) {
 				ParseData parseData = page.getParseData();
 				if (parseData instanceof HtmlParseData) {
 					HtmlParseData htmlParseData = (HtmlParseData) parseData;
@@ -292,7 +294,9 @@ public class WebCrawler implements Runnable {
 			e.printStackTrace();
 			logger.error(e.getMessage() + ", while processing: " + curURL.getURL());
 		} finally {
-			pageFetcher.discardContentIfNotConsumed();
+			if (fetchResult != null) {
+				fetchResult.discardContentIfNotConsumed();
+			}
 		}
 		return 0;
 	}

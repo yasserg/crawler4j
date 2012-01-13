@@ -18,6 +18,7 @@
 package edu.uci.ics.crawler4j.robotstxt;
 
 import edu.uci.ics.crawler4j.crawler.Page;
+import edu.uci.ics.crawler4j.fetcher.PageFetchResult;
 import edu.uci.ics.crawler4j.fetcher.PageFetchStatus;
 import edu.uci.ics.crawler4j.fetcher.PageFetcher;
 import edu.uci.ics.crawler4j.url.WebURL;
@@ -32,7 +33,6 @@ import java.util.Map.Entry;
 /**
  * @author Yasser Ganjisaffar <lastname at gmail dot com>
  */
-
 public class RobotstxtServer {
 
 	protected RobotstxtConfig config;
@@ -78,11 +78,12 @@ public class RobotstxtServer {
 		WebURL robotsTxtUrl = new WebURL();
 		robotsTxtUrl.setURL("http://" + host + "/robots.txt");
 		HostDirectives directives = null;
+		PageFetchResult fetchResult = null;
 		try {
-			int statusCode = pageFetcher.fetchHeader(robotsTxtUrl);
-			if (statusCode == PageFetchStatus.OK) {
+			fetchResult = pageFetcher.fetchHeader(robotsTxtUrl);
+			if (fetchResult.getStatusCode() == PageFetchStatus.OK) {
 				Page page = new Page(robotsTxtUrl);
-				pageFetcher.fetchContent(page);
+				fetchResult.fetchContent(page);
 				if (Util.hasPlainTextContent(page.getContentType())) {
 					try {
 						String content;
@@ -98,7 +99,7 @@ public class RobotstxtServer {
 				}
 			}
 		} finally {
-			pageFetcher.discardContentIfNotConsumed();
+			fetchResult.discardContentIfNotConsumed();
 		}
 		if (directives == null) {
 			// We still need to have this object to keep track of the time we
