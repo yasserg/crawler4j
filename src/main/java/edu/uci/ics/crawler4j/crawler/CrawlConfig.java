@@ -102,11 +102,6 @@ public class CrawlConfig {
 	private boolean followRedirects = true;
 
 	/**
-	 * Should we log the 404 (Not Found) pages?
-	 */
-	private boolean show404PagesInLogs = false;
-
-	/**
 	 * If crawler should run behind a proxy, this parameter can be used for
 	 * specifying the proxy host.
 	 */
@@ -328,17 +323,6 @@ public class CrawlConfig {
      */
 	public void setFollowRedirects(boolean followRedirects) {
 		this.followRedirects = followRedirects;
-	}
-
-	public boolean isShow404PagesInLogs() {
-		return show404PagesInLogs;
-	}
-
-    /**
-     * Should we log the 404 (Not Found) pages?
-     */
-	public void setShow404PagesInLogs(boolean show404PagesInLogs) {
-		this.show404PagesInLogs = show404PagesInLogs;
 	}
 
 	public String getProxyHost() {

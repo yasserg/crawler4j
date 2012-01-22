@@ -18,7 +18,7 @@
 package edu.uci.ics.crawler4j.crawler;
 
 import edu.uci.ics.crawler4j.fetcher.PageFetchResult;
-import edu.uci.ics.crawler4j.fetcher.PageFetchStatus;
+import edu.uci.ics.crawler4j.fetcher.CustomFetchStatus;
 import edu.uci.ics.crawler4j.fetcher.PageFetcher;
 import edu.uci.ics.crawler4j.frontier.DocIDServer;
 import edu.uci.ics.crawler4j.frontier.Frontier;
@@ -27,6 +27,8 @@ import edu.uci.ics.crawler4j.parser.ParseData;
 import edu.uci.ics.crawler4j.parser.Parser;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
 import edu.uci.ics.crawler4j.url.WebURL;
+
+import org.apache.http.HttpStatus;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
@@ -144,6 +146,14 @@ public class WebCrawler implements Runnable {
 	 */
 	public void onBeforeExit() {
 	}
+	
+	/**
+	 * This function is called once the header of a page is fetched.
+	 * It can be overwritten by sub-classes to perform custom logic
+	 * for different status codes. For example, 404 pages can be logged, etc.
+	 */
+	protected void handlePageStatusCode(WebURL webUrl, int statusCode, String statusDescription) {
+	}
 
 	/**
 	 * The CrawlController instance that has created this crawler instance will
@@ -213,23 +223,26 @@ public class WebCrawler implements Runnable {
 	public void visit(Page page) {
 	}
 
-	private int processPage(WebURL curURL) {
+	private void processPage(WebURL curURL) {
 		if (curURL == null) {
-			return -1;
+			return;
 		}
 		PageFetchResult fetchResult = null;
 		try {
 			fetchResult = pageFetcher.fetchHeader(curURL);
-			if (fetchResult.getStatusCode() != PageFetchStatus.OK) {
-				if (fetchResult.getStatusCode() == PageFetchStatus.Moved) {
+			int statusCode = fetchResult.getStatusCode();
+			handlePageStatusCode(curURL, statusCode, CustomFetchStatus.getStatusDescription(statusCode));
+			if (statusCode != HttpStatus.SC_OK) {
+				if (statusCode == HttpStatus.SC_MOVED_PERMANENTLY || statusCode == HttpStatus.SC_MOVED_TEMPORARILY) {
 					if (myController.getConfig().isFollowRedirects()) {
-						String movedToUrl = curURL.getURL();
+						String movedToUrl = fetchResult.getMovedToUrl();
 						if (movedToUrl == null) {
-							return PageFetchStatus.MovedToUnknownLocation;
+							return;
 						}
 						int newDocId = docIdServer.getDocId(movedToUrl);
 						if (newDocId > 0) {
-							return PageFetchStatus.RedirectedPageIsSeen;
+							// Redirect page is already seen
+							return;
 						} else {
 							WebURL webURL = new WebURL();
 							webURL.setURL(movedToUrl);
@@ -242,16 +255,16 @@ public class WebCrawler implements Runnable {
 							}
 						}
 					}
-					return PageFetchStatus.Moved;
-				} else if (fetchResult.getStatusCode() == PageFetchStatus.PageTooBig) {
+				} else if (fetchResult.getStatusCode() == CustomFetchStatus.PageTooBig) {
 					logger.info("Skipping a page which was bigger than max allowed size: " + curURL.getURL());
 				}
-				return fetchResult.getStatusCode();
+				return;
 			}
 
 			if (!curURL.getURL().equals(fetchResult.getFetchedUrl())) {
 				if (docIdServer.isSeenBefore(fetchResult.getFetchedUrl())) {
-					return PageFetchStatus.RedirectedPageIsSeen;
+					// Redirect page is already seen
+					return;
 				}
 				curURL.setURL(fetchResult.getFetchedUrl());
 				curURL.setDocid(docIdServer.getNewDocID(fetchResult.getFetchedUrl()));
@@ -298,7 +311,6 @@ public class WebCrawler implements Runnable {
 				fetchResult.discardContentIfNotConsumed();
 			}
 		}
-		return 0;
 	}
 
 	public Thread getThread() {

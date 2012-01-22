@@ -36,6 +36,7 @@ public class PageFetchResult {
 	protected int statusCode;
 	protected HttpEntity entity = null;
 	protected String fetchedUrl = null;
+	protected String movedToUrl = null;
 
 	public int getStatusCode() {
 		return statusCode;
@@ -87,6 +88,14 @@ public class PageFetchResult {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	public String getMovedToUrl() {
+		return movedToUrl;
+	}
+
+	public void setMovedToUrl(String movedToUrl) {
+		this.movedToUrl = movedToUrl;
 	}
 
 }

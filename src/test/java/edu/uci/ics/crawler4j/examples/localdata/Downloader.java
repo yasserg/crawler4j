@@ -17,10 +17,11 @@
 
 package edu.uci.ics.crawler4j.examples.localdata;
 
+import org.apache.http.HttpStatus;
+
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.crawler.Page;
 import edu.uci.ics.crawler4j.fetcher.PageFetchResult;
-import edu.uci.ics.crawler4j.fetcher.PageFetchStatus;
 import edu.uci.ics.crawler4j.fetcher.PageFetcher;
 import edu.uci.ics.crawler4j.parser.HtmlParseData;
 import edu.uci.ics.crawler4j.parser.ParseData;
@@ -48,7 +49,7 @@ public class Downloader {
 		PageFetchResult fetchResult = null;
 		try {
 			fetchResult = pageFetcher.fetchHeader(curURL);
-			if (fetchResult.getStatusCode() == PageFetchStatus.OK) {
+			if (fetchResult.getStatusCode() == HttpStatus.SC_OK) {
 				try {
 					Page page = new Page(curURL);
 					fetchResult.fetchContent(page);

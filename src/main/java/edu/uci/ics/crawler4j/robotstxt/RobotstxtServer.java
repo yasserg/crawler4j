@@ -17,18 +17,19 @@
 
 package edu.uci.ics.crawler4j.robotstxt;
 
-import edu.uci.ics.crawler4j.crawler.Page;
-import edu.uci.ics.crawler4j.fetcher.PageFetchResult;
-import edu.uci.ics.crawler4j.fetcher.PageFetchStatus;
-import edu.uci.ics.crawler4j.fetcher.PageFetcher;
-import edu.uci.ics.crawler4j.url.WebURL;
-import edu.uci.ics.crawler4j.util.Util;
-
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import org.apache.http.HttpStatus;
+
+import edu.uci.ics.crawler4j.crawler.Page;
+import edu.uci.ics.crawler4j.fetcher.PageFetchResult;
+import edu.uci.ics.crawler4j.fetcher.PageFetcher;
+import edu.uci.ics.crawler4j.url.WebURL;
+import edu.uci.ics.crawler4j.util.Util;
 
 /**
  * @author Yasser Ganjisaffar <lastname at gmail dot com>
@@ -81,7 +82,7 @@ public class RobotstxtServer {
 		PageFetchResult fetchResult = null;
 		try {
 			fetchResult = pageFetcher.fetchHeader(robotsTxtUrl);
-			if (fetchResult.getStatusCode() == PageFetchStatus.OK) {
+			if (fetchResult.getStatusCode() == HttpStatus.SC_OK) {
 				Page page = new Page(robotsTxtUrl);
 				fetchResult.fetchContent(page);
 				if (Util.hasPlainTextContent(page.getContentType())) {

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package edu.uci.ics.crawler4j.examples.basic;
+package edu.uci.ics.crawler4j.examples.statushandler;
 
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.crawler.CrawlController;
@@ -26,7 +26,7 @@ import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
 /**
  * @author Yasser Ganjisaffar <lastname at gmail dot com>
  */
-public class BasicCrawlController {
+public class StatusHandlerCrawlController {
 
 	public static void main(String[] args) throws Exception {
 		if (args.length != 2) {
@@ -109,6 +109,6 @@ public class BasicCrawlController {
 		 * Start the crawl. This is a blocking operation, meaning that your code
 		 * will reach the line after this only when crawling is finished.
 		 */
-		controller.start(BasicCrawler.class, numberOfCrawlers);
+		controller.start(StatusHandlerCrawler.class, numberOfCrawlers);
 	}
 }
