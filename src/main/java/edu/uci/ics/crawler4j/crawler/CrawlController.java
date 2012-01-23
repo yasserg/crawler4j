@@ -305,19 +305,21 @@ public class CrawlController extends Configurable {
 
 	/**
 	 * Adds a new seed URL. A seed URL is a URL that is fetched by the crawler
-	 * to extract new URLs in it and follow them for crawling. You can also 
+	 * to extract new URLs in it and follow them for crawling. You can also
 	 * specify a specific document id to be assigned to this seed URL. This
 	 * document id needs to be unique. Also, note that if you add three seeds
 	 * with document ids 1,2, and 7. Then the next URL that is found during the
-	 * crawl will get a doc id of 8. Also you need to ensure to add seeds in 
+	 * crawl will get a doc id of 8. Also you need to ensure to add seeds in
 	 * increasing order of document ids.
 	 * 
 	 * Specifying doc ids is mainly useful when you have had a previous crawl
 	 * and have stored the results and want to start a new crawl with seeds
 	 * which get the same document ids as the previous crawl.
 	 * 
-	 * @param pageUrl the URL of the seed
-	 * @param docId the document id that you want to be assigned to this seed URL.
+	 * @param pageUrl
+	 *            the URL of the seed
+	 * @param docId
+	 *            the document id that you want to be assigned to this seed URL.
 	 * 
 	 */
 	public void addSeed(String pageUrl, int docId) {
@@ -349,6 +351,35 @@ public class CrawlController extends Configurable {
 			logger.info("Robots.txt does not allow this seed: " + pageUrl);
 		} else {
 			frontier.schedule(webUrl);
+		}
+	}
+
+	/**
+	 * This function can called to assign a specific document id to a url. This
+	 * feature is useful when you have had a previous crawl and have stored the
+	 * Urls and their associated document ids and want to have a new crawl which
+	 * is aware of the previously seen Urls and won't re-crawl them.
+	 * 
+	 * Note that if you add three seen Urls with document ids 1,2, and 7. Then
+	 * the next URL that is found during the crawl will get a doc id of 8. Also
+	 * you need to ensure to add seen Urls in increasing order of document ids. 
+	 * 
+	 * @param pageUrl
+	 *            the URL of the page
+	 * @param docId
+	 *            the document id that you want to be assigned to this URL.
+	 * 
+	 */
+	public void addSeenUrl(String url, int docId) {
+		String canonicalUrl = URLCanonicalizer.getCanonicalURL(url);
+		if (canonicalUrl == null) {
+			logger.error("Invalid Url: " + url);
+			return;
+		}
+		try {
+			docIdServer.addUrlAndDocId(canonicalUrl, docId);
+		} catch (Exception e) {
+			logger.error("Could not add seen url: " + e.getMessage());
 		}
 	}
 
