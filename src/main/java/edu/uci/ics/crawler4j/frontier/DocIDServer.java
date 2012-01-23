@@ -103,6 +103,26 @@ public class DocIDServer extends Configurable {
 		}
 	}
 	
+	public void addUrlAndDocId(String url, int docId) throws Exception {
+		synchronized (mutex) {
+			if (docId <= lastDocID) {
+				throw new Exception("Requested doc id: " + docId + " is not larger than: " + lastDocID);
+			}
+			
+			// Make sure that we have not already assigned a docid for this URL
+			int prevDocid = getDocId(url);
+			if (prevDocid > 0) {
+				if (prevDocid == docId) {
+					return;
+				}
+				throw new Exception("Doc id: " + prevDocid + " is already assigned to URL: " + url);
+			}
+			
+			docIDsDB.put(null, new DatabaseEntry(url.getBytes()), new DatabaseEntry(Util.int2ByteArray(docId)));
+			lastDocID = docId;
+		}
+	}
+	
 	public boolean isSeenBefore(String url) {
 		return getDocId(url) != -1;
 	}
