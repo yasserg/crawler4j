@@ -34,9 +34,8 @@ public class BasicCrawler extends WebCrawler {
 			+ "|wav|avi|mov|mpeg|ram|m4v|pdf" + "|rm|smil|wmv|swf|wma|zip|rar|gz))$");
 
 	/**
-	 * You should implement this function to specify whether
-	 * the given url should be crawled or not (based on your
-	 * crawling logic).
+	 * You should implement this function to specify whether the given url
+	 * should be crawled or not (based on your crawling logic).
 	 */
 	@Override
 	public boolean shouldVisit(WebURL url) {
@@ -45,17 +44,21 @@ public class BasicCrawler extends WebCrawler {
 	}
 
 	/**
-	 * This function is called when a page is fetched and ready 
-	 * to be processed by your program.
+	 * This function is called when a page is fetched and ready to be processed
+	 * by your program.
 	 */
 	@Override
 	public void visit(Page page) {
 		int docid = page.getWebURL().getDocid();
 		String url = page.getWebURL().getURL();
+		String domain = page.getWebURL().getDomain();
+		String subDomain = page.getWebURL().getSubDomain();
 		int parentDocid = page.getWebURL().getParentDocid();
 
 		System.out.println("Docid: " + docid);
 		System.out.println("URL: " + url);
+		System.out.println("Domain: '" + domain + "'");
+		System.out.println("Sub-domain: '" + subDomain + "'");
 		System.out.println("Docid of parent page: " + parentDocid);
 
 		if (page.getParseData() instanceof HtmlParseData) {
