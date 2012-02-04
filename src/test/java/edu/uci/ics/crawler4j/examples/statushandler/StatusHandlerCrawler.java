@@ -59,7 +59,7 @@ public class StatusHandlerCrawler extends WebCrawler {
 		if (statusCode != HttpStatus.SC_OK) {
 
 			if (statusCode == HttpStatus.SC_NOT_FOUND) {
-				System.out.println("Broken link: " + webUrl.getURL() + ", this link was found in page with docid: " + webUrl.getParentDocid());
+				System.out.println("Broken link: " + webUrl.getURL() + ", this link was found in page: " + webUrl.getParentUrl());
 			} else {
 				System.out.println("Non success status for link: " + webUrl.getURL() + ", status code: " + statusCode + ", description: " + statusDescription);
 			}

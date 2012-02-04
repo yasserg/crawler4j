@@ -34,6 +34,7 @@ public class WebURLTupleBinding extends TupleBinding<WebURL> {
 		webURL.setURL(input.readString());
 		webURL.setDocid(input.readInt());
 		webURL.setParentDocid(input.readInt());
+		webURL.setParentUrl(input.readString());
 		webURL.setDepth(input.readShort());
 		return webURL;
 	}
@@ -43,6 +44,7 @@ public class WebURLTupleBinding extends TupleBinding<WebURL> {
 		output.writeString(url.getURL());
 		output.writeInt(url.getDocid());
 		output.writeInt(url.getParentDocid());
+		output.writeString(url.getParentUrl());
 		output.writeShort(url.getDepth());
 	}
 }

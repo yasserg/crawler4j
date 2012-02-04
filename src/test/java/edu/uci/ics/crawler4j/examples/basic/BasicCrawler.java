@@ -52,14 +52,16 @@ public class BasicCrawler extends WebCrawler {
 		int docid = page.getWebURL().getDocid();
 		String url = page.getWebURL().getURL();
 		String domain = page.getWebURL().getDomain();
+		String path = page.getWebURL().getPath();
 		String subDomain = page.getWebURL().getSubDomain();
-		int parentDocid = page.getWebURL().getParentDocid();
+		String parentUrl = page.getWebURL().getParentUrl();
 
 		System.out.println("Docid: " + docid);
 		System.out.println("URL: " + url);
 		System.out.println("Domain: '" + domain + "'");
 		System.out.println("Sub-domain: '" + subDomain + "'");
-		System.out.println("Docid of parent page: " + parentDocid);
+		System.out.println("Path: '" + path + "'");
+		System.out.println("Parent page: " + parentUrl);
 
 		if (page.getParseData() instanceof HtmlParseData) {
 			HtmlParseData htmlParseData = (HtmlParseData) page.getParseData();

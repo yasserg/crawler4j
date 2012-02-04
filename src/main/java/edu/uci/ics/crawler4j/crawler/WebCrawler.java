@@ -247,6 +247,7 @@ public class WebCrawler implements Runnable {
 							WebURL webURL = new WebURL();
 							webURL.setURL(movedToUrl);
 							webURL.setParentDocid(curURL.getParentDocid());
+							webURL.setParentUrl(curURL.getParentUrl());
 							webURL.setDepth(curURL.getDepth());
 							webURL.setDocid(-1);
 							if (shouldVisit(webURL) && robotstxtServer.allows(webURL)) {
@@ -281,6 +282,7 @@ public class WebCrawler implements Runnable {
 					int maxCrawlDepth = myController.getConfig().getMaxDepthOfCrawling();
 					for (WebURL webURL : htmlParseData.getOutgoingUrls()) {
 						webURL.setParentDocid(docid);
+						webURL.setParentUrl(curURL.getURL());
 						int newdocid = docIdServer.getDocId(webURL.getURL());
 						if (newdocid > 0) {
 							// This is not the first time that this Url is
