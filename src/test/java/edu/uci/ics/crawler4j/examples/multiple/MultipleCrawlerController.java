@@ -81,7 +81,7 @@ public class MultipleCrawlerController {
 
 		controller1.addSeed("http://www.ics.uci.edu/");
 		controller1.addSeed("http://www.cnn.com/");
-		controller1.addSeed("http://www.ics.uci.edu/~yganjisa/");
+		controller1.addSeed("http://www.ics.uci.edu/~lopes/");
 		controller1.addSeed("http://www.cnn.com/POLITICS/");
 
 		controller2.addSeed("http://en.wikipedia.org/wiki/Main_Page");

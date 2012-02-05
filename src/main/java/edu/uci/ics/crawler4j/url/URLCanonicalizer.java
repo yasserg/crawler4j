@@ -37,23 +37,13 @@ import java.util.TreeMap;
 public class URLCanonicalizer {
 
 	public static String getCanonicalURL(String url) {
-		URL canonicalURL = getCanonicalURL(url, null);
-		if (canonicalURL != null) {
-			return canonicalURL.toExternalForm();
-		}
-		return null;
+		return getCanonicalURL(url, null);
 	}
 
-	public static URL getCanonicalURL(String href, String context) {
+	public static String getCanonicalURL(String href, String context) {
 
 		try {
-
-			URL canonicalURL;
-			if (context == null) {
-				canonicalURL = new URL(href);
-			} else {
-				canonicalURL = new URL(new URL(context), href);
-			}
+			URL canonicalURL = new URL(UrlResolver.resolveUrl(context == null ? "" : context, href));
 
 			String path = canonicalURL.getPath();
 
@@ -117,8 +107,9 @@ public class URLCanonicalizer {
 			String host = canonicalURL.getHost().toLowerCase();
 			String pathAndQueryString = normalizePath(path) + queryString;
 
-			return new URL(protocol, host, port, pathAndQueryString);
-
+			URL result = new URL(protocol, host, port, pathAndQueryString);
+			return result.toExternalForm();
+			
 		} catch (MalformedURLException ex) {
 			return null;
 		} catch (URISyntaxException ex) {
