@@ -19,10 +19,10 @@ package edu.uci.ics.crawler4j.crawler;
 
 public class CrawlConfig {
 
-    /**
-     * The folder which will be used by crawler for storing the intermediate
-     * crawl data. The content of this folder should not be modified manually.
-     */
+	/**
+	 * The folder which will be used by crawler for storing the intermediate
+	 * crawl data. The content of this folder should not be modified manually.
+	 */
 	private String crawlStorageFolder;
 
 	/**
@@ -91,8 +91,8 @@ public class CrawlConfig {
 	private int maxOutgoingLinksToFollow = 5000;
 
 	/**
-	 * Max allowed size of a page. Pages larger than this size will not
-	 * be fetched.
+	 * Max allowed size of a page. Pages larger than this size will not be
+	 * fetched.
 	 */
 	private int maxDownloadSize = 1048576;
 
@@ -130,10 +130,11 @@ public class CrawlConfig {
 	public CrawlConfig() {
 	}
 
-    /**
-     * Validates the configs specified by this instance.
-     * @throws Exception
-     */
+	/**
+	 * Validates the configs specified by this instance.
+	 * 
+	 * @throws Exception
+	 */
 	public void validate() throws Exception {
 		if (crawlStorageFolder == null) {
 			throw new Exception("Crawl storage folder is not set in the CrawlConfig.");
@@ -154,23 +155,22 @@ public class CrawlConfig {
 		return crawlStorageFolder;
 	}
 
-    /**
-     * The folder which will be used by crawler for storing the intermediate
-     * crawl data. The content of this folder should not be modified manually.
-     */
+	/**
+	 * The folder which will be used by crawler for storing the intermediate
+	 * crawl data. The content of this folder should not be modified manually.
+	 */
 	public void setCrawlStorageFolder(String crawlStorageFolder) {
 		this.crawlStorageFolder = crawlStorageFolder;
 	}
-
 
 	public boolean isResumableCrawling() {
 		return resumableCrawling;
 	}
 
-    /**
-     * If this feature is enabled, you would be able to resume a previously
-     * stopped/crashed crawl. However, it makes crawling slightly slower
-     */
+	/**
+	 * If this feature is enabled, you would be able to resume a previously
+	 * stopped/crashed crawl. However, it makes crawling slightly slower
+	 */
 	public void setResumableCrawling(boolean resumableCrawling) {
 		this.resumableCrawling = resumableCrawling;
 	}
@@ -179,10 +179,10 @@ public class CrawlConfig {
 		return maxDepthOfCrawling;
 	}
 
-    /**
-     * Maximum depth of crawling For unlimited depth this parameter should be
-     * set to -1
-     */
+	/**
+	 * Maximum depth of crawling For unlimited depth this parameter should be
+	 * set to -1
+	 */
 	public void setMaxDepthOfCrawling(int maxDepthOfCrawling) {
 		this.maxDepthOfCrawling = maxDepthOfCrawling;
 	}
@@ -191,11 +191,11 @@ public class CrawlConfig {
 		return maxPagesToFetch;
 	}
 
-    /**
-     * Maximum number of pages to fetch For unlimited number of pages, this
-     * parameter should be set to -1
-     */
-    public void setMaxPagesToFetch(int maxPagesToFetch) {
+	/**
+	 * Maximum number of pages to fetch For unlimited number of pages, this
+	 * parameter should be set to -1
+	 */
+	public void setMaxPagesToFetch(int maxPagesToFetch) {
 		this.maxPagesToFetch = maxPagesToFetch;
 	}
 
@@ -203,10 +203,10 @@ public class CrawlConfig {
 		return userAgentString;
 	}
 
-    /**
-     * user-agent string that is used for representing your crawler to web
-     * servers. See http://en.wikipedia.org/wiki/User_agent for more details
-     */
+	/**
+	 * user-agent string that is used for representing your crawler to web
+	 * servers. See http://en.wikipedia.org/wiki/User_agent for more details
+	 */
 	public void setUserAgentString(String userAgentString) {
 		this.userAgentString = userAgentString;
 	}
@@ -215,12 +215,13 @@ public class CrawlConfig {
 		return politenessDelay;
 	}
 
-    /**
-     * Politeness delay in milliseconds (delay between sending two requests to
-     * the same host).
-     * 
-     * @param politenessDelay the delay in milliseconds.
-     */
+	/**
+	 * Politeness delay in milliseconds (delay between sending two requests to
+	 * the same host).
+	 * 
+	 * @param politenessDelay
+	 *            the delay in milliseconds.
+	 */
 	public void setPolitenessDelay(int politenessDelay) {
 		this.politenessDelay = politenessDelay;
 	}
@@ -229,9 +230,9 @@ public class CrawlConfig {
 		return includeHttpsPages;
 	}
 
-    /**
-     * Should we also crawl https pages?
-     */
+	/**
+	 * Should we also crawl https pages?
+	 */
 	public void setIncludeHttpsPages(boolean includeHttpsPages) {
 		this.includeHttpsPages = includeHttpsPages;
 	}
@@ -240,9 +241,9 @@ public class CrawlConfig {
 		return includeBinaryContentInCrawling;
 	}
 
-    /**
-     * Should we fetch binary content such as images, audio, ...?
-     */
+	/**
+	 * Should we fetch binary content such as images, audio, ...?
+	 */
 	public void setIncludeBinaryContentInCrawling(boolean includeBinaryContentInCrawling) {
 		this.includeBinaryContentInCrawling = includeBinaryContentInCrawling;
 	}
@@ -251,9 +252,9 @@ public class CrawlConfig {
 		return maxConnectionsPerHost;
 	}
 
-    /**
-     * Maximum Connections per host
-     */
+	/**
+	 * Maximum Connections per host
+	 */
 	public void setMaxConnectionsPerHost(int maxConnectionsPerHost) {
 		this.maxConnectionsPerHost = maxConnectionsPerHost;
 	}
@@ -262,9 +263,9 @@ public class CrawlConfig {
 		return maxTotalConnections;
 	}
 
-    /**
-     * Maximum total connections
-     */
+	/**
+	 * Maximum total connections
+	 */
 	public void setMaxTotalConnections(int maxTotalConnections) {
 		this.maxTotalConnections = maxTotalConnections;
 	}
@@ -273,9 +274,9 @@ public class CrawlConfig {
 		return socketTimeout;
 	}
 
-    /**
-     * Socket timeout in milliseconds
-     */
+	/**
+	 * Socket timeout in milliseconds
+	 */
 	public void setSocketTimeout(int socketTimeout) {
 		this.socketTimeout = socketTimeout;
 	}
@@ -284,9 +285,9 @@ public class CrawlConfig {
 		return connectionTimeout;
 	}
 
-    /**
-     * Connection timeout in milliseconds
-     */
+	/**
+	 * Connection timeout in milliseconds
+	 */
 	public void setConnectionTimeout(int connectionTimeout) {
 		this.connectionTimeout = connectionTimeout;
 	}
@@ -295,9 +296,9 @@ public class CrawlConfig {
 		return maxOutgoingLinksToFollow;
 	}
 
-    /**
-     * Max number of outgoing links which are processed from a page
-     */
+	/**
+	 * Max number of outgoing links which are processed from a page
+	 */
 	public void setMaxOutgoingLinksToFollow(int maxOutgoingLinksToFollow) {
 		this.maxOutgoingLinksToFollow = maxOutgoingLinksToFollow;
 	}
@@ -306,10 +307,10 @@ public class CrawlConfig {
 		return maxDownloadSize;
 	}
 
-    /**
-     * Max allowed size of a page. Pages larger than this size will not
-     * be fetched.
-     */
+	/**
+	 * Max allowed size of a page. Pages larger than this size will not be
+	 * fetched.
+	 */
 	public void setMaxDownloadSize(int maxDownloadSize) {
 		this.maxDownloadSize = maxDownloadSize;
 	}
@@ -318,9 +319,9 @@ public class CrawlConfig {
 		return followRedirects;
 	}
 
-    /**
-     * Should we follow redirects?
-     */
+	/**
+	 * Should we follow redirects?
+	 */
 	public void setFollowRedirects(boolean followRedirects) {
 		this.followRedirects = followRedirects;
 	}
@@ -329,10 +330,10 @@ public class CrawlConfig {
 		return proxyHost;
 	}
 
-    /**
-     * If crawler should run behind a proxy, this parameter can be used for
-     * specifying the proxy host.
-     */
+	/**
+	 * If crawler should run behind a proxy, this parameter can be used for
+	 * specifying the proxy host.
+	 */
 	public void setProxyHost(String proxyHost) {
 		this.proxyHost = proxyHost;
 	}
@@ -341,10 +342,10 @@ public class CrawlConfig {
 		return proxyPort;
 	}
 
-    /**
-     * If crawler should run behind a proxy, this parameter can be used for
-     * specifying the proxy port.
-     */
+	/**
+	 * If crawler should run behind a proxy, this parameter can be used for
+	 * specifying the proxy port.
+	 */
 	public void setProxyPort(int proxyPort) {
 		this.proxyPort = proxyPort;
 	}
@@ -353,11 +354,11 @@ public class CrawlConfig {
 		return proxyUsername;
 	}
 
-    /**
-     * If crawler should run behind a proxy and user/pass is needed for
-     * authentication in proxy, this parameter can be used for specifying the
-     * username.
-     */
+	/**
+	 * If crawler should run behind a proxy and user/pass is needed for
+	 * authentication in proxy, this parameter can be used for specifying the
+	 * username.
+	 */
 	public void setProxyUsername(String proxyUsername) {
 		this.proxyUsername = proxyUsername;
 	}
@@ -366,13 +367,37 @@ public class CrawlConfig {
 		return proxyPassword;
 	}
 
-    /**
-     * If crawler should run behind a proxy and user/pass is needed for
-     * authentication in proxy, this parameter can be used for specifying the
-     * password.
-     */
+	/**
+	 * If crawler should run behind a proxy and user/pass is needed for
+	 * authentication in proxy, this parameter can be used for specifying the
+	 * password.
+	 */
 	public void setProxyPassword(String proxyPassword) {
 		this.proxyPassword = proxyPassword;
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("Crawl storage folder: " + getCrawlStorageFolder() + "\n");
+		sb.append("Resumable crawling: " + isResumableCrawling() + "\n");
+		sb.append("Max depth of crawl: " + getMaxDepthOfCrawling() + "\n");
+		sb.append("Max pages to fetch: " + getMaxPagesToFetch() + "\n");
+		sb.append("User agent string: " + getUserAgentString() + "\n");
+		sb.append("Include https pages: " + isIncludeHttpsPages() + "\n");
+		sb.append("Include binary content: " + isIncludeBinaryContentInCrawling() + "\n");
+		sb.append("Max connections per host: " + getMaxConnectionsPerHost() + "\n");
+		sb.append("Max total connections: " + getMaxTotalConnections() + "\n");
+		sb.append("Socket timeout: " + getSocketTimeout() + "\n");
+		sb.append("Max total connections: " + getMaxTotalConnections() + "\n");
+		sb.append("Max outgoing links to follow: " + getMaxOutgoingLinksToFollow() + "\n");
+		sb.append("Max download size: " + getMaxDownloadSize() + "\n");
+		sb.append("Should follow redirects?: " + isFollowRedirects() + "\n");
+		sb.append("Proxy host: " + getProxyHost() + "\n");
+		sb.append("Proxy port: " + getProxyPort() + "\n");
+		sb.append("Proxy username: " + getProxyUsername() + "\n");
+		sb.append("Proxy password: " + getProxyPassword() + "\n");
+		return sb.toString();
 	}
 
 }

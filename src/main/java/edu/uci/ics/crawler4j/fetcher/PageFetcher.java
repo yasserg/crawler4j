@@ -49,7 +49,6 @@ import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParamBean;
 import org.apache.http.protocol.HttpContext;
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
 import edu.uci.ics.crawler4j.crawler.Configurable;
@@ -99,7 +98,6 @@ public class PageFetcher extends Configurable {
 		connectionManager = new ThreadSafeClientConnManager(schemeRegistry);
 		connectionManager.setMaxTotal(config.getMaxTotalConnections());
 		connectionManager.setDefaultMaxPerRoute(config.getMaxConnectionsPerHost());
-		logger.setLevel(Level.INFO);
 		httpClient = new DefaultHttpClient(connectionManager, params);
 
 		if (config.getProxyHost() != null) {
