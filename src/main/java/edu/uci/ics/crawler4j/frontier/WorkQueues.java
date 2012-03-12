@@ -134,7 +134,23 @@ public class WorkQueues {
 	}
 
 	public void put(WebURL url) throws DatabaseException {
-		byte[] keyData = Util.int2ByteArray(url.getDocid());
+		
+		/*
+		 * The key that is used for storing URLs determines the order
+		 * they are crawled. Lower key values results in earlier crawling.
+		 * Here our keys are 6 bytes. The first byte comes from the URL priority.
+		 * The second byte comes from depth of crawl at which this URL is first found.
+		 * The rest of the 4 bytes come from the docid of the URL. As a result,
+		 * URLs with lower priority numbers will be crawled earlier. If priority
+		 * numbers are the same, those found at lower depths will be crawled earlier.
+		 * If depth is also equal, those found earlier (therefore, smaller docid) will
+		 * be crawled earlier.
+		 */
+		byte[] keyData = new byte[6];
+		keyData[0] = url.getPriority();
+		keyData[1] = (url.getDepth() > Byte.MAX_VALUE ? Byte.MAX_VALUE : (byte) url.getDepth());
+		Util.putIntInByteArray(url.getDocid(), keyData, 2);
+
 		DatabaseEntry value = new DatabaseEntry();
 		webURLBinding.objectToEntry(url, value);
 		Transaction txn;
@@ -145,10 +161,10 @@ public class WorkQueues {
 		}
 		urlsDB.put(txn, new DatabaseEntry(keyData), value);
 		if (resumable) {
-            if (txn != null) {
-                txn.commit();
-            }
-        }
+			if (txn != null) {
+				txn.commit();
+			}
+		}
 	}
 
 	public long getLength() {

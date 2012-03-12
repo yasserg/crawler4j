@@ -41,6 +41,8 @@ public class WebURL implements Serializable {
 	private String domain;
 	private String subDomain;
 	private String path;
+	private String anchor;
+	private byte priority;
 
 	/**
 	 * Returns the unique document id assigned to this Url.
@@ -109,9 +111,8 @@ public class WebURL implements Serializable {
 	}
 
 	/**
-	 * Returns the unique document id of the parent page.
-	 * The parent page is the page in which the Url of this
-	 * page is first observed.
+	 * Returns the unique document id of the parent page. The parent page is the
+	 * page in which the Url of this page is first observed.
 	 */
 	public int getParentDocid() {
 		return parentDocid;
@@ -122,9 +123,8 @@ public class WebURL implements Serializable {
 	}
 
 	/**
-	 * Returns the url of the parent page.
-	 * The parent page is the page in which the Url of this
-	 * page is first observed.
+	 * Returns the url of the parent page. The parent page is the page in which
+	 * the Url of this page is first observed.
 	 */
 	public String getParentUrl() {
 		return parentUrl;
@@ -135,9 +135,9 @@ public class WebURL implements Serializable {
 	}
 
 	/**
-	 * Returns the crawl depth at which this Url is first observed.
-	 * Seed Urls are at depth 0. Urls that are extracted from seed Urls
-	 * are at depth 1, etc.
+	 * Returns the crawl depth at which this Url is first observed. Seed Urls
+	 * are at depth 0. Urls that are extracted from seed Urls are at depth 1,
+	 * etc.
 	 */
 	public short getDepth() {
 		return depth;
@@ -148,8 +148,8 @@ public class WebURL implements Serializable {
 	}
 
 	/**
-	 * Returns the domain of this Url.
-	 * For 'http://www.example.com/sample.htm', domain will be 'example.com'
+	 * Returns the domain of this Url. For 'http://www.example.com/sample.htm',
+	 * domain will be 'example.com'
 	 */
 	public String getDomain() {
 		return domain;
@@ -160,8 +160,8 @@ public class WebURL implements Serializable {
 	}
 
 	/**
-	 * Returns the path of this Url.
-	 * For 'http://www.example.com/sample.htm', domain will be 'sample.htm'
+	 * Returns the path of this Url. For 'http://www.example.com/sample.htm',
+	 * domain will be 'sample.htm'
 	 */
 	public String getPath() {
 		return path;
@@ -170,4 +170,30 @@ public class WebURL implements Serializable {
 	public void setPath(String path) {
 		this.path = path;
 	}
+
+	/**
+	 * Returns the anchor string. For example, in <a href="example.com">A sample anchor</a>
+	 * the anchor string is 'A sample anchor'
+	 */
+	public String getAnchor() {
+		return anchor;
+	}
+	
+	public void setAnchor(String anchor) {
+		this.anchor = anchor;
+	}
+
+	/**
+	 * Returns the priority for crawling this URL.
+	 * A lower number results in higher priority.
+	 */
+	public byte getPriority() {
+		return priority;
+	}
+
+	public void setPriority(byte priority) {
+		this.priority = priority;
+	}
+
+	
 }
