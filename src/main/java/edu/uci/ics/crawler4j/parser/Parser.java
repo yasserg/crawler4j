@@ -24,6 +24,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.apache.tika.metadata.DublinCore;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.ParseContext;
@@ -40,6 +41,8 @@ import edu.uci.ics.crawler4j.util.Util;
  * @author Yasser Ganjisaffar <lastname at gmail dot com>
  */
 public class Parser extends Configurable {
+	
+	protected static final Logger logger = Logger.getLogger(Parser.class.getName());
 
 	private HtmlParser htmlParser;
 	private ParseContext parseContext;
@@ -67,7 +70,7 @@ public class Parser extends Configurable {
 				page.setParseData(parseData);
 				return true;
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.error(e.getMessage() + ", while parsing: " + page.getWebURL().getURL());				
 			}
 			return false;
 		}
@@ -79,14 +82,14 @@ public class Parser extends Configurable {
 			inputStream = new ByteArrayInputStream(page.getContentData());
 			htmlParser.parse(inputStream, contentHandler, metadata, parseContext);
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error(e.getMessage() + ", while parsing: " + page.getWebURL().getURL());
 		} finally {
 			try {
 				if (inputStream != null) {
 					inputStream.close();
 				}
 			} catch (IOException e) {
-				e.printStackTrace();
+				logger.error(e.getMessage() + ", while parsing: " + page.getWebURL().getURL());
 			}
 		}
 
