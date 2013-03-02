@@ -25,6 +25,8 @@ import edu.uci.ics.crawler4j.url.WebURL;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import org.apache.http.Header;
+
 /**
  * @author Yasser Ganjisaffar <lastname at gmail dot com>
  */
@@ -62,7 +64,7 @@ public class BasicCrawler extends WebCrawler {
 		System.out.println("Sub-domain: '" + subDomain + "'");
 		System.out.println("Path: '" + path + "'");
 		System.out.println("Parent page: " + parentUrl);
-
+		
 		if (page.getParseData() instanceof HtmlParseData) {
 			HtmlParseData htmlParseData = (HtmlParseData) page.getParseData();
 			String text = htmlParseData.getText();
@@ -74,6 +76,14 @@ public class BasicCrawler extends WebCrawler {
 			System.out.println("Number of outgoing links: " + links.size());
 		}
 
+		Header[] responseHeaders = page.getFetchResponseHeaders();
+		if (responseHeaders != null) {
+			System.out.println("Response headers:");
+			for (Header header : responseHeaders) {
+				System.out.println("\t" + header.getName() + ": " + header.getValue());
+			}
+		}
+		
 		System.out.println("=============");
 	}
 }

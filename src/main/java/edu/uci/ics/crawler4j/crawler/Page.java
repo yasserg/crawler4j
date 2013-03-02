@@ -61,6 +61,12 @@ public class Page {
      * For example: "UTF-8"
      */
     protected String contentCharset;
+    
+    /**
+     * Headers which were present in the response of the
+     * fetch request
+     */
+    protected Header[] fetchResponseHeaders;
 
     /**
      * The parsed data populated by parsers
@@ -103,7 +109,18 @@ public class Page {
 		}
 
 		contentData = EntityUtils.toByteArray(entity);
-
+	}
+	
+	/**
+     * Returns headers which were present in the response of the
+     * fetch request
+     */
+	public Header[] getFetchResponseHeaders() {
+		return fetchResponseHeaders;
+	}
+	
+	public void setFetchResponseHeaders(Header[] headers) {
+		fetchResponseHeaders = headers;
 	}
 
     /**
