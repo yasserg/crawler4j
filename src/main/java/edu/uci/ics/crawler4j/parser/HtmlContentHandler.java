@@ -124,11 +124,17 @@ public class HtmlContentHandler extends DefaultHandler {
 					if (pos != -1) {
 						metaRefresh = content.substring(pos + 4);
 					}
+					curUrl = new ExtractedUrlAnchorPair();
+					curUrl.setHref(metaRefresh);
+					outgoingUrls.add(curUrl);
 				}
 
 				// http-equiv="location" content="http://foo.bar/..."
 				if (equiv.equals("location") && (metaLocation == null)) {
 					metaLocation = content;
+					curUrl = new ExtractedUrlAnchorPair();
+					curUrl.setHref(metaRefresh);
+					outgoingUrls.add(curUrl);
 				}
 			}
 			return;
