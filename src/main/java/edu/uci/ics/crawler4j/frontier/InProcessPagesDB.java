@@ -27,7 +27,6 @@ import com.sleepycat.je.OperationStatus;
 import com.sleepycat.je.Transaction;
 
 import edu.uci.ics.crawler4j.url.WebURL;
-import edu.uci.ics.crawler4j.util.Util;
 
 /**
  * This class maintains the list of pages which are
@@ -51,7 +50,7 @@ public class InProcessPagesDB extends WorkQueues {
 	public boolean removeURL(WebURL webUrl) {
 		synchronized (mutex) {
 			try {
-				DatabaseEntry key = new DatabaseEntry(Util.int2ByteArray(webUrl.getDocid()));				
+				DatabaseEntry key = getDatabaseEntryKey(webUrl);				
 				Cursor cursor = null;
 				OperationStatus result;
 				DatabaseEntry value = new DatabaseEntry();
