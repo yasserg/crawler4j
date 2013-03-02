@@ -46,6 +46,11 @@ public class RobotstxtServer {
 		this.config = config;
 		this.pageFetcher = pageFetcher;
 	}
+	
+	private String getHost(URL url)
+	{
+		return url.getHost().toLowerCase();
+	}
 
 	public boolean allows(WebURL webURL) {
 		if (!config.isEnabled()) {
@@ -53,7 +58,7 @@ public class RobotstxtServer {
 		}
 		try {
 			URL url = new URL(webURL.getURL());
-			String host = url.getHost().toLowerCase();
+			String host = getHost(url);
 			String path = url.getPath();
 
 			HostDirectives directives = host2directivesCache.get(host);
@@ -66,7 +71,7 @@ public class RobotstxtServer {
             }
 
 			if (directives == null) {
-				directives = fetchDirectives(host);
+				directives = fetchDirectives(url);
 			}
 			return directives.allows(path);
 		} catch (MalformedURLException e) {
@@ -75,9 +80,11 @@ public class RobotstxtServer {
 		return true;
 	}
 
-	private HostDirectives fetchDirectives(String host) {
+	private HostDirectives fetchDirectives(URL url) {
 		WebURL robotsTxtUrl = new WebURL();
-		robotsTxtUrl.setURL("http://" + host + "/robots.txt");
+		String host = getHost(url);
+		String port = (url.getPort() == url.getDefaultPort() || url.getPort() == -1) ? "" : ":" + url.getPort();
+		robotsTxtUrl.setURL("http://" + host + port + "/robots.txt");
 		HostDirectives directives = null;
 		PageFetchResult fetchResult = null;
 		try {
