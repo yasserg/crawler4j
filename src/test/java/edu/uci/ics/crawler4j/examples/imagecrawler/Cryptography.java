@@ -46,8 +46,8 @@ public class Cryptography {
 
 		// MSB maps to idx 0
 		for (i = 0; i < b.length; i++) {
-			msb = ((int) b[i] & 0x000000FF) / 16;
-			lsb = ((int) b[i] & 0x000000FF) % 16;
+			msb = (b[i] & 0x000000FF) / 16;
+			lsb = (b[i] & 0x000000FF) % 16;
 			hex = hex + hexChars[msb] + hexChars[lsb];
 		}
 		return (hex);

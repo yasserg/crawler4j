@@ -60,10 +60,7 @@ public class RobotstxtParser {
 			if (line.matches(PATTERNS_USERAGENT)) {
 				String ua = line.substring(PATTERNS_USERAGENT_LENGTH).trim().toLowerCase();
 				if (ua.equals("*") || ua.contains(myUserAgent)) {
-					inMatchingUserAgent = true;
-					if (directives == null) {
-						directives = new HostDirectives();
-					}
+					inMatchingUserAgent = true;					
 				} else {
 					inMatchingUserAgent = false;
 				}
@@ -77,6 +74,9 @@ public class RobotstxtParser {
 				}
 				path = path.trim();
 				if (path.length() > 0) {
+					if (directives == null) {
+						directives = new HostDirectives();
+					}
 					directives.addDisallow(path);	
 				}								
 			} else if (line.matches(PATTERNS_ALLOW)) {
@@ -88,6 +88,9 @@ public class RobotstxtParser {
 					path = path.substring(0, path.length() - 1);
 				}
 				path = path.trim();
+				if (directives == null) {
+					directives = new HostDirectives();
+				}
 				directives.addAllow(path);
 			}			
 		}

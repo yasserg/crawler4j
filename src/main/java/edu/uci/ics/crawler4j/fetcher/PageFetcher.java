@@ -204,9 +204,10 @@ public class PageFetcher extends Configurable {
 				fetchResult.setStatusCode(HttpStatus.SC_OK);
 				return fetchResult;
 
-			} else {
-				get.abort();
 			}
+			
+			get.abort();
+			
 		} catch (IOException e) {
 			logger.error("Fatal transport error: " + e.getMessage() + " while fetching " + toFetchURL
 					+ " (link found in doc #" + webUrl.getParentDocid() + ")");

@@ -46,8 +46,8 @@ public class ImageCrawler extends WebCrawler {
 	private static File storageFolder;
 	private static String[] crawlDomains;
 
-	public static void configure(String[] crawlDomains, String storageFolderName) {
-		ImageCrawler.crawlDomains = crawlDomains;
+	public static void configure(String[] domain, String storageFolderName) {
+		ImageCrawler.crawlDomains = domain;
 
 		storageFolder = new File(storageFolderName);
 		if (!storageFolder.exists()) {

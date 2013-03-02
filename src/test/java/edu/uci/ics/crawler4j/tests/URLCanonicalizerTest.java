@@ -5,7 +5,7 @@ import edu.uci.ics.crawler4j.url.URLCanonicalizer;
 
 public class URLCanonicalizerTest extends TestCase {
 
-	public void testCanonizalier() {
+	public static void testCanonizalier() {
 
 		assertEquals("http://www.example.com/display?category=foo%2Fbar%2Bbaz",
 				URLCanonicalizer.getCanonicalURL("http://www.example.com/display?category=foo/bar+baz"));

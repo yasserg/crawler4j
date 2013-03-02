@@ -61,7 +61,10 @@ public class Downloader {
 				}
 			}
 		} finally {
-			fetchResult.discardContentIfNotConsumed();
+			if (fetchResult != null)
+			{
+				fetchResult.discardContentIfNotConsumed();
+			}			
 		}
 		return null;
 	}

@@ -85,7 +85,7 @@ public class ControllerWithShutdown {
 		Thread.sleep(30 * 1000);
 
 		// Send the shutdown request and then wait for finishing
-		controller.Shutdown();
+		controller.shutdown();
 		controller.waitUntilFinish();
 	}
 }

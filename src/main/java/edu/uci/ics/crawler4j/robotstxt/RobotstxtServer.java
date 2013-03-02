@@ -46,9 +46,8 @@ public class RobotstxtServer {
 		this.config = config;
 		this.pageFetcher = pageFetcher;
 	}
-	
-	private String getHost(URL url)
-	{
+
+	private static String getHost(URL url) {
 		return url.getHost().toLowerCase();
 	}
 
@@ -63,12 +62,12 @@ public class RobotstxtServer {
 
 			HostDirectives directives = host2directivesCache.get(host);
 
-            if (directives != null && directives.needsRefetch()) {
-                synchronized (host2directivesCache) {
-                    host2directivesCache.remove(host);
-                    directives = null;
-                }
-            }
+			if (directives != null && directives.needsRefetch()) {
+				synchronized (host2directivesCache) {
+					host2directivesCache.remove(host);
+					directives = null;
+				}
+			}
 
 			if (directives == null) {
 				directives = fetchDirectives(url);
@@ -107,7 +106,9 @@ public class RobotstxtServer {
 				}
 			}
 		} finally {
-			fetchResult.discardContentIfNotConsumed();
+			if (fetchResult != null) {
+				fetchResult.discardContentIfNotConsumed();
+			}
 		}
 		if (directives == null) {
 			// We still need to have this object to keep track of the time we
@@ -130,5 +131,4 @@ public class RobotstxtServer {
 		}
 		return directives;
 	}
-
 }

@@ -396,12 +396,12 @@ public final class UrlResolver {
      */
     private static class Url {
 
-        private String scheme_;
-        private String location_;
-        private String path_;
-        private String parameters_;
-        private String query_;
-        private String fragment_;
+        String scheme_;
+        String location_;
+        String path_;
+        String parameters_;
+        String query_;
+        String fragment_;
 
         /**
          * Creates a <tt>Url</tt> object.

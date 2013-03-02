@@ -54,6 +54,11 @@ public class WebURL implements Serializable {
 	public void setDocid(int docid) {
 		this.docid = docid;
 	}
+	
+	@Override
+	public int hashCode() {
+		return url.hashCode();
+	}
 
 	@Override
 	public boolean equals(Object o) {
@@ -178,13 +183,13 @@ public class WebURL implements Serializable {
 	public String getAnchor() {
 		return anchor;
 	}
-	
+
 	public void setAnchor(String anchor) {
 		this.anchor = anchor;
 	}
 
 	/**
-	 * Returns the priority for crawling this URL.
+	 * Returns the priority for crawling this URL. 
 	 * A lower number results in higher priority.
 	 */
 	public byte getPriority() {
@@ -193,7 +198,6 @@ public class WebURL implements Serializable {
 
 	public void setPriority(byte priority) {
 		this.priority = priority;
-	}
+	}	
 
-	
 }

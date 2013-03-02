@@ -24,6 +24,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.tika.metadata.DublinCore;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.html.HtmlParser;
@@ -54,10 +55,11 @@ public class Parser extends Configurable {
 		if (Util.hasBinaryContent(page.getContentType())) {
 			if (!config.isIncludeBinaryContentInCrawling()) {
 				return false;
-			} else {
-				page.setParseData(BinaryParseData.getInstance());
-				return true;
 			}
+			
+			page.setParseData(BinaryParseData.getInstance());
+			return true;
+			
 		} else if (Util.hasPlainTextContent(page.getContentType())) {
 			try {
 				TextParseData parseData = new TextParseData();
@@ -94,7 +96,7 @@ public class Parser extends Configurable {
 
 		HtmlParseData parseData = new HtmlParseData();
 		parseData.setText(contentHandler.getBodyText().trim());
-		parseData.setTitle(metadata.get(Metadata.TITLE));
+		parseData.setTitle(metadata.get(DublinCore.TITLE));
 
 		List<WebURL> outgoingUrls = new ArrayList<WebURL>();
 

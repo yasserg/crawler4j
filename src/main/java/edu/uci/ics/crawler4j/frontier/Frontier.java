@@ -150,6 +150,7 @@ public class Frontier extends Configurable {
 					waitingList.wait();
 				}
 			} catch (InterruptedException ignored) {
+				// Do nothing
 			}
 			if (isFinished) {
 				return;

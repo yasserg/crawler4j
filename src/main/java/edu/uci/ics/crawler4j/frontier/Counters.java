@@ -72,7 +72,7 @@ public class Counters extends Configurable {
 				if (value.getData().length > 0) {
 					String name = new String(key.getData());
 					long counterValue = Util.byteArray2Long(value.getData());
-					counterValues.put(name, counterValue);
+					counterValues.put(name, new Long(counterValue));
 				}
 				result = cursor.getNext(key, value, null);
 			}
@@ -87,14 +87,14 @@ public class Counters extends Configurable {
 			if (value == null) {
 				return 0;
 			}
-			return value;
+			return value.longValue();
 		}
 	}
 
 	public void setValue(String name, long value) {
 		synchronized (mutex) {
 			try {
-				counterValues.put(name, value);
+				counterValues.put(name, new Long(value));
 				if (statisticsDB != null) {
 					Transaction txn = env.beginTransaction(null, null);					
 					statisticsDB.put(txn, new DatabaseEntry(name.getBytes()),

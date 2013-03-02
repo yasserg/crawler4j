@@ -95,8 +95,7 @@ public class Page {
 			contentEncoding = encoding.getValue();
 		}
 
-		ContentType contentType = ContentType.getOrDefault(entity);
-		contentCharset = contentType.getCharset().displayName();
+		contentCharset = ContentType.getOrDefault(entity).getCharset().displayName();
 
 		contentData = EntityUtils.toByteArray(entity);
 

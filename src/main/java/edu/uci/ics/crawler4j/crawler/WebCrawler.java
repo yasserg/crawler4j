@@ -102,13 +102,13 @@ public class WebCrawler implements Runnable {
 	/**
 	 * Initializes the current instance of the crawler
 	 * 
-	 * @param myId
+	 * @param id
 	 *            the id of this crawler instance
 	 * @param crawlController
 	 *            the controller that manages this crawling session
 	 */
-	public void init(int myId, CrawlController crawlController) {
-		this.myId = myId;
+	public void init(int id, CrawlController crawlController) {
+		this.myId = id;
 		this.pageFetcher = crawlController.getPageFetcher();
 		this.robotstxtServer = crawlController.getRobotstxtServer();
 		this.docIdServer = crawlController.getDocIdServer();
@@ -137,6 +137,8 @@ public class WebCrawler implements Runnable {
 	 * initializations needed by this crawler instance.
 	 */
 	public void onStart() {
+		// Do nothing by default
+		// Sub-classed can override this to add their custom functionality
 	}
 
 	/**
@@ -145,14 +147,22 @@ public class WebCrawler implements Runnable {
 	 * finalization tasks.
 	 */
 	public void onBeforeExit() {
+		// Do nothing by default
+		// Sub-classed can override this to add their custom functionality
 	}
 	
 	/**
 	 * This function is called once the header of a page is fetched.
 	 * It can be overwritten by sub-classes to perform custom logic
 	 * for different status codes. For example, 404 pages can be logged, etc.
+	 * 
+	 * @param webUrl 
+	 * @param statusCode 
+	 * @param statusDescription 
 	 */
 	protected void handlePageStatusCode(WebURL webUrl, int statusCode, String statusDescription) {
+		// Do nothing by default
+		// Sub-classed can override this to add their custom functionality
 	}
 
 	/**
@@ -221,6 +231,8 @@ public class WebCrawler implements Runnable {
 	 *            the page object that is just fetched and parsed.
 	 */
 	public void visit(Page page) {
+		// Do nothing by default
+		// Sub-classed can override this to add their custom functionality
 	}
 
 	private void processPage(WebURL curURL) {
@@ -243,18 +255,18 @@ public class WebCrawler implements Runnable {
 						if (newDocId > 0) {
 							// Redirect page is already seen
 							return;
-						} else {
-							WebURL webURL = new WebURL();
-							webURL.setURL(movedToUrl);
-							webURL.setParentDocid(curURL.getParentDocid());
-							webURL.setParentUrl(curURL.getParentUrl());
-							webURL.setDepth(curURL.getDepth());
-							webURL.setDocid(-1);
-							if (shouldVisit(webURL) && robotstxtServer.allows(webURL)) {
-								webURL.setDocid(docIdServer.getNewDocID(movedToUrl));
-								frontier.schedule(webURL);
-							}
 						}
+						
+						WebURL webURL = new WebURL();
+						webURL.setURL(movedToUrl);
+						webURL.setParentDocid(curURL.getParentDocid());
+						webURL.setParentUrl(curURL.getParentUrl());
+						webURL.setDepth(curURL.getDepth());
+						webURL.setDocid(-1);
+						if (shouldVisit(webURL) && robotstxtServer.allows(webURL)) {
+							webURL.setDocid(docIdServer.getNewDocID(movedToUrl));
+							frontier.schedule(webURL);
+						}						
 					}
 				} else if (fetchResult.getStatusCode() == CustomFetchStatus.PageTooBig) {
 					logger.info("Skipping a page which was bigger than max allowed size: " + curURL.getURL());
