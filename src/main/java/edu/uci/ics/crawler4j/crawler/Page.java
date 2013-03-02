@@ -19,6 +19,7 @@ package edu.uci.ics.crawler4j.crawler;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
+import org.apache.http.entity.ContentType;
 import org.apache.http.util.EntityUtils;
 
 import edu.uci.ics.crawler4j.parser.ParseData;
@@ -94,7 +95,8 @@ public class Page {
 			contentEncoding = encoding.getValue();
 		}
 
-		contentCharset = EntityUtils.getContentCharSet(entity);
+		ContentType contentType = ContentType.getOrDefault(entity);
+		contentCharset = contentType.getCharset().displayName();
 
 		contentData = EntityUtils.toByteArray(entity);
 

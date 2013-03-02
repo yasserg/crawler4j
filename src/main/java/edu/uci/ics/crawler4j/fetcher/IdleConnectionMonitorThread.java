@@ -19,14 +19,14 @@ package edu.uci.ics.crawler4j.fetcher;
 
 import java.util.concurrent.TimeUnit;
 
-import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
+import org.apache.http.impl.conn.PoolingClientConnectionManager;
 
 public class IdleConnectionMonitorThread extends Thread {
     
-    private final ThreadSafeClientConnManager connMgr;
+    private final PoolingClientConnectionManager connMgr;
     private volatile boolean shutdown;
     
-    public IdleConnectionMonitorThread(ThreadSafeClientConnManager connMgr) {
+    public IdleConnectionMonitorThread(PoolingClientConnectionManager connMgr) {
         super("Connection Manager");
         this.connMgr = connMgr;
     }

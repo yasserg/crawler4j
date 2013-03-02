@@ -42,7 +42,7 @@ import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.entity.HttpEntityWrapper;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
+import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.params.CoreProtocolPNames;
@@ -63,7 +63,7 @@ public class PageFetcher extends Configurable {
 
 	protected static final Logger logger = Logger.getLogger(PageFetcher.class);
 
-	protected ThreadSafeClientConnManager connectionManager;
+	protected PoolingClientConnectionManager connectionManager;
 
 	protected DefaultHttpClient httpClient;
 
@@ -95,7 +95,7 @@ public class PageFetcher extends Configurable {
 			schemeRegistry.register(new Scheme("https", 443, SSLSocketFactory.getSocketFactory()));
 		}
 
-		connectionManager = new ThreadSafeClientConnManager(schemeRegistry);
+		connectionManager = new PoolingClientConnectionManager(schemeRegistry);
 		connectionManager.setMaxTotal(config.getMaxTotalConnections());
 		connectionManager.setDefaultMaxPerRoute(config.getMaxConnectionsPerHost());
 		httpClient = new DefaultHttpClient(connectionManager, params);
