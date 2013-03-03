@@ -164,7 +164,7 @@ public class WebCrawler implements Runnable {
 		// Do nothing by default
 		// Sub-classed can override this to add their custom functionality
 	}
-	
+
 	/**
 	 * This function is called if the content of a url could not be fetched.
 	 * 
@@ -174,9 +174,10 @@ public class WebCrawler implements Runnable {
 		// Do nothing by default
 		// Sub-classed can override this to add their custom functionality
 	}
-	
+
 	/**
-	 * This function is called if there has been an error in parsing the content.
+	 * This function is called if there has been an error in parsing the
+	 * content.
 	 * 
 	 * @param webUrl
 	 */
@@ -345,7 +346,11 @@ public class WebCrawler implements Runnable {
 				}
 				frontier.scheduleAll(toSchedule);
 			}
-			visit(page);
+			try {
+				visit(page);
+			} catch (Exception e) {
+				logger.error("Exception while running the visit method. Message: '" + e.getMessage() + "' at " + e.getStackTrace()[0]);
+			}
 
 		} catch (Exception e) {
 			logger.error(e.getMessage() + ", while processing: " + curURL.getURL());
