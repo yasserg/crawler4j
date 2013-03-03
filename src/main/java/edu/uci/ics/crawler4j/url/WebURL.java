@@ -97,7 +97,7 @@ public class WebURL implements Serializable {
 		if (parts.length > 2) {
 			domain = parts[parts.length - 2] + "." + parts[parts.length - 1];
 			int limit = 2;
-			if (TLDList.contains(domain)) {
+			if (TLDList.getInstance().contains(domain)) {
 				domain = parts[parts.length - 3] + "." + domain;
 				limit = 3;
 			}
