@@ -1,11 +1,10 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>edu.uci.ics</groupId>
 	<artifactId>crawler4j</artifactId>
 	<packaging>jar</packaging>
 	<name>crawler4j</name>
-	<version>3.4.1-SNAPSHOT</version>
+	<version>3.5</version>
 	<description>Open Source Web Crawler for Java</description>
 	<url>http://code.google.com/p/crawler4j/</url>
 	<licenses>
