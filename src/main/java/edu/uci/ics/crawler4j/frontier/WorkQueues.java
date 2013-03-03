@@ -52,7 +52,7 @@ public class WorkQueues {
 	public List<WebURL> get(int max) throws DatabaseException {
 		synchronized (mutex) {
 			int matches = 0;
-			List<WebURL> results = new ArrayList<WebURL>(max);
+			List<WebURL> results = new ArrayList<>(max);
 
 			Cursor cursor = null;
 			OperationStatus result;

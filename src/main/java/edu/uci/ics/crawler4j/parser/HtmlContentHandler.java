@@ -38,7 +38,7 @@ public class HtmlContentHandler extends DefaultHandler {
 		private static Map<String, Element> name2Element;
 
 		static {
-			name2Element = new HashMap<String, Element>();
+			name2Element = new HashMap<>();
 			for (Element element : Element.values()) {
 				name2Element.put(element.toString().toLowerCase(), element);
 			}
@@ -65,7 +65,7 @@ public class HtmlContentHandler extends DefaultHandler {
 	public HtmlContentHandler() {
 		isWithinBodyElement = false;
 		bodyText = new StringBuilder();
-		outgoingUrls = new ArrayList<ExtractedUrlAnchorPair>();
+		outgoingUrls = new ArrayList<>();
 	}
 
 	@Override

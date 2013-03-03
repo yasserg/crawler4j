@@ -47,7 +47,7 @@ public class Counters extends Configurable {
 		super(config);
 
 		this.env = env;
-		this.counterValues = new HashMap<String, Long>();
+		this.counterValues = new HashMap<>();
 
 		/*
 		 * When crawling is set to be resumable, we have to keep the statistics

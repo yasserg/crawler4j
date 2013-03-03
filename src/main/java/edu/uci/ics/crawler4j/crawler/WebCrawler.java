@@ -201,7 +201,7 @@ public class WebCrawler implements Runnable {
 	public void run() {
 		onStart();
 		while (true) {
-			List<WebURL> assignedURLs = new ArrayList<WebURL>(50);
+			List<WebURL> assignedURLs = new ArrayList<>(50);
 			isWaitingForNewURLs = true;
 			frontier.getNextURLs(50, assignedURLs);
 			isWaitingForNewURLs = false;
@@ -322,7 +322,7 @@ public class WebCrawler implements Runnable {
 			if (parseData instanceof HtmlParseData) {
 				HtmlParseData htmlParseData = (HtmlParseData) parseData;
 
-				List<WebURL> toSchedule = new ArrayList<WebURL>();
+				List<WebURL> toSchedule = new ArrayList<>();
 				int maxCrawlDepth = myController.getConfig().getMaxDepthOfCrawling();
 				for (WebURL webURL : htmlParseData.getOutgoingUrls()) {
 					webURL.setParentDocid(docid);

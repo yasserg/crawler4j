@@ -52,7 +52,7 @@ public class CrawlController extends Configurable {
 	 * Once the crawling session finishes the controller collects the local data
 	 * of the crawler threads and stores them in this List.
 	 */
-	protected List<Object> crawlersLocalData = new ArrayList<Object>();
+	protected List<Object> crawlersLocalData = new ArrayList<>();
 
 	/**
 	 * Is the crawling of this session finished?
@@ -142,8 +142,8 @@ public class CrawlController extends Configurable {
 		try {
 			finished = false;
 			crawlersLocalData.clear();
-			final List<Thread> threads = new ArrayList<Thread>();
-			final List<T> crawlers = new ArrayList<T>();
+			final List<Thread> threads = new ArrayList<>();
+			final List<T> crawlers = new ArrayList<>();
 
 			for (int i = 1; i <= numberOfCrawlers; i++) {
 				T crawler = _c.newInstance();

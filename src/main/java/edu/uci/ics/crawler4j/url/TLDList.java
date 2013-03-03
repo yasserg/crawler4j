@@ -10,7 +10,7 @@ public class TLDList {
 	
 	private final String tldNamesFileName = "tld-names.txt";
 
-	private Set<String> tldSet = new HashSet<String>();
+	private Set<String> tldSet = new HashSet<>();
 
 	private static TLDList instance = new TLDList();
 
