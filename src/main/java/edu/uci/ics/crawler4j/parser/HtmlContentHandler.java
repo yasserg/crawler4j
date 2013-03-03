@@ -28,6 +28,8 @@ import org.xml.sax.helpers.DefaultHandler;
 
 public class HtmlContentHandler extends DefaultHandler {
 
+	private final int MAX_ANCHOR_LENGTH = 100;
+
 	private enum Element {
 		A, AREA, LINK, IFRAME, FRAME, EMBED, IMG, BASE, META, BODY
 	}
@@ -151,8 +153,11 @@ public class HtmlContentHandler extends DefaultHandler {
 		if (element == Element.A || element == Element.AREA || element == Element.LINK) {
 			anchorFlag = false;
 			if (curUrl != null) {
-				String anchor = anchorText.toString().trim();
+				String anchor = anchorText.toString().replaceAll("\n", " ").replaceAll("\t", " ").trim();
 				if (!anchor.isEmpty()) {
+					if (anchor.length() > MAX_ANCHOR_LENGTH) {
+						anchor = anchor.substring(0, MAX_ANCHOR_LENGTH) + "...";
+					}
 					curUrl.setAnchor(anchor);
 				}
 				anchorText.delete(0, anchorText.length());
@@ -170,7 +175,7 @@ public class HtmlContentHandler extends DefaultHandler {
 			bodyText.append(ch, start, length);
 
 			if (anchorFlag) {
-				anchorText.append(new String(ch, start, length).replaceAll("\n", "").replaceAll("\t", "").trim());
+				anchorText.append(new String(ch, start, length));
 			}
 		}
 	}

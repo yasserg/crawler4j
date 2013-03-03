@@ -57,6 +57,7 @@ public class BasicCrawler extends WebCrawler {
 		String path = page.getWebURL().getPath();
 		String subDomain = page.getWebURL().getSubDomain();
 		String parentUrl = page.getWebURL().getParentUrl();
+		String anchor = page.getWebURL().getAnchor();
 
 		System.out.println("Docid: " + docid);
 		System.out.println("URL: " + url);
@@ -64,6 +65,7 @@ public class BasicCrawler extends WebCrawler {
 		System.out.println("Sub-domain: '" + subDomain + "'");
 		System.out.println("Path: '" + path + "'");
 		System.out.println("Parent page: " + parentUrl);
+		System.out.println("Anchor text: " + anchor);
 		
 		if (page.getParseData() instanceof HtmlParseData) {
 			HtmlParseData htmlParseData = (HtmlParseData) page.getParseData();

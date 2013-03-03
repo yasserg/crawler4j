@@ -284,6 +284,7 @@ public class WebCrawler implements Runnable {
 						webURL.setParentUrl(curURL.getParentUrl());
 						webURL.setDepth(curURL.getDepth());
 						webURL.setDocid(-1);
+						webURL.setAnchor(curURL.getAnchor());
 						if (shouldVisit(webURL) && robotstxtServer.allows(webURL)) {
 							webURL.setDocid(docIdServer.getNewDocID(movedToUrl));
 							frontier.schedule(webURL);
