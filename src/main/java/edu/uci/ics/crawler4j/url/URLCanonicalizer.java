@@ -44,6 +44,12 @@ public class URLCanonicalizer {
 
 		try {
 			URL canonicalURL = new URL(UrlResolver.resolveUrl(context == null ? "" : context, href));
+			
+			String host = canonicalURL.getHost().toLowerCase();
+			if (host == "") {
+				// This is an invalid Url.
+				return null;
+			}
 
 			String path = canonicalURL.getPath();
 
@@ -100,11 +106,7 @@ public class URLCanonicalizer {
 				port = -1;
 			}
 
-			/*
-			 * Lowercasing protocol and host
-			 */
 			String protocol = canonicalURL.getProtocol().toLowerCase();
-			String host = canonicalURL.getHost().toLowerCase();
 			String pathAndQueryString = normalizePath(path) + queryString;
 
 			URL result = new URL(protocol, host, port, pathAndQueryString);

@@ -41,7 +41,7 @@ import edu.uci.ics.crawler4j.util.Util;
  * @author Yasser Ganjisaffar <lastname at gmail dot com>
  */
 public class Parser extends Configurable {
-	
+
 	protected static final Logger logger = Logger.getLogger(Parser.class.getName());
 
 	private HtmlParser htmlParser;
@@ -59,10 +59,10 @@ public class Parser extends Configurable {
 			if (!config.isIncludeBinaryContentInCrawling()) {
 				return false;
 			}
-			
+
 			page.setParseData(BinaryParseData.getInstance());
 			return true;
-			
+
 		} else if (Util.hasPlainTextContent(page.getContentType())) {
 			try {
 				TextParseData parseData = new TextParseData();
@@ -70,7 +70,7 @@ public class Parser extends Configurable {
 				page.setParseData(parseData);
 				return true;
 			} catch (Exception e) {
-				logger.error(e.getMessage() + ", while parsing: " + page.getWebURL().getURL());				
+				logger.error(e.getMessage() + ", while parsing: " + page.getWebURL().getURL());
 			}
 			return false;
 		}
@@ -119,7 +119,9 @@ public class Parser extends Configurable {
 			if (href.startsWith("http://")) {
 				hrefWithoutProtocol = href.substring(7);
 			}
-			if (!hrefWithoutProtocol.contains("javascript:") && !hrefWithoutProtocol.contains("@")) {
+			if (!hrefWithoutProtocol.contains("javascript:") 
+					&& !hrefWithoutProtocol.contains("mailto:")
+					&& !hrefWithoutProtocol.contains("@")) {
 				String url = URLCanonicalizer.getCanonicalURL(href, contextURL);
 				if (url != null) {
 					WebURL webURL = new WebURL();
