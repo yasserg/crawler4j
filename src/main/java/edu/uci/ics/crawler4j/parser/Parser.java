@@ -66,7 +66,11 @@ public class Parser extends Configurable {
 		} else if (Util.hasPlainTextContent(page.getContentType())) {
 			try {
 				TextParseData parseData = new TextParseData();
-				parseData.setTextContent(new String(page.getContentData(), page.getContentCharset()));
+				if (page.getContentCharset() == null) {
+					parseData.setTextContent(new String(page.getContentData()));
+				} else {
+					parseData.setTextContent(new String(page.getContentData(), page.getContentCharset()));
+				}
 				page.setParseData(parseData);
 				return true;
 			} catch (Exception e) {
@@ -119,8 +123,7 @@ public class Parser extends Configurable {
 			if (href.startsWith("http://")) {
 				hrefWithoutProtocol = href.substring(7);
 			}
-			if (!hrefWithoutProtocol.contains("javascript:") 
-					&& !hrefWithoutProtocol.contains("mailto:")
+			if (!hrefWithoutProtocol.contains("javascript:") && !hrefWithoutProtocol.contains("mailto:")
 					&& !hrefWithoutProtocol.contains("@")) {
 				String url = URLCanonicalizer.getCanonicalURL(href, contextURL);
 				if (url != null) {
