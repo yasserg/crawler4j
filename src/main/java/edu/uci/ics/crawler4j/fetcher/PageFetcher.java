@@ -203,6 +203,7 @@ public class PageFetcher extends Configurable {
 				if (size > config.getMaxDownloadSize()) {
 					fetchResult.setStatusCode(CustomFetchStatus.PageTooBig);
 					get.abort();
+					logger.error("Failed: Page Size (" + size + ") exceeded max-download-size (" + config.getMaxDownloadSize() + ")");
 					return fetchResult;
 				}
 
@@ -237,6 +238,7 @@ public class PageFetcher extends Configurable {
 			}
 		}
 		fetchResult.setStatusCode(CustomFetchStatus.UnknownError);
+		logger.error("Failed: Unknown error occurred while fetching " + webUrl.getURL());
 		return fetchResult;
 	}
 
