@@ -26,7 +26,8 @@ import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
 import edu.uci.ics.crawler4j.url.URLCanonicalizer;
 import edu.uci.ics.crawler4j.url.WebURL;
 import edu.uci.ics.crawler4j.util.IO;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -40,7 +41,7 @@ import java.util.List;
  */
 public class CrawlController extends Configurable {
 
-	static final Logger logger = Logger.getLogger(CrawlController.class.getName());
+	static final Logger logger = LoggerFactory.getLogger(CrawlController.class);
 
 	/**
 	 * The 'customData' object can be used for passing custom crawl-related

@@ -17,7 +17,6 @@
 
 package edu.uci.ics.crawler4j.frontier;
 
-import org.apache.log4j.Logger;
 
 import com.sleepycat.je.Cursor;
 import com.sleepycat.je.DatabaseEntry;
@@ -27,6 +26,8 @@ import com.sleepycat.je.OperationStatus;
 import com.sleepycat.je.Transaction;
 
 import edu.uci.ics.crawler4j.url.WebURL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class maintains the list of pages which are
@@ -37,7 +38,7 @@ import edu.uci.ics.crawler4j.url.WebURL;
  */
 public class InProcessPagesDB extends WorkQueues {
 
-	private static final Logger logger = Logger.getLogger(InProcessPagesDB.class.getName());
+	private static final Logger logger = LoggerFactory.getLogger(InProcessPagesDB.class);
 		
 	public InProcessPagesDB(Environment env) throws DatabaseException {
 		super(env, "InProcessPagesDB", true);

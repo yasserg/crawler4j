@@ -51,19 +51,20 @@ import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParamBean;
 import org.apache.http.protocol.HttpContext;
-import org.apache.log4j.Logger;
 
 import edu.uci.ics.crawler4j.crawler.Configurable;
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.url.URLCanonicalizer;
 import edu.uci.ics.crawler4j.url.WebURL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Yasser Ganjisaffar <lastname at gmail dot com>
  */
 public class PageFetcher extends Configurable {
 
-	protected static final Logger logger = Logger.getLogger(PageFetcher.class);
+	protected static final Logger logger = LoggerFactory.getLogger(PageFetcher.class);
 
 	protected PoolingClientConnectionManager connectionManager;
 

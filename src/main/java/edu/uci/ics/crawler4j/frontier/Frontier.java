@@ -23,7 +23,8 @@ import edu.uci.ics.crawler4j.crawler.Configurable;
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.frontier.Counters.ReservedCounterNames;
 import edu.uci.ics.crawler4j.url.WebURL;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -33,7 +34,7 @@ import java.util.List;
 
 public class Frontier extends Configurable {
 
-	protected static final Logger logger = Logger.getLogger(Frontier.class.getName());
+	protected static final Logger logger = LoggerFactory.getLogger(Frontier.class);
 
 	protected WorkQueues workQueues;
 

@@ -23,16 +23,17 @@ import java.io.IOException;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.util.EntityUtils;
-import org.apache.log4j.Logger;
 
 import edu.uci.ics.crawler4j.crawler.Page;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Yasser Ganjisaffar <lastname at gmail dot com>
  */
 public class PageFetchResult {
 
-	protected static final Logger logger = Logger.getLogger(PageFetchResult.class);
+	protected static final Logger logger = LoggerFactory.getLogger(PageFetchResult.class);
 
 	protected int statusCode;
 	protected HttpEntity entity = null;

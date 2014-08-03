@@ -29,7 +29,8 @@ import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
 import edu.uci.ics.crawler4j.url.WebURL;
 
 import org.apache.http.HttpStatus;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,7 +43,7 @@ import java.util.List;
  */
 public class WebCrawler implements Runnable {
 
-	protected static final Logger logger = Logger.getLogger(WebCrawler.class.getName());
+	protected static final Logger logger = LoggerFactory.getLogger(WebCrawler.class);
 
 	/**
 	 * The id associated to the crawler thread running this instance

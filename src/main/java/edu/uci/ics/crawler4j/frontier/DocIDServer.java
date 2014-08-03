@@ -17,13 +17,13 @@
 
 package edu.uci.ics.crawler4j.frontier;
 
-import org.apache.log4j.Logger;
-
 import com.sleepycat.je.*;
 
 import edu.uci.ics.crawler4j.crawler.Configurable;
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Yasser Ganjisaffar <lastname at gmail dot com>
@@ -31,7 +31,7 @@ import edu.uci.ics.crawler4j.util.Util;
 
 public class DocIDServer extends Configurable {
 
-	protected static final Logger logger = Logger.getLogger(DocIDServer.class.getName());
+	protected static final Logger logger = LoggerFactory.getLogger(DocIDServer.class);
 	
 	protected Database docIDsDB = null;
 	
