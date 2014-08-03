@@ -6,7 +6,7 @@
 	<name>crawler4j</name>
 	<version>3.6-SNAPSHOT</version>
 	<description>Open Source Web Crawler for Java</description>
-	<url>http://code.google.com/p/crawler4j/</url>
+	<url>https://github.com/Chaiavi/Crawler4j</url>
 	<licenses>
 		<license>
 			<name>The Apache Software License, Version 2.0</name>
@@ -15,14 +15,20 @@
 		</license>
 	</licenses>
 	<scm>
-		<connection>scm:git:https://crawler4j.googlecode.com/git/</connection>
-		<developerConnection>scm:git:https://crawler4j.googlecode.com/git/</developerConnection>
-		<url>https://crawler4j.googlecode.com/git/</url>
+		<connection>https://github.com/Chaiavi/Crawler4j.git</connection>
+		<developerConnection>https://github.com/Chaiavi/Crawler4j.git</developerConnection>
+		<url>https://github.com/Chaiavi/Crawler4j</url>
 	</scm>
+
 	<developers>
 		<developer>
 			<name>Yasser Ganjisaffar</name>
 			<email>{lastname}@gmail.com</email>
+		</developer>
+
+        <developer>
+			<name>Avi Hayun</name>
+			<email>avraham2@gmail.com</email>
 		</developer>
 	</developers>
 
@@ -88,24 +94,27 @@
 		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
-			<version>1.2.14</version>
+			<version>1.2.17</version>
 			<scope>compile</scope>
 		</dependency>
+
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
-			<version>4.2.3</version>
+			<version>4.3.5</version>
 			<scope>compile</scope>
 		</dependency>
+
 		<dependency>
 			<groupId>com.sleepycat</groupId>
 			<artifactId>je</artifactId>
-			<version>4.0.92</version>
+			<version>5.0.73</version>
 		</dependency>
+
 		<dependency>
 			<groupId>org.apache.tika</groupId>
 			<artifactId>tika-parsers</artifactId>
-			<version>1.0</version>
+			<version>1.5</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>poi-ooxml-schemas</artifactId>
@@ -153,6 +162,7 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
