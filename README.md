@@ -4,6 +4,29 @@ Crawler4j
 Crawler4j is an open source Java crawler which provides a simple interface for crawling the Web. You can setup a multi-threaded web crawler in 5 minutes!
 
 
+How to use?
+-----------
+Basicly it is very simple.
+Crawler4j exposes an API with only two methods which you need to implement:
+
+**boolean shouldVisit(WebUrl webUrl)** - called BEFORE fetching of the page, so you can decide if you want to allow the fetching of the page by analyzing the URL (example: returning false on all non html pages, or returning true only when the url is of specific domains etc)
+
+**void visit(Page page)** - called after the page was fetched and lets you decide what to do about it.
+
+
+Detailed examples can be found on this site's [wiki pages] (https://github.com/Chaiavi/Crawler4j/wiki)
+
+
+Code Examples
+-------------
+**[Basic crawler](https://github.com/Chaiavi/Crawler4j/tree/master/src/test/java/edu/uci/ics/crawler4j/examples/basic)**: Basic example usecase of Crawler4j.
+**[Image crawler](https://github.com/Chaiavi/Crawler4j/tree/master/src/test/java/edu/uci/ics/crawler4j/examples/imagecrawler)**: a simple image crawler that downloads image content from the crawling domain and stores them in a folder. This example demonstrates how binary content can be fetched using crawler4j.
+**[Collecting data from threads](https://github.com/Chaiavi/Crawler4j/tree/master/src/test/java/edu/uci/ics/crawler4j/examples/localdata)**: this example demonstrates how the controller can collect data/statistics from crawling threads.
+**[Multiple crawlers](https://github.com/Chaiavi/Crawler4j/tree/master/src/test/java/edu/uci/ics/crawler4j/examples/multiple)**: this is a sample that shows how two distinct crawlers can run concurrently. For example, you might want to split your crawling into different domains and then take different crawling policies for each group. Each crawling controller can have its own configurations.
+**[Shutdown crawling](https://github.com/Chaiavi/Crawler4j/tree/master/src/test/java/edu/uci/ics/crawler4j/examples/shutdown)**: this example shows have crawling can be terminated gracefully by sending the 'shutdown' command to the controller.
+
+
+
 CLARIFICATION
 -------------
 This project aims to be a continuation of the [Original Project] (https://code.google.com/p/crawler4j/) which is the best [open source java web crawler] (http://myblog.chaiware.org/2014/07/crawling-site-with-java.html).
@@ -45,8 +68,8 @@ After I see that you are fit, I will request you to become a committer on this p
 
 Changelog
 ---------
-1. Updated all libraries to their latest version (August 2014)
-2. Removed log4j implementation and switched it with slf4j
+1. Updated all libraries to their latest version (August 2014) (issue #21)
+2. Removed log4j implementation and switched it with slf4j (issue #1)
 3. Added more logs
 4. Many more to come, feel free to look into the [issues list] (https://github.com/Chaiavi/Crawler4j/issues)
 
