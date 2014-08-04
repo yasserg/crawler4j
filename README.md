@@ -19,11 +19,11 @@ Detailed examples can be found on this site's [wiki pages] (https://github.com/C
 
 Code Examples
 -------------
-**[Basic crawler](https://github.com/Chaiavi/Crawler4j/tree/master/src/test/java/edu/uci/ics/crawler4j/examples/basic)**: Basic example usecase of Crawler4j.
-**[Image crawler](https://github.com/Chaiavi/Crawler4j/tree/master/src/test/java/edu/uci/ics/crawler4j/examples/imagecrawler)**: a simple image crawler that downloads image content from the crawling domain and stores them in a folder. This example demonstrates how binary content can be fetched using crawler4j.
-**[Collecting data from threads](https://github.com/Chaiavi/Crawler4j/tree/master/src/test/java/edu/uci/ics/crawler4j/examples/localdata)**: this example demonstrates how the controller can collect data/statistics from crawling threads.
-**[Multiple crawlers](https://github.com/Chaiavi/Crawler4j/tree/master/src/test/java/edu/uci/ics/crawler4j/examples/multiple)**: this is a sample that shows how two distinct crawlers can run concurrently. For example, you might want to split your crawling into different domains and then take different crawling policies for each group. Each crawling controller can have its own configurations.
-**[Shutdown crawling](https://github.com/Chaiavi/Crawler4j/tree/master/src/test/java/edu/uci/ics/crawler4j/examples/shutdown)**: this example shows have crawling can be terminated gracefully by sending the 'shutdown' command to the controller.
+- **[Basic crawler](https://github.com/Chaiavi/Crawler4j/tree/master/src/test/java/edu/uci/ics/crawler4j/examples/basic)**: Basic example usecase of Crawler4j.
+- **[Image crawler](https://github.com/Chaiavi/Crawler4j/tree/master/src/test/java/edu/uci/ics/crawler4j/examples/imagecrawler)**: a simple image crawler that downloads image content from the crawling domain and stores them in a folder. This example demonstrates how binary content can be fetched using crawler4j.
+- **[Collecting data from threads](https://github.com/Chaiavi/Crawler4j/tree/master/src/test/java/edu/uci/ics/crawler4j/examples/localdata)**: this example demonstrates how the controller can collect data/statistics from crawling threads.
+- **[Multiple crawlers](https://github.com/Chaiavi/Crawler4j/tree/master/src/test/java/edu/uci/ics/crawler4j/examples/multiple)**: this is a sample that shows how two distinct crawlers can run concurrently. For example, you might want to split your crawling into different domains and then take different crawling policies for each group. Each crawling controller can have its own configurations.
+- **[Shutdown crawling](https://github.com/Chaiavi/Crawler4j/tree/master/src/test/java/edu/uci/ics/crawler4j/examples/shutdown)**: this example shows have crawling can be terminated gracefully by sending the 'shutdown' command to the controller.
 
 
 
@@ -53,12 +53,12 @@ Can I participate in this project?
 But, I don't know you yet, so in order to know that you are a worthy committer, please follow the following guidelines
 
 *Want to add your code?*
-1. Make sure it is good for everyone and not only solves your specific needs.
-2. Open an issue detailing the need and your suggested solution
-3. If this is a bug, then please detail the scenario
-4. Fork my project and make the fix
-5. **Make sure you didn't add any other code except this issue's specific code** No code styling, no adding something else etc - only **ATOMIC** changes correlated to this specific issue.
-6. Send me a pull request
+* Make sure it is good for everyone and not only solves your specific needs.
+* Open an issue detailing the need and your suggested solution
+* If this is a bug, then please detail the scenario
+* Fork my project and make the fix
+* **Make sure you didn't add any other code except this issue's specific code** No code styling, no adding something else etc - only **ATOMIC** changes correlated to this specific issue.
+* Send me a pull request
 
 That's it, I will see the issue and probably reply so a conversation might arise in the issues list.
 I will see the code and if it is good I will apply it to my own.
