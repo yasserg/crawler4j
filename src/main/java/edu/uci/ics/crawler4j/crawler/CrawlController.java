@@ -72,6 +72,7 @@ public class CrawlController extends Configurable {
 	protected DocIDServer docIdServer;
 
 	protected final Object waitingLock = new Object();
+	protected final Environment env;
 
 	public CrawlController(CrawlConfig config, PageFetcher pageFetcher, RobotstxtServer robotstxtServer)
 			throws Exception {
@@ -102,7 +103,7 @@ public class CrawlController extends Configurable {
 			IO.deleteFolderContents(envHome);
 		}
 
-		Environment env = new Environment(envHome, envConfig);
+		env = new Environment(envHome, envConfig);
 		docIdServer = new DocIDServer(env, config);
 		frontier = new Frontier(env, config, docIdServer);
 
@@ -236,6 +237,7 @@ public class CrawlController extends Configurable {
 
 										finished = true;
 										waitingLock.notifyAll();
+                                        env.close();
 
 										return;
 									}
