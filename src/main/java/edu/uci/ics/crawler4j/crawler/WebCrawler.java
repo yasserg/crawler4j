@@ -292,7 +292,7 @@ public class WebCrawler implements Runnable {
 						}
 					}
 				} else if (fetchResult.getStatusCode() == CustomFetchStatus.PageTooBig) {
-					logger.info("Skipping a page which was bigger than max allowed size: " + curURL.getURL());
+					logger.info("Skipping a page which was bigger than max allowed size: {}", curURL.getURL());
 				}
 				return;
 			}
@@ -351,11 +351,11 @@ public class WebCrawler implements Runnable {
 			try {
 				visit(page);
 			} catch (Exception e) {
-				logger.error("Exception while running the visit method. Message: '" + e.getMessage() + "' at " + e.getStackTrace()[0]);
+				logger.error("Exception while running the visit method. Message: '{}' at {}", e.getMessage(), e.getStackTrace()[0]);
 			}
 
 		} catch (Exception e) {
-			logger.error(e.getMessage() + ", while processing: " + curURL.getURL());
+			logger.error("{}, while processing: {}", e.getMessage(), curURL.getURL());
 		} finally {
 			if (fetchResult != null) {
 				fetchResult.discardContentIfNotConsumed();

@@ -75,7 +75,7 @@ public class Parser extends Configurable {
 				page.setParseData(parseData);
 				return true;
 			} catch (Exception e) {
-				logger.error(e.getMessage() + ", while parsing: " + page.getWebURL().getURL());
+				logger.error("{}, while parsing: {}", e.getMessage(), page.getWebURL().getURL());
 			}
 			return false;
 		}
@@ -87,14 +87,14 @@ public class Parser extends Configurable {
 			inputStream = new ByteArrayInputStream(page.getContentData());
 			htmlParser.parse(inputStream, contentHandler, metadata, parseContext);
 		} catch (Exception e) {
-			logger.error(e.getMessage() + ", while parsing: " + page.getWebURL().getURL());
+			logger.error("{}, while parsing: {}", e.getMessage(), page.getWebURL().getURL());
 		} finally {
 			try {
 				if (inputStream != null) {
 					inputStream.close();
 				}
 			} catch (IOException e) {
-				logger.error(e.getMessage() + ", while parsing: " + page.getWebURL().getURL());
+				logger.error("{}, while parsing: {}", e.getMessage(), page.getWebURL().getURL());
 			}
 		}
 

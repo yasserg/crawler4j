@@ -154,7 +154,7 @@ public class CrawlController extends Configurable {
 				thread.start();
 				crawlers.add(crawler);
 				threads.add(thread);
-				logger.info("Crawler " + i + " started.");
+				logger.info("Crawler {} started", i);
 			}
 
 			final CrawlController controller = this;
@@ -173,7 +173,7 @@ public class CrawlController extends Configurable {
 									Thread thread = threads.get(i);
 									if (!thread.isAlive()) {
 										if (!shuttingDown) {
-											logger.info("Thread " + i + " was dead, I'll recreate it.");
+											logger.info("Thread {} was dead, I'll recreate it", i);
 											T crawler = _c.newInstance();
 											thread = new Thread(crawler, "Crawler " + (i + 1));
 											threads.remove(i);
@@ -327,7 +327,7 @@ public class CrawlController extends Configurable {
 	public void addSeed(String pageUrl, int docId) {
 		String canonicalUrl = URLCanonicalizer.getCanonicalURL(pageUrl);
 		if (canonicalUrl == null) {
-			logger.error("Invalid seed URL: " + pageUrl);
+			logger.error("Invalid seed URL: {}", pageUrl);
 			return;
 		}
 		if (docId < 0) {
@@ -341,7 +341,7 @@ public class CrawlController extends Configurable {
 			try {
 				docIdServer.addUrlAndDocId(canonicalUrl, docId);
 			} catch (Exception e) {
-				logger.error("Could not add seed: " + e.getMessage());
+				logger.error("Could not add seed: {}", e.getMessage());
 			}
 		}
 
@@ -350,7 +350,7 @@ public class CrawlController extends Configurable {
 		webUrl.setDocid(docId);
 		webUrl.setDepth((short) 0);
 		if (!robotstxtServer.allows(webUrl)) {
-			logger.info("Robots.txt does not allow this seed: " + pageUrl);
+			logger.info("Robots.txt does not allow this seed: {}", pageUrl);
 		} else {
 			frontier.schedule(webUrl);
 		}
@@ -375,13 +375,13 @@ public class CrawlController extends Configurable {
 	public void addSeenUrl(String url, int docId) {
 		String canonicalUrl = URLCanonicalizer.getCanonicalURL(url);
 		if (canonicalUrl == null) {
-			logger.error("Invalid Url: " + url);
+			logger.error("Invalid Url: {}", url);
 			return;
 		}
 		try {
 			docIdServer.addUrlAndDocId(canonicalUrl, docId);
 		} catch (Exception e) {
-			logger.error("Could not add seen url: " + e.getMessage());
+			logger.error("Could not add seen url: {}", e.getMessage());
 		}
 	}
 

@@ -62,7 +62,7 @@ public class Frontier extends Configurable {
 				inProcessPages = new InProcessPagesDB(env);
 				long numPreviouslyInProcessPages = inProcessPages.getLength();
 				if (numPreviouslyInProcessPages > 0) {
-					logger.info("Rescheduling " + numPreviouslyInProcessPages + " URLs from previous crawl.");
+					logger.info("Rescheduling {} URLs from previous crawl.", numPreviouslyInProcessPages);
 					scheduledPages -= numPreviouslyInProcessPages;
 					while (true) {
 						List<WebURL> urls = inProcessPages.get(100);
@@ -78,7 +78,7 @@ public class Frontier extends Configurable {
 				scheduledPages = 0;
 			}
 		} catch (DatabaseException e) {
-			logger.error("Error while initializing the Frontier: " + e.getMessage());
+			logger.error("Error while initializing the Frontier: {}", e.getMessage());
 			workQueues = null;
 		}
 	}
@@ -95,7 +95,7 @@ public class Frontier extends Configurable {
 					workQueues.put(url);
 					newScheduledPage++;
 				} catch (DatabaseException e) {
-					logger.error("Error while puting the url in the work queue.");
+					logger.error("Error while putting the url in the work queue.");
 				}
 			}
 			if (newScheduledPage > 0) {
@@ -118,7 +118,7 @@ public class Frontier extends Configurable {
 					counters.increment(Counters.ReservedCounterNames.SCHEDULED_PAGES);
 				}
 			} catch (DatabaseException e) {
-				logger.error("Error while puting the url in the work queue.");
+				logger.error("Error while putting the url in the work queue.");
 			}
 		}
 	}
@@ -139,7 +139,7 @@ public class Frontier extends Configurable {
 					}
 					result.addAll(curResults);
 				} catch (DatabaseException e) {
-					logger.error("Error while getting next urls: " + e.getMessage());
+					logger.error("Error while getting next urls: {}", e.getMessage());
 					e.printStackTrace();
 				}
 				if (result.size() > 0) {
@@ -163,7 +163,7 @@ public class Frontier extends Configurable {
 		counters.increment(ReservedCounterNames.PROCESSED_PAGES);
 		if (inProcessPages != null) {
 			if (!inProcessPages.removeURL(webURL)) {
-				logger.warn("Could not remove: " + webURL.getURL() + " from list of processed pages.");
+				logger.warn("Could not remove: {} from list of processed pages.", webURL.getURL());
 			}
 		}
 	}

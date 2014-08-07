@@ -44,7 +44,7 @@ public class InProcessPagesDB extends WorkQueues {
 		super(env, "InProcessPagesDB", true);
 		long docCount = getLength();
 		if (docCount > 0) {
-			logger.info("Loaded " + docCount + " URLs that have been in process in the previous crawl.");
+			logger.info("Loaded {} URLs that have been in process in the previous crawl.", docCount);
 		}
 	}
 

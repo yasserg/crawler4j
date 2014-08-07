@@ -174,7 +174,7 @@ public class PageFetcher extends Configurable {
 						fetchResult.setStatusCode(statusCode);
 						return fetchResult;
 					}
-					logger.info("Failed: " + response.getStatusLine().toString() + ", while fetching " + toFetchURL);
+					logger.info("Failed: {}, while fetching {}", response.getStatusLine().toString(), toFetchURL);
 				}
 				fetchResult.setStatusCode(response.getStatusLine().getStatusCode());
 				return fetchResult;
@@ -204,7 +204,7 @@ public class PageFetcher extends Configurable {
 				if (size > config.getMaxDownloadSize()) {
 					fetchResult.setStatusCode(CustomFetchStatus.PageTooBig);
 					get.abort();
-					logger.error("Failed: Page Size (" + size + ") exceeded max-download-size (" + config.getMaxDownloadSize() + ")");
+					logger.error("Failed: Page Size ({}) exceeded max-download-size ({})", size, config.getMaxDownloadSize());
 					return fetchResult;
 				}
 
@@ -216,8 +216,7 @@ public class PageFetcher extends Configurable {
 			get.abort();
 			
 		} catch (IOException e) {
-			logger.error("Fatal transport error: " + e.getMessage() + " while fetching " + toFetchURL
-					+ " (link found in doc #" + webUrl.getParentDocid() + ")");
+			logger.error("Fatal transport error: {} while fetching {} (link found in doc #{})", e.getMessage(), toFetchURL, webUrl.getParentDocid());
 			fetchResult.setStatusCode(CustomFetchStatus.FatalTransportError);
 			return fetchResult;
 		} catch (IllegalStateException e) {
@@ -225,9 +224,9 @@ public class PageFetcher extends Configurable {
 			// and other schemes
 		} catch (Exception e) {
 			if (e.getMessage() == null) {
-				logger.error("Error while fetching " + webUrl.getURL());
+				logger.error("Error while fetching {}", webUrl.getURL());
 			} else {
-				logger.error(e.getMessage() + " while fetching " + webUrl.getURL());
+				logger.error("{} while fetching {}", e.getMessage(), webUrl.getURL());
 			}
 		} finally {
 			try {
@@ -239,7 +238,7 @@ public class PageFetcher extends Configurable {
 			}
 		}
 		fetchResult.setStatusCode(CustomFetchStatus.UnknownError);
-		logger.error("Failed: Unknown error occurred while fetching " + webUrl.getURL());
+		logger.error("Failed: Unknown error occurred while fetching {}", webUrl.getURL());
 		return fetchResult;
 	}
 

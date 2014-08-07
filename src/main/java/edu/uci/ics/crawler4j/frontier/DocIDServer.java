@@ -49,7 +49,7 @@ public class DocIDServer extends Configurable {
 		if (config.isResumableCrawling()) {
 			int docCount = getDocCount();
 			if (docCount > 0) {
-				logger.info("Loaded " + docCount + " URLs that had been detected in previous crawl.");
+				logger.info("Loaded {} URLs that had been detected in previous crawl.", docCount);
 				lastDocID = docCount;
 			}
 		} else {
