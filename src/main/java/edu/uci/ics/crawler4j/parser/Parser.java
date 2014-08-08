@@ -57,13 +57,13 @@ public class Parser extends Configurable {
 	public boolean parse(Page page, String contextURL) {
 
 		if (Util.hasBinaryContent(page.getContentType())) {
-			if (!config.isIncludeBinaryContentInCrawling()) {
-				return false;
+            BinaryParseData parseData = new BinaryParseData();
+            if (config.isIncludeBinaryContentInCrawling()) {
+                parseData.setBinaryContent(page.getContentData());
+                page.setParseData(parseData);
 			}
 
-			page.setParseData(BinaryParseData.getInstance());
-			return true;
-
+			return parseData.getHtml() != null;
 		} else if (Util.hasPlainTextContent(page.getContentType())) {
 			try {
 				TextParseData parseData = new TextParseData();
@@ -77,6 +77,7 @@ public class Parser extends Configurable {
 			} catch (Exception e) {
 				logger.error("{}, while parsing: {}", e.getMessage(), page.getWebURL().getURL());
 			}
+
 			return false;
 		}
 
@@ -155,7 +156,5 @@ public class Parser extends Configurable {
 
 		page.setParseData(parseData);
 		return true;
-
 	}
-
 }

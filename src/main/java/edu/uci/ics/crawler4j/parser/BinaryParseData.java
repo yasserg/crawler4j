@@ -17,16 +17,99 @@
 
 package edu.uci.ics.crawler4j.parser;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
+
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.sax.SAXTransformerFactory;
+import javax.xml.transform.sax.TransformerHandler;
+import javax.xml.transform.stream.StreamResult;
+
+import org.apache.tika.metadata.Metadata;
+import org.apache.tika.parser.AutoDetectParser;
+import org.apache.tika.parser.ParseContext;
+import org.apache.tika.parser.Parser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class BinaryParseData implements ParseData {
 
-	private static BinaryParseData instance = new BinaryParseData();
-	
-	public static BinaryParseData getInstance() {
-		return instance;
-	}
-	
-	@Override
-	public String toString() {
-		return "[Binary parse data can not be dumped as string]";
-	}
+    private static final Logger logger = LoggerFactory.getLogger(BinaryParseData.class);
+    private static final String DEFAULT_ENCODING = "UTF-8";
+    private static final String DEFAULT_OUTPUT_FORMAT = "html";
+
+    private static final Metadata METADATA = new Metadata();
+    private static final Parser AUTO_DETECT_PARSER = new AutoDetectParser();
+    private static final SAXTransformerFactory SAX_TRANSFORMER_FACTORY = (SAXTransformerFactory) SAXTransformerFactory.newInstance();
+
+    private final ParseContext context = new ParseContext();
+    private String html = null;
+
+    public BinaryParseData() {
+        context.set(Parser.class, AUTO_DETECT_PARSER);
+    }
+
+    public void setBinaryContent(byte[] data) {
+        InputStream inputStream = new ByteArrayInputStream(data);
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+
+        try {
+            TransformerHandler handler = getTransformerHandler(outputStream, DEFAULT_OUTPUT_FORMAT, DEFAULT_ENCODING);
+            AUTO_DETECT_PARSER.parse(inputStream, handler, METADATA, context);
+
+            setHtml(new String(outputStream.toByteArray(), DEFAULT_ENCODING));
+        } catch (TransformerConfigurationException e) {
+            logger.error("Error configuring handler", e);
+        } catch (UnsupportedEncodingException e) {
+            logger.error("Encoding for content not supported", e);
+        } catch (Exception e) {
+            logger.error("Error parsing file", e);
+        }
+    }
+
+    /**
+     * Returns a transformer handler that serializes incoming SAX events to
+     * XHTML or HTML (depending the given method) using the given output encoding.
+     *
+     * @param encoding output encoding, or <code>null</code> for the platform default
+     */
+    private static TransformerHandler getTransformerHandler(OutputStream out, String method, String encoding)
+            throws TransformerConfigurationException {
+
+        TransformerHandler transformerHandler = SAX_TRANSFORMER_FACTORY.newTransformerHandler();
+        Transformer transformer = transformerHandler.getTransformer();
+        transformer.setOutputProperty(OutputKeys.METHOD, method);
+        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+
+        if (encoding != null) {
+            transformer.setOutputProperty(OutputKeys.ENCODING, encoding);
+        }
+
+        transformerHandler.setResult(new StreamResult(new PrintStream(out)));
+        return transformerHandler;
+    }
+
+    /** @return Parsed binary content or null */
+    public String getHtml() {
+        return html;
+    }
+
+    public void setHtml(String html) {
+        this.html = html;
+    }
+
+    @Override
+    public String toString() {
+        if (html == null || html.isEmpty()) {
+            return "No data parsed yet";
+        } else {
+            return getHtml();
+        }
+    }
 }

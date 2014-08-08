@@ -100,6 +100,12 @@
             <scope>compile</scope>
         </dependency>
 
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.1.2</version>
+        </dependency>
+
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
@@ -117,52 +123,6 @@
 			<groupId>org.apache.tika</groupId>
 			<artifactId>tika-parsers</artifactId>
 			<version>1.5</version>
-			<exclusions>
-				<exclusion>
-					<artifactId>poi-ooxml-schemas</artifactId>
-					<groupId>org.apache.poi</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>poi-ooxml</artifactId>
-					<groupId>org.apache.poi</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>poi-scratchpad</artifactId>
-					<groupId>org.apache.poi</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>fontbox</artifactId>
-					<groupId>org.apache.pdfbox</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>poi</artifactId>
-					<groupId>org.apache.poi</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>pdfbox</artifactId>
-					<groupId>org.apache.pdfbox</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>netcdf</artifactId>
-					<groupId>edu.ucar</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>jdom</artifactId>
-					<groupId>jdom</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>rome</artifactId>
-					<groupId>rome</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>bcmail-jdk15</artifactId>
-					<groupId>org.bouncycastle</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>bcprov-jdk15</artifactId>
-					<groupId>org.bouncycastle</groupId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 
         <!-- Test Dependencies -->

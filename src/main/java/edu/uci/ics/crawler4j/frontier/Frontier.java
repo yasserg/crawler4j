@@ -194,7 +194,9 @@ public class Frontier extends Configurable {
 		sync();
 		workQueues.close();
         counters.close();
-		inProcessPages.close();
+        if (inProcessPages != null) {
+            inProcessPages.close();
+        }
 	}
 
 	public void finish() {
