@@ -6,7 +6,7 @@
 	<name>crawler4j</name>
 	<version>3.6-SNAPSHOT</version>
 	<description>Open Source Web Crawler for Java</description>
-	<url>https://github.com/Chaiavi/Crawler4j</url>
+	<url>http://code.google.com/p/crawler4j/</url>
 	<licenses>
 		<license>
 			<name>The Apache Software License, Version 2.0</name>
@@ -15,9 +15,9 @@
 		</license>
 	</licenses>
 	<scm>
-		<connection>https://github.com/Chaiavi/Crawler4j.git</connection>
-		<developerConnection>https://github.com/Chaiavi/Crawler4j.git</developerConnection>
-		<url>https://github.com/Chaiavi/Crawler4j</url>
+		<connection>scm:git:https://crawler4j.googlecode.com/git/</connection>
+		<developerConnection>scm:git:https://crawler4j.googlecode.com/git/</developerConnection>
+		<url>https://crawler4j.googlecode.com/git/</url>
 	</scm>
 
 	<developers>
