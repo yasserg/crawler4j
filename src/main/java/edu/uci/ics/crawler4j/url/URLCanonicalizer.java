@@ -58,7 +58,7 @@ public class URLCanonicalizer {
 			 * ".", and no segments equal to ".." that are preceded by a segment
 			 * not equal to "..".
 			 */
-			path = new URI(path).normalize().toString();
+			path = new URI(path.replace("\\", "/")).normalize().toString();
 
 			/*
 			 * Convert '//' -> '/'
