@@ -172,7 +172,8 @@ public class WebCrawler implements Runnable {
 	 * @param webUrl
 	 */
 	protected void onContentFetchError(WebURL webUrl) {
-		// Do nothing by default
+		logger.warn("Can't fetch content of: {}", webUrl.getURL());
+		// Do nothing by default (except basic logging)
 		// Sub-classed can override this to add their custom functionality
 	}
 
@@ -183,7 +184,8 @@ public class WebCrawler implements Runnable {
 	 * @param webUrl
 	 */
 	protected void onParseError(WebURL webUrl) {
-		// Do nothing by default
+        logger.warn("Parsing error of: {}", webUrl.getURL());
+        // Do nothing by default (Except logging)
 		// Sub-classed can override this to add their custom functionality
 	}
 
@@ -271,11 +273,12 @@ public class WebCrawler implements Runnable {
 					if (myController.getConfig().isFollowRedirects()) {
 						String movedToUrl = fetchResult.getMovedToUrl();
 						if (movedToUrl == null) {
+                            logger.warn("Unexpected error, URL: {} is redirected to NOTHING", curURL);
 							return;
 						}
 						int newDocId = docIdServer.getDocId(movedToUrl);
 						if (newDocId > 0) {
-							// Redirect page is already seen
+							logger.debug("Redirect page: {} is already seen", curURL);
 							return;
 						}
 
@@ -292,14 +295,17 @@ public class WebCrawler implements Runnable {
 						}
 					}
 				} else if (fetchResult.getStatusCode() == CustomFetchStatus.PageTooBig) {
-					logger.info("Skipping a page which was bigger than max allowed size: {}", curURL.getURL());
-				}
+					logger.warn("Skipping a page which was bigger than max allowed size: {}", curURL.getURL());
+				} else {
+                    logger.warn("Skipping URL: {}, StatusCode: {}, {}",
+                            curURL, fetchResult.getStatusCode(), fetchResult.getEntity().getContentType());
+                }
 				return;
 			}
 
 			if (!curURL.getURL().equals(fetchResult.getFetchedUrl())) {
 				if (docIdServer.isSeenBefore(fetchResult.getFetchedUrl())) {
-					// Redirect page is already seen
+					logger.debug("Redirect page: {} has already been seen", curURL);
 					return;
 				}
 				curURL.setURL(fetchResult.getFetchedUrl());
