@@ -89,7 +89,7 @@ public class MultipleCrawlerController {
 		controller2.addSeed("http://en.wikipedia.org/wiki/Bing");
 
 		/*
-		 * The first crawler will have 5 cuncurrent threads and the second
+		 * The first crawler will have 5 concurrent threads and the second
 		 * crawler will have 7 threads.
 		 */
 		controller1.startNonBlocking(BasicCrawler.class, 5);
