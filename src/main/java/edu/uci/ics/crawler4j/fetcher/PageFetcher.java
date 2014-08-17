@@ -204,7 +204,8 @@ public class PageFetcher extends Configurable {
 				if (size > config.getMaxDownloadSize()) {
 					fetchResult.setStatusCode(CustomFetchStatus.PageTooBig);
 					get.abort();
-					logger.error("Failed: Page Size ({}) exceeded max-download-size ({})", size, config.getMaxDownloadSize());
+					logger.error("Failed: Page Size ({}) exceeded max-download-size ({}), at URL: {}",
+                            size, config.getMaxDownloadSize(), webUrl.getURL());
 					return fetchResult;
 				}
 

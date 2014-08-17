@@ -28,6 +28,7 @@ import edu.uci.ics.crawler4j.parser.Parser;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
 import edu.uci.ics.crawler4j.url.WebURL;
 
+import org.apache.http.Header;
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -154,7 +155,7 @@ public class WebCrawler implements Runnable {
 
 	/**
 	 * This function is called once the header of a page is fetched. It can be
-	 * overwritten by sub-classes to perform custom logic for different status
+	 * overridden by sub-classes to perform custom logic for different status
 	 * codes. For example, 404 pages can be logged, etc.
 	 * 
 	 * @param webUrl
@@ -165,6 +166,36 @@ public class WebCrawler implements Runnable {
 		// Do nothing by default
 		// Sub-classed can override this to add their custom functionality
 	}
+
+    /**
+     * This function is called before processing of the page's URL
+     * It can be overridden by subclasses for tweaking of the url before processing it.
+     * For example, http://abc.com/def?a=123 >> http://abc.com/def
+     *
+     * @param curURL current URL which can be tweaked before processing
+     * @return tweaked WebURL
+     */
+    protected WebURL handleUrlBeforeProcess(WebURL curURL) {
+        return curURL;
+    }
+
+    /**
+     * This function is called if the content of a url is bigger than allowed size.
+     *
+     * @param urlStr - The URL which it's content is bigger than allowed size
+     */
+    protected void onPageBiggerThanMaxSize(String urlStr) {
+        logger.warn("Skipping a page which was bigger than max allowed size: {}", urlStr);
+    }
+
+    /**
+     * This function is called if the crawler encountered an unexpected error while crawling this url
+     *
+     * @param urlStr - The URL in which an unexpected error was encountered while crawling
+     */
+    protected void onUnexpectedError(String urlStr, int statusCode, Header contentType) {
+        logger.warn("Skipping URL: {}, StatusCode: {}, {}", urlStr, statusCode, contentType);
+    }
 
 	/**
 	 * This function is called if the content of a url could not be fetched.
@@ -220,7 +251,8 @@ public class WebCrawler implements Runnable {
 			} else {
 				for (WebURL curURL : assignedURLs) {
 					if (curURL != null) {
-						processPage(curURL);
+                        curURL = handleUrlBeforeProcess(curURL);
+                        processPage(curURL);
 						frontier.setProcessed(curURL);
 					}
 					if (myController.isShuttingDown()) {
@@ -232,7 +264,7 @@ public class WebCrawler implements Runnable {
 		}
 	}
 
-	/**
+    /**
 	 * Classes that extends WebCrawler can overwrite this function to tell the
 	 * crawler whether the given url should be crawled or not. The following
 	 * implementation indicates that all urls should be included in the crawl.
@@ -295,10 +327,9 @@ public class WebCrawler implements Runnable {
 						}
 					}
 				} else if (fetchResult.getStatusCode() == CustomFetchStatus.PageTooBig) {
-					logger.warn("Skipping a page which was bigger than max allowed size: {}", curURL.getURL());
+                    onPageBiggerThanMaxSize(curURL.getURL());
 				} else {
-                    logger.warn("Skipping URL: {}, StatusCode: {}, {}",
-                            curURL, fetchResult.getStatusCode(), fetchResult.getEntity().getContentType());
+                    onUnexpectedError(curURL.getURL(), fetchResult.getStatusCode(), fetchResult.getEntity().getContentType());
                 }
 				return;
 			}
@@ -369,7 +400,7 @@ public class WebCrawler implements Runnable {
 		}
 	}
 
-	public Thread getThread() {
+    public Thread getThread() {
 		return myThread;
 	}
 
