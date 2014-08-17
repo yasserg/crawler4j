@@ -44,7 +44,6 @@ public class BinaryParseData implements ParseData {
     private static final String DEFAULT_ENCODING = "UTF-8";
     private static final String DEFAULT_OUTPUT_FORMAT = "html";
 
-    private static final Metadata METADATA = new Metadata();
     private static final Parser AUTO_DETECT_PARSER = new AutoDetectParser();
     private static final SAXTransformerFactory SAX_TRANSFORMER_FACTORY = (SAXTransformerFactory) SAXTransformerFactory.newInstance();
 
@@ -61,7 +60,7 @@ public class BinaryParseData implements ParseData {
 
         try {
             TransformerHandler handler = getTransformerHandler(outputStream, DEFAULT_OUTPUT_FORMAT, DEFAULT_ENCODING);
-            AUTO_DETECT_PARSER.parse(inputStream, handler, METADATA, context);
+            AUTO_DETECT_PARSER.parse(inputStream, handler, new Metadata(), context);
 
             setHtml(new String(outputStream.toByteArray(), DEFAULT_ENCODING));
         } catch (TransformerConfigurationException e) {
