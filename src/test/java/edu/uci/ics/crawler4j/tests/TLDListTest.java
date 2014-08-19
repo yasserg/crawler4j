@@ -2,9 +2,11 @@ package edu.uci.ics.crawler4j.tests;
 
 import edu.uci.ics.crawler4j.url.URLCanonicalizer;
 import edu.uci.ics.crawler4j.url.WebURL;
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class TLDListTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+
+public class TLDListTest {
 	
 	private WebURL webUrl = new WebURL();
 	
@@ -12,6 +14,7 @@ public class TLDListTest extends TestCase {
 		webUrl.setURL(URLCanonicalizer.getCanonicalURL(url));
 	}
 
+    @Test
 	public void testTLD() {
 		
 		setUrl("http://example.com");
@@ -37,7 +40,5 @@ public class TLDListTest extends TestCase {
 		setUrl("http://example.ac.jp");
 		assertEquals("example.ac.jp", webUrl.getDomain());
 		assertEquals("", webUrl.getSubDomain());
-		
 	}
-	
 }

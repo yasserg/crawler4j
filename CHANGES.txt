@@ -13,6 +13,7 @@ Features
 - Updated pom.xml project Dependencies were updated to their latest (Avi)
 - Added log messages to PageFetcher These logs were taken from: ind9/crawler4j 153eb752bef5a57bd39016807423683ab22f3913 (Avi)
 - Issue 282: Add CHANGES.TXT with the changelog to the root
+- Issue 288: Upgrade Unit Tests to v4
 
 BugFixes
 - Issue 284: Cathing any exception and hidding the log. Upgraded logging in webcrawler Clarified a little statuscode 1005 (Avi)

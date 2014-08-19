@@ -1,11 +1,14 @@
 package edu.uci.ics.crawler4j.tests;
 
-import junit.framework.TestCase;
 import edu.uci.ics.crawler4j.url.URLCanonicalizer;
+import org.junit.Test;
 
-public class URLCanonicalizerTest extends TestCase {
+import static org.junit.Assert.assertEquals;
 
-	public static void testCanonizalier() {
+public class URLCanonicalizerTest {
+
+    @Test
+	public void testCanonizalier() {
 
 		assertEquals("http://www.example.com/display?category=foo%2Fbar%2Bbaz",
 				URLCanonicalizer.getCanonicalURL("http://www.example.com/display?category=foo/bar+baz"));
