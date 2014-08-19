@@ -193,8 +193,10 @@ public class WebCrawler implements Runnable {
      *
      * @param urlStr - The URL in which an unexpected error was encountered while crawling
      */
-    protected void onUnexpectedError(String urlStr, int statusCode, Header contentType) {
-        logger.warn("Skipping URL: {}, StatusCode: {}, {}", urlStr, statusCode, contentType);
+    protected void onUnexpectedError(String urlStr, int statusCode, String contentType, String description) {
+        logger.warn("Skipping URL: {}, StatusCode: {}, {}, {}", urlStr, statusCode, contentType, description);
+        // Do nothing by default (except basic logging)
+        // Sub-classed can override this to add their custom functionality
     }
 
 	/**
@@ -329,7 +331,9 @@ public class WebCrawler implements Runnable {
 				} else if (fetchResult.getStatusCode() == CustomFetchStatus.PageTooBig) {
                     onPageBiggerThanMaxSize(curURL.getURL());
 				} else {
-                    onUnexpectedError(curURL.getURL(), fetchResult.getStatusCode(), fetchResult.getEntity().getContentType());
+                    String description = CustomFetchStatus.getStatusDescription(statusCode);
+                    String contentType = fetchResult.getEntity() == null ? "" : fetchResult.getEntity().getContentType().getValue();
+                    onUnexpectedError(curURL.getURL(), fetchResult.getStatusCode(), contentType, description);
                 }
 				return;
 			}
@@ -388,7 +392,7 @@ public class WebCrawler implements Runnable {
 			try {
 				visit(page);
 			} catch (Exception e) {
-				logger.error("Exception while running the visit method. Message: '{}' at {}", e.getMessage(), e.getStackTrace()[0]);
+				logger.error("Exception while running the visit method. Stacktrace: ", e);
 			}
 
 		} catch (Exception e) {

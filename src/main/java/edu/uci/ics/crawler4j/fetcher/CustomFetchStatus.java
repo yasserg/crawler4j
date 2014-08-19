@@ -93,7 +93,7 @@ public class CustomFetchStatus {
 		case PageTooBig:
 			return "Page size was too big";
 		case FatalTransportError:
-			return "Fatal transport error";
+			return "Fatal transport error - server is probably down"; // todo follow https://issues.apache.org/jira/browse/HTTPCORE-388
 		case UnknownError:
 			return "Unknown error";
 		default:
