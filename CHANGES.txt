@@ -21,6 +21,8 @@ BugFixes
 - Issue 279: TikaException is thrown while crawling several PDFs in a row The problem was the wrong re-use of the metadata (Avi)
 - Issue 139: A URL with a backslash was rejected (Avi)
 - Issue 231: Memory leakage in crawler4j caused by database environment, Closing the environment solves the leak. (Avi)
+- Issue 206: StringIndexOutOfBoundsException in WebURL
+- Issue 285: WebURL.java causes IndexOutOfBoundException
 
 Version 3.5 (March 2013)
 - Fixed issues #184, #169, #136, #156, #191, #192, #127 (Yasser)
