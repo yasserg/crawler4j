@@ -54,14 +54,16 @@ public class Parser extends Configurable {
 		parseContext = new ParseContext();
 	}
 
-	public boolean parse(Page page, String contextURL) {
+	public boolean parse(Page page, String contextURL) throws NotAllowedContentException {
 
 		if (Util.hasBinaryContent(page.getContentType())) {
             BinaryParseData parseData = new BinaryParseData();
             if (config.isIncludeBinaryContentInCrawling()) {
                 parseData.setBinaryContent(page.getContentData());
                 page.setParseData(parseData);
-			}
+			} else {
+                throw new NotAllowedContentException();
+            }
 
 			return parseData.getHtml() != null;
 		} else if (Util.hasPlainTextContent(page.getContentType())) {

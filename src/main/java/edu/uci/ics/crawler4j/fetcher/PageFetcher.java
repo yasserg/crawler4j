@@ -217,7 +217,9 @@ public class PageFetcher extends Configurable {
 			get.abort();
 			
 		} catch (IOException e) {
-			logger.error("Fatal transport error: {} while fetching {} (link found in doc #{})", e.getMessage(), toFetchURL, webUrl.getParentDocid());
+			logger.error("Fatal transport error: {} while fetching {} (link found in doc #{})",
+                    e.getMessage() != null ? e.getMessage() : e.getCause(), toFetchURL, webUrl.getParentDocid());
+            logger.debug("Stacktrace: ", e);
 			fetchResult.setStatusCode(CustomFetchStatus.FatalTransportError);
 			return fetchResult;
 		} catch (IllegalStateException e) {

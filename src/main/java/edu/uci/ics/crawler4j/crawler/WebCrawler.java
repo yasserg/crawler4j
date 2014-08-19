@@ -23,6 +23,7 @@ import edu.uci.ics.crawler4j.fetcher.PageFetcher;
 import edu.uci.ics.crawler4j.frontier.DocIDServer;
 import edu.uci.ics.crawler4j.frontier.Frontier;
 import edu.uci.ics.crawler4j.parser.HtmlParseData;
+import edu.uci.ics.crawler4j.parser.NotAllowedContentException;
 import edu.uci.ics.crawler4j.parser.ParseData;
 import edu.uci.ics.crawler4j.parser.Parser;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
@@ -299,102 +300,104 @@ public class WebCrawler implements Runnable {
 		}
 		PageFetchResult fetchResult = null;
 		try {
-			fetchResult = pageFetcher.fetchHeader(curURL);
-			int statusCode = fetchResult.getStatusCode();
-			handlePageStatusCode(curURL, statusCode, CustomFetchStatus.getStatusDescription(statusCode));
-			if (statusCode != HttpStatus.SC_OK) {
-				if (statusCode == HttpStatus.SC_MOVED_PERMANENTLY || statusCode == HttpStatus.SC_MOVED_TEMPORARILY) {
-					if (myController.getConfig().isFollowRedirects()) {
-						String movedToUrl = fetchResult.getMovedToUrl();
-						if (movedToUrl == null) {
+            fetchResult = pageFetcher.fetchHeader(curURL);
+            int statusCode = fetchResult.getStatusCode();
+            handlePageStatusCode(curURL, statusCode, CustomFetchStatus.getStatusDescription(statusCode));
+            if (statusCode != HttpStatus.SC_OK) {
+                if (statusCode == HttpStatus.SC_MOVED_PERMANENTLY || statusCode == HttpStatus.SC_MOVED_TEMPORARILY) {
+                    if (myController.getConfig().isFollowRedirects()) {
+                        String movedToUrl = fetchResult.getMovedToUrl();
+                        if (movedToUrl == null) {
                             logger.warn("Unexpected error, URL: {} is redirected to NOTHING", curURL);
-							return;
-						}
-						int newDocId = docIdServer.getDocId(movedToUrl);
-						if (newDocId > 0) {
-							logger.debug("Redirect page: {} is already seen", curURL);
-							return;
-						}
+                            return;
+                        }
+                        int newDocId = docIdServer.getDocId(movedToUrl);
+                        if (newDocId > 0) {
+                            logger.debug("Redirect page: {} is already seen", curURL);
+                            return;
+                        }
 
-						WebURL webURL = new WebURL();
-						webURL.setURL(movedToUrl);
-						webURL.setParentDocid(curURL.getParentDocid());
-						webURL.setParentUrl(curURL.getParentUrl());
-						webURL.setDepth(curURL.getDepth());
-						webURL.setDocid(-1);
-						webURL.setAnchor(curURL.getAnchor());
-						if (shouldVisit(webURL) && robotstxtServer.allows(webURL)) {
-							webURL.setDocid(docIdServer.getNewDocID(movedToUrl));
-							frontier.schedule(webURL);
-						}
-					}
-				} else if (fetchResult.getStatusCode() == CustomFetchStatus.PageTooBig) {
+                        WebURL webURL = new WebURL();
+                        webURL.setURL(movedToUrl);
+                        webURL.setParentDocid(curURL.getParentDocid());
+                        webURL.setParentUrl(curURL.getParentUrl());
+                        webURL.setDepth(curURL.getDepth());
+                        webURL.setDocid(-1);
+                        webURL.setAnchor(curURL.getAnchor());
+                        if (shouldVisit(webURL) && robotstxtServer.allows(webURL)) {
+                            webURL.setDocid(docIdServer.getNewDocID(movedToUrl));
+                            frontier.schedule(webURL);
+                        }
+                    }
+                } else if (fetchResult.getStatusCode() == CustomFetchStatus.PageTooBig) {
                     onPageBiggerThanMaxSize(curURL.getURL());
-				} else {
+                } else {
                     String description = CustomFetchStatus.getStatusDescription(statusCode);
                     String contentType = fetchResult.getEntity() == null ? "" : fetchResult.getEntity().getContentType().getValue();
                     onUnexpectedError(curURL.getURL(), fetchResult.getStatusCode(), contentType, description);
                 }
-				return;
-			}
+                return;
+            }
 
-			if (!curURL.getURL().equals(fetchResult.getFetchedUrl())) {
-				if (docIdServer.isSeenBefore(fetchResult.getFetchedUrl())) {
-					logger.debug("Redirect page: {} has already been seen", curURL);
-					return;
-				}
-				curURL.setURL(fetchResult.getFetchedUrl());
-				curURL.setDocid(docIdServer.getNewDocID(fetchResult.getFetchedUrl()));
-			}
+            if (!curURL.getURL().equals(fetchResult.getFetchedUrl())) {
+                if (docIdServer.isSeenBefore(fetchResult.getFetchedUrl())) {
+                    logger.debug("Redirect page: {} has already been seen", curURL);
+                    return;
+                }
+                curURL.setURL(fetchResult.getFetchedUrl());
+                curURL.setDocid(docIdServer.getNewDocID(fetchResult.getFetchedUrl()));
+            }
 
-			Page page = new Page(curURL);
-			int docid = curURL.getDocid();
+            Page page = new Page(curURL);
+            int docid = curURL.getDocid();
 
-			if (!fetchResult.fetchContent(page)) {
-				onContentFetchError(curURL);
-				return;
-			}
+            if (!fetchResult.fetchContent(page)) {
+                onContentFetchError(curURL);
+                return;
+            }
 
-			if (!parser.parse(page, curURL.getURL())) {
-				onParseError(curURL);
-				return;
-			}
+            if (!parser.parse(page, curURL.getURL())) {
+                onParseError(curURL);
+                return;
+            }
 
-			ParseData parseData = page.getParseData();
-			if (parseData instanceof HtmlParseData) {
-				HtmlParseData htmlParseData = (HtmlParseData) parseData;
+            ParseData parseData = page.getParseData();
+            if (parseData instanceof HtmlParseData) {
+                HtmlParseData htmlParseData = (HtmlParseData) parseData;
 
-				List<WebURL> toSchedule = new ArrayList<>();
-				int maxCrawlDepth = myController.getConfig().getMaxDepthOfCrawling();
-				for (WebURL webURL : htmlParseData.getOutgoingUrls()) {
-					webURL.setParentDocid(docid);
-					webURL.setParentUrl(curURL.getURL());
-					int newdocid = docIdServer.getDocId(webURL.getURL());
-					if (newdocid > 0) {
-						// This is not the first time that this Url is
-						// visited. So, we set the depth to a negative
-						// number.
-						webURL.setDepth((short) -1);
-						webURL.setDocid(newdocid);
-					} else {
-						webURL.setDocid(-1);
-						webURL.setDepth((short) (curURL.getDepth() + 1));
-						if (maxCrawlDepth == -1 || curURL.getDepth() < maxCrawlDepth) {
-							if (shouldVisit(webURL) && robotstxtServer.allows(webURL)) {
-								webURL.setDocid(docIdServer.getNewDocID(webURL.getURL()));
-								toSchedule.add(webURL);
-							}
-						}
-					}
-				}
-				frontier.scheduleAll(toSchedule);
-			}
-			try {
-				visit(page);
-			} catch (Exception e) {
-				logger.error("Exception while running the visit method. Stacktrace: ", e);
-			}
-
+                List<WebURL> toSchedule = new ArrayList<>();
+                int maxCrawlDepth = myController.getConfig().getMaxDepthOfCrawling();
+                for (WebURL webURL : htmlParseData.getOutgoingUrls()) {
+                    webURL.setParentDocid(docid);
+                    webURL.setParentUrl(curURL.getURL());
+                    int newdocid = docIdServer.getDocId(webURL.getURL());
+                    if (newdocid > 0) {
+                        // This is not the first time that this Url is
+                        // visited. So, we set the depth to a negative
+                        // number.
+                        webURL.setDepth((short) -1);
+                        webURL.setDocid(newdocid);
+                    } else {
+                        webURL.setDocid(-1);
+                        webURL.setDepth((short) (curURL.getDepth() + 1));
+                        if (maxCrawlDepth == -1 || curURL.getDepth() < maxCrawlDepth) {
+                            if (shouldVisit(webURL) && robotstxtServer.allows(webURL)) {
+                                webURL.setDocid(docIdServer.getNewDocID(webURL.getURL()));
+                                toSchedule.add(webURL);
+                            }
+                        }
+                    }
+                }
+                frontier.scheduleAll(toSchedule);
+            }
+            try {
+                visit(page);
+            } catch (Exception e) {
+                logger.error("Exception while running the visit method. Stacktrace: ", e);
+            }
+        } catch (NotAllowedContentException nace) {
+            logger.debug("Skipping: {} as it contains binary content which you configured not to crawl", curURL.getURL());
+            return;
 		} catch (Exception e) {
 			logger.error("{}, while processing: {}", e.getMessage(), curURL.getURL());
 		} finally {
