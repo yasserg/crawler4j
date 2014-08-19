@@ -1,0 +1,65 @@
+Crawler4J Change Log
+
+Version 4.0
+Major Features
+- Issue 272: Parse Binary Content parsing, Now the crawler can really parse binary content. Based on Tero Jankilla's code (Avi)
+
+Features
+- Issue 278: Add hooks in the webcrawler for better error handling (Avi)
+- Issue 239: Add an option to tweak the URL before processing the page Added hooks to several errors where by default we log the error but allow the user to override those methods in order to do anything they want with those URLs (maybe list them and then try to process them later etc) Added a method which can be overridden by the user which enables the user to tweak the url before fetching it (Avi)
+- Issue 276: Don't let a crawled URL to be dropped without proper logging. Each URL should be logged somehow so the user will know it was crawled. We shouldn't just drop URLs without logging them (warn / debug, depends on the case) (Avi)
+- Issue 213: Upgrade all logging statements to use {} of slf4j - Slf4j optimizes string concatenation in logging statements by using {} placeholder. Upgrade all logging statements to use it. (Avi)
+- Issue 213: Changed from log4j implementation to slf4j API - Removed any reference to log4j - Logging Implementations should be the user's choice and not the library choice. Instead I have inserted the slf4j API. (Avi)
+- Updated pom.xml project Dependencies were updated to their latest (Avi)
+- Added log messages to PageFetcher These logs were taken from: ind9/crawler4j 153eb752bef5a57bd39016807423683ab22f3913 (Avi)
+- Issue 282: Add CHANGES.TXT with the changelog to the root
+
+BugFixes
+- Issue 284: Cathing any exception and hidding the log. Upgraded logging in webcrawler Clarified a little statuscode 1005 (Avi)
+- Issue 251: Fix a typo, Fix a typo in line #92. 'cuncurrent' -> 'concurrent' (Avi)
+- Issue 279: TikaException is thrown while crawling several PDFs in a row The problem was the wrong re-use of the metadata (Avi)
+- Issue 139: A URL with a backslash was rejected (Avi)
+- Issue 231: Memory leakage in crawler4j caused by database environment, Closing the environment solves the leak. (Avi)
+
+Version 3.5 (March 2013)
+- Fixed issues #184, #169, #136, #156, #191, #192, #127 (Yasser)
+- Fixed  issue #101  in normalizing Urls (Yasser)
+- Fixed  issue #143 : Anchor text is now provided correctly (Yasser)
+- Access to response headers is now provided as a field in Page object (Yasser)
+- Added support for handling content fetch and parsing issues. (Yasser)
+- Added meta refresh and location to outgoing links (Yasser)
+- Upgraded to Java 7 (Yasser)
+- Updated dependencies to their latest versions (Yasser)
+
+Version 3.3
+- Updated URL canonicalizer based on RFC1808 and fixed bugs (Yasser)
+- Added Parent Url and Path to WebURL (Yasser)
+- Added support for domain and sub-domain detection. (Yasser)
+- Added support for handling http status codes for fetched pages (Yasser)
+
+Version 3.1
+- Fixed thread-safety bug in page fetcher. (Yasser)
+- Improved URL canonicalizer. (Yasser)
+
+Version 3.0
+- Major re-design of crawler4j to add many new features and make it extendable. (Yasser)
+- Multiple distinct crawlers can now run concurrently. (Yasser)
+- Maven support (Yasser)
+- Automatic detection of character encoding of pages to support crawling of non UTF-8 pages. (Yasser)
+- Implemented graceful shutdown of the crawlers. (Yasser)
+- Crawlers are now configurable through a config objects and the static crawler4j.properties file is removed. (Yasser)
+- Fixed several bugs in handling redirects, resuming crawling, ... (Yasser)
+
+Version 2.6.1
+- Added Javadocs (Yasser)
+- Fixed bug in parsing robots.txt files (Yasser)
+
+Version 2.6
+- Added support for robots.txt files (Yasser)
+- Added the feature to specify maximum number of pages to crawl (Yasser)
+
+Version 2.5
+- Added support for specifying maximum crawl depth (Yasser)
+- Fixed bug in terminating all threads (Yasser)
+- Fixed bug in handling redirected pages (Yasser)
+- Fixed bug in handling pages with base url (Yasser)
