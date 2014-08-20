@@ -24,6 +24,7 @@ import org.apache.http.HttpStatus;
  */
 public class CustomFetchStatus {
 
+  public static final int SC_PERMANENT_REDIRECT = 308; // todo follow https://issues.apache.org/jira/browse/HTTPCORE-389
   public static final int PageTooBig = 1001;
   public static final int FatalTransportError = 1005;
   public static final int UnknownError = 1006;

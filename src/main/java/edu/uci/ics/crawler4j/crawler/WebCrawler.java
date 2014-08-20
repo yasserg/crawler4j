@@ -303,7 +303,9 @@ public class WebCrawler implements Runnable {
       int statusCode = fetchResult.getStatusCode();
       handlePageStatusCode(curURL, statusCode, CustomFetchStatus.getStatusDescription(statusCode));
       if (statusCode != HttpStatus.SC_OK) {
-        if (statusCode == HttpStatus.SC_MOVED_PERMANENTLY || statusCode == HttpStatus.SC_MOVED_TEMPORARILY) {
+        if (statusCode == HttpStatus.SC_MOVED_PERMANENTLY || statusCode == HttpStatus.SC_MOVED_TEMPORARILY
+            || statusCode == HttpStatus.SC_MULTIPLE_CHOICES || statusCode == HttpStatus.SC_SEE_OTHER
+            || statusCode == HttpStatus.SC_TEMPORARY_REDIRECT || statusCode == CustomFetchStatus.SC_PERMANENT_REDIRECT) {
           if (myController.getConfig().isFollowRedirects()) {
             String movedToUrl = fetchResult.getMovedToUrl();
             if (movedToUrl == null) {
