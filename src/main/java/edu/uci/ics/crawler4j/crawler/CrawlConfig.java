@@ -58,7 +58,7 @@ public class CrawlConfig {
 	/**
 	 * Should we also crawl https pages?
 	 */
-	private boolean includeHttpsPages = false;
+	private boolean includeHttpsPages = true;
 
 	/**
 	 * Should we fetch binary content such as images, audio, ...?
