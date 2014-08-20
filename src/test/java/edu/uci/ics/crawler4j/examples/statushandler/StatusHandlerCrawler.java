@@ -63,9 +63,6 @@ public class StatusHandlerCrawler extends WebCrawler {
 			} else {
 				System.out.println("Non success status for link: " + webUrl.getURL() + ", status code: " + statusCode + ", description: " + statusDescription);
 			}
-			
 		}
-		
 	}
-	
 }

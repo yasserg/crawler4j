@@ -8,6 +8,6 @@ package edu.uci.ics.crawler4j.parser;
  */
 public class NotAllowedContentException extends Exception {
     public NotAllowedContentException() {
-        super("Not allowed to parse this type of content");
+      super("Not allowed to parse this type of content");
     }
 }

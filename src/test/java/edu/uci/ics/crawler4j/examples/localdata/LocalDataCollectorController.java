@@ -34,6 +34,7 @@ public class LocalDataCollectorController {
 			System.out.println("\t numberOfCralwers (number of concurrent threads)");
 			return;
 		}
+
 		String rootFolder = args[0];
 		int numberOfCrawlers = Integer.parseInt(args[1]);
 
@@ -60,10 +61,10 @@ public class LocalDataCollectorController {
 			totalTextSize += stat.getTotalTextSize();
 			totalProcessedPages += stat.getTotalProcessedPages();
 		}
+
 		System.out.println("Aggregated Statistics:");
 		System.out.println("   Processed Pages: " + totalProcessedPages);
 		System.out.println("   Total Links found: " + totalLinks);
 		System.out.println("   Total Text Size: " + totalTextSize);
 	}
-
 }

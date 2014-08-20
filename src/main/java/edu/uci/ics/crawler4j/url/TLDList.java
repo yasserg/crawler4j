@@ -7,42 +7,41 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class TLDList {
-	
-	private final String tldNamesFileName = "tld-names.txt";
 
-	private Set<String> tldSet = new HashSet<>();
+  private final String tldNamesFileName = "tld-names.txt";
 
-	private static TLDList instance = new TLDList();
+  private Set<String> tldSet = new HashSet<>();
 
-	private TLDList() {
-		try {
-			InputStream stream = this.getClass().getClassLoader().getResourceAsStream(tldNamesFileName);
-			if (stream == null) {
-				System.err.println("Couldn't find " + tldNamesFileName);
-				System.exit(-1);
-			}
-			
-			BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
-			String line;
-			while ((line = reader.readLine()) != null) {
-				line = line.trim();
-				if (line.isEmpty() || line.startsWith("//")) {
-					continue;
-				}
-				tldSet.add(line);
-			}
-			reader.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+  private static TLDList instance = new TLDList();
 
-	public static TLDList getInstance() {
-		return instance;
-	}
+  private TLDList() {
+    try {
+      InputStream stream = this.getClass().getClassLoader().getResourceAsStream(tldNamesFileName);
+      if (stream == null) {
+        System.err.println("Couldn't find " + tldNamesFileName);
+        System.exit(-1);
+      }
 
-	public boolean contains(String str) {
-		return tldSet.contains(str);
-	}
+      BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+      String line;
+      while ((line = reader.readLine()) != null) {
+        line = line.trim();
+        if (line.isEmpty() || line.startsWith("//")) {
+          continue;
+        }
+        tldSet.add(line);
+      }
+      reader.close();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
 
+  public static TLDList getInstance() {
+    return instance;
+  }
+
+  public boolean contains(String str) {
+    return tldSet.contains(str);
+  }
 }

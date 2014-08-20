@@ -38,67 +38,67 @@ import edu.uci.ics.crawler4j.util.IO;
  */
 public class ImageCrawler extends WebCrawler {
 
-	private static final Pattern filters = Pattern.compile(".*(\\.(css|js|mid|mp2|mp3|mp4|wav|avi|mov|mpeg|ram|m4v|pdf"
-			+ "|rm|smil|wmv|swf|wma|zip|rar|gz))$");
+  private static final Pattern filters = Pattern.compile(".*(\\.(css|js|mid|mp2|mp3|mp4|wav|avi|mov|mpeg|ram|m4v|pdf"
+      + "|rm|smil|wmv|swf|wma|zip|rar|gz))$");
 
-	private static final Pattern imgPatterns = Pattern.compile(".*(\\.(bmp|gif|jpe?g|png|tiff?))$");
+  private static final Pattern imgPatterns = Pattern.compile(".*(\\.(bmp|gif|jpe?g|png|tiff?))$");
 
-	private static File storageFolder;
-	private static String[] crawlDomains;
+  private static File storageFolder;
+  private static String[] crawlDomains;
 
-	public static void configure(String[] domain, String storageFolderName) {
-		ImageCrawler.crawlDomains = domain;
+  public static void configure(String[] domain, String storageFolderName) {
+    ImageCrawler.crawlDomains = domain;
 
-		storageFolder = new File(storageFolderName);
-		if (!storageFolder.exists()) {
-			storageFolder.mkdirs();
-		}
-	}
+    storageFolder = new File(storageFolderName);
+    if (!storageFolder.exists()) {
+      storageFolder.mkdirs();
+    }
+  }
 
-	@Override
-	public boolean shouldVisit(WebURL url) {
-		String href = url.getURL().toLowerCase();
-		if (filters.matcher(href).matches()) {
-			return false;
-		}
+  @Override
+  public boolean shouldVisit(WebURL url) {
+    String href = url.getURL().toLowerCase();
+    if (filters.matcher(href).matches()) {
+      return false;
+    }
 
-		if (imgPatterns.matcher(href).matches()) {
-			return true;
-		}
+    if (imgPatterns.matcher(href).matches()) {
+      return true;
+    }
 
-		for (String domain : crawlDomains) {
-			if (href.startsWith(domain)) {
-				return true;
-			}
-		}
-		return false;
-	}
+    for (String domain : crawlDomains) {
+      if (href.startsWith(domain)) {
+        return true;
+      }
+    }
+    return false;
+  }
 
-	@Override
-	public void visit(Page page) {
-		String url = page.getWebURL().getURL();
+  @Override
+  public void visit(Page page) {
+    String url = page.getWebURL().getURL();
 
-		// We are only interested in processing images
-		if (!(page.getParseData() instanceof BinaryParseData)) {
-			return;
-		}
+    // We are only interested in processing images
+    if (!(page.getParseData() instanceof BinaryParseData)) {
+      return;
+    }
 
-		if (!imgPatterns.matcher(url).matches()) {
-			return;
-		}
+    if (!imgPatterns.matcher(url).matches()) {
+      return;
+    }
 
-		// Not interested in very small images
-		if (page.getContentData().length < 10 * 1024) {
-			return;
-		}
+    // Not interested in very small images
+    if (page.getContentData().length < 10 * 1024) {
+      return;
+    }
 
-		// get a unique name for storing this image
-		String extension = url.substring(url.lastIndexOf("."));
-		String hashedName = Cryptography.MD5(url) + extension;
+    // get a unique name for storing this image
+    String extension = url.substring(url.lastIndexOf("."));
+    String hashedName = Cryptography.MD5(url) + extension;
 
-		// store image
-		IO.writeBytesToFile(page.getContentData(), storageFolder.getAbsolutePath() + "/" + hashedName);
+    // store image
+    IO.writeBytesToFile(page.getContentData(), storageFolder.getAbsolutePath() + "/" + hashedName);
 
-		System.out.println("Stored: " + url);
-	}
+    System.out.println("Stored: " + url);
+  }
 }

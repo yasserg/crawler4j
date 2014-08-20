@@ -15,6 +15,8 @@ Enhancements
 - Issue 282: Add CHANGES.TXT with the changelog to the root (Avi)
 - Issue 288: Upgrade Unit Tests to v4 (Avi)
 - Issue 289: Parsing a binary content shouldn't throw a general parsing error (Avi)
+- Issue 236: Please default includeHttpsPages to true (Avi)
+- Issue 273: Tabbing looks messed up in several places (Avi)
 
 BugFixes
 - Issue 284: Cathing any exception and hidding the log. Upgraded logging in webcrawler Clarified a little statuscode 1005 (Avi)

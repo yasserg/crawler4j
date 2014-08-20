@@ -55,21 +55,21 @@ public class BinaryParseData implements ParseData {
     }
 
     public void setBinaryContent(byte[] data) {
-        InputStream inputStream = new ByteArrayInputStream(data);
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+      InputStream inputStream = new ByteArrayInputStream(data);
+      ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
-        try {
-            TransformerHandler handler = getTransformerHandler(outputStream, DEFAULT_OUTPUT_FORMAT, DEFAULT_ENCODING);
-            AUTO_DETECT_PARSER.parse(inputStream, handler, new Metadata(), context);
+      try {
+        TransformerHandler handler = getTransformerHandler(outputStream, DEFAULT_OUTPUT_FORMAT, DEFAULT_ENCODING);
+        AUTO_DETECT_PARSER.parse(inputStream, handler, new Metadata(), context);
 
-            setHtml(new String(outputStream.toByteArray(), DEFAULT_ENCODING));
-        } catch (TransformerConfigurationException e) {
-            logger.error("Error configuring handler", e);
-        } catch (UnsupportedEncodingException e) {
-            logger.error("Encoding for content not supported", e);
-        } catch (Exception e) {
-            logger.error("Error parsing file", e);
-        }
+        setHtml(new String(outputStream.toByteArray(), DEFAULT_ENCODING));
+      } catch (TransformerConfigurationException e) {
+        logger.error("Error configuring handler", e);
+      } catch (UnsupportedEncodingException e) {
+        logger.error("Encoding for content not supported", e);
+      } catch (Exception e) {
+        logger.error("Error parsing file", e);
+      }
     }
 
     /**
@@ -79,36 +79,36 @@ public class BinaryParseData implements ParseData {
      * @param encoding output encoding, or <code>null</code> for the platform default
      */
     private static TransformerHandler getTransformerHandler(OutputStream out, String method, String encoding)
-            throws TransformerConfigurationException {
+          throws TransformerConfigurationException {
 
-        TransformerHandler transformerHandler = SAX_TRANSFORMER_FACTORY.newTransformerHandler();
-        Transformer transformer = transformerHandler.getTransformer();
-        transformer.setOutputProperty(OutputKeys.METHOD, method);
-        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+      TransformerHandler transformerHandler = SAX_TRANSFORMER_FACTORY.newTransformerHandler();
+      Transformer transformer = transformerHandler.getTransformer();
+      transformer.setOutputProperty(OutputKeys.METHOD, method);
+      transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 
-        if (encoding != null) {
-            transformer.setOutputProperty(OutputKeys.ENCODING, encoding);
-        }
+      if (encoding != null) {
+        transformer.setOutputProperty(OutputKeys.ENCODING, encoding);
+      }
 
-        transformerHandler.setResult(new StreamResult(new PrintStream(out)));
-        return transformerHandler;
+      transformerHandler.setResult(new StreamResult(new PrintStream(out)));
+      return transformerHandler;
     }
 
     /** @return Parsed binary content or null */
     public String getHtml() {
-        return html;
+      return html;
     }
 
     public void setHtml(String html) {
-        this.html = html;
+      this.html = html;
     }
 
-    @Override
-    public String toString() {
-        if (html == null || html.isEmpty()) {
-            return "No data parsed yet";
-        } else {
-            return getHtml();
-        }
+  @Override
+  public String toString() {
+    if (html == null || html.isEmpty()) {
+      return "No data parsed yet";
+    } else {
+      return getHtml();
     }
+  }
 }
