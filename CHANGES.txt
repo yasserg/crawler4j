@@ -17,6 +17,8 @@ Enhancements
 - Issue 289: Parsing a binary content shouldn't throw a general parsing error (Avi)
 - Issue 236: Please default includeHttpsPages to true (Avi)
 - Issue 273: Tabbing looks messed up in several places (Avi)
+- Issue 290: We should support all redirect status codes (Avi)
+- Issue 291: HtmlParseData should hold a unique list of URLs (Avi)
 
 BugFixes
 - Issue 284: Cathing any exception and hidding the log. Upgraded logging in webcrawler Clarified a little statuscode 1005 (Avi)

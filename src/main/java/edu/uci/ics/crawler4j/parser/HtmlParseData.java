@@ -20,6 +20,7 @@ package edu.uci.ics.crawler4j.parser;
 import edu.uci.ics.crawler4j.url.WebURL;
 
 import java.util.List;
+import java.util.Set;
 
 public class HtmlParseData implements ParseData {
 
@@ -27,7 +28,7 @@ public class HtmlParseData implements ParseData {
   private String text;
   private String title;
 
-  private List<WebURL> outgoingUrls;
+  private Set<WebURL> outgoingUrls;
 
   public String getHtml() {
     return html;
@@ -53,11 +54,11 @@ public class HtmlParseData implements ParseData {
     this.title = title;
   }
 
-  public List<WebURL> getOutgoingUrls() {
+  public Set<WebURL> getOutgoingUrls() {
     return outgoingUrls;
   }
 
-  public void setOutgoingUrls(List<WebURL> outgoingUrls) {
+  public void setOutgoingUrls(Set<WebURL> outgoingUrls) {
     this.outgoingUrls = outgoingUrls;
   }
 

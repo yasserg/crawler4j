@@ -23,7 +23,7 @@ import edu.uci.ics.crawler4j.parser.HtmlParseData;
 import edu.uci.ics.crawler4j.url.WebURL;
 
 import java.io.UnsupportedEncodingException;
-import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 public class LocalDataCollectorCrawler extends WebCrawler {
@@ -50,7 +50,7 @@ public class LocalDataCollectorCrawler extends WebCrawler {
 
     if (page.getParseData() instanceof HtmlParseData) {
       HtmlParseData parseData = (HtmlParseData) page.getParseData();
-      List<WebURL> links = parseData.getOutgoingUrls();
+      Set<WebURL> links = parseData.getOutgoingUrls();
       myCrawlStat.incTotalLinks(links.size());
       try {
         myCrawlStat.incTotalTextSize(parseData.getText().getBytes("UTF-8").length);

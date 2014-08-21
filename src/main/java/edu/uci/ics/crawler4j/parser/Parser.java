@@ -21,8 +21,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.tika.metadata.DublinCore;
 import org.apache.tika.metadata.Metadata;
@@ -109,7 +109,7 @@ public class Parser extends Configurable {
     parseData.setText(contentHandler.getBodyText().trim());
     parseData.setTitle(metadata.get(DublinCore.TITLE));
 
-    List<WebURL> outgoingUrls = new ArrayList<>();
+    Set<WebURL> outgoingUrls = new HashSet<>();
 
     String baseURL = contentHandler.getBaseUrl();
     if (baseURL != null) {

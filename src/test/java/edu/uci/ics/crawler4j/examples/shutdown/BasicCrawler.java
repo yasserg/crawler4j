@@ -22,7 +22,7 @@ import edu.uci.ics.crawler4j.crawler.WebCrawler;
 import edu.uci.ics.crawler4j.parser.HtmlParseData;
 import edu.uci.ics.crawler4j.url.WebURL;
 
-import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
@@ -56,7 +56,7 @@ public class BasicCrawler extends WebCrawler {
       HtmlParseData htmlParseData = (HtmlParseData) page.getParseData();
       String text = htmlParseData.getText();
       String html = htmlParseData.getHtml();
-      List<WebURL> links = htmlParseData.getOutgoingUrls();
+      Set<WebURL> links = htmlParseData.getOutgoingUrls();
 
       System.out.println("Text length: " + text.length());
       System.out.println("Html length: " + html.length());
