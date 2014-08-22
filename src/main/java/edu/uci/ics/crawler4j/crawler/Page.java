@@ -40,6 +40,21 @@ public class Page {
   protected WebURL url;
 
   /**
+  * Redirection flag
+  */
+  protected boolean redirect;
+
+  /**
+   * The URL to which this page will be redirected to
+   */
+  protected String redirectedToUrl;
+
+  /**
+  * Status of the page
+  */
+  protected int statusCode;
+
+  /**
    * The content of this page in binary format.
    */
   protected byte[] contentData;
@@ -63,6 +78,11 @@ public class Page {
   protected String contentCharset;
 
   /**
+  * Language of the Content.
+  */
+  private String language;
+
+  /**
    * Headers which were present in the response of the
    * fetch request
    */
@@ -73,15 +93,8 @@ public class Page {
    */
   protected ParseData parseData;
 
+
   public Page(WebURL url) {
-    this.url = url;
-  }
-
-  public WebURL getWebURL() {
-    return url;
-  }
-
-  public void setWebURL(WebURL url) {
     this.url = url;
   }
 
@@ -109,6 +122,38 @@ public class Page {
     }
 
     contentData = EntityUtils.toByteArray(entity);
+  }
+
+  public WebURL getWebURL() {
+    return url;
+  }
+
+  public void setWebURL(WebURL url) {
+    this.url = url;
+  }
+
+  public boolean isRedirect() {
+    return redirect;
+  }
+
+  public void setRedirect(boolean redirect) {
+    this.redirect = redirect;
+  }
+
+  public String getRedirectedToUrl() {
+    return redirectedToUrl;
+  }
+
+  public void setRedirectedToUrl(String redirectedToUrl) {
+    this.redirectedToUrl = redirectedToUrl;
+  }
+
+  public int getStatusCode() {
+    return statusCode;
+  }
+
+  public void setStatusCode(int statusCode) {
+    this.statusCode = statusCode;
   }
 
   /**
@@ -157,17 +202,17 @@ public class Page {
     this.contentType = contentType;
   }
 
-    /**
-     * Returns the encoding of the content.
-     * For example: "gzip"
-     */
-    public String getContentEncoding() {
-        return contentEncoding;
-    }
+  /**
+   * Returns the encoding of the content.
+   * For example: "gzip"
+   */
+  public String getContentEncoding() {
+    return contentEncoding;
+  }
 
-    public void setContentEncoding(String contentEncoding) {
-        this.contentEncoding = contentEncoding;
-    }
+  public void setContentEncoding(String contentEncoding) {
+    this.contentEncoding = contentEncoding;
+  }
 
   /**
    * Returns the charset of the content.
@@ -179,5 +224,13 @@ public class Page {
 
   public void setContentCharset(String contentCharset) {
     this.contentCharset = contentCharset;
+  }
+
+  public String getLanguage() {
+    return language;
+  }
+
+  public void setLanguage(String language) {
+    this.language = language;
   }
 }

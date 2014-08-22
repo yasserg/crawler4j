@@ -266,18 +266,20 @@ public class WebCrawler implements Runnable {
     }
   }
 
-    /**
-   * Classes that extends WebCrawler can overwrite this function to tell the
-   * crawler whether the given url should be crawled or not. The following
-   * implementation indicates that all urls should be included in the crawl.
-   *
-   * @param url
-   *            the url which we are interested to know whether it should be
-   *            included in the crawl or not.
-   * @return if the url should be included in the crawl it returns true,
-   *         otherwise false is returned.
-   */
-  public boolean shouldVisit(WebURL url) {
+  /**
+  * Classes that extends WebCrawler can overwrite this function to tell the
+  * crawler whether the given url should be crawled or not. The following
+  * implementation indicates that all urls should be included in the crawl.
+  *
+  * @param url
+  *            the url which we are interested to know whether it should be
+  *            included in the crawl or not.
+  * @param page
+  *           Page context from which this URL was scraped
+  * @return if the url should be included in the crawl it returns true,
+  *         otherwise false is returned.
+  */
+  public boolean shouldVisit(Page page, WebURL url) {
     return true;
   }
 
@@ -302,16 +304,24 @@ public class WebCrawler implements Runnable {
       fetchResult = pageFetcher.fetchHeader(curURL);
       int statusCode = fetchResult.getStatusCode();
       handlePageStatusCode(curURL, statusCode, CustomFetchStatus.getStatusDescription(statusCode));
+
+      Page page = new Page(curURL);
+      page.setFetchResponseHeaders(fetchResult.getResponseHeaders());
+      page.setStatusCode(statusCode);
       if (statusCode != HttpStatus.SC_OK) {
         if (statusCode == HttpStatus.SC_MOVED_PERMANENTLY || statusCode == HttpStatus.SC_MOVED_TEMPORARILY
             || statusCode == HttpStatus.SC_MULTIPLE_CHOICES || statusCode == HttpStatus.SC_SEE_OTHER
             || statusCode == HttpStatus.SC_TEMPORARY_REDIRECT || statusCode == CustomFetchStatus.SC_PERMANENT_REDIRECT) {
+
+          page.setRedirect(true);
           if (myController.getConfig().isFollowRedirects()) {
             String movedToUrl = fetchResult.getMovedToUrl();
             if (movedToUrl == null) {
               logger.warn("Unexpected error, URL: {} is redirected to NOTHING", curURL);
               return;
             }
+            page.setRedirectedToUrl(movedToUrl);
+
             int newDocId = docIdServer.getDocId(movedToUrl);
             if (newDocId > 0) {
               logger.debug("Redirect page: {} is already seen", curURL);
@@ -325,7 +335,7 @@ public class WebCrawler implements Runnable {
             webURL.setDepth(curURL.getDepth());
             webURL.setDocid(-1);
             webURL.setAnchor(curURL.getAnchor());
-            if (shouldVisit(webURL) && robotstxtServer.allows(webURL)) {
+            if (shouldVisit(page, webURL) && robotstxtServer.allows(webURL)) {
               webURL.setDocid(docIdServer.getNewDocID(movedToUrl));
               frontier.schedule(webURL);
             }
@@ -349,9 +359,6 @@ public class WebCrawler implements Runnable {
         curURL.setDocid(docIdServer.getNewDocID(fetchResult.getFetchedUrl()));
       }
 
-      Page page = new Page(curURL);
-      int docid = curURL.getDocid();
-
       if (!fetchResult.fetchContent(page)) {
         onContentFetchError(curURL);
         return;
@@ -369,20 +376,19 @@ public class WebCrawler implements Runnable {
         List<WebURL> toSchedule = new ArrayList<>();
         int maxCrawlDepth = myController.getConfig().getMaxDepthOfCrawling();
         for (WebURL webURL : htmlParseData.getOutgoingUrls()) {
-          webURL.setParentDocid(docid);
+          webURL.setParentDocid(curURL.getDocid());
           webURL.setParentUrl(curURL.getURL());
           int newdocid = docIdServer.getDocId(webURL.getURL());
           if (newdocid > 0) {
             // This is not the first time that this Url is
-            // visited. So, we set the depth to a negative
-            // number.
+            // visited. So, we set the depth to a negative number.
             webURL.setDepth((short) -1);
             webURL.setDocid(newdocid);
           } else {
             webURL.setDocid(-1);
             webURL.setDepth((short) (curURL.getDepth() + 1));
             if (maxCrawlDepth == -1 || curURL.getDepth() < maxCrawlDepth) {
-              if (shouldVisit(webURL) && robotstxtServer.allows(webURL)) {
+              if (shouldVisit(page, webURL) && robotstxtServer.allows(webURL)) {
                   webURL.setDocid(docIdServer.getNewDocID(webURL.getURL()));
                   toSchedule.add(webURL);
               }
@@ -398,7 +404,6 @@ public class WebCrawler implements Runnable {
       }
     } catch (NotAllowedContentException nace) {
       logger.debug("Skipping: {} as it contains binary content which you configured not to crawl", curURL.getURL());
-      return;
     } catch (Exception e) {
       logger.error("{}, while processing: {}", e.getMessage(), curURL.getURL());
     } finally {

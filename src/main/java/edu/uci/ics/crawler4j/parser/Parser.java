@@ -24,6 +24,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.tika.language.LanguageIdentifier;
 import org.apache.tika.metadata.DublinCore;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.ParseContext;
@@ -108,6 +109,8 @@ public class Parser extends Configurable {
     HtmlParseData parseData = new HtmlParseData();
     parseData.setText(contentHandler.getBodyText().trim());
     parseData.setTitle(metadata.get(DublinCore.TITLE));
+    LanguageIdentifier languageIdentifier = new LanguageIdentifier(parseData.getText());
+    page.setLanguage(languageIdentifier.getLanguage());
 
     Set<WebURL> outgoingUrls = new HashSet<>();
 

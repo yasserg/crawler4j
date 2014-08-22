@@ -41,7 +41,7 @@ public class BasicCrawler extends WebCrawler {
   }
 
   @Override
-  public boolean shouldVisit(WebURL url) {
+  public boolean shouldVisit(Page page, WebURL url) {
     String href = url.getURL().toLowerCase();
     if (FILTERS.matcher(href).matches()) {
       return false;

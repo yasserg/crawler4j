@@ -39,7 +39,7 @@ public class StatusHandlerCrawler extends WebCrawler {
 	 * crawling logic).
 	 */
 	@Override
-	public boolean shouldVisit(WebURL url) {
+	public boolean shouldVisit(Page page, WebURL url) {
 		String href = url.getURL().toLowerCase();
 		return !FILTERS.matcher(href).matches() && href.startsWith("http://www.ics.uci.edu/");
 	}
