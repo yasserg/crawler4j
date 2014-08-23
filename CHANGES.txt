@@ -19,6 +19,9 @@ Enhancements
 - Issue 273: Tabbing looks messed up in several places (Avi)
 - Issue 290: We should support all redirect status codes (Avi)
 - Issue 291: HtmlParseData should hold a unique list of URLs (Avi)
+- Issue 133: Get the content type and prevent crawling for example feeds (Avi)
+- Issue 160: Add more context in shouldVisit (Avi)
+- Issue 205: Remove eclipse generated files from the repository (Avi)
 
 BugFixes
 - Issue 284: Cathing any exception and hidding the log. Upgraded logging in webcrawler Clarified a little statuscode 1005 (Avi)

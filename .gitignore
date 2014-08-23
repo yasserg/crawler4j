@@ -1,5 +1,7 @@
-target/*
+target/
 .idea/*
 *.iml
 .settings/*
 javadocs/*
+.classpath
+.project
