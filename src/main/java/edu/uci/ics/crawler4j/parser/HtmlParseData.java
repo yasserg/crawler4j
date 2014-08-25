@@ -19,7 +19,7 @@ package edu.uci.ics.crawler4j.parser;
 
 import edu.uci.ics.crawler4j.url.WebURL;
 
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class HtmlParseData implements ParseData {
@@ -27,6 +27,7 @@ public class HtmlParseData implements ParseData {
   private String html;
   private String text;
   private String title;
+  private Map<String, String> metaTags;
 
   private Set<WebURL> outgoingUrls;
 
@@ -52,6 +53,14 @@ public class HtmlParseData implements ParseData {
 
   public void setTitle(String title) {
     this.title = title;
+  }
+
+  public Map<String, String> getMetaTags() {
+    return metaTags;
+  }
+
+  public void setMetaTags(Map<String, String> metaTags) {
+    this.metaTags = metaTags;
   }
 
   public Set<WebURL> getOutgoingUrls() {

@@ -109,6 +109,7 @@ public class Parser extends Configurable {
     HtmlParseData parseData = new HtmlParseData();
     parseData.setText(contentHandler.getBodyText().trim());
     parseData.setTitle(metadata.get(DublinCore.TITLE));
+    parseData.setMetaTags(contentHandler.getMetaTags());
     LanguageIdentifier languageIdentifier = new LanguageIdentifier(parseData.getText());
     page.setLanguage(languageIdentifier.getLanguage());
 

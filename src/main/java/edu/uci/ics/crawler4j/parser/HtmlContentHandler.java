@@ -52,6 +52,7 @@ public class HtmlContentHandler extends DefaultHandler {
   private String base;
   private String metaRefresh;
   private String metaLocation;
+  private Map<String, String> metaTags = new HashMap<>();
 
   private boolean isWithinBodyElement;
   private StringBuilder bodyText;
@@ -119,6 +120,7 @@ public class HtmlContentHandler extends DefaultHandler {
       String content = attributes.getValue("content");
       if (equiv != null && content != null) {
         equiv = equiv.toLowerCase();
+        metaTags.put(equiv, content);
 
         // http-equiv="refresh" content="0;URL=http://foo.bar/..."
         if (equiv.equals("refresh") && (metaRefresh == null)) {
@@ -190,5 +192,9 @@ public class HtmlContentHandler extends DefaultHandler {
 
   public String getBaseUrl() {
     return base;
+  }
+
+  public Map<String, String> getMetaTags() {
+    return metaTags;
   }
 }

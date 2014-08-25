@@ -121,6 +121,7 @@ public class Page {
       contentCharset = charset.displayName();
     }
 
+
     contentData = EntityUtils.toByteArray(entity);
   }
 
