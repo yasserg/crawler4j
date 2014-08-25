@@ -43,6 +43,8 @@ public class WebURL implements Serializable {
   private String path;
   private String anchor;
   private byte priority;
+  private String tag;
+
 
   /**
    * Returns the unique document id assigned to this Url.
@@ -199,5 +201,16 @@ public class WebURL implements Serializable {
 
   public void setPriority(byte priority) {
     this.priority = priority;
+  }
+
+  /**
+   * Returns the tag in which this URL is found
+   * */
+  public String getTag() {
+    return tag;
+  }
+
+  public void setTag(String tag) {
+    this.tag = tag;
   }
 }

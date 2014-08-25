@@ -79,6 +79,7 @@ public class HtmlContentHandler extends DefaultHandler {
         anchorFlag = true;
         curUrl = new ExtractedUrlAnchorPair();
         curUrl.setHref(href);
+        curUrl.setTag(localName);
         outgoingUrls.add(curUrl);
       }
       return;
@@ -89,6 +90,7 @@ public class HtmlContentHandler extends DefaultHandler {
       if (imgSrc != null) {
         curUrl = new ExtractedUrlAnchorPair();
         curUrl.setHref(imgSrc);
+        curUrl.setTag(localName);
         outgoingUrls.add(curUrl);
       }
       return;
@@ -99,14 +101,14 @@ public class HtmlContentHandler extends DefaultHandler {
       if (src != null) {
         curUrl = new ExtractedUrlAnchorPair();
         curUrl.setHref(src);
+        curUrl.setTag(localName);
         outgoingUrls.add(curUrl);
       }
       return;
     }
 
     if (element == Element.BASE) {
-      if (base != null) { // We only consider the first occurrence of the
-                // Base element.
+      if (base != null) { // We only consider the first occurrence of the Base element.
         String href = attributes.getValue("href");
         if (href != null) {
           base = href;
@@ -130,6 +132,7 @@ public class HtmlContentHandler extends DefaultHandler {
           }
           curUrl = new ExtractedUrlAnchorPair();
           curUrl.setHref(metaRefresh);
+          curUrl.setTag(localName);
           outgoingUrls.add(curUrl);
         }
 
@@ -138,6 +141,7 @@ public class HtmlContentHandler extends DefaultHandler {
           metaLocation = content;
           curUrl = new ExtractedUrlAnchorPair();
           curUrl.setHref(metaRefresh);
+          curUrl.setTag(localName);
           outgoingUrls.add(curUrl);
         }
       }
@@ -160,6 +164,7 @@ public class HtmlContentHandler extends DefaultHandler {
           if (anchor.length() > MAX_ANCHOR_LENGTH) {
             anchor = anchor.substring(0, MAX_ANCHOR_LENGTH) + "...";
           }
+          curUrl.setTag(localName);
           curUrl.setAnchor(anchor);
         }
         anchorText.delete(0, anchorText.length());

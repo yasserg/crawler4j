@@ -133,6 +133,7 @@ public class Parser extends Configurable {
         if (url != null) {
           WebURL webURL = new WebURL();
           webURL.setURL(url);
+          webURL.setTag(urlAnchorPair.getTag());
           webURL.setAnchor(urlAnchorPair.getAnchor());
           outgoingUrls.add(webURL);
           urlCount++;
