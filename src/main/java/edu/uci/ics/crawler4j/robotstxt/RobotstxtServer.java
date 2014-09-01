@@ -30,11 +30,15 @@ import edu.uci.ics.crawler4j.fetcher.PageFetchResult;
 import edu.uci.ics.crawler4j.fetcher.PageFetcher;
 import edu.uci.ics.crawler4j.url.WebURL;
 import edu.uci.ics.crawler4j.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Yasser Ganjisaffar <lastname at gmail dot com>
  */
 public class RobotstxtServer {
+
+  private static final Logger logger = LoggerFactory.getLogger(RobotstxtServer.class);
 
   protected RobotstxtConfig config;
 
@@ -101,7 +105,7 @@ public class RobotstxtServer {
             }
             directives = RobotstxtParser.parse(content, config.getUserAgentName());
           } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Error occurred while fetching (robots) url: " + robotsTxtUrl.getURL(), e);
           }
         }
       }

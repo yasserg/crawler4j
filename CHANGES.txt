@@ -38,6 +38,7 @@ BugFixes
 - Issue 285: WebURL.java causes IndexOutOfBoundException 
 - Issue 131: Internal error in WebURL
 - Issue 296: Threads not being killed in graceful shutdown
+- Issue 299: NullPointerException when trying to crawl different URLs
 
 Version 3.5 (March 2013)
 - Fixed issues #184, #169, #136, #156, #191, #192, #127 

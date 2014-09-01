@@ -152,7 +152,7 @@ public class PageFetcher extends Configurable {
         }
         lastFetchTime = (new Date()).getTime();
       }
-      get.addHeader("Accept-Encoding", "gzip");
+
       HttpResponse response = httpClient.execute(get);
       fetchResult.setEntity(response.getEntity());
       fetchResult.setResponseHeaders(response.getAllHeaders());
