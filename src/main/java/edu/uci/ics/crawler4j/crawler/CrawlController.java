@@ -443,6 +443,7 @@ public class CrawlController extends Configurable {
   public void shutdown() {
     logger.info("Shutting down...");
     this.shuttingDown = true;
+    getPageFetcher().shutDown();
     frontier.finish();
   }
 }

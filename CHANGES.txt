@@ -25,6 +25,7 @@ Enhancements
 - Issues 293 & 294: Grab the TLD list from the online URL Save the TLD list as a compressed file backup / fallback
 - Issue 295: Add meta tags into the parsed html object
 - Issue 297: Add tag name to WebUrl
+- Issue 225 : Meta refresh does not work correctly ?
 
 BugFixes
 - Issue 284: Cathing any exception and hidding the log. Upgraded logging in webcrawler Clarified a little statuscode 1005 
@@ -34,7 +35,8 @@ BugFixes
 - Issue 231: Memory leakage in crawler4j caused by database environment, Closing the environment solves the leak. 
 - Issue 206: StringIndexOutOfBoundsException in WebURL 
 - Issue 285: WebURL.java causes IndexOutOfBoundException 
-- Issue 131: Internal error in WebURL 
+- Issue 131: Internal error in WebURL
+- Issue 296: Threads not being killed in graceful shutdown
 
 Version 3.5 (March 2013)
 - Fixed issues #184, #169, #136, #156, #191, #192, #127 
