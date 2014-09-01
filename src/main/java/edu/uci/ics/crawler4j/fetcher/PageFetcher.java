@@ -202,7 +202,7 @@ public class PageFetcher extends Configurable {
         if (size > config.getMaxDownloadSize()) {
           fetchResult.setStatusCode(CustomFetchStatus.PageTooBig);
           get.abort();
-          logger.error("Failed: Page Size ({}) exceeded max-download-size ({}), at URL: {}",
+          logger.warn("Failed: Page Size ({}) exceeded max-download-size ({}), at URL: {}",
               size, config.getMaxDownloadSize(), webUrl.getURL());
           return fetchResult;
         }
@@ -214,20 +214,22 @@ public class PageFetcher extends Configurable {
       get.abort();
 
     } catch (IOException e) {
-      logger.error("Fatal transport error: {} while fetching {} (link found in doc #{})",
-          e.getMessage() != null ? e.getMessage() : e.getCause(), toFetchURL, webUrl.getParentDocid());
-      logger.debug("Stacktrace: ", e);
-      fetchResult.setStatusCode(CustomFetchStatus.FatalTransportError);
-      return fetchResult;
+      if (toFetchURL.toLowerCase().endsWith("robots.txt")) {
+        // Ignoring this Exception as it just means that we tried to parse a robots.txt file which this site doesn't have
+        // Which is ok, so no exception should be thrown
+      } else {
+        logger.error("Fatal transport error: {} while fetching {} (link found in doc #{})",
+            e.getMessage() != null ? e.getMessage() : e.getCause(), toFetchURL, webUrl.getParentDocid());
+        logger.debug("Stacktrace: ", e);
+        fetchResult.setStatusCode(CustomFetchStatus.FatalTransportError);
+        return fetchResult;
+      }
     } catch (IllegalStateException e) {
       // ignoring exceptions that occur because of not registering https
       // and other schemes
     } catch (Exception e) {
-      if (e.getMessage() == null) {
-        logger.error("Error while fetching {}", webUrl.getURL());
-      } else {
-        logger.error("{} while fetching {}", e.getMessage(), webUrl.getURL());
-      }
+      logger.error("{} Error while fetching {}", e.getMessage() != null ? e.getMessage() : e.getCause(), webUrl.getURL());
+      logger.debug("Stacktrace:", e);
     } finally {
       try {
         if (fetchResult.getEntity() == null && get != null) {

@@ -25,7 +25,8 @@ Enhancements
 - Issues 293 & 294: Grab the TLD list from the online URL Save the TLD list as a compressed file backup / fallback
 - Issue 295: Add meta tags into the parsed html object
 - Issue 297: Add tag name to WebUrl
-- Issue 225 : Meta refresh does not work correctly ?
+- Issue 225: Meta refresh does not work correctly ?
+- Issue 298: Fatal Transport Error when crawling robots.txt
 
 BugFixes
 - Issue 284: Cathing any exception and hidding the log. Upgraded logging in webcrawler Clarified a little statuscode 1005 
