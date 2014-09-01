@@ -119,6 +119,10 @@ public class HtmlContentHandler extends DefaultHandler {
 
     if (element == Element.META) {
       String equiv = attributes.getValue("http-equiv");
+      if (equiv == null) { // This condition covers several cases of XHTML meta
+        equiv = attributes.getValue("name");
+      }
+
       String content = attributes.getValue("content");
       if (equiv != null && content != null) {
         equiv = equiv.toLowerCase();
