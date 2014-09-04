@@ -27,6 +27,7 @@ Enhancements
 - Issue 297: Add tag name to WebUrl
 - Issue 225: Meta refresh does not work correctly ?
 - Issue 298: Fatal Transport Error when crawling robots.txt
+- Issue 303: Create a log configuration file default
 
 BugFixes
 - Issue 284: Cathing any exception and hidding the log. Upgraded logging in webcrawler Clarified a little statuscode 1005 
