@@ -338,6 +338,8 @@ public class WebCrawler implements Runnable {
             if (shouldVisit(page, webURL) && robotstxtServer.allows(webURL)) {
               webURL.setDocid(docIdServer.getNewDocID(movedToUrl));
               frontier.schedule(webURL);
+            } else {
+              logger.debug("Not visiting: {} as per your \"shouldVisit\" policy", webURL.getURL());
             }
           }
         } else if (fetchResult.getStatusCode() == CustomFetchStatus.PageTooBig) {

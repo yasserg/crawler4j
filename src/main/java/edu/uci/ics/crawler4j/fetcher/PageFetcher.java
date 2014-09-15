@@ -19,6 +19,7 @@ package edu.uci.ics.crawler4j.fetcher;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.zip.GZIPInputStream;
 
@@ -42,6 +43,7 @@ import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.entity.HttpEntityWrapper;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
@@ -96,7 +98,19 @@ public class PageFetcher extends Configurable {
     schemeRegistry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
 
     if (config.isIncludeHttpsPages()) {
-      schemeRegistry.register(new Scheme("https", 443, SSLSocketFactory.getSocketFactory()));
+      try { // Fixing: https://code.google.com/p/crawler4j/issues/detail?id=174
+        // By always trusting the ssl certificate
+        SSLSocketFactory sslsf = new SSLSocketFactory(new TrustStrategy() {
+          public boolean isTrusted(final X509Certificate[] chain, String authType) {
+            return true;
+          }
+        });
+
+        schemeRegistry.register(new Scheme("https", 443, sslsf)); // Trying to ignore broken certificates in SSL sites
+      } catch (Exception e) {
+        logger.debug("Exception thrown while trying to register https:", e);
+        schemeRegistry.register(new Scheme("https", 443, SSLSocketFactory.getSocketFactory()));
+      }
     }
 
     connectionManager = new PoolingClientConnectionManager(schemeRegistry);
