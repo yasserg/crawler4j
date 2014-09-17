@@ -23,6 +23,8 @@ import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.zip.GZIPInputStream;
 
+import javax.net.ssl.SSLContext;
+
 import org.apache.http.Header;
 import org.apache.http.HeaderElement;
 import org.apache.http.HttpEntity;
@@ -31,35 +33,32 @@ import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.HttpStatus;
-import org.apache.http.HttpVersion;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.CookieSpecs;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.params.ClientPNames;
-import org.apache.http.client.params.CookiePolicy;
-import org.apache.http.conn.params.ConnRoutePNames;
-import org.apache.http.conn.scheme.PlainSocketFactory;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.config.Registry;
+import org.apache.http.config.RegistryBuilder;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.apache.http.conn.socket.PlainConnectionSocketFactory;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.SSLContexts;
 import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.entity.HttpEntityWrapper;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.PoolingClientConnectionManager;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.CoreConnectionPNames;
-import org.apache.http.params.CoreProtocolPNames;
-import org.apache.http.params.HttpParams;
-import org.apache.http.params.HttpProtocolParamBean;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.protocol.HttpContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import edu.uci.ics.crawler4j.crawler.Configurable;
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.url.URLCanonicalizer;
 import edu.uci.ics.crawler4j.url.WebURL;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author Yasser Ganjisaffar <lastname at gmail dot com>
@@ -68,9 +67,9 @@ public class PageFetcher extends Configurable {
 
   protected static final Logger logger = LoggerFactory.getLogger(PageFetcher.class);
 
-  protected PoolingClientConnectionManager connectionManager;
+  protected PoolingHttpClientConnectionManager connectionManager;
 
-  protected DefaultHttpClient httpClient;
+  protected CloseableHttpClient httpClient;
 
   protected final Object mutex = new Object();
 
@@ -81,71 +80,74 @@ public class PageFetcher extends Configurable {
   public PageFetcher(CrawlConfig config) {
     super(config);
 
-    HttpParams params = new BasicHttpParams();
-    HttpProtocolParamBean paramsBean = new HttpProtocolParamBean(params);
-    paramsBean.setVersion(HttpVersion.HTTP_1_1);
-    paramsBean.setContentCharset("UTF-8");
-    paramsBean.setUseExpectContinue(false);
+    RequestConfig requestConfig = RequestConfig.custom()
+        .setExpectContinueEnabled(false)
+        .setCookieSpec(CookieSpecs.BROWSER_COMPATIBILITY)
+        .setRedirectsEnabled(false)
+        .setSocketTimeout(config.getSocketTimeout())
+        .setConnectTimeout(config.getConnectionTimeout())
+        .build();
 
-    params.setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.BROWSER_COMPATIBILITY);
-    params.setParameter(CoreProtocolPNames.USER_AGENT, config.getUserAgentString());
-    params.setIntParameter(CoreConnectionPNames.SO_TIMEOUT, config.getSocketTimeout());
-    params.setIntParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, config.getConnectionTimeout());
-
-    params.setBooleanParameter("http.protocol.handle-redirects", false);
-
-    SchemeRegistry schemeRegistry = new SchemeRegistry();
-    schemeRegistry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
-
+    RegistryBuilder<ConnectionSocketFactory> connRegistryBuilder = RegistryBuilder.create();
+    connRegistryBuilder.register("http", PlainConnectionSocketFactory.INSTANCE);
     if (config.isIncludeHttpsPages()) {
       try { // Fixing: https://code.google.com/p/crawler4j/issues/detail?id=174
         // By always trusting the ssl certificate
-        SSLSocketFactory sslsf = new SSLSocketFactory(new TrustStrategy() {
-          public boolean isTrusted(final X509Certificate[] chain, String authType) {
-            return true;
-          }
-        });
-
-        schemeRegistry.register(new Scheme("https", 443, sslsf)); // Trying to ignore broken certificates in SSL sites
+        SSLContext sslContext = SSLContexts.custom()
+            .loadTrustMaterial(null, new TrustStrategy() {
+              @Override
+              public boolean isTrusted(final X509Certificate[] chain, String authType) {
+                return true;
+              }
+            }).build();
+        SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
+            sslContext, SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+        connRegistryBuilder.register("https", sslsf);
       } catch (Exception e) {
         logger.debug("Exception thrown while trying to register https:", e);
-        schemeRegistry.register(new Scheme("https", 443, SSLSocketFactory.getSocketFactory()));
       }
     }
 
-    connectionManager = new PoolingClientConnectionManager(schemeRegistry);
+    Registry<ConnectionSocketFactory> connRegistry = connRegistryBuilder.build();
+    connectionManager = new PoolingHttpClientConnectionManager(connRegistry);
     connectionManager.setMaxTotal(config.getMaxTotalConnections());
     connectionManager.setDefaultMaxPerRoute(config.getMaxConnectionsPerHost());
-    httpClient = new DefaultHttpClient(connectionManager, params);
 
+    HttpClientBuilder clientBuilder = HttpClientBuilder.create();
+    clientBuilder.setDefaultRequestConfig(requestConfig);
+    clientBuilder.setConnectionManager(connectionManager);
+    clientBuilder.setUserAgent(config.getUserAgentString());
     if (config.getProxyHost() != null) {
 
       if (config.getProxyUsername() != null) {
-        httpClient.getCredentialsProvider().setCredentials(
-          new AuthScope(config.getProxyHost(), config.getProxyPort()),
-          new UsernamePasswordCredentials(config.getProxyUsername(), config.getProxyPassword()));
+        BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+        credentialsProvider.setCredentials(
+            new AuthScope(config.getProxyHost(), config.getProxyPort()),
+            new UsernamePasswordCredentials(config.getProxyUsername(), config.getProxyPassword()));
+        clientBuilder.setDefaultCredentialsProvider(credentialsProvider);
       }
 
       HttpHost proxy = new HttpHost(config.getProxyHost(), config.getProxyPort());
-      httpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
+      clientBuilder.setProxy(proxy);
     }
-
-    httpClient.addResponseInterceptor(new HttpResponseInterceptor() {
+    clientBuilder.addInterceptorLast(new HttpResponseInterceptor() {
       @Override
       public void process(final HttpResponse response, final HttpContext context) throws HttpException, IOException {
         HttpEntity entity = response.getEntity();
         Header contentEncoding = entity.getContentEncoding();
         if (contentEncoding != null) {
           HeaderElement[] codecs = contentEncoding.getElements();
-        for (HeaderElement codec : codecs) {
-          if (codec.getName().equalsIgnoreCase("gzip")) {
-            response.setEntity(new GzipDecompressingEntity(response.getEntity()));
-            return;
+          for (HeaderElement codec : codecs) {
+            if (codec.getName().equalsIgnoreCase("gzip")) {
+              response.setEntity(new GzipDecompressingEntity(response.getEntity()));
+              return;
+            }
           }
-        }
         }
       }
     });
+
+    httpClient = clientBuilder.build();
 
     if (connectionMonitorThread == null) {
       connectionMonitorThread = new IdleConnectionMonitorThread(connectionManager);
