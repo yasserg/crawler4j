@@ -1,26 +1,27 @@
 Crawler4J Change Log
 
-Version 4.0 (September 2014)
+Version 4.0 (October 2014)
 Major Features
 - Issue 272: Parse Binary Content parsing, Now the crawler can really parse binary content. Based on Tero Jankilla's code 
+- Issue 311: Add functionality to retrieve links from binary and text only files
 
 Enhancements
-- Issue 278: Add hooks in the webcrawler for better error handling 
-- Issue 239: Add an option to tweak the URL before processing the page Added hooks to several errors where by default we log the error but allow the user to override those methods in order to do anything they want with those URLs 
-- Issue 276: Don't let a crawled URL to be dropped without proper logging. Each URL should be logged somehow so the user will know it was crawled. We shouldn't just drop URLs without logging them 
-- Issue 213: Upgrade all logging statements to use {} of slf4j - Slf4j optimizes string concatenation in logging statements by using {} placeholder. Upgrade all logging statements to use it. 
-- Issue 213: Changed from log4j implementation to slf4j API - Removed any reference to log4j - Logging Implementations should be the user's choice and not the library choice. Instead I have inserted the slf4j API. 
-- Updated pom.xml project Dependencies were updated to their latest 
-- Added log messages to PageFetcher These logs were taken from: ind9/crawler4j 153eb752bef5a57bd39016807423683ab22f3913 
-- Issue 282: Add CHANGES.TXT with the changelog to the root 
-- Issue 288: Upgrade Unit Tests to v4 
-- Issue 289: Parsing a binary content shouldn't throw a general parsing error 
-- Issue 236: Please default includeHttpsPages to true 
-- Issue 273: Tabbing looks messed up in several places 
-- Issue 290: We should support all redirect status codes 
-- Issue 291: HtmlParseData should hold a unique list of URLs 
-- Issue 133: Get the content type and prevent crawling for example feeds 
-- Issue 160: Add more context in shouldVisit 
+- Issue 278: Add hooks in the webcrawler for better error handling
+- Issue 239: Add an option to tweak the URL before processing the page Added hooks to several errors where by default we log the error but allow the user to override those methods in order to do anything they want with those URLs
+- Issue 276: Don't let a crawled URL to be dropped without proper logging. Each URL should be logged somehow so the user will know it was crawled. We shouldn't just drop URLs without logging them
+- Issue 213: Upgrade all logging statements to use {} of slf4j - Slf4j optimizes string concatenation in logging statements by using {} placeholder. Upgrade all logging statements to use it.
+- Issue 213: Changed from log4j implementation to slf4j API - Removed any reference to log4j - Logging Implementations should be the user's choice and not the library choice. Instead I have inserted the slf4j API.
+- Updated pom.xml project Dependencies were updated to their latest
+- Added log messages to PageFetcher These logs were taken from: ind9/crawler4j 153eb752bef5a57bd39016807423683ab22f3913
+- Issue 282: Add CHANGES.TXT with the changelog to the root
+- Issue 288: Upgrade Unit Tests to v4
+- Issue 289: Parsing a binary content shouldn't throw a general parsing error
+- Issue 236: Please default includeHttpsPages to true
+- Issue 273: Tabbing looks messed up in several places
+- Issue 290: We should support all redirect status codes
+- Issue 291: HtmlParseData should hold a unique list of URLs
+- Issue 133: Get the content type and prevent crawling for example feeds
+- Issue 160: Add more context in shouldVisit
 - Issue 205: Remove eclipse generated files from the repository
 - Issues 293 & 294: Grab the TLD list from the online URL Save the TLD list as a compressed file backup / fallback
 - Issue 295: Add meta tags into the parsed html object
@@ -28,6 +29,9 @@ Enhancements
 - Issue 225: Meta refresh does not work correctly ?
 - Issue 298: Fatal Transport Error when crawling robots.txt
 - Issue 303: Create a log configuration file default
+- Issue 174: crawler4j should support crawling all https page
+- Issue 302: Update deprecated methods/classes in PageFetcher
+- Issue 304: Crawl Site Maps
 
 BugFixes
 - Issue 284: Cathing any exception and hidding the log. Upgraded logging in webcrawler Clarified a little statuscode 1005 

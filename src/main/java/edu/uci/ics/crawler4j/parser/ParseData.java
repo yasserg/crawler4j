@@ -17,8 +17,16 @@
 
 package edu.uci.ics.crawler4j.parser;
 
+import edu.uci.ics.crawler4j.url.WebURL;
+
+import java.util.Set;
+
 public interface ParseData {
 
+  Set<WebURL> getOutgoingUrls();
+
+  void setOutgoingUrls(Set<WebURL> outgoingUrls);
+
   @Override
-  public String toString();
+  String toString();
 }

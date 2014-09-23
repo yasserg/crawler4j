@@ -372,33 +372,30 @@ public class WebCrawler implements Runnable {
       }
 
       ParseData parseData = page.getParseData();
-      if (parseData instanceof HtmlParseData) {
-        HtmlParseData htmlParseData = (HtmlParseData) parseData;
-
-        List<WebURL> toSchedule = new ArrayList<>();
-        int maxCrawlDepth = myController.getConfig().getMaxDepthOfCrawling();
-        for (WebURL webURL : htmlParseData.getOutgoingUrls()) {
-          webURL.setParentDocid(curURL.getDocid());
-          webURL.setParentUrl(curURL.getURL());
-          int newdocid = docIdServer.getDocId(webURL.getURL());
-          if (newdocid > 0) {
-            // This is not the first time that this Url is
-            // visited. So, we set the depth to a negative number.
-            webURL.setDepth((short) -1);
-            webURL.setDocid(newdocid);
-          } else {
-            webURL.setDocid(-1);
-            webURL.setDepth((short) (curURL.getDepth() + 1));
-            if (maxCrawlDepth == -1 || curURL.getDepth() < maxCrawlDepth) {
-              if (shouldVisit(page, webURL) && robotstxtServer.allows(webURL)) {
-                  webURL.setDocid(docIdServer.getNewDocID(webURL.getURL()));
-                  toSchedule.add(webURL);
-              }
+      List<WebURL> toSchedule = new ArrayList<>();
+      int maxCrawlDepth = myController.getConfig().getMaxDepthOfCrawling();
+      for (WebURL webURL : parseData.getOutgoingUrls()) {
+        webURL.setParentDocid(curURL.getDocid());
+        webURL.setParentUrl(curURL.getURL());
+        int newdocid = docIdServer.getDocId(webURL.getURL());
+        if (newdocid > 0) {
+          // This is not the first time that this Url is
+          // visited. So, we set the depth to a negative number.
+          webURL.setDepth((short) -1);
+          webURL.setDocid(newdocid);
+        } else {
+          webURL.setDocid(-1);
+          webURL.setDepth((short) (curURL.getDepth() + 1));
+          if (maxCrawlDepth == -1 || curURL.getDepth() < maxCrawlDepth) {
+            if (shouldVisit(page, webURL) && robotstxtServer.allows(webURL)) {
+                webURL.setDocid(docIdServer.getNewDocID(webURL.getURL()));
+                toSchedule.add(webURL);
             }
           }
         }
-        frontier.scheduleAll(toSchedule);
       }
+      frontier.scheduleAll(toSchedule);
+
       try {
         visit(page);
       } catch (Exception e) {

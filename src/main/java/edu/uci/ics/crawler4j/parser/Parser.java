@@ -24,6 +24,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashSet;
 import java.util.Set;
 
+import edu.uci.ics.crawler4j.util.Net;
 import org.apache.tika.language.LanguageIdentifier;
 import org.apache.tika.metadata.DublinCore;
 import org.apache.tika.metadata.Metadata;
@@ -66,6 +67,7 @@ public class Parser extends Configurable {
         throw new NotAllowedContentException();
       }
 
+      parseData.setOutgoingUrls(Net.extractUrls(parseData.getHtml()));
       return parseData.getHtml() != null;
     } else if (Util.hasPlainTextContent(page.getContentType())) {
       try {
@@ -75,13 +77,14 @@ public class Parser extends Configurable {
         } else {
           parseData.setTextContent(new String(page.getContentData(), page.getContentCharset()));
         }
+        parseData.setOutgoingUrls(Net.extractUrls(parseData.getTextContent()));
         page.setParseData(parseData);
+
         return true;
       } catch (Exception e) {
         logger.error("{}, while parsing: {}", e.getMessage(), page.getWebURL().getURL());
+        return false;
       }
-
-      return false;
     }
 
     Metadata metadata = new Metadata();
