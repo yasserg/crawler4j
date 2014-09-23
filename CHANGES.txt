@@ -32,6 +32,7 @@ Enhancements
 - Issue 174: crawler4j should support crawling all https page
 - Issue 302: Update deprecated methods/classes in PageFetcher
 - Issue 304: Crawl Site Maps
+- Issue 312: Crawler should follow links in plain text files
 
 BugFixes
 - Issue 284: Cathing any exception and hidding the log. Upgraded logging in webcrawler Clarified a little statuscode 1005 

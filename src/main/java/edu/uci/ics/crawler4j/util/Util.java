@@ -67,22 +67,15 @@ public class Util {
   }
 
   public static boolean hasBinaryContent(String contentType) {
-    if (contentType != null) {
-      String typeStr = contentType.toLowerCase();
-      if (typeStr.contains("image") || typeStr.contains("audio") || typeStr.contains("video") || typeStr.contains("application")) {
-        return true;
-      }
-    }
-    return false;
+    String typeStr = contentType != null ? contentType.toLowerCase() : "";
+
+    return typeStr.contains("image") || typeStr.contains("audio") || typeStr.contains("video") || typeStr.contains("application");
   }
     
   public static boolean hasPlainTextContent(String contentType) {
-  if (contentType != null) {
-    String typeStr = contentType.toLowerCase();
-    if (typeStr.contains("text/plain")) {
-      return true;
-    }
+    String typeStr = contentType != null ? contentType.toLowerCase() : "";
+
+    return typeStr.contains("text") && !typeStr.contains("html");
   }
-  return false;
-  }
+
 }
