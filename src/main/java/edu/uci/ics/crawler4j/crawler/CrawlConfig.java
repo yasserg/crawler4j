@@ -115,6 +115,13 @@ public class CrawlConfig {
    * Should we follow redirects?
    */
   private boolean followRedirects = true;
+  
+  /**
+   * Should the TLD list be updated automatically on each run? Alternatively,
+   * it can be loaded from the embedded tld-names.zip file that was obtained from 
+   * https://publicsuffix.org/list/effective_tld_names.dat
+   */
+  private boolean onlineTldListUpdate = false;
 
   /**
    * If crawler should run behind a proxy, this parameter can be used for
@@ -370,6 +377,19 @@ public class CrawlConfig {
    */
   public void setFollowRedirects(boolean followRedirects) {
     this.followRedirects = followRedirects;
+  }
+  
+  public boolean isOnlineTldListUpdate() {
+      return onlineTldListUpdate;
+  }
+  
+  /**
+   * Should the TLD list be updated automatically on each run? Alternatively,
+   * it can be loaded from the embedded tld-names.zip file that was obtained from 
+   * https://publicsuffix.org/list/effective_tld_names.dat
+   */
+  public void setOnlineTldListUpdate(boolean online) {
+      onlineTldListUpdate = online;
   }
 
   public String getProxyHost() {
