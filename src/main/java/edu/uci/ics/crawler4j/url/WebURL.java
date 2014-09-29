@@ -36,6 +36,7 @@ public class WebURL implements Serializable {
 
   private int docid;
   private int parentDocid;
+  private int seedDocid;
   private String parentUrl;
   private short depth;
   private String domain;
@@ -45,6 +46,25 @@ public class WebURL implements Serializable {
   private byte priority;
   private String tag;
 
+  /** Copy constructor */
+  public WebURL(WebURL rhs)
+  {
+    this.url = rhs.url;
+    this.docid = rhs.docid;
+    this.parentDocid = rhs.parentDocid;
+    this.seedDocid = rhs.seedDocid;
+    this.parentUrl = rhs.parentUrl;
+    this.depth = rhs.depth;
+    this.domain = rhs.domain;
+    this.subDomain = rhs.subDomain;
+    this.path = rhs.path;
+    this.anchor = rhs.anchor;
+    this.priority = rhs.priority;
+    this.tag = rhs.tag;
+  }
+
+  public WebURL()
+  {}
 
   /**
    * @return unique document id assigned to this Url.
@@ -105,6 +125,21 @@ public class WebURL implements Serializable {
 
   public void setParentDocid(int parentDocid) {
     this.parentDocid = parentDocid;
+  }
+  
+  /**
+   * Returns the unique document id of the seed page. The seed page is the
+   * page that was used as the starting point that eventually resulted in this
+   * page being visited.
+   * 
+   * @return The Docid of the seed
+   */
+  public int getSeedDocid() {
+      return seedDocid;
+  }
+  
+  public void setSeedDocid(int seedDocid) {
+      this.seedDocid = seedDocid;
   }
 
   /**

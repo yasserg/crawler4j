@@ -56,24 +56,19 @@ public class Frontier extends Configurable {
     this.counters = new Counters(env, config);
     try {
       workQueues = new WorkQueues(env, DATABASE_NAME, config.isResumableCrawling());
-      if (config.isResumableCrawling()) {
-        scheduledPages = counters.getValue(Counters.ReservedCounterNames.SCHEDULED_PAGES);
-        inProcessPages = new InProcessPagesDB(env);
-        long numPreviouslyInProcessPages = inProcessPages.getLength();
-        if (numPreviouslyInProcessPages > 0) {
-          logger.info("Rescheduling {} URLs from previous crawl.", numPreviouslyInProcessPages);
-          scheduledPages -= numPreviouslyInProcessPages;
-
-          List<WebURL> urls = inProcessPages.get(IN_PROCESS_RESCHEDULE_BATCH_SIZE);
-          while (!urls.isEmpty()) {
-            scheduleAll(urls);
-            inProcessPages.delete(urls.size());
-            urls = inProcessPages.get(IN_PROCESS_RESCHEDULE_BATCH_SIZE);
+      scheduledPages = counters.getValue(Counters.ReservedCounterNames.SCHEDULED_PAGES);
+      inProcessPages = new InProcessPagesDB(env, config.isResumableCrawling());
+      long numPreviouslyInProcessPages = inProcessPages.getLength();
+      if (numPreviouslyInProcessPages > 0) {
+        logger.info("Rescheduling {} URLs from previous crawl.", numPreviouslyInProcessPages);
+        scheduledPages -= numPreviouslyInProcessPages;
+        while (true) {
+          List<WebURL> urls = inProcessPages.shift(IN_PROCESS_RESCHEDULE_BATCH_SIZE);
+          if (urls.size() == 0) {
+            break;
           }
+          scheduleAll(urls);
         }
-      } else {
-        inProcessPages = null;
-        scheduledPages = 0;
       }
     } catch (DatabaseException e) {
       logger.error("Error while initializing the Frontier", e);
@@ -129,14 +124,11 @@ public class Frontier extends Configurable {
           return;
         }
         try {
-          List<WebURL> curResults = workQueues.get(max);
-          workQueues.delete(curResults.size());
-          if (inProcessPages != null) {
-            for (WebURL curPage : curResults) {
-              inProcessPages.put(curPage);
-            }
+          List<WebURL> curResults = workQueues.shift(max);
+          for (WebURL curPage : curResults) {
+            if (inProcessPages.put(curPage))
+              result.add(curPage);
           }
-          result.addAll(curResults);
         } catch (DatabaseException e) {
           logger.error("Error while getting next urls", e);
         }
@@ -158,16 +150,30 @@ public class Frontier extends Configurable {
       }
     }
   }
-
-  public void setProcessed(WebURL webURL) {
+  
+  /**
+   * Set the page as processed and return true if, as a consequence, there is no
+   * more offspring left of the seed that eventually resulted in this document.
+   * 
+   * @param webURL The URL to set as processed
+   * @return True when this was the last offspring of the seed, false otherwise
+   */
+  public boolean setProcessed(WebURL webURL) {
     counters.increment(Counters.ReservedCounterNames.PROCESSED_PAGES);
-    if (inProcessPages != null) {
+    synchronized (mutex) {
       if (!inProcessPages.removeURL(webURL)) {
         logger.warn("Could not remove: {} from list of processed pages.", webURL.getURL());
       }
+      return numOffspring(webURL.getSeedDocid()) == 0;
     }
   }
 
+  public int numOffspring(Integer seedDocid) {
+    synchronized (mutex) {
+        return workQueues.getSeedCount(seedDocid) + inProcessPages.getSeedCount(seedDocid);
+    }
+  }
+  
   public long getQueueLength() {
     return workQueues.getLength();
   }
@@ -197,5 +203,17 @@ public class Frontier extends Configurable {
     synchronized (waitingList) {
       waitingList.notifyAll();
     }
+  }
+
+  /**
+   * Allow a certain piece of code to be run synchronously. This method
+   * acquires the mutex and then runs the run method in the provided runnable.
+   * 
+   * @param r The object on which to run the run method synchronized
+   */
+  public void runSync(Runnable r) {
+      synchronized (mutex) {
+          r.run();
+      }
   }
 }

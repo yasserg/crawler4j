@@ -39,11 +39,10 @@ import edu.uci.ics.crawler4j.util.IO;
 /**
  * The controller that manages a crawling session. This class creates the
  * crawler threads and monitors their progress.
- *
+ * 
  * @author Yasser Ganjisaffar
  */
 public class CrawlController extends Configurable {
-
   static final Logger logger = LoggerFactory.getLogger(CrawlController.class);
 
   /**
@@ -233,8 +232,7 @@ public class CrawlController extends Configurable {
             synchronized (waitingLock) {
 
               while (true) {
-                sleep(10);
-                boolean someoneIsWorking = false;
+                sleep(1);
                 for (int i = 0; i < threads.size(); i++) {
                   Thread thread = threads.get(i);
                   if (!thread.isAlive()) {
@@ -244,54 +242,42 @@ public class CrawlController extends Configurable {
                       thread = new Thread(crawler, "Crawler " + (i + 1));
                       threads.remove(i);
                       threads.add(i, thread);
+                      T oldCrawler = crawlers.get(i);
                       crawler.setThread(thread);
                       crawler.init(i + 1, controller);
+                      crawler.resume(oldCrawler.extractAssignedURLs());
                       thread.start();
                       crawlers.remove(i);
                       crawlers.add(i, crawler);
                     }
-                  } else if (crawlers.get(i).isNotWaitingForNewURLs()) {
-                    someoneIsWorking = true;
-                  }
+                  } 
                 }
-                if (!someoneIsWorking) {
-                  // Make sure again that none of the threads are alive.
-                  logger.info("It looks like no thread is working, waiting for 10 seconds to make sure...");
-                  sleep(10);
-
-                  someoneIsWorking = false;
-                  for (int i = 0; i < threads.size(); i++) {
-                    Thread thread = threads.get(i);
-                    if (thread.isAlive() && crawlers.get(i).isNotWaitingForNewURLs()) {
-                      someoneIsWorking = true;
+                if (shuttingDown || frontier.getQueueLength() == 0) {
+                  if (!shuttingDown)
+                  {
+                    logger.info("No pages are in progress and none are enqueued. Waiting a second to make sure");
+                    sleep(1);
+                    if (frontier.getQueueLength() == 0)
+                    {
+                      logger.info("Still no pages are in progress and still none are enqueued. Finishing the process...");
+                      shuttingDown = true;
                     }
                   }
-                  if (!someoneIsWorking) {
-                    if (!shuttingDown) {
-                      long queueLength = frontier.getQueueLength();
-                      if (queueLength > 0) {
-                        continue;
-                      }
-                      logger.info(
-                          "No thread is working and no more URLs are in queue waiting for another 10 seconds to make " +
-                          "sure...");
-                      sleep(10);
-                      queueLength = frontier.getQueueLength();
-                      if (queueLength > 0) {
-                        continue;
-                      }
-                    }
-
-                    logger.info("All of the crawlers are stopped. Finishing the process...");
-                    // At this step, frontier notifies the threads that were waiting for new URLs and they should stop
+                  
+                  if (shuttingDown) {
+                    // At this step, frontier notifies the
+                    // threads that were
+                    // waiting for new URLs and they should
+                    // stop
                     frontier.finish();
                     for (T crawler : crawlers) {
                       crawler.onBeforeExit();
                       crawlersLocalData.add(crawler.getMyLocalData());
                     }
-
-                    logger.info("Waiting for 10 seconds before final clean up...");
-                    sleep(10);
+                    
+                    logger.info("Joining all running threads...");
+                    for (Thread t : threads)
+                        t.join();
 
                     frontier.close();
                     docIdServer.close();
@@ -367,8 +353,8 @@ public class CrawlController extends Configurable {
    * @param pageUrl
    *            the URL of the seed
    */
-  public void addSeed(String pageUrl) {
-    addSeed(pageUrl, -1);
+  public int addSeed(String pageUrl) {
+    return addSeed(pageUrl, -1);
   }
 
   /**
@@ -388,39 +374,40 @@ public class CrawlController extends Configurable {
    *            the URL of the seed
    * @param docId
    *            the document id that you want to be assigned to this seed URL.
-   *
+   * @return The docId used / assigned for the seed URL
    */
-  public void addSeed(String pageUrl, int docId) {
+  public int addSeed(String pageUrl, int docId) {
     String canonicalUrl = URLCanonicalizer.getCanonicalURL(pageUrl);
     if (canonicalUrl == null) {
       logger.error("Invalid seed URL: {}", pageUrl);
-    } else {
-      if (docId < 0) {
-        docId = docIdServer.getDocId(canonicalUrl);
-        if (docId > 0) {
-          logger.trace("This URL is already seen.");
-          return;
-        }
-        docId = docIdServer.getNewDocID(canonicalUrl);
-      } else {
-        try {
-          docIdServer.addUrlAndDocId(canonicalUrl, docId);
-        } catch (Exception e) {
-          logger.error("Could not add seed: {}", e.getMessage());
-        }
+      return -1;
+    }
+    if (docId < 0) {
+      docId = docIdServer.getDocId(canonicalUrl);
+      if (docId > 0) {
+        logger.trace("This URL is already seen.");
+        return -1;
       }
-
-      WebURL webUrl = new WebURL();
-      webUrl.setURL(canonicalUrl);
-      webUrl.setDocid(docId);
-      webUrl.setDepth((short) 0);
-      if (robotstxtServer.allows(webUrl)) {
-        frontier.schedule(webUrl);
-      } else {
-        logger.warn("Robots.txt does not allow this seed: {}",
-                    pageUrl); // using the WARN level here, as the user specifically asked to add this seed
+      docId = docIdServer.getNewDocID(canonicalUrl);
+    } else {
+      try {
+        docIdServer.addUrlAndDocId(canonicalUrl, docId);
+      } catch (Exception e) {
+        logger.error("Could not add seed: {}", e.getMessage());
       }
     }
+
+    WebURL webUrl = new WebURL();
+    webUrl.setURL(canonicalUrl);
+    webUrl.setSeedDocid(docId);
+    webUrl.setDocid(docId);
+    webUrl.setDepth((short) 0);
+    if (!robotstxtServer.allows(webUrl)) {
+      logger.info("Robots.txt does not allow this seed: {}", pageUrl);
+    } else {
+      frontier.schedule(webUrl);
+    }
+    return docId;
   }
 
   /**
