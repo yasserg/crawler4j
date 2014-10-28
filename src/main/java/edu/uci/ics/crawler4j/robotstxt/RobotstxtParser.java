@@ -34,10 +34,13 @@ public class RobotstxtParser {
   private static final int PATTERNS_DISALLOW_LENGTH = 9;
   private static final int PATTERNS_ALLOW_LENGTH = 6;
 
-  public static HostDirectives parse(String content, String myUserAgent) {
+  public static HostDirectives [] parse(String content, RobotstxtConfig config) {
 
-    HostDirectives directives = null;
+    String myUserAgent = config.getUserAgentName();
+    HostDirectives directives = new HostDirectives();
+    HostDirectives specificDirectives = new HostDirectives();
     boolean inMatchingUserAgent = false;
+    boolean inExactUserAgent = false;
 
     StringTokenizer st = new StringTokenizer(content, "\n\r");
     while (st.hasMoreTokens()) {
@@ -59,7 +62,8 @@ public class RobotstxtParser {
 
       if (line.matches(PATTERNS_USERAGENT)) {
         String ua = line.substring(PATTERNS_USERAGENT_LENGTH).trim().toLowerCase();
-        inMatchingUserAgent = "*".equals(ua) || ua.contains(myUserAgent);
+        inMatchingUserAgent = "*".equals(ua) || ua.contains(myUserAgent); 
+        inExactUserAgent = ua.equals(myUserAgent);
       } else if (line.matches(PATTERNS_DISALLOW)) {
         if (!inMatchingUserAgent) {
           continue;
@@ -70,13 +74,18 @@ public class RobotstxtParser {
         }
         path = path.trim();
         if (!path.isEmpty()) {
-          if (directives == null) {
-            directives = new HostDirectives();
+          if (inExactUserAgent) {
+            specificDirectives.addDisallow(path);
+          } else {
+            directives.addDisallow(path);
           }
-          directives.addDisallow(path);
         }
       } else if (line.matches(PATTERNS_ALLOW)) {
-        if (!inMatchingUserAgent) {
+        // Check if the user agent matches or if it was
+        // specified that white-listing is ignored and
+        // "allows" rules are applied regardless of the User-agent
+        // string.
+        if (!inMatchingUserAgent && !config.getIgnoreUserAgentInAllow()) {
           continue;
         }
         String path = line.substring(PATTERNS_ALLOW_LENGTH).trim();
@@ -84,13 +93,15 @@ public class RobotstxtParser {
           path = path.substring(0, path.length() - 1);
         }
         path = path.trim();
-        if (directives == null) {
-          directives = new HostDirectives();
+        if (inExactUserAgent) {
+          specificDirectives.addAllow(path);
+        } else {
+          directives.addAllow(path);
         }
-        directives.addAllow(path);
       }
     }
 
-    return directives;
+    HostDirectives [] result = {directives, specificDirectives};
+    return result;
   }
 }
