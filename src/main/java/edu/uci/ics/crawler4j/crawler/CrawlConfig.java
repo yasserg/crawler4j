@@ -124,6 +124,11 @@ public class CrawlConfig {
   private boolean onlineTldListUpdate = false;
 
   /**
+   * Should the crawler stop running when the queue is empty?
+   */
+  private boolean shutdownOnEmptyQueue = true;
+  
+  /**
    * If crawler should run behind a proxy, this parameter can be used for
    * specifying the proxy host.
    */
@@ -377,6 +382,17 @@ public class CrawlConfig {
    */
   public void setFollowRedirects(boolean followRedirects) {
     this.followRedirects = followRedirects;
+  }
+  
+  public boolean isShutdownOnEmptyQueue() {
+      return shutdownOnEmptyQueue;
+  }
+  
+  /**
+   * Should the crawler stop running when the queue is empty?
+   */
+  public void setShutdownOnEmptyQueue(boolean shutdown) {
+      shutdownOnEmptyQueue = shutdown;
   }
 
   public boolean isOnlineTldListUpdate() {
