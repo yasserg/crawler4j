@@ -113,6 +113,7 @@ public class Parser extends Configurable {
     parseData.setText(contentHandler.getBodyText().trim());
     parseData.setTitle(metadata.get(DublinCore.TITLE));
     parseData.setMetaTags(contentHandler.getMetaTags());
+    // Please note that identifying language takes less than 10 milliseconds
     LanguageIdentifier languageIdentifier = new LanguageIdentifier(parseData.getText());
     page.setLanguage(languageIdentifier.getLanguage());
 
