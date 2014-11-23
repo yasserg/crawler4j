@@ -49,9 +49,12 @@ public class IO {
 
   public static void writeBytesToFile(byte[] bytes, String destination) {
     try {
-      FileChannel fc = new FileOutputStream(destination).getChannel();
+      FileOutputStream fos = new FileOutputStream(destination);
+      FileChannel fc = fos.getChannel();
+
       fc.write(ByteBuffer.wrap(bytes));
       fc.close();
+      fos.close();
     } catch (Exception e) {
       e.printStackTrace();
     }
