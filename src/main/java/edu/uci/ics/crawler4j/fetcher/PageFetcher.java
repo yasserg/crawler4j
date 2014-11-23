@@ -43,6 +43,7 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
+import org.apache.http.conn.ConnectTimeoutException;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
@@ -234,7 +235,7 @@ public class PageFetcher extends Configurable {
       logger.error("Unknown host {} while fetching URL: {}", e.getMessage(), toFetchURL);
       fetchResult.setStatusCode(CustomFetchStatus.UnknownHostError);
       return fetchResult;
-    } catch (SocketTimeoutException e) {
+    } catch (SocketTimeoutException | ConnectTimeoutException e) {
       logger.error("Timeout while fetching page '{}': {}", toFetchURL, e.getMessage());
       fetchResult.setStatusCode(CustomFetchStatus.SocketTimeoutError);
       return fetchResult;
