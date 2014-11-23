@@ -20,6 +20,7 @@ package edu.uci.ics.crawler4j.fetcher;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.zip.GZIPInputStream;
@@ -229,9 +230,13 @@ public class PageFetcher extends Configurable {
       }
 
       get.abort();
+    } catch (UnknownHostException e) {
+      logger.error("Unknown host {} while fetching URL: {}", e.getMessage(), toFetchURL);
+      fetchResult.setStatusCode(CustomFetchStatus.UnknownHostError);
+      return fetchResult;
     } catch (SocketTimeoutException e) {
       logger.error("Timeout while fetching page '{}': {}", toFetchURL, e.getMessage());
-      fetchResult.setStatusCode(CustomFetchStatus.FatalTransportError);
+      fetchResult.setStatusCode(CustomFetchStatus.SocketTimeoutError);
       return fetchResult;
     } catch (IOException e) {
       if (toFetchURL.toLowerCase().endsWith("robots.txt")) {

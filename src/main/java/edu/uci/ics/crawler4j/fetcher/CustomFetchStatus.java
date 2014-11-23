@@ -27,6 +27,8 @@ public class CustomFetchStatus {
   public static final int SC_PERMANENT_REDIRECT = 308; // todo follow https://issues.apache.org/jira/browse/HTTPCORE-389
   public static final int PageTooBig = 1001;
   public static final int FatalTransportError = 1005;
+  public static final int UnknownHostError = 1007;
+  public static final int SocketTimeoutError = 1008;
   public static final int UnknownError = 1006;
 
   public static String getStatusDescription(int code) {
@@ -93,6 +95,10 @@ public class CustomFetchStatus {
       return "Request Timeout";
     case PageTooBig:
       return "Page size was too big";
+    case UnknownHostError:
+      return "Transport error - Unknown Host";
+    case SocketTimeoutError:
+      return "Transport error - Socket Timeout";
     case FatalTransportError:
       return "Fatal transport error - Is the server down ?";
     case UnknownError:
