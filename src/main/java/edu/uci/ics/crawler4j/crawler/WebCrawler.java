@@ -369,8 +369,13 @@ public class WebCrawler implements Runnable {
           curURL.setDocid(docIdServer.getNewDocID(fetchResult.getFetchedUrl()));
         }
 
-        if (!fetchResult.fetchContent(page)) {
+        if (!fetchResult.fetchContent(page, myController.getConfig().getMaxDownloadSize())) {
           throw new ContentFetchException();
+        }
+        
+        if (page.isTruncated()) {
+          logger.warn("Warning: unknown page size exceeded max-download-size, truncated to: ({}), at URL: {}",
+              myController.getConfig().getMaxDownloadSize(), curURL.getURL());
         }
 
         parser.parse(page, curURL.getURL());

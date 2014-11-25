@@ -81,7 +81,7 @@ public class Downloader {
       fetchResult = pageFetcher.fetchPage(curURL);
       if (fetchResult.getStatusCode() == HttpStatus.SC_OK) {
         Page page = new Page(curURL);
-        fetchResult.fetchContent(page);
+        fetchResult.fetchContent(page, pageFetcher.getConfig().getMaxDownloadSize());
         parser.parse(page, curURL.getURL());
         return page;
       }
