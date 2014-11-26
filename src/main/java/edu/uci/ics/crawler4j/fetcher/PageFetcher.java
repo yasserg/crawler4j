@@ -19,28 +19,32 @@ package edu.uci.ics.crawler4j.fetcher;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.zip.GZIPInputStream;
 
 import javax.net.ssl.SSLContext;
 
-import org.apache.http.Header;
-import org.apache.http.HeaderElement;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpException;
-import org.apache.http.HttpHost;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpResponseInterceptor;
-import org.apache.http.HttpStatus;
+import edu.uci.ics.crawler4j.crawler.*;
+import edu.uci.ics.crawler4j.crawler.authentication.AuthInfo;
+import edu.uci.ics.crawler4j.crawler.authentication.BasicAuthInfo;
+import edu.uci.ics.crawler4j.crawler.authentication.FormAuthInfo;
+import org.apache.http.*;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.ConnectTimeoutException;
@@ -50,16 +54,13 @@ import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLContexts;
 import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.entity.HttpEntityWrapper;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.*;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.uci.ics.crawler4j.crawler.Configurable;
-import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.url.URLCanonicalizer;
 import edu.uci.ics.crawler4j.url.WebURL;
 
@@ -151,11 +152,68 @@ public class PageFetcher extends Configurable {
     });
 
     httpClient = clientBuilder.build();
+    if (config.getAuthInfos() != null && !config.getAuthInfos().isEmpty()) {
+      doAuthetication(config.getAuthInfos());
+    }
 
     if (connectionMonitorThread == null) {
       connectionMonitorThread = new IdleConnectionMonitorThread(connectionManager);
     }
     connectionMonitorThread.start();
+  }
+
+  private void doAuthetication(List<AuthInfo> authInfos) {
+    for (AuthInfo authInfo : authInfos) {
+      if (authInfo.getAuthenticationType().equals(AuthInfo.AuthenticationType.BASIC_AUTHENTICATION)) {
+        doBasicLogin((BasicAuthInfo) authInfo);
+      } else {
+        doFormLogin((FormAuthInfo) authInfo);
+      }
+    }
+  }
+
+  /**
+   * BASIC authentication<br/>
+   * Official Example: https://hc.apache.org/httpcomponents-client-ga/httpclient/examples/org/apache/http/examples/client/ClientAuthentication.java
+   * */
+  private void doBasicLogin(BasicAuthInfo authInfo) {
+    HttpHost targetHost = new HttpHost(authInfo.getHost(), authInfo.getPort(), authInfo.getProtocol());
+    CredentialsProvider credsProvider = new BasicCredentialsProvider();
+    credsProvider.setCredentials(
+        new AuthScope(targetHost.getHostName(), targetHost.getPort()),
+        new UsernamePasswordCredentials(authInfo.getUsername(), authInfo.getPassword()));
+    httpClient = HttpClients.custom()
+        .setDefaultCredentialsProvider(credsProvider)
+        .build();
+  }
+
+  /**
+   * FORM authentication<br/>
+   * Official Example: https://hc.apache.org/httpcomponents-client-ga/httpclient/examples/org/apache/http/examples/client/ClientFormLogin.java
+   * */
+  private void doFormLogin(FormAuthInfo authInfo) {
+    String fullUri = authInfo.getProtocol() + "://" + authInfo.getHost() + ":" + authInfo.getPort() + authInfo.getLoginTarget();
+    HttpPost httpPost = new HttpPost(fullUri);
+    List<NameValuePair> formParams = new ArrayList<>();
+    formParams.add(new BasicNameValuePair(authInfo.getUsernameFormStr(), authInfo.getUsername()));
+    formParams.add(new BasicNameValuePair(authInfo.getPasswordFormStr(), authInfo.getPassword()));
+
+    UrlEncodedFormEntity entity = null;
+    try {
+      entity = new UrlEncodedFormEntity(formParams, "UTF-8");
+    } catch (UnsupportedEncodingException e) {
+      logger.error("Encountered a non supported encoding while trying to login to: " + authInfo.getHost(), e);
+    }
+    httpPost.setEntity(entity);
+
+    try {
+      httpClient.execute(httpPost);
+      logger.debug("Logged in with user " + authInfo.getUsername() + " to " + authInfo.getHost());
+    } catch (ClientProtocolException e) {
+      logger.error("While trying to login to: " + authInfo.getHost() + " - Client protocol not supported", e);
+    } catch (IOException e) {
+      logger.error("While trying to login to: " + authInfo.getHost() + " - Error making request", e);
+    }
   }
 
   public PageFetchResult fetchHeader(WebURL webUrl) {

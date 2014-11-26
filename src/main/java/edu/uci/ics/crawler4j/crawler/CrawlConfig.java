@@ -17,6 +17,11 @@
 
 package edu.uci.ics.crawler4j.crawler;
 
+import edu.uci.ics.crawler4j.crawler.authentication.AuthInfo;
+
+import java.util.ArrayList;
+import java.util.List;
+
 public class CrawlConfig {
 
   /**
@@ -126,6 +131,11 @@ public class CrawlConfig {
    * password.
    */
   private String proxyPassword = null;
+
+  /**
+  * List of possible authentications needed by crawler
+  */
+  private List<AuthInfo> authInfos;
 
   public CrawlConfig() {
   }
@@ -373,6 +383,28 @@ public class CrawlConfig {
    */
   public void setProxyPassword(String proxyPassword) {
     this.proxyPassword = proxyPassword;
+  }
+
+  /**
+   * @return the authentications Information
+   */
+  public List<AuthInfo> getAuthInfos() {
+    return authInfos;
+  }
+
+  public void addAuthInfo(AuthInfo authInfo) {
+    if (this.authInfos == null) {
+      this.authInfos = new ArrayList<AuthInfo>();
+    }
+
+    this.authInfos.add(authInfo);
+  }
+
+  /**
+   /* @param authenticationInformations the authenticationInformations to set
+   */
+  public void setAuthInfos(List<AuthInfo> authInfos) {
+    this.authInfos = authInfos;
   }
 
   @Override
