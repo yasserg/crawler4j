@@ -265,17 +265,6 @@ public class PageFetcher extends Configurable {
 
       if (fetchResult.getEntity() != null) {
         long size = fetchResult.getEntity().getContentLength();
-        if (size == -1) {
-          Header length = response.getLastHeader("Content-Length");
-          if (length == null) {
-            length = response.getLastHeader("Content-length");
-          }
-          if (length != null) {
-            size = Integer.parseInt(length.getValue());
-          } else {
-            size = -1;
-          }
-        }
         if (size > config.getMaxDownloadSize()) {
           fetchResult.setStatusCode(CustomFetchStatus.PageTooBig);
           get.abort();
