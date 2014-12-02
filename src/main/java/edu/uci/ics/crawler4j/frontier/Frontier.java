@@ -49,11 +49,14 @@ public class Frontier extends Configurable {
 
   protected long scheduledPages;
 
+  protected DocIDServer docIdServer;
+  
   protected Counters counters;
 
-  public Frontier(Environment env, CrawlConfig config) {
+  public Frontier(Environment env, CrawlConfig config, DocIDServer docIdServer) {
     super(config);
     this.counters = new Counters(env, config);
+    this.docIdServer = docIdServer;
     try {
       workQueues = new WorkQueues(env, DATABASE_NAME, config.isResumableCrawling());
       if (config.isResumableCrawling()) {
@@ -118,6 +121,36 @@ public class Frontier extends Configurable {
         }
       } catch (DatabaseException e) {
         logger.error("Error while putting the url in the work queue", e);
+      }
+    }
+  }
+  
+  /**
+   * Remove all document IDs from the DocIDServer. This allows to re-crawl
+   * pages that have been visited before, which can be useful in a long-running
+   * crawler that may revisit pages after a certain amount of time.
+   * 
+   * This method will wait until all queues are empty to avoid purging DocIDs
+   * that are still will be crawled before actually clearing the database, so make
+   * sure the crawler is running when executing this method.
+   */
+  public void clearDocIDs() {
+    while (true) {
+      if (getQueueLength() > 0) {
+        synchronized (waitingList) {
+          try {
+            waitingList.wait(2000);
+          } catch (InterruptedException e)
+          {}
+        }
+      } else {
+        synchronized (mutex) {
+          if (getQueueLength() > 0)
+            continue;
+          docIdServer.clear();
+          logger.info("Document ID Server has been emptied.");
+          break;
+        }
       }
     }
   }
