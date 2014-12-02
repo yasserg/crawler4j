@@ -7,6 +7,12 @@ import java.net.MalformedURLException;
  * Created by Avi Hayun on 11/25/2014.
  *
  * BasicAuthInfo contains the authentication information needed for BASIC authentication (extending AuthInfo which has all common auth info in it)
+ *
+ * BASIC authentication in PHP:
+ * <ul>
+ *  <li>http://php.net/manual/en/features.http-auth.php</li>
+ *  <li>http://stackoverflow.com/questions/4150507/how-can-i-use-basic-http-authentication-in-php</li>
+ * </ul>
  */
 public class BasicAuthInfo extends AuthInfo {
 

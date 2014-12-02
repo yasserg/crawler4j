@@ -7,6 +7,7 @@ import java.net.MalformedURLException;
  * Created by Avi Hayun on 11/25/2014.
  *
  * FormAuthInfo contains the authentication information needed for FORM authentication (extending AuthInfo which has all common auth info in it)
+ * Basically, this is the most common authentication, where you will get to a site and you will need to enter a username & password into an HTML form
  */
 public class FormAuthInfo extends AuthInfo {
 
