@@ -26,7 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @author Yasser Ganjisaffar <lastname at gmail dot com>
+ * @author Yasser Ganjisaffar [lastname at gmail dot com]
  */
 
 public class DocIDServer extends Configurable {

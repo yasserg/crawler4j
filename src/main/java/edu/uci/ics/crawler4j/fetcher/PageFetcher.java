@@ -65,7 +65,7 @@ import edu.uci.ics.crawler4j.url.URLCanonicalizer;
 import edu.uci.ics.crawler4j.url.WebURL;
 
 /**
- * @author Yasser Ganjisaffar <lastname at gmail dot com>
+ * @author Yasser Ganjisaffar [lastname at gmail dot com]
  */
 public class PageFetcher extends Configurable {
 

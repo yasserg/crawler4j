@@ -40,7 +40,7 @@ import java.util.List;
  * WebCrawler class in the Runnable class that is executed by each crawler
  * thread.
  *
- * @author Yasser Ganjisaffar <lastname at gmail dot com>
+ * @author Yasser Ganjisaffar [lastname at gmail dot com]
  */
 public class WebCrawler implements Runnable {
 
@@ -158,9 +158,9 @@ public class WebCrawler implements Runnable {
    * overridden by sub-classes to perform custom logic for different status
    * codes. For example, 404 pages can be logged, etc.
    *
-   * @param webUrl
-   * @param statusCode
-   * @param statusDescription
+   * @param webUrl WebUrl containing the statusCode
+   * @param statusCode Html Status Code number
+   * @param statusDescription Html Status COde description
    */
   protected void handlePageStatusCode(WebURL webUrl, int statusCode, String statusDescription) {
     // Do nothing by default
@@ -170,7 +170,7 @@ public class WebCrawler implements Runnable {
     /**
      * This function is called before processing of the page's URL
      * It can be overridden by subclasses for tweaking of the url before processing it.
-     * For example, http://abc.com/def?a=123 >> http://abc.com/def
+     * For example, http://abc.com/def?a=123 - http://abc.com/def
      *
      * @param curURL current URL which can be tweaked before processing
      * @return tweaked WebURL
@@ -188,11 +188,14 @@ public class WebCrawler implements Runnable {
       logger.warn("Skipping a page which was bigger than max allowed size: {}", urlStr);
     }
 
-    /**
-     * This function is called if the crawler encountered an unexpected error while crawling this url
-     *
-     * @param urlStr - The URL in which an unexpected error was encountered while crawling
-     */
+  /**
+   * This function is called if the crawler encountered an unexpected error while crawling this url
+   *
+   * @param urlStr URL in which an unexpected error was encountered while crawling
+   * @param statusCode Html StatusCode
+   * @param contentType Type of Content
+   * @param description Error Description
+   */
     protected void onUnexpectedError(String urlStr, int statusCode, String contentType, String description) {
       logger.warn("Skipping URL: {}, StatusCode: {}, {}, {}", urlStr, statusCode, contentType, description);
       // Do nothing by default (except basic logging)
@@ -202,7 +205,7 @@ public class WebCrawler implements Runnable {
   /**
    * This function is called if the content of a url could not be fetched.
    *
-   * @param webUrl
+   * @param webUrl URL which content failed to be fetched
    */
   protected void onContentFetchError(WebURL webUrl) {
     logger.warn("Can't fetch content of: {}", webUrl.getURL());
@@ -214,7 +217,7 @@ public class WebCrawler implements Runnable {
    * This function is called if there has been an error in parsing the
    * content.
    *
-   * @param webUrl
+   * @param webUrl URL which failed on parsing
    */
   protected void onParseError(WebURL webUrl) {
     logger.warn("Parsing error of: {}", webUrl.getURL());
@@ -227,8 +230,9 @@ public class WebCrawler implements Runnable {
    * call this function just before terminating this crawler thread. Classes
    * that extend WebCrawler can override this function to pass their local
    * data to their controller. The controller then puts these local data in a
-   * List that can then be used for processing the local data of crawlers (if
-   * needed).
+   * List that can then be used for processing the local data of crawlers (if needed).
+   *
+   * @return currently NULL
    */
   public Object getMyLocalData() {
     return null;

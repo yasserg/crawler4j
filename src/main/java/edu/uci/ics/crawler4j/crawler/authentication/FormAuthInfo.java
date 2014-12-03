@@ -7,7 +7,7 @@ import java.net.MalformedURLException;
  * Created by Avi Hayun on 11/25/2014.
  *
  * FormAuthInfo contains the authentication information needed for FORM authentication (extending AuthInfo which has all common auth info in it)
- * Basically, this is the most common authentication, where you will get to a site and you will need to enter a username & password into an HTML form
+ * Basically, this is the most common authentication, where you will get to a site and you will need to enter a username and password into an HTML form
  */
 public class FormAuthInfo extends AuthInfo {
 
@@ -22,6 +22,8 @@ public class FormAuthInfo extends AuthInfo {
    * @param loginUrl Full login URL, starting with "http"... ending with the full URL
    * @param usernameFormStr "Name" attribute of the username form field
    * @param passwordFormStr "Name" attribute of the password form field
+   *
+   * @throws MalformedURLException Make sure your URL is valid
    */
   public FormAuthInfo(String username, String password, String loginUrl, String usernameFormStr, String passwordFormStr) throws MalformedURLException {
     super(AuthenticationType.FORM_AUTHENTICATION, MethodType.POST, loginUrl, username, password);
@@ -30,22 +32,30 @@ public class FormAuthInfo extends AuthInfo {
     this.passwordFormStr = passwordFormStr;
   }
 
-  /** Returns the username html "name" form attribute */
+  /**
+   * @return username html "name" form attribute
+   */
   public String getUsernameFormStr() {
     return usernameFormStr;
   }
 
-  /** Sets the username html "name" form attribute */
+  /**
+   * @param usernameFormStr username html "name" form attribute
+   */
   public void setUsernameFormStr(String usernameFormStr) {
     this.usernameFormStr = usernameFormStr;
   }
 
-  /** Returns the password html "name" form attribute */
+  /**
+   * @return password html "name" form attribute
+   */
   public String getPasswordFormStr() {
     return passwordFormStr;
   }
 
-  /** Sets the password html "name" form attribute */
+  /**
+   * @param passwordFormStr password html "name" form attribute
+   */
   public void setPasswordFormStr(String passwordFormStr) {
     this.passwordFormStr = passwordFormStr;
   }

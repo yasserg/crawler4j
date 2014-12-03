@@ -32,7 +32,7 @@ import java.util.TreeMap;
  * See http://en.wikipedia.org/wiki/URL_normalization for a reference Note: some
  * parts of the code are adapted from: http://stackoverflow.com/a/4057470/405418
  * 
- * @author Yasser Ganjisaffar <lastname at gmail dot com>
+ * @author Yasser Ganjisaffar [lastname at gmail dot com]
  */
 public class URLCanonicalizer {
 

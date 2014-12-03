@@ -30,7 +30,7 @@ import edu.uci.ics.crawler4j.url.WebURL;
 /**
  * This class contains the data for a fetched and parsed page.
  *
- * @author Yasser Ganjisaffar <lastname at gmail dot com>
+ * @author Yasser Ganjisaffar [lastname at gmail dot com]
  */
 public class Page {
 
@@ -99,8 +99,10 @@ public class Page {
   }
 
   /**
-   * Loads the content of this page from a fetched
-   * HttpEntity.
+   * Loads the content of this page from a fetched HttpEntity.
+   *
+   * @param entity HttpEntity
+   * @throws Exception when load fails
    */
   public void load(HttpEntity entity) throws Exception {
 
@@ -158,8 +160,9 @@ public class Page {
   }
 
   /**
-   * Returns headers which were present in the response of the
-   * fetch request
+   * Returns headers which were present in the response of the fetch request
+   *
+   * @return Header Array, the response headers
    */
   public Header[] getFetchResponseHeaders() {
     return fetchResponseHeaders;
@@ -170,7 +173,7 @@ public class Page {
   }
 
   /**
-   * Returns the parsed data generated for this page by parsers
+   * @return parsed data generated for this page by parsers
    */
   public ParseData getParseData() {
     return parseData;
@@ -181,7 +184,7 @@ public class Page {
   }
 
   /**
-   * Returns the content of this page in binary format.
+   * @return content of this page in binary format.
    */
   public byte[] getContentData() {
     return contentData;
@@ -192,7 +195,7 @@ public class Page {
   }
 
   /**
-   * Returns the ContentType of this page.
+   * @return ContentType of this page.
    * For example: "text/html; charset=UTF-8"
    */
   public String getContentType() {
@@ -204,7 +207,7 @@ public class Page {
   }
 
   /**
-   * Returns the encoding of the content.
+   * @return encoding of the content.
    * For example: "gzip"
    */
   public String getContentEncoding() {
@@ -216,7 +219,7 @@ public class Page {
   }
 
   /**
-   * Returns the charset of the content.
+   * @return charset of the content.
    * For example: "UTF-8"
    */
   public String getContentCharset() {
@@ -227,6 +230,9 @@ public class Page {
     this.contentCharset = contentCharset;
   }
 
+  /**
+   * @return Language
+   */
   public String getLanguage() {
     return language;
   }

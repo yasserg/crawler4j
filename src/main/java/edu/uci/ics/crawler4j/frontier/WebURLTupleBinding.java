@@ -24,7 +24,7 @@ import com.sleepycat.bind.tuple.TupleOutput;
 import edu.uci.ics.crawler4j.url.WebURL;
 
 /**
- * @author Yasser Ganjisaffar <lastname at gmail dot com>
+ * @author Yasser Ganjisaffar [lastname at gmail dot com]
  */
 public class WebURLTupleBinding extends TupleBinding<WebURL> {
 

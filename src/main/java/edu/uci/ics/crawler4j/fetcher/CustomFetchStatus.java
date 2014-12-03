@@ -20,7 +20,7 @@ package edu.uci.ics.crawler4j.fetcher;
 import org.apache.http.HttpStatus;
 
 /**
- * @author Yasser Ganjisaffar <lastname at gmail dot com>
+ * @author Yasser Ganjisaffar [lastname at gmail dot com]
  */
 public class CustomFetchStatus {
 

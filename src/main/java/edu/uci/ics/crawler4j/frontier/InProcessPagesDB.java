@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
  * assigned to crawlers but are not yet processed.
  * It is used for resuming a previous crawl. 
  * 
- * @author Yasser Ganjisaffar <lastname at gmail dot com>
+ * @author Yasser Ganjisaffar [lastname at gmail dot com]
  */
 public class InProcessPagesDB extends WorkQueues {
 

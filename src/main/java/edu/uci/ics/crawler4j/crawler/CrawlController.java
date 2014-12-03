@@ -37,7 +37,7 @@ import java.util.List;
  * The controller that manages a crawling session. This class creates the
  * crawler threads and monitors their progress.
  * 
- * @author Yasser Ganjisaffar <lastname at gmail dot com>
+ * @author Yasser Ganjisaffar [lastname at gmail dot com]
  */
 public class CrawlController extends Configurable {
 
@@ -122,6 +122,7 @@ public class CrawlController extends Configurable {
    * @param numberOfCrawlers
    *            the number of concurrent threads that will be contributing in
    *            this crawling session.
+   * @param <T> Your class extending WebCrawler
    */
   public <T extends WebCrawler> void start(final Class<T> _c, final int numberOfCrawlers) {
     this.start(_c, numberOfCrawlers, true);
@@ -135,6 +136,7 @@ public class CrawlController extends Configurable {
    * @param numberOfCrawlers
    *            the number of concurrent threads that will be contributing in
    *            this crawling session.
+   * @param <T> Your class extending WebCrawler
    */
   public <T extends WebCrawler> void startNonBlocking(final Class<T> _c, final int numberOfCrawlers) {
     this.start(_c, numberOfCrawlers, false);
@@ -283,6 +285,8 @@ public class CrawlController extends Configurable {
    * Once the crawling session finishes the controller collects the local data
    * of the crawler threads and stores them in a List. This function returns
    * the reference to this list.
+   *
+   * @return List of Objects which are your local data
    */
   public List<Object> getCrawlersLocalData() {
     return crawlersLocalData;

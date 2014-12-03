@@ -7,9 +7,9 @@ import java.net.URL;
 /**
  * Created by Avi Hayun on 11/23/2014.
  *
- * Abstract class containing authentication information needed to login into a user/password protected site<br/>
- * This class should be extended by specific authentication types like form authentication and basic authentication etc<br/>
- * <br/>
+ * Abstract class containing authentication information needed to login into a user/password protected site<br>
+ * This class should be extended by specific authentication types like form authentication and basic authentication etc<br>
+ * <br>
  * This class contains all of the mutual authentication data for all authentication types
  */
 public abstract class AuthInfo {
@@ -26,10 +26,21 @@ public abstract class AuthInfo {
   protected String username;
   protected String password;
 
+  /** Constructs a new AuthInfo. */
   public AuthInfo() {
   }
 
-  /** This constructor should only be used by extending classes */
+  /**
+   * This constructor should only be used by extending classes
+   *
+   * @param authenticationType Pick the one which matches your authentication
+   * @param httpMethod Choose POST / GET
+   * @param loginUrl Full URL of the login page
+   * @param username Username for Authentication
+   * @param password Password for Authentication
+   *
+   * @throws MalformedURLException Make sure your URL is valid
+   */
   protected AuthInfo(AuthenticationType authenticationType, MethodType httpMethod, String loginUrl, String username, String password) throws MalformedURLException {
     this.authenticationType = authenticationType;
     this.httpMethod = httpMethod;
@@ -43,82 +54,116 @@ public abstract class AuthInfo {
     this.password = password;
   }
 
-  /** Returns the Authentication type (BASIC, FORM) */
+  /**
+   * @return Authentication type (BASIC, FORM)
+   */
   public AuthenticationType getAuthenticationType() {
     return authenticationType;
   }
 
-  /** Should be set only by extending classes (BASIC, FORM) */
+  /**
+   *
+   * @param authenticationType Should be set only by extending classes (BASICAuthInfo, FORMAuthInfo)
+   */
   public void setAuthenticationType(AuthenticationType authenticationType) {
     this.authenticationType = authenticationType;
   }
 
-  /** Returns the httpMethod (POST, GET) */
+  /**
+   *
+   * @return httpMethod (POST, GET)
+   */
   public MethodType getHttpMethod() {
     return httpMethod;
   }
 
-  /** Should be set by extending classes (POST, GET) */
+  /**
+   * @param httpMethod Should be set by extending classes (POST, GET)
+   */
   public void setHttpMethod(MethodType httpMethod) {
     this.httpMethod = httpMethod;
   }
 
-  /** Returns protocol type (http, https) */
+  /**
+   * @return protocol type (http, https)
+   */
   public String getProtocol() {
     return protocol;
   }
 
-  /** Don't set this one unless you know what you are doing (protocol: http, https) */
+  /**
+   * @param protocol Don't set this one unless you know what you are doing (protocol: http, https)
+   */
   public void setProtocol(String protocol) {
     this.protocol = protocol;
   }
 
-  /** Returns the host (www.sitename.com) */
+  /**
+   * @return host (www.sitename.com)
+   */
   public String getHost() {
     return host;
   }
 
-  /** Don't set this one unless you know what you are doing (sets the domain name) */
+  /**
+   * @param host Don't set this one unless you know what you are doing (sets the domain name)
+   */
   public void setHost(String host) {
     this.host = host;
   }
 
-  /** Returns the file/path which is the rest of the url after the domain name (eg: /login.php) */
+  /**
+   * @return file/path which is the rest of the url after the domain name (eg: /login.php)
+   */
   public String getLoginTarget() {
     return loginTarget;
   }
 
-  /** Don't set this one unless you know what you are doing (eg: /login.php) */
+  /**
+   * @param loginTarget Don't set this one unless you know what you are doing (eg: /login.php)
+   */
   public void setLoginTarget(String loginTarget) {
     this.loginTarget = loginTarget;
   }
 
-  /** Returns the port number (eg: 80, 443) */
+  /**
+   * @return port number (eg: 80, 443)
+   */
   public int getPort() {
     return port;
   }
 
-  /** Don't set this one unless you know what you are doing (eg: 80, 443) */
+  /**
+   * @param port Don't set this one unless you know what you are doing (eg: 80, 443)
+   */
   public void setPort(int port) {
     this.port = port;
   }
 
-  /** Returns the username used for Authentication */
+  /**
+   * @return username used for Authentication
+   */
   public String getUsername() {
     return username;
   }
 
-  /** Sets the username used for Authentication */
+  /**
+   * @param username username used for Authentication
+   */
   public void setUsername(String username) {
     this.username = username;
   }
 
-  /** Returns the password used for Authentication */
+  /**
+   * @return password used for Authentication
+   */
   public String getPassword() {
     return password;
   }
 
-  /** Sets the password used for Authentication */
+  /**
+   * @param password password used for Authentication
+   */
   public void setPassword(String password) {
     this.password = password;
   }

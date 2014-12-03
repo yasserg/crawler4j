@@ -20,7 +20,7 @@ package edu.uci.ics.crawler4j.examples.imagecrawler;
 import java.security.MessageDigest;
 
 /**
- * @author Yasser Ganjisaffar <lastname at gmail dot com>
+ * @author Yasser Ganjisaffar [lastname at gmail dot com]
  */
 public class Cryptography {
 
