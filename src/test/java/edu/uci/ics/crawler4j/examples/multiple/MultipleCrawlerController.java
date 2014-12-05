@@ -22,17 +22,20 @@ import edu.uci.ics.crawler4j.crawler.CrawlController;
 import edu.uci.ics.crawler4j.fetcher.PageFetcher;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtConfig;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Yasser Ganjisaffar [lastname at gmail dot com]
  */
 
 public class MultipleCrawlerController {
+  private static Logger logger = LoggerFactory.getLogger(MultipleCrawlerController.class);
 
   public static void main(String[] args) throws Exception {
     if (args.length != 1) {
-      System.out.println("Needed parameter: ");
-      System.out.println("\t rootFolder (it will contain intermediate crawl data)");
+      logger.info("Needed parameter: ");
+      logger.info("\t rootFolder (it will contain intermediate crawl data)");
       return;
     }
 
@@ -96,9 +99,9 @@ public class MultipleCrawlerController {
     controller2.startNonBlocking(BasicCrawler.class, 7);
 
     controller1.waitUntilFinish();
-    System.out.println("Crawler 1 is finished.");
+    logger.info("Crawler 1 is finished.");
 
     controller2.waitUntilFinish();
-    System.out.println("Crawler 2 is finished.");
+    logger.info("Crawler 2 is finished.");
   }
 }

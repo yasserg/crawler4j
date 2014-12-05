@@ -24,11 +24,14 @@ import org.apache.http.HttpStatus;
 import edu.uci.ics.crawler4j.crawler.Page;
 import edu.uci.ics.crawler4j.crawler.WebCrawler;
 import edu.uci.ics.crawler4j.url.WebURL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Yasser Ganjisaffar [lastname at gmail dot com]
  */
 public class StatusHandlerCrawler extends WebCrawler {
+	private Logger logger = LoggerFactory.getLogger(StatusHandlerCrawler.class);
 
 	private final static Pattern FILTERS = Pattern.compile(".*(\\.(css|js|bmp|gif|jpe?g" + "|png|tiff?|mid|mp2|mp3|mp4"
 			+ "|wav|avi|mov|mpeg|ram|m4v|pdf" + "|rm|smil|wmv|swf|wma|zip|rar|gz))$");
@@ -59,9 +62,9 @@ public class StatusHandlerCrawler extends WebCrawler {
 		if (statusCode != HttpStatus.SC_OK) {
 
 			if (statusCode == HttpStatus.SC_NOT_FOUND) {
-				System.out.println("Broken link: " + webUrl.getURL() + ", this link was found in page: " + webUrl.getParentUrl());
+				logger.warn("Broken link: {}, this link was found in page: {}", webUrl.getURL(), webUrl.getParentUrl());
 			} else {
-				System.out.println("Non success status for link: " + webUrl.getURL() + ", status code: " + statusCode + ", description: " + statusDescription);
+				logger.warn("Non success status for link: {} status code: {}, description: ", webUrl.getURL(), statusCode, statusDescription);
 			}
 		}
 	}

@@ -24,14 +24,17 @@ import edu.uci.ics.crawler4j.crawler.CrawlController;
 import edu.uci.ics.crawler4j.fetcher.PageFetcher;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtConfig;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class LocalDataCollectorController {
+	private static Logger logger = LoggerFactory.getLogger(LocalDataCollectorController.class);
 
 	public static void main(String[] args) throws Exception {
 		if (args.length != 2) {
-			System.out.println("Needed parameters: ");
-			System.out.println("\t rootFolder (it will contain intermediate crawl data)");
-			System.out.println("\t numberOfCralwers (number of concurrent threads)");
+			logger.info("Needed parameters: ");
+			logger.info("\t rootFolder (it will contain intermediate crawl data)");
+			logger.info("\t numberOfCralwers (number of concurrent threads)");
 			return;
 		}
 
@@ -62,9 +65,9 @@ public class LocalDataCollectorController {
 			totalProcessedPages += stat.getTotalProcessedPages();
 		}
 
-		System.out.println("Aggregated Statistics:");
-		System.out.println("   Processed Pages: " + totalProcessedPages);
-		System.out.println("   Total Links found: " + totalLinks);
-		System.out.println("   Total Text Size: " + totalTextSize);
+		logger.info("Aggregated Statistics:");
+		logger.info("\tProcessed Pages: {}", totalProcessedPages);
+		logger.info("\tTotal Links found: {}", totalLinks);
+		logger.info("\tTotal Text Size: {}", totalTextSize);
 	}
 }

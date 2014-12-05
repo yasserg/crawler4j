@@ -1,6 +1,7 @@
 Crawler4J Change Log
 
 Version 4.1
+- Issue 321: Change logging from System.out.print to SLF4J
 - Issue 301: Upgrade the Pattern constant on the crawler examples
 
 Version 4.0 (December 2014)

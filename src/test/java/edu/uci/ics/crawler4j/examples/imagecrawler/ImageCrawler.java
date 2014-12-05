@@ -99,6 +99,6 @@ public class ImageCrawler extends WebCrawler {
     // store image
     IO.writeBytesToFile(page.getContentData(), storageFolder.getAbsolutePath() + "/" + hashedName);
 
-    System.out.println("Stored: " + url);
+    logger.info("Stored: {}", url);
   }
 }

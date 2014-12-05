@@ -21,12 +21,15 @@ import edu.uci.ics.crawler4j.crawler.Page;
 import edu.uci.ics.crawler4j.crawler.WebCrawler;
 import edu.uci.ics.crawler4j.parser.HtmlParseData;
 import edu.uci.ics.crawler4j.url.WebURL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Set;
 import java.util.regex.Pattern;
 
 public class LocalDataCollectorCrawler extends WebCrawler {
+  private Logger logger = LoggerFactory.getLogger(LocalDataCollectorCrawler.class);
 
   Pattern filters = Pattern.compile(".*(\\.(css|js|bmp|gif|jpe?g" + "|png|tiff?|mid|mp2|mp3|mp4"
       + "|wav|avi|mov|mpeg|ram|m4v|pdf" + "|rm|smil|wmv|swf|wma|zip|rar|gz))$");
@@ -45,7 +48,7 @@ public class LocalDataCollectorCrawler extends WebCrawler {
 
   @Override
   public void visit(Page page) {
-    System.out.println("Visited: " + page.getWebURL().getURL());
+    logger.info("Visited: {}", page.getWebURL().getURL());
     myCrawlStat.incProcessedPages();
 
     if (page.getParseData() instanceof HtmlParseData) {
@@ -64,15 +67,18 @@ public class LocalDataCollectorCrawler extends WebCrawler {
     }
   }
 
-  // This function is called by controller to get the local data of this
-  // crawler when job is finished
+  /**
+   * This function is called by controller to get the local data of this crawler when job is finished
+  */
   @Override
   public Object getMyLocalData() {
     return myCrawlStat;
   }
 
-  // This function is called by controller before finishing the job.
-  // You can put whatever stuff you need here.
+  /**
+   * This function is called by controller before finishing the job.
+   * You can put whatever stuff you need here.
+   */
   @Override
   public void onBeforeExit() {
     dumpMyData();
@@ -80,10 +86,9 @@ public class LocalDataCollectorCrawler extends WebCrawler {
 
   public void dumpMyData() {
     int id = getMyId();
-    // This is just an example. Therefore I print on screen. You may
-    // probably want to write in a text file.
-    System.out.println("Crawler " + id + "> Processed Pages: " + myCrawlStat.getTotalProcessedPages());
-    System.out.println("Crawler " + id + "> Total Links Found: " + myCrawlStat.getTotalLinks());
-    System.out.println("Crawler " + id + "> Total Text Size: " + myCrawlStat.getTotalTextSize());
+    // You can configure the log to output to file
+    logger.info("Crawler {} > Processed Pages: {}", id, myCrawlStat.getTotalProcessedPages());
+    logger.info("Crawler {} > Total Links Found: {}", id, myCrawlStat.getTotalLinks());
+    logger.info("Crawler {} > Total Text Size: {}", id,  myCrawlStat.getTotalTextSize());
   }
 }

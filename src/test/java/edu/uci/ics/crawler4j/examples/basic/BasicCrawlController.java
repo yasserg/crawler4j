@@ -17,22 +17,26 @@
 
 package edu.uci.ics.crawler4j.examples.basic;
 
+import com.sleepycat.je.txn.LockerFactory;
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.crawler.CrawlController;
 import edu.uci.ics.crawler4j.fetcher.PageFetcher;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtConfig;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Yasser Ganjisaffar [lastname at gmail dot com]
  */
 public class BasicCrawlController {
+  private static Logger logger = LoggerFactory.getLogger(BasicCrawlController.class);
 
   public static void main(String[] args) throws Exception {
     if (args.length != 2) {
-      System.out.println("Needed parameters: ");
-      System.out.println("\t rootFolder (it will contain intermediate crawl data)");
-      System.out.println("\t numberOfCralwers (number of concurrent threads)");
+      logger.info("Needed parameters: ");
+      logger.info("\t rootFolder (it will contain intermediate crawl data)");
+      logger.info("\t numberOfCralwers (number of concurrent threads)");
       return;
     }
 
@@ -69,6 +73,12 @@ public class BasicCrawlController {
      * is -1 for unlimited number of pages
      */
     config.setMaxPagesToFetch(1000);
+
+    /**
+     * Do you want crawler4j to crawl also binary data ?
+     * example: the contents of pdf, or the metadata of images etc
+     */
+    config.setIncludeBinaryContentInCrawling(false);
 
     /*
      * Do you need to set a proxy? If so, you can use:

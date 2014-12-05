@@ -17,6 +17,9 @@
 
 package edu.uci.ics.crawler4j.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
@@ -25,13 +28,14 @@ import java.nio.channels.FileChannel;
  * @author Yasser Ganjisaffar [lastname at gmail dot com]
  */
 public class IO {
+  private static Logger logger = LoggerFactory.getLogger(IO.class);
 
   public static boolean deleteFolder(File folder) {
     return deleteFolderContents(folder) && folder.delete();
   }
 
   public static boolean deleteFolderContents(File folder) {
-    System.out.println("Deleting content of: " + folder.getAbsolutePath());
+    logger.info("Deleting content of: " + folder.getAbsolutePath());
     File[] files = folder.listFiles();
     for (File file : files) {
       if (file.isFile()) {
@@ -56,7 +60,7 @@ public class IO {
       fc.close();
       fos.close();
     } catch (Exception e) {
-      e.printStackTrace();
+      logger.error("Failed to write file: " + destination, e);
     }
   }
 }

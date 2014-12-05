@@ -27,6 +27,8 @@ import edu.uci.ics.crawler4j.parser.HtmlParseData;
 import edu.uci.ics.crawler4j.parser.ParseData;
 import edu.uci.ics.crawler4j.parser.Parser;
 import edu.uci.ics.crawler4j.url.WebURL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class is a demonstration of how crawler4j can be used to download a
@@ -36,6 +38,7 @@ public class Downloader {
 
   private Parser parser;
   private PageFetcher pageFetcher;
+  private Logger logger = LoggerFactory.getLogger(Downloader.class);
 
   public Downloader() {
     CrawlConfig config = new CrawlConfig();
@@ -70,24 +73,24 @@ public class Downloader {
   }
 
   public void processUrl(String url) {
-    System.out.println("Processing: " + url);
+    logger.debug("Processing: {}", url);
     Page page = download(url);
     if (page != null) {
       ParseData parseData = page.getParseData();
       if (parseData != null) {
         if (parseData instanceof HtmlParseData) {
           HtmlParseData htmlParseData = (HtmlParseData) parseData;
-          System.out.println("Title: " + htmlParseData.getTitle());
-          System.out.println("Text length: " + htmlParseData.getText().length());
-          System.out.println("Html length: " + htmlParseData.getHtml().length());
+          logger.debug("Title: {}", htmlParseData.getTitle());
+          logger.debug("Text length: {}", htmlParseData.getText().length());
+          logger.debug("Html length: {}", htmlParseData.getHtml().length());
         }
       } else {
-        System.out.println("Couldn't parse the content of the page.");
+        logger.warn("Couldn't parse the content of the page.");
       }
     } else {
-      System.out.println("Couldn't fetch the content of the page.");
+      logger.warn("Couldn't fetch the content of the page.");
     }
-    System.out.println("==============");
+    logger.debug("==============");
   }
 
   public static void main(String[] args) {

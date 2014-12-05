@@ -22,24 +22,21 @@ import edu.uci.ics.crawler4j.crawler.CrawlController;
 import edu.uci.ics.crawler4j.fetcher.PageFetcher;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtConfig;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Yasser Ganjisaffar [lastname at gmail dot com]
  */
-
-/*
- * IMPORTANT: Make sure that you update crawler4j.properties file and set
- * crawler.include_images to true
- */
-
 public class ImageCrawlController {
+    private static Logger logger = LoggerFactory.getLogger(ImageCrawlController.class);
 
   public static void main(String[] args) throws Exception {
     if (args.length < 3) {
-      System.out.println("Needed parameters: ");
-      System.out.println("\t rootFolder (it will contain intermediate crawl data)");
-      System.out.println("\t numberOfCralwers (number of concurrent threads)");
-      System.out.println("\t storageFolder (a folder for storing downloaded images)");
+      logger.info("Needed parameters: ");
+      logger.info("\t rootFolder (it will contain intermediate crawl data)");
+      logger.info("\t numberOfCralwers (number of concurrent threads)");
+      logger.info("\t storageFolder (a folder for storing downloaded images)");
       return;
     }
 
