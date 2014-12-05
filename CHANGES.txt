@@ -1,7 +1,9 @@
 Crawler4J Change Log
 
-Version 4.0 (November 2014)
+Version 4.1
+- Issue 301: Upgrade the Pattern constant on the crawler examples
 
+Version 4.0 (December 2014)
 Enhancements
 - Issue 272: Parse Binary Content parsing, Now the crawler can really parse binary content. Based on Tero Jankilla's code
 - Issue 311: Add functionality to retrieve links from binary and text only files

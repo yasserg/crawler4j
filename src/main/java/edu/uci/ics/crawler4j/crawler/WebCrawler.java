@@ -339,9 +339,13 @@ public class WebCrawler implements Runnable {
             webURL.setDepth(curURL.getDepth());
             webURL.setDocid(-1);
             webURL.setAnchor(curURL.getAnchor());
-            if (shouldVisit(page, webURL) && robotstxtServer.allows(webURL)) {
-              webURL.setDocid(docIdServer.getNewDocID(movedToUrl));
-              frontier.schedule(webURL);
+            if (shouldVisit(page, webURL)) {
+              if (robotstxtServer.allows(webURL)) {
+                webURL.setDocid(docIdServer.getNewDocID(movedToUrl));
+                frontier.schedule(webURL);
+              } else {
+                logger.debug("Not visiting: {} as per the server's \"robots.txt\" policy", webURL.getURL());
+              }
             } else {
               logger.debug("Not visiting: {} as per your \"shouldVisit\" policy", webURL.getURL());
             }
@@ -391,9 +395,15 @@ public class WebCrawler implements Runnable {
           webURL.setDocid(-1);
           webURL.setDepth((short) (curURL.getDepth() + 1));
           if (maxCrawlDepth == -1 || curURL.getDepth() < maxCrawlDepth) {
-            if (shouldVisit(page, webURL) && robotstxtServer.allows(webURL)) {
+            if (shouldVisit(page, webURL)) {
+              if (robotstxtServer.allows(webURL)) {
                 webURL.setDocid(docIdServer.getNewDocID(webURL.getURL()));
                 toSchedule.add(webURL);
+              } else {
+                logger.debug("Not visiting: {} as per the server's \"robots.txt\" policy", webURL.getURL());
+              }
+            } else {
+              logger.debug("Not visiting: {} as per your \"shouldVisit\" policy", webURL.getURL());
             }
           }
         }

@@ -32,8 +32,12 @@ import org.apache.http.Header;
  */
 public class BasicCrawler extends WebCrawler {
 
-  private final static Pattern FILTERS = Pattern.compile(".*(\\.(css|js|bmp|gif|jpe?g" + "|png|tiff?|mid|mp2|mp3|mp4"
-      + "|wav|avi|mov|mpeg|ram|m4v|pdf" + "|rm|smil|wmv|swf|wma|zip|rar|gz))$");
+  private final static Pattern BINARY_FILES_EXTENSIONS =
+        Pattern.compile(".*\\.(bmp|gif|jpe?g|png|tiff?|pdf|ico|xaml|pict|rif|pptx?|ps" +
+        "|mid|mp2|mp3|mp4|wav|wma|au|aiff|flac|ogg|3gp|aac|amr|au|vox" +
+        "|avi|mov|mpe?g|ra?m|m4v|smil|wm?v|swf|aaf|asf|flv|mkv" +
+        "|zip|rar|gz|7z|aac|ace|alz|apk|arc|arj|dmg|jar|lzip|lha)" +
+        "(\\?.*)?$"); // For url Query parts ( URL?q=... )
 
   /**
    * You should implement this function to specify whether the given url
@@ -42,7 +46,8 @@ public class BasicCrawler extends WebCrawler {
   @Override
   public boolean shouldVisit(Page page, WebURL url) {
     String href = url.getURL().toLowerCase();
-    return !FILTERS.matcher(href).matches() && href.startsWith("http://www.ics.uci.edu/");
+
+    return !BINARY_FILES_EXTENSIONS.matcher(href).matches() && href.startsWith("http://www.ics.uci.edu/");
   }
 
   /**
