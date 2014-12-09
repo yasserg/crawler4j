@@ -47,14 +47,11 @@ public class Frontier extends Configurable {
 
   protected long scheduledPages;
 
-  protected DocIDServer docIdServer;
-
   protected Counters counters;
 
-  public Frontier(Environment env, CrawlConfig config, DocIDServer docIdServer) {
+  public Frontier(Environment env, CrawlConfig config) {
     super(config);
     this.counters = new Counters(env, config);
-    this.docIdServer = docIdServer;
     try {
       workQueues = new WorkQueues(env, "PendingURLsDB", config.isResumableCrawling());
       if (config.isResumableCrawling()) {
@@ -180,18 +177,11 @@ public class Frontier extends Configurable {
     return counters.getValue(ReservedCounterNames.PROCESSED_PAGES);
   }
 
-  public void sync() {
-    workQueues.sync();
-    docIdServer.sync();
-    counters.sync();
-  }
-
   public boolean isFinished() {
     return isFinished;
   }
 
   public void close() {
-    sync();
     workQueues.close();
     counters.close();
     if (inProcessPages != null) {

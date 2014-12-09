@@ -136,20 +136,6 @@ public class DocIDServer extends Configurable {
     return -1;
   }
 
-  public void sync() {
-    if (config.isResumableCrawling()) {
-      return;
-    }
-    if (docIDsDB == null) {
-      return;
-    }
-    try {
-      docIDsDB.sync();
-    } catch (DatabaseException e) {
-      e.printStackTrace();
-    }
-  }
-
   public void close() {
     try {
       docIDsDB.close();

@@ -178,20 +178,6 @@ public class WorkQueues {
     return -1;
   }
 
-  public void sync() {
-    if (resumable) {
-      return;
-    }
-    if (urlsDB == null) {
-      return;
-    }
-    try {
-      urlsDB.sync();
-    } catch (DatabaseException e) {
-      e.printStackTrace();
-    }
-  }
-
   public void close() {
     try {
       urlsDB.close();

@@ -118,20 +118,6 @@ public class Counters extends Configurable {
     }
   }
 
-  public void sync() {
-    if (config.isResumableCrawling()) {
-      return;
-    }
-    if (statisticsDB == null) {
-      return;
-    }
-    try {
-      statisticsDB.sync();
-    } catch (DatabaseException e) {
-      e.printStackTrace();
-    }
-  }
-
   public void close() {
     try {
       if (statisticsDB != null) {

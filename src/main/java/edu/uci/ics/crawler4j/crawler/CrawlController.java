@@ -105,7 +105,7 @@ public class CrawlController extends Configurable {
 
     env = new Environment(envHome, envConfig);
     docIdServer = new DocIDServer(env, config);
-    frontier = new Frontier(env, config, docIdServer);
+    frontier = new Frontier(env, config);
 
     this.pageFetcher = pageFetcher;
     this.robotstxtServer = robotstxtServer;
