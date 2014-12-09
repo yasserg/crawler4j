@@ -34,6 +34,7 @@ import edu.uci.ics.crawler4j.crawler.*;
 import edu.uci.ics.crawler4j.crawler.authentication.AuthInfo;
 import edu.uci.ics.crawler4j.crawler.authentication.BasicAuthInfo;
 import edu.uci.ics.crawler4j.crawler.authentication.FormAuthInfo;
+import edu.uci.ics.crawler4j.crawler.exceptions.PageBiggerThanMaxSizeException;
 import org.apache.http.*;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -311,6 +312,7 @@ public class PageFetcher extends Configurable {
         e.printStackTrace();
       }
     }
+
     fetchResult.setStatusCode(CustomFetchStatus.UnknownError);
     logger.error("Failed: Unknown error occurred while fetching {}", webUrl.getURL());
     return fetchResult;

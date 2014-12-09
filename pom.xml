@@ -100,10 +100,17 @@
             <scope>compile</scope>
         </dependency>
 
+		<dependency>
+			<groupId>uk.org.lidalia</groupId>
+			<artifactId>lidalia-slf4j-ext</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <version>1.1.2</version>
+			<scope>test</scope>
         </dependency>
 
 		<dependency>
