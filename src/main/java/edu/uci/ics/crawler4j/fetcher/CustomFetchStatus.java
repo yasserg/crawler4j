@@ -17,7 +17,11 @@
 
 package edu.uci.ics.crawler4j.fetcher;
 
-import org.apache.http.HttpStatus;
+import org.apache.http.impl.EnglishReasonPhraseCatalog;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Locale;
 
 /**
  * @author Yasser Ganjisaffar [lastname at gmail dot com]
@@ -31,80 +35,42 @@ public class CustomFetchStatus {
   public static final int SocketTimeoutError = 1008;
   public static final int UnknownError = 1006;
 
+  private static Logger logger = LoggerFactory.getLogger(CustomFetchStatus.class);
+
   public static String getStatusDescription(int code) {
-    switch (code) {
-    case HttpStatus.SC_OK:
-      return "OK";
-    case HttpStatus.SC_CREATED:
-      return "Created";
-    case HttpStatus.SC_ACCEPTED:
-      return "Accepted";
-    case HttpStatus.SC_NO_CONTENT:
-      return "No Content";
-    case HttpStatus.SC_MOVED_PERMANENTLY:
-      return "Moved Permanently";
-    case HttpStatus.SC_MOVED_TEMPORARILY:
-      return "Moved Temporarily";
-    case HttpStatus.SC_NOT_MODIFIED:
-      return "Not Modified";
-    case HttpStatus.SC_BAD_REQUEST:
-      return "Bad Request";
-    case HttpStatus.SC_UNAUTHORIZED:
-      return "Unauthorized";
-    case HttpStatus.SC_FORBIDDEN:
-      return "Forbidden";
-    case HttpStatus.SC_NOT_FOUND:
-      return "Not Found";
-    case HttpStatus.SC_INTERNAL_SERVER_ERROR:
-      return "Internal Server Error";
-    case HttpStatus.SC_NOT_IMPLEMENTED:
-      return "Not Implemented";
-    case HttpStatus.SC_BAD_GATEWAY:
-      return "Bad Gateway";
-    case HttpStatus.SC_SERVICE_UNAVAILABLE:
-      return "Service Unavailable";
-    case HttpStatus.SC_CONTINUE:
-      return "Continue";
-    case HttpStatus.SC_TEMPORARY_REDIRECT:
-      return "Temporary Redirect";
-    case HttpStatus.SC_METHOD_NOT_ALLOWED:
-      return "Method Not Allowed";
-    case HttpStatus.SC_CONFLICT:
-      return "Conflict";
-    case HttpStatus.SC_PRECONDITION_FAILED:
-      return "Precondition Failed";
-    case HttpStatus.SC_REQUEST_TOO_LONG:
-      return "Request Too Long";
-    case HttpStatus.SC_REQUEST_URI_TOO_LONG:
-      return "Request-URI Too Long";
-    case HttpStatus.SC_UNSUPPORTED_MEDIA_TYPE:
-      return "Unsupported Media Type";
-    case HttpStatus.SC_MULTIPLE_CHOICES:
-      return "Multiple Choices";
-    case HttpStatus.SC_SEE_OTHER:
-      return "See Other";
-    case HttpStatus.SC_USE_PROXY:
-      return "Use Proxy";
-    case HttpStatus.SC_PAYMENT_REQUIRED:
-      return "Payment Required";
-    case HttpStatus.SC_NOT_ACCEPTABLE:
-      return "Not Acceptable";
-    case HttpStatus.SC_PROXY_AUTHENTICATION_REQUIRED:
-      return "Proxy Authentication Required";
-    case HttpStatus.SC_REQUEST_TIMEOUT:
-      return "Request Timeout";
-    case PageTooBig:
-      return "Page size was too big";
-    case UnknownHostError:
-      return "Transport error - Unknown Host";
-    case SocketTimeoutError:
-      return "Transport error - Socket Timeout";
-    case FatalTransportError:
-      return "Fatal transport error - Is the server down ?";
-    case UnknownError:
-      return "Unknown error";
-    default:
-      return "(" + code + ")";
+    String reason = null;
+
+    try {
+      reason = EnglishReasonPhraseCatalog.INSTANCE.getReason(code, Locale.ENGLISH); // Finds the status reason for all known statuses
+    } catch (IllegalArgumentException iae) {
+      logger.debug("Custom Status Code: {} is being used", code);
     }
+
+    if (reason == null) { // Finding status reason for our custom status codes
+      switch (code) {
+        case SC_PERMANENT_REDIRECT:
+          reason = "Permanent redirect";
+          break;
+        case PageTooBig:
+          reason = "Page size was too big";
+          break;
+        case UnknownHostError:
+          reason = "Transport error - Unknown Host";
+          break;
+        case SocketTimeoutError:
+          reason = "Transport error - Socket Timeout";
+          break;
+        case FatalTransportError:
+          reason = "Fatal transport error - Is the server down ?";
+          break;
+        case UnknownError:
+          reason = "Unknown error";
+          break;
+        default:
+          reason = "( " + code + " )";
+      }
+    }
+
+    return reason;
   }
 }
