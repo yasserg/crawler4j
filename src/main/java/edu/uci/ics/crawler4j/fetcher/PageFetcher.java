@@ -43,6 +43,7 @@ import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.entity.GzipDecompressingEntity;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -73,13 +74,9 @@ public class PageFetcher extends Configurable {
   protected static final Logger logger = LoggerFactory.getLogger(PageFetcher.class);
 
   protected PoolingHttpClientConnectionManager connectionManager;
-
   protected CloseableHttpClient httpClient;
-
   protected final Object mutex = new Object();
-
   protected long lastFetchTime = 0;
-
   protected IdleConnectionMonitorThread connectionMonitorThread = null;
 
   public PageFetcher(CrawlConfig config) {
@@ -109,7 +106,8 @@ public class PageFetcher extends Configurable {
             sslContext, SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
         connRegistryBuilder.register("https", sslsf);
       } catch (Exception e) {
-        logger.debug("Exception thrown while trying to register https:", e);
+        logger.warn("Exception thrown while trying to register https");
+        logger.debug("Stacktrace", e);
       }
     }
 
@@ -122,8 +120,8 @@ public class PageFetcher extends Configurable {
     clientBuilder.setDefaultRequestConfig(requestConfig);
     clientBuilder.setConnectionManager(connectionManager);
     clientBuilder.setUserAgent(config.getUserAgentString());
-    if (config.getProxyHost() != null) {
 
+    if (config.getProxyHost() != null) {
       if (config.getProxyUsername() != null) {
         BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
         credentialsProvider.setCredentials(
@@ -134,23 +132,8 @@ public class PageFetcher extends Configurable {
 
       HttpHost proxy = new HttpHost(config.getProxyHost(), config.getProxyPort());
       clientBuilder.setProxy(proxy);
+      logger.debug("Working through Proxy: {}", proxy.getHostName());
     }
-    clientBuilder.addInterceptorLast(new HttpResponseInterceptor() {
-      @Override
-      public void process(final HttpResponse response, final HttpContext context) throws HttpException, IOException {
-        HttpEntity entity = response.getEntity();
-        Header contentEncoding = entity.getContentEncoding();
-        if (contentEncoding != null) {
-          HeaderElement[] codecs = contentEncoding.getElements();
-          for (HeaderElement codec : codecs) {
-            if (codec.getName().equalsIgnoreCase("gzip")) {
-              response.setEntity(new GzipDecompressingEntity(response.getEntity()));
-              return;
-            }
-          }
-        }
-      }
-    });
 
     httpClient = clientBuilder.build();
     if (config.getAuthInfos() != null && !config.getAuthInfos().isEmpty()) {
@@ -327,28 +310,5 @@ public class PageFetcher extends Configurable {
 
   public HttpClient getHttpClient() {
     return httpClient;
-  }
-
-
-  private static class GzipDecompressingEntity extends HttpEntityWrapper {
-
-    public GzipDecompressingEntity(final HttpEntity entity) {
-      super(entity);
-    }
-
-    @Override
-    public InputStream getContent() throws IOException, IllegalStateException {
-
-      // the wrapped entity's getContent() decides about repeatability
-      InputStream wrappedin = wrappedEntity.getContent();
-
-      return new GZIPInputStream(wrappedin);
-    }
-
-    @Override
-    public long getContentLength() {
-      // length of ungzipped content is not known
-      return -1;
-    }
   }
 }
