@@ -126,12 +126,13 @@ public class Parser extends Configurable {
 
     int urlCount = 0;
     for (ExtractedUrlAnchorPair urlAnchorPair : contentHandler.getOutgoingUrls()) {
-      String href = urlAnchorPair.getHref().trim();
-      if (href.length() == 0) {
+
+      String href = urlAnchorPair.getHref();
+      if (href == null || href.trim().length() == 0) {
         continue;
       }
 
-      String hrefLoweredCase = href.toLowerCase();
+      String hrefLoweredCase = href.trim().toLowerCase();
       if (!hrefLoweredCase.contains("javascript:") && !hrefLoweredCase.contains("mailto:") && !hrefLoweredCase.contains("@")) {
         String url = URLCanonicalizer.getCanonicalURL(href, contextURL);
         if (url != null) {
