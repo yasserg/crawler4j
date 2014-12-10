@@ -1,0 +1,61 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'eclipse'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.7'
+    compile group: 'uk.org.lidalia', name: 'lidalia-slf4j-ext', version: '1.0.0'
+    compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.1.2'
+    compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.4'
+    compile group: 'com.sleepycat', name: 'je', version: '5.0.73'
+    compile group: 'org.apache.tika', name: 'tika-parsers', version: '1.5'
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+    testCompile group: 'ch.qos.logback', name: 'logback-classic', version: '1.1.2'
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            pom.groupId = 'edu.uci.ics'
+            pom.artifactId = 'crawler4j'
+            pom.version = '4.2-SNAPSHOT'
+            pom.project {
+	            description 'Open Source Web Crawler for Java'
+	            url 'http://code.google.com/p/crawler4j/'
+                licenses {
+                    license {
+			            name 'The Apache Software License, Version 2.0'
+			            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+			            distribution 'repo'
+                    }
+                }
+                scm {
+                    url 'https://github.com/yasserg/crawler4j'
+                    connection 'scm:git:git@github.com:yasserg/crawler4j.git'
+                    developerConnection 'scm:git:git@github.com:yasserg/crawler4j.git'
+                }
+
+                developers {
+                    developer {
+                        name "Yasser Ganjisaffar"
+                        email "{lastname}@gmail.com"
+                    }
+                    developer {
+                        name 'Avi Hayun'
+                        email 'avraham2@gmail.com'
+                    }
+                }
+
+                parent {
+                    groupId 'org.sonatype.oss'
+                    artifactId 'oss-parent'
+                    version '7'
+                }
+            }
+        }
+    }
+}
