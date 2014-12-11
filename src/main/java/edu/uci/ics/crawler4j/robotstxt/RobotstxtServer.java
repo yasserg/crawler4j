@@ -17,12 +17,12 @@
 
 package edu.uci.ics.crawler4j.robotstxt;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import edu.uci.ics.crawler4j.crawler.exceptions.PageBiggerThanMaxSizeException;
 import org.apache.http.HttpStatus;
 
 import edu.uci.ics.crawler4j.crawler.Page;
@@ -91,29 +91,32 @@ public class RobotstxtServer {
     HostDirectives directives = null;
     PageFetchResult fetchResult = null;
     try {
-      fetchResult = pageFetcher.fetchHeader(robotsTxtUrl);
+      fetchResult = pageFetcher.fetchPage(robotsTxtUrl);
       if (fetchResult.getStatusCode() == HttpStatus.SC_OK) {
         Page page = new Page(robotsTxtUrl);
         fetchResult.fetchContent(page);
         if (Util.hasPlainTextContent(page.getContentType())) {
-          try {
-            String content;
-            if (page.getContentCharset() == null) {
-              content = new String(page.getContentData());
-            } else {
-              content = new String(page.getContentData(), page.getContentCharset());
-            }
-            directives = RobotstxtParser.parse(content, config.getUserAgentName());
-          } catch (Exception e) {
-            logger.error("Error occurred while fetching (robots) url: " + robotsTxtUrl.getURL(), e);
+          String content;
+          if (page.getContentCharset() == null) {
+            content = new String(page.getContentData());
+          } else {
+            content = new String(page.getContentData(), page.getContentCharset());
           }
+          directives = RobotstxtParser.parse(content, config.getUserAgentName());
         }
       }
+    } catch (SocketException | UnknownHostException | SocketTimeoutException se) {
+      // No logging here, as it just means that robots.txt doesn't exist on this server which is perfectly ok
+    } catch (PageBiggerThanMaxSizeException pbtms) {
+      logger.error("Error occurred while fetching (robots) url: {}, {}", robotsTxtUrl.getURL(), pbtms.getMessage());
+    } catch (Exception e) {
+      logger.error("Error occurred while fetching (robots) url: " + robotsTxtUrl.getURL(), e);
     } finally {
       if (fetchResult != null) {
         fetchResult.discardContentIfNotConsumed();
       }
     }
+
     if (directives == null) {
       // We still need to have this object to keep track of the time we
       // fetched it

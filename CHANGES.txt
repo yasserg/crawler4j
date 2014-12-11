@@ -1,8 +1,20 @@
 Crawler4J Change Log
 
-Version 4.1
+Version 4.1 (2015)
+Enhancements
+- Issue 326: PageFetcher is unreadable
+- Issue 325: Remove Non official http status codes
+- Issue 238: fetchHeader Does a HTTP GET
+- Issue 149: Proper compression support in the PageFetcher
+- Issue 323: Upgrade CustomFetchStatus
+- Issue 322: WebCrawler should throw exceptions instead of returning at the middle of the method
 - Issue 321: Change logging from System.out.print to SLF4J
 - Issue 301: Upgrade the Pattern constant on the crawler examples
+
+BugFixes
+- Issue 324: NullPointerException when crawling links with no HREF
+- Issue 175: Missing IF-Statement causes crawler to throw a NullPointerException while syncing
+
 
 Version 4.0 (December 2014)
 Enhancements

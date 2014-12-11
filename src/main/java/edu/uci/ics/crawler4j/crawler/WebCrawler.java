@@ -22,7 +22,6 @@ import edu.uci.ics.crawler4j.crawler.exceptions.PageBiggerThanMaxSizeException;
 import edu.uci.ics.crawler4j.crawler.exceptions.ParseException;
 import edu.uci.ics.crawler4j.crawler.exceptions.RedirectException;
 import edu.uci.ics.crawler4j.fetcher.PageFetchResult;
-import edu.uci.ics.crawler4j.fetcher.CustomFetchStatus;
 import edu.uci.ics.crawler4j.fetcher.PageFetcher;
 import edu.uci.ics.crawler4j.frontier.DocIDServer;
 import edu.uci.ics.crawler4j.frontier.Frontier;
@@ -34,12 +33,14 @@ import edu.uci.ics.crawler4j.url.WebURL;
 
 import org.apache.http.HttpStatus;
 
+import org.apache.http.impl.EnglishReasonPhraseCatalog;
 import uk.org.lidalia.slf4jext.Level;
 import uk.org.lidalia.slf4jext.Logger;
 import uk.org.lidalia.slf4jext.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * WebCrawler class in the Runnable class that is executed by each crawler thread.
@@ -305,17 +306,17 @@ public class WebCrawler implements Runnable {
         throw new Exception("Failed processing a NULL url !?");
       }
 
-      fetchResult = pageFetcher.fetchHeader(curURL);
+      fetchResult = pageFetcher.fetchPage(curURL);
       int statusCode = fetchResult.getStatusCode();
-      handlePageStatusCode(curURL, statusCode, CustomFetchStatus.getStatusDescription(statusCode));
+      handlePageStatusCode(curURL, statusCode, EnglishReasonPhraseCatalog.INSTANCE.getReason(statusCode, Locale.ENGLISH)); // Finds the status reason for all known statuses
 
       Page page = new Page(curURL);
       page.setFetchResponseHeaders(fetchResult.getResponseHeaders());
       page.setStatusCode(statusCode);
-      if (statusCode != HttpStatus.SC_OK) {
+      if (statusCode != HttpStatus.SC_OK) { // Not 200
         if (statusCode == HttpStatus.SC_MOVED_PERMANENTLY || statusCode == HttpStatus.SC_MOVED_TEMPORARILY
             || statusCode == HttpStatus.SC_MULTIPLE_CHOICES || statusCode == HttpStatus.SC_SEE_OTHER
-            || statusCode == HttpStatus.SC_TEMPORARY_REDIRECT || statusCode == CustomFetchStatus.SC_PERMANENT_REDIRECT) {
+            || statusCode == HttpStatus.SC_TEMPORARY_REDIRECT || statusCode == 308) { // is 3xx  todo follow https://issues.apache.org/jira/browse/HTTPCORE-389
 
           page.setRedirect(true);
           if (myController.getConfig().isFollowRedirects()) {
@@ -348,15 +349,13 @@ public class WebCrawler implements Runnable {
               logger.debug("Not visiting: {} as per your \"shouldVisit\" policy", webURL.getURL());
             }
           }
-        } else if (fetchResult.getStatusCode() == CustomFetchStatus.PageTooBig) {
-          throw new PageBiggerThanMaxSizeException(Long.MIN_VALUE); // todo when changing PageFetcher, then pageFetcher should throw an exception and this line should be removed
-        } else { // All other http codes other than 3xx
-          String description = CustomFetchStatus.getStatusDescription(statusCode);
+        } else { // All other http codes other than 3xx & 200
+          String description = EnglishReasonPhraseCatalog.INSTANCE.getReason(fetchResult.getStatusCode(), Locale.ENGLISH); // Finds the status reason for all known statuses
           String contentType = fetchResult.getEntity() == null ? "" : fetchResult.getEntity().getContentType().getValue();
           onUnexpectedStatusCode(curURL.getURL(), fetchResult.getStatusCode(), contentType, description);
         }
 
-      } else { // if status code is not 3xx
+      } else { // if status code is 200
         if (!curURL.getURL().equals(fetchResult.getFetchedUrl())) {
           if (docIdServer.isSeenBefore(fetchResult.getFetchedUrl())) {
             throw new RedirectException(Level.DEBUG, "Redirect page: " + curURL + " has already been seen");

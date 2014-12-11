@@ -18,15 +18,11 @@
 package edu.uci.ics.crawler4j.fetcher;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.net.SocketTimeoutException;
-import java.net.UnknownHostException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.zip.GZIPInputStream;
 
 import javax.net.ssl.SSLContext;
 
@@ -40,26 +36,21 @@ import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.entity.GzipDecompressingEntity;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
-import org.apache.http.conn.ConnectTimeoutException;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLContexts;
 import org.apache.http.conn.ssl.TrustStrategy;
-import org.apache.http.entity.HttpEntityWrapper;
 import org.apache.http.impl.client.*;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.protocol.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -161,6 +152,7 @@ public class PageFetcher extends Configurable {
    * Official Example: https://hc.apache.org/httpcomponents-client-ga/httpclient/examples/org/apache/http/examples/client/ClientAuthentication.java
    * */
   private void doBasicLogin(BasicAuthInfo authInfo) {
+    logger.info("BASIC authentication for: " + authInfo.getLoginTarget());
     HttpHost targetHost = new HttpHost(authInfo.getHost(), authInfo.getPort(), authInfo.getProtocol());
     CredentialsProvider credsProvider = new BasicCredentialsProvider();
     credsProvider.setCredentials(
@@ -176,23 +168,20 @@ public class PageFetcher extends Configurable {
    * Official Example: https://hc.apache.org/httpcomponents-client-ga/httpclient/examples/org/apache/http/examples/client/ClientFormLogin.java
    * */
   private void doFormLogin(FormAuthInfo authInfo) {
+    logger.info("FORM authentication for: " + authInfo.getLoginTarget());
     String fullUri = authInfo.getProtocol() + "://" + authInfo.getHost() + ":" + authInfo.getPort() + authInfo.getLoginTarget();
     HttpPost httpPost = new HttpPost(fullUri);
     List<NameValuePair> formParams = new ArrayList<>();
     formParams.add(new BasicNameValuePair(authInfo.getUsernameFormStr(), authInfo.getUsername()));
     formParams.add(new BasicNameValuePair(authInfo.getPasswordFormStr(), authInfo.getPassword()));
 
-    UrlEncodedFormEntity entity = null;
     try {
-      entity = new UrlEncodedFormEntity(formParams, "UTF-8");
+      UrlEncodedFormEntity entity = new UrlEncodedFormEntity(formParams, "UTF-8");
+      httpPost.setEntity(entity);
+      httpClient.execute(httpPost);
+      logger.debug("Successfully Logged in with user: " + authInfo.getUsername() + " to: " + authInfo.getHost());
     } catch (UnsupportedEncodingException e) {
       logger.error("Encountered a non supported encoding while trying to login to: " + authInfo.getHost(), e);
-    }
-    httpPost.setEntity(entity);
-
-    try {
-      httpClient.execute(httpPost);
-      logger.debug("Logged in with user " + authInfo.getUsername() + " to " + authInfo.getHost());
     } catch (ClientProtocolException e) {
       logger.error("While trying to login to: " + authInfo.getHost() + " - Client protocol not supported", e);
     } catch (IOException e) {
@@ -200,12 +189,14 @@ public class PageFetcher extends Configurable {
     }
   }
 
-  public PageFetchResult fetchHeader(WebURL webUrl) {
+  public PageFetchResult fetchPage(WebURL webUrl) throws InterruptedException, IOException, PageBiggerThanMaxSizeException {
+    // Getting URL, setting headers & content
     PageFetchResult fetchResult = new PageFetchResult();
     String toFetchURL = webUrl.getURL();
     HttpGet get = null;
     try {
       get = new HttpGet(toFetchURL);
+      // Applying Politeness delay
       synchronized (mutex) {
         long now = (new Date()).getTime();
         if (now - lastFetchTime < config.getPolitenessDelay()) {
@@ -218,87 +209,45 @@ public class PageFetcher extends Configurable {
       fetchResult.setEntity(response.getEntity());
       fetchResult.setResponseHeaders(response.getAllHeaders());
 
+      // Setting HttpStatus
       int statusCode = response.getStatusLine().getStatusCode();
-      if (statusCode != HttpStatus.SC_OK) {
-        if (statusCode != HttpStatus.SC_NOT_FOUND) {
-          if (statusCode == HttpStatus.SC_MOVED_PERMANENTLY || statusCode == HttpStatus.SC_MOVED_TEMPORARILY
-              || statusCode == HttpStatus.SC_MULTIPLE_CHOICES || statusCode == HttpStatus.SC_SEE_OTHER
-              || statusCode == HttpStatus.SC_TEMPORARY_REDIRECT || statusCode == CustomFetchStatus.SC_PERMANENT_REDIRECT) {
-            Header header = response.getFirstHeader("Location");
-            if (header != null) {
-              String movedToUrl = header.getValue();
-              movedToUrl = URLCanonicalizer.getCanonicalURL(movedToUrl, toFetchURL);
-              fetchResult.setMovedToUrl(movedToUrl);
-            }
-            fetchResult.setStatusCode(statusCode);
-            return fetchResult;
+
+      // If Redirect ( 3xx )
+      if (statusCode == HttpStatus.SC_MOVED_PERMANENTLY || statusCode == HttpStatus.SC_MOVED_TEMPORARILY
+          || statusCode == HttpStatus.SC_MULTIPLE_CHOICES || statusCode == HttpStatus.SC_SEE_OTHER
+          || statusCode == HttpStatus.SC_TEMPORARY_REDIRECT || statusCode == 308) { // todo follow https://issues.apache.org/jira/browse/HTTPCORE-389
+
+        Header header = response.getFirstHeader("Location");
+        if (header != null) {
+          String movedToUrl = URLCanonicalizer.getCanonicalURL(header.getValue(), toFetchURL);
+          fetchResult.setMovedToUrl(movedToUrl);
+        }
+      } else if (statusCode == HttpStatus.SC_OK) { // is 200, everything looks ok
+        fetchResult.setFetchedUrl(toFetchURL);
+        String uri = get.getURI().toString();
+        if (!uri.equals(toFetchURL)) {
+          if (!URLCanonicalizer.getCanonicalURL(uri).equals(toFetchURL)) {
+            fetchResult.setFetchedUrl(uri);
           }
-          logger.info("Failed: {}, while fetching {}", response.getStatusLine().toString(), toFetchURL);
         }
-        fetchResult.setStatusCode(response.getStatusLine().getStatusCode());
-        return fetchResult;
-      }
 
-      fetchResult.setFetchedUrl(toFetchURL);
-      String uri = get.getURI().toString();
-      if (!uri.equals(toFetchURL)) {
-        if (!URLCanonicalizer.getCanonicalURL(uri).equals(toFetchURL)) {
-          fetchResult.setFetchedUrl(uri);
+        // Checking maximum size
+        if (fetchResult.getEntity() != null) {
+          long size = fetchResult.getEntity().getContentLength();
+          if (size > config.getMaxDownloadSize()) {
+            throw new PageBiggerThanMaxSizeException(size);
+          }
         }
       }
 
-      if (fetchResult.getEntity() != null) {
-        long size = fetchResult.getEntity().getContentLength();
-        if (size > config.getMaxDownloadSize()) {
-          fetchResult.setStatusCode(CustomFetchStatus.PageTooBig);
-          get.abort();
-          logger.warn("Failed: Page Size ({}) exceeded max-download-size ({}), at URL: {}",
-              size, config.getMaxDownloadSize(), webUrl.getURL());
-          return fetchResult;
-        }
-
-        fetchResult.setStatusCode(HttpStatus.SC_OK);
-        return fetchResult;
-      }
-
-      get.abort();
-    } catch (UnknownHostException e) {
-      logger.error("Unknown host {} while fetching URL: {}", e.getMessage(), toFetchURL);
-      fetchResult.setStatusCode(CustomFetchStatus.UnknownHostError);
+      fetchResult.setStatusCode(statusCode);
       return fetchResult;
-    } catch (SocketTimeoutException | ConnectTimeoutException e) {
-      logger.error("Timeout while fetching page '{}': {}", toFetchURL, e.getMessage());
-      fetchResult.setStatusCode(CustomFetchStatus.SocketTimeoutError);
-      return fetchResult;
-    } catch (IOException e) {
-      if (toFetchURL.toLowerCase().endsWith("robots.txt")) {
-        // Ignoring this Exception as it just means that we tried to parse a robots.txt file which this site doesn't have
-        // Which is ok, so no exception should be thrown
-      } else {
-        logger.error("Fatal transport error: {} while fetching {} (link found in doc #{})",
-            e.getMessage() != null ? e.getMessage() : e.getCause(), toFetchURL, webUrl.getParentDocid());
-        logger.debug("Stacktrace: ", e);
-        fetchResult.setStatusCode(CustomFetchStatus.FatalTransportError);
-        return fetchResult;
-      }
-    } catch (IllegalStateException e) {
-      // ignoring exceptions that occur because of not registering https and other schemes
-    } catch (Exception e) {
-      logger.error("{} Error while fetching {}", e.getMessage() != null ? e.getMessage() : e.getCause(), webUrl.getURL());
-      logger.debug("Stacktrace:", e);
-    } finally {
-      try {
-        if (fetchResult.getEntity() == null && get != null) {
-          get.abort();
-        }
-      } catch (Exception e) {
-        e.printStackTrace();
+
+    } finally { // occurs also with thrown exceptions
+      if (fetchResult.getEntity() == null && get != null) {
+        get.abort();
       }
     }
-
-    fetchResult.setStatusCode(CustomFetchStatus.UnknownError);
-    logger.error("Failed: Unknown error occurred while fetching {}", webUrl.getURL());
-    return fetchResult;
   }
 
   public synchronized void shutDown() {
@@ -306,9 +255,5 @@ public class PageFetcher extends Configurable {
       connectionManager.shutdown();
       connectionMonitorThread.shutdown();
     }
-  }
-
-  public HttpClient getHttpClient() {
-    return httpClient;
   }
 }

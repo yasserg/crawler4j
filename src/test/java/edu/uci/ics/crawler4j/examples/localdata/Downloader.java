@@ -30,6 +30,8 @@ import edu.uci.ics.crawler4j.url.WebURL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+
 /**
  * This class is a demonstration of how crawler4j can be used to download a
  * single page and extract its title and text.
@@ -51,18 +53,16 @@ public class Downloader {
     curURL.setURL(url);
     PageFetchResult fetchResult = null;
     try {
-      fetchResult = pageFetcher.fetchHeader(curURL);
+      fetchResult = pageFetcher.fetchPage(curURL);
       if (fetchResult.getStatusCode() == HttpStatus.SC_OK) {
-        try {
-          Page page = new Page(curURL);
-          fetchResult.fetchContent(page);
-          if (parser.parse(page, curURL.getURL())) {
-            return page;
-          }
-        } catch (Exception e) {
-          e.printStackTrace();
+        Page page = new Page(curURL);
+        fetchResult.fetchContent(page);
+        if (parser.parse(page, curURL.getURL())) {
+          return page;
         }
       }
+    } catch (Exception e) {
+      logger.error("Error occurred while fetching url: " + curURL.getURL(), e);
     } finally {
       if (fetchResult != null)
       {
