@@ -122,8 +122,15 @@ public class WorkQueues {
    */
   protected static DatabaseEntry getDatabaseEntryKey(WebURL url) {
     byte[] keyData = new byte[6];
-    keyData[0] = url.getPriority();
-    keyData[1] = ((url.getDepth() > Byte.MAX_VALUE) ? Byte.MAX_VALUE : (byte) url.getDepth());
+    
+    // Because the ordering is done strictly binary, negative values will come last, because
+    // their binary representation starts with the MSB at 1. In order to fix this, we'll have
+    // to add the minimum value to become 0. This means that the maximum number will become
+    // out of range in Byte-value, but the integer value is nicely converted down to the actual
+    // binary representation that is useful here.
+    byte binary_priority = (byte)(url.getPriority() - Byte.MIN_VALUE);
+    keyData[0] = binary_priority;
+    keyData[1] = (url.getDepth() > Byte.MAX_VALUE ? Byte.MAX_VALUE : (byte) url.getDepth());
     Util.putIntInByteArray(url.getDocid(), keyData, 2);
     return new DatabaseEntry(keyData);
   }
