@@ -38,6 +38,14 @@ public class Frontier extends Configurable {
   
   private static final String DATABASE_NAME = "PendingURLsDB";
   private static final int IN_PROCESS_RESCHEDULE_BATCH_SIZE = 100;
+
+  /** Identifier for the InProgress queue: pages in progress by a thread */
+  public static final int IN_PROGRESS_QUEUE = 1;
+  /** Identifier for the WorkQueue: pages not yet claimed by any thread */
+  public static final int WORK_QUEUE = 2;
+  /** convenience identifier for both queues: IN_PROGRESS_QUEUE | WORK_QUEUE */
+  public static final int BOTH_QUEUES = IN_PROGRESS_QUEUE | WORK_QUEUE;
+
   protected WorkQueues workQueues;
 
   protected InProcessPagesDB inProcessPages;
@@ -169,11 +177,22 @@ public class Frontier extends Configurable {
   }
 
   public long getQueueLength() {
-    return workQueues.getLength();
+    return getQueueLength(WORK_QUEUE);
+  }
+
+  public long getQueueLength(int type) {
+    synchronized (mutex) {
+      int length = 0;
+      if ((type & WORK_QUEUE) == WORK_QUEUE)
+          length += workQueues.getLength();
+      if ((type & IN_PROGRESS_QUEUE) == IN_PROGRESS_QUEUE)
+          length += inProcessPages.getLength();
+      return length;
+    }
   }
 
   public long getNumberOfAssignedPages() {
-    return inProcessPages.getLength();
+    return getQueueLength(IN_PROGRESS_QUEUE);
   }
 
   public long getNumberOfProcessedPages() {
