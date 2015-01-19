@@ -12,6 +12,7 @@ Enhancements
 - Issue 301: Upgrade the Pattern constant on the crawler examples
 
 BugFixes
+- Issue 329: Fixed relative path to the tld file (even when packed in the jar file)
 - Issue 324: NullPointerException when crawling links with no HREF
 - Issue 175: Missing IF-Statement causes crawler to throw a NullPointerException while syncing
 
