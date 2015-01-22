@@ -60,30 +60,20 @@ public class URLCanonicalizer {
        */
       path = new URI(path.replace("\\", "/")).normalize().toString();
 
-      /*
-       * Convert '//' -> '/'
-       */
       int idx = path.indexOf("//");
       while (idx >= 0) {
         path = path.replace("//", "/");
         idx = path.indexOf("//");
       }
 
-      /*
-       * Drop starting '/../'
-       */
       while (path.startsWith("/../")) {
         path = path.substring(3);
       }
 
-      /*
-       * Trim
-       */
       path = path.trim();
 
       final SortedMap<String, String> params = createParameterMap(canonicalURL.getQuery());
       final String queryString;
-
       if (params != null && params.size() > 0) {
         String canonicalParams = canonicalize(params);
         queryString = (canonicalParams.isEmpty() ? "" : "?" + canonicalParams);
@@ -91,16 +81,11 @@ public class URLCanonicalizer {
         queryString = "";
       }
 
-      /*
-       * Add starting slash if needed
-       */
       if (path.length() == 0) {
-        path = "/" + path;
+        path = "/";
       }
 
-      /*
-       * Drop default port: example.com:80 -> example.com
-       */
+      //Drop default port: example.com:80 -> example.com
       int port = canonicalURL.getPort();
       if (port == canonicalURL.getDefaultPort()) {
         port = -1;
@@ -112,9 +97,7 @@ public class URLCanonicalizer {
       URL result = new URL(protocol, host, port, pathAndQueryString);
       return result.toExternalForm();
 
-    } catch (MalformedURLException ex) {
-      return null;
-    } catch (URISyntaxException ex) {
+    } catch (MalformedURLException | URISyntaxException ex) {
       return null;
     }
   }

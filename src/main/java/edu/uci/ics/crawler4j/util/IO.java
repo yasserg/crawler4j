@@ -17,6 +17,7 @@
 
 package edu.uci.ics.crawler4j.util;
 
+import com.google.common.io.Files;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +36,7 @@ public class IO {
   }
 
   public static boolean deleteFolderContents(File folder) {
-    logger.info("Deleting content of: " + folder.getAbsolutePath());
+    logger.debug("Deleting content of: " + folder.getAbsolutePath());
     File[] files = folder.listFiles();
     for (File file : files) {
       if (file.isFile()) {
@@ -49,18 +50,5 @@ public class IO {
       }
     }
     return true;
-  }
-
-  public static void writeBytesToFile(byte[] bytes, String destination) {
-    try {
-      FileOutputStream fos = new FileOutputStream(destination);
-      FileChannel fc = fos.getChannel();
-
-      fc.write(ByteBuffer.wrap(bytes));
-      fc.close();
-      fos.close();
-    } catch (Exception e) {
-      logger.error("Failed to write file: " + destination, e);
-    }
   }
 }

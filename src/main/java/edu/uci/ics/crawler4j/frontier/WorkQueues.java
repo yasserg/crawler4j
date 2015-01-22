@@ -20,6 +20,8 @@ package edu.uci.ics.crawler4j.frontier;
 import com.sleepycat.je.*;
 import edu.uci.ics.crawler4j.url.WebURL;
 import edu.uci.ics.crawler4j.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +39,8 @@ public class WorkQueues {
   protected WebURLTupleBinding webURLBinding;
 
   protected final Object mutex = new Object();
+
+  private Logger logger = LoggerFactory.getLogger(WorkQueues.class);
 
   public WorkQueues(Environment env, String dbName, boolean resumable) throws DatabaseException {
     this.env = env;
@@ -173,16 +177,16 @@ public class WorkQueues {
     try {
       return urlsDB.count();
     } catch (Exception e) {
-      e.printStackTrace();
+      logger.error("Error in UrlsDB", e);
+      return -1;
     }
-    return -1;
   }
 
   public void close() {
     try {
       urlsDB.close();
     } catch (DatabaseException e) {
-      e.printStackTrace();
+      logger.error("Error in UrlsDB", e);
     }
   }
 }

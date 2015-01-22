@@ -83,8 +83,7 @@ public class Page {
   private String language;
 
   /**
-   * Headers which were present in the response of the
-   * fetch request
+   * Headers which were present in the response of the fetch request
    */
   protected Header[] fetchResponseHeaders;
 
@@ -122,7 +121,6 @@ public class Page {
     if (charset != null) {
       contentCharset = charset.displayName();
     }
-
 
     contentData = EntityUtils.toByteArray(entity);
   }

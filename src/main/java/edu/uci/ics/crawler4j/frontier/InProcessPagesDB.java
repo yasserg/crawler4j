@@ -81,7 +81,7 @@ public class InProcessPagesDB extends WorkQueues {
           }
         }
       } catch (Exception e) {
-        e.printStackTrace();
+        logger.error("Error while manipulating the DB of links from previous crawls", e);
       }
     }
     return false;

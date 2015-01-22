@@ -50,13 +50,13 @@ public class TLDList {
         }
         tldSet.add(line);
       }
+
       reader.close();
       stream.close();
     } catch (Exception e) {
       logger.error("Couldn't find " + TLD_NAMES_TXT_FILENAME, e);
       System.exit(-1);
     }
-
   }
 
   public static TLDList getInstance() {

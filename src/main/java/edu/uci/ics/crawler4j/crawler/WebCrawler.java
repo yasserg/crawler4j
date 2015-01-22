@@ -368,9 +368,7 @@ public class WebCrawler implements Runnable {
           throw new ContentFetchException();
         }
 
-        if (!parser.parse(page, curURL.getURL())) {
-          throw new ParseException();
-        }
+        parser.parse(page, curURL.getURL());
 
         ParseData parseData = page.getParseData();
         List<WebURL> toSchedule = new ArrayList<>();

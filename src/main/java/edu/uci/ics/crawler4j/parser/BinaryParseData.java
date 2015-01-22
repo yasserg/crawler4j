@@ -69,10 +69,6 @@ public class BinaryParseData implements ParseData {
       // Hacking the following line to remove Tika's inserted DocType
       String htmlContent = new String(outputStream.toByteArray(), DEFAULT_ENCODING).replace("http://www.w3.org/1999/xhtml", "");
       setHtml(htmlContent);
-    } catch (TransformerConfigurationException e) {
-      logger.error("Error configuring handler", e);
-    } catch (UnsupportedEncodingException e) {
-      logger.error("Encoding for content not supported", e);
     } catch (Exception e) {
       logger.error("Error parsing file", e);
     }
@@ -105,9 +101,9 @@ public class BinaryParseData implements ParseData {
     return html;
   }
 
-    public void setHtml(String html) {
-      this.html = html;
-    }
+  public void setHtml(String html) {
+    this.html = html;
+  }
 
   @Override
   public Set<WebURL> getOutgoingUrls() {
@@ -121,10 +117,6 @@ public class BinaryParseData implements ParseData {
 
   @Override
   public String toString() {
-    if (html == null || html.isEmpty()) {
-      return "No data parsed yet";
-    } else {
-      return getHtml();
-    }
+    return (html == null || html.isEmpty()) ? "No data parsed yet" : getHtml();
   }
 }

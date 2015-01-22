@@ -61,13 +61,12 @@ public class Frontier extends Configurable {
         if (numPreviouslyInProcessPages > 0) {
           logger.info("Rescheduling {} URLs from previous crawl.", numPreviouslyInProcessPages);
           scheduledPages -= numPreviouslyInProcessPages;
-          while (true) {
-            List<WebURL> urls = inProcessPages.get(100);
-            if (urls.size() == 0) {
-              break;
-            }
+
+          List<WebURL> urls = inProcessPages.get(100);
+          while (urls.size() > 0) {
             scheduleAll(urls);
             inProcessPages.delete(urls.size());
+            urls = inProcessPages.get(100);
           }
         }
       } else {
@@ -75,7 +74,7 @@ public class Frontier extends Configurable {
         scheduledPages = 0;
       }
     } catch (DatabaseException e) {
-      logger.error("Error while initializing the Frontier: {}", e.getMessage());
+      logger.error("Error while initializing the Frontier", e);
       workQueues = null;
     }
   }
@@ -88,11 +87,12 @@ public class Frontier extends Configurable {
         if (maxPagesToFetch > 0 && (scheduledPages + newScheduledPage) >= maxPagesToFetch) {
           break;
         }
+
         try {
           workQueues.put(url);
           newScheduledPage++;
         } catch (DatabaseException e) {
-          logger.error("Error while putting the url in the work queue.");
+          logger.error("Error while putting the url in the work queue", e);
         }
       }
       if (newScheduledPage > 0) {
@@ -115,7 +115,7 @@ public class Frontier extends Configurable {
           counters.increment(Counters.ReservedCounterNames.SCHEDULED_PAGES);
         }
       } catch (DatabaseException e) {
-        logger.error("Error while putting the url in the work queue.");
+        logger.error("Error while putting the url in the work queue", e);
       }
     }
   }
@@ -136,13 +136,14 @@ public class Frontier extends Configurable {
           }
           result.addAll(curResults);
         } catch (DatabaseException e) {
-          logger.error("Error while getting next urls: {}", e.getMessage());
-          e.printStackTrace();
+          logger.error("Error while getting next urls", e);
         }
+
         if (result.size() > 0) {
           return;
         }
       }
+
       try {
         synchronized (waitingList) {
           waitingList.wait();

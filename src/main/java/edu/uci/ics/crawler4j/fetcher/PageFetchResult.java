@@ -79,7 +79,7 @@ public class PageFetchResult {
       page.setFetchResponseHeaders(responseHeaders);
       return true;
     } catch (Exception e) {
-      logger.info("Exception while fetching content for: {} [{}]",page.getWebURL().getURL(), e.getMessage());
+      logger.info("Exception while fetching content for: {} [{}]", page.getWebURL().getURL(), e.getMessage());
     }
     return false;
   }
@@ -89,14 +89,11 @@ public class PageFetchResult {
       if (entity != null) {
         EntityUtils.consume(entity);
       }
-    } catch (EOFException e) {
-      // We can ignore this exception. It can happen on compressed streams
-      // which are not repeatable
     } catch (IOException e) {
-      // We can ignore this exception. It can happen if the stream is
-      // closed.
+      // We can EOFException (extends IOException) exception. It can happen on compressed streams which are not repeatable
+      // We can ignore this exception. It can happen if the stream is closed.
     } catch (Exception e) {
-      e.printStackTrace();
+      logger.warn("Unexpected error occurred while trying to discard content", e);
     }
   }
 

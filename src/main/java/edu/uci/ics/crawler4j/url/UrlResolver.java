@@ -33,11 +33,12 @@ public final class UrlResolver {
     if (baseUrl == null) {
       throw new IllegalArgumentException("Base URL must not be null");
     }
+
     if (relativeUrl == null) {
       throw new IllegalArgumentException("Relative URL must not be null");
     }
-    final Url url = resolveUrl(parseUrl(baseUrl.trim()), relativeUrl.trim());
 
+    final Url url = resolveUrl(parseUrl(baseUrl.trim()), relativeUrl.trim());
     return url.toString();
   }
 

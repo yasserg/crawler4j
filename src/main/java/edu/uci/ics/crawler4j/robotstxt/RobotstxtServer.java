@@ -30,6 +30,7 @@ import edu.uci.ics.crawler4j.fetcher.PageFetchResult;
 import edu.uci.ics.crawler4j.fetcher.PageFetcher;
 import edu.uci.ics.crawler4j.url.WebURL;
 import edu.uci.ics.crawler4j.util.Util;
+import org.apache.http.NoHttpResponseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,31 +56,33 @@ public class RobotstxtServer {
     return url.getHost().toLowerCase();
   }
 
+  /** Please note that in the case of a bad URL, TRUE will be returned */
   public boolean allows(WebURL webURL) {
-    if (!config.isEnabled()) {
-      return true;
-    }
-    try {
-      URL url = new URL(webURL.getURL());
-      String host = getHost(url);
-      String path = url.getPath();
+    if (config.isEnabled()) {
+      try {
+        URL url = new URL(webURL.getURL());
+        String host = getHost(url);
+        String path = url.getPath();
 
-      HostDirectives directives = host2directivesCache.get(host);
+        HostDirectives directives = host2directivesCache.get(host);
 
-      if (directives != null && directives.needsRefetch()) {
-        synchronized (host2directivesCache) {
-          host2directivesCache.remove(host);
-          directives = null;
+        if (directives != null && directives.needsRefetch()) {
+          synchronized (host2directivesCache) {
+            host2directivesCache.remove(host);
+            directives = null;
+          }
         }
-      }
 
-      if (directives == null) {
-        directives = fetchDirectives(url);
+        if (directives == null) {
+          directives = fetchDirectives(url);
+        }
+
+        return directives.allows(path);
+      } catch (MalformedURLException e) {
+        logger.error("Bad URL in Robots.txt: " + webURL.getURL(), e);
       }
-      return directives.allows(path);
-    } catch (MalformedURLException e) {
-      e.printStackTrace();
     }
+
     return true;
   }
 
@@ -103,9 +106,11 @@ public class RobotstxtServer {
             content = new String(page.getContentData(), page.getContentCharset());
           }
           directives = RobotstxtParser.parse(content, config.getUserAgentName());
+        } else {
+          logger.warn("Can't read this robots.txt: {}  as it is not written in plain text", url.toExternalForm());
         }
       }
-    } catch (SocketException | UnknownHostException | SocketTimeoutException se) {
+    } catch (SocketException | UnknownHostException | SocketTimeoutException | NoHttpResponseException se) {
       // No logging here, as it just means that robots.txt doesn't exist on this server which is perfectly ok
     } catch (PageBiggerThanMaxSizeException pbtms) {
       logger.error("Error occurred while fetching (robots) url: {}, {}", robotsTxtUrl.getURL(), pbtms.getMessage());
@@ -118,8 +123,7 @@ public class RobotstxtServer {
     }
 
     if (directives == null) {
-      // We still need to have this object to keep track of the time we
-      // fetched it
+      // We still need to have this object to keep track of the time we fetched it
       directives = new HostDirectives();
     }
     synchronized (host2directivesCache) {

@@ -18,8 +18,11 @@
 package edu.uci.ics.crawler4j.examples.imagecrawler;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
+import com.google.common.io.Files;
 import edu.uci.ics.crawler4j.crawler.Page;
 import edu.uci.ics.crawler4j.crawler.WebCrawler;
 import edu.uci.ics.crawler4j.parser.BinaryParseData;
@@ -78,27 +81,22 @@ public class ImageCrawler extends WebCrawler {
   public void visit(Page page) {
     String url = page.getWebURL().getURL();
 
-    // We are only interested in processing images
-    if (!(page.getParseData() instanceof BinaryParseData)) {
-      return;
-    }
-
-    if (!imgPatterns.matcher(url).matches()) {
-      return;
-    }
-
-    // Not interested in very small images
-    if (page.getContentData().length < 10 * 1024) {
+    // We are only interested in processing images which are bigger than 10k
+    if (!imgPatterns.matcher(url).matches() || !(page.getParseData() instanceof BinaryParseData || page.getContentData().length < 10 * 1024)) {
       return;
     }
 
     // get a unique name for storing this image
     String extension = url.substring(url.lastIndexOf("."));
-    String hashedName = Cryptography.MD5(url) + extension;
+    String hashedName = UUID.randomUUID().toString() + extension;
 
     // store image
-    IO.writeBytesToFile(page.getContentData(), storageFolder.getAbsolutePath() + "/" + hashedName);
-
-    logger.info("Stored: {}", url);
+    String filename = storageFolder.getAbsolutePath() + "/" + hashedName;
+    try {
+      Files.write(page.getContentData(), new File(filename));
+      logger.info("Stored: {}", url);
+    } catch (IOException iox) {
+      logger.error("Failed to write file: " + filename, iox);
+    }
   }
 }

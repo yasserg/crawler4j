@@ -48,28 +48,10 @@ public class Downloader {
     pageFetcher = new PageFetcher(config);
   }
 
-  private Page download(String url) {
-    WebURL curURL = new WebURL();
-    curURL.setURL(url);
-    PageFetchResult fetchResult = null;
-    try {
-      fetchResult = pageFetcher.fetchPage(curURL);
-      if (fetchResult.getStatusCode() == HttpStatus.SC_OK) {
-        Page page = new Page(curURL);
-        fetchResult.fetchContent(page);
-        if (parser.parse(page, curURL.getURL())) {
-          return page;
-        }
-      }
-    } catch (Exception e) {
-      logger.error("Error occurred while fetching url: " + curURL.getURL(), e);
-    } finally {
-      if (fetchResult != null)
-      {
-        fetchResult.discardContentIfNotConsumed();
-      }
-    }
-    return null;
+  public static void main(String[] args) {
+    Downloader downloader = new Downloader();
+    downloader.processUrl("http://en.wikipedia.org/wiki/Main_Page/");
+    downloader.processUrl("http://www.yahoo.com/");
   }
 
   public void processUrl(String url) {
@@ -93,9 +75,26 @@ public class Downloader {
     logger.debug("==============");
   }
 
-  public static void main(String[] args) {
-    Downloader downloader = new Downloader();
-    downloader.processUrl("http://en.wikipedia.org/wiki/Main_Page/");
-    downloader.processUrl("http://www.yahoo.com/");
+  private Page download(String url) {
+    WebURL curURL = new WebURL();
+    curURL.setURL(url);
+    PageFetchResult fetchResult = null;
+    try {
+      fetchResult = pageFetcher.fetchPage(curURL);
+      if (fetchResult.getStatusCode() == HttpStatus.SC_OK) {
+        Page page = new Page(curURL);
+        fetchResult.fetchContent(page);
+        parser.parse(page, curURL.getURL());
+        return page;
+      }
+    } catch (Exception e) {
+      logger.error("Error occurred while fetching url: " + curURL.getURL(), e);
+    } finally {
+      if (fetchResult != null)
+      {
+        fetchResult.discardContentIfNotConsumed();
+      }
+    }
+    return null;
   }
 }

@@ -17,7 +17,7 @@
     </appender>
 
 
-    <root level="debug">
+    <root level="DEBUG">
         <appender-ref ref="STDOUT" />
         <!--<appender-ref ref="FILE" />-->
     </root>

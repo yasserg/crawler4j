@@ -21,6 +21,8 @@ import com.sleepycat.je.*;
 import edu.uci.ics.crawler4j.crawler.Configurable;
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,8 +30,8 @@ import java.util.Map;
 /**
  * @author Yasser Ganjisaffar [lastname at gmail dot com]
  */
-
 public class Counters extends Configurable {
+  private Logger logger = LoggerFactory.getLogger(Counters.class);
 
   public class ReservedCounterNames {
     public final static String SCHEDULED_PAGES = "Scheduled-Pages";
@@ -72,7 +74,7 @@ public class Counters extends Configurable {
         if (value.getData().length > 0) {
           String name = new String(key.getData());
           long counterValue = Util.byteArray2Long(value.getData());
-          counterValues.put(name, new Long(counterValue));
+          counterValues.put(name, counterValue);
         }
         result = cursor.getNext(key, value, null);
       }
@@ -83,18 +85,14 @@ public class Counters extends Configurable {
 
   public long getValue(String name) {
     synchronized (mutex) {
-      Long value = counterValues.get(name);
-      if (value == null) {
-        return 0;
-      }
-      return value.longValue();
+      return counterValues.get(name) == null ? 0 : counterValues.get(name);
     }
   }
 
   public void setValue(String name, long value) {
     synchronized (mutex) {
       try {
-        counterValues.put(name, new Long(value));
+        counterValues.put(name, value);
         if (statisticsDB != null) {
           Transaction txn = env.beginTransaction(null, null);
           statisticsDB.put(txn, new DatabaseEntry(name.getBytes()),
@@ -102,7 +100,7 @@ public class Counters extends Configurable {
           txn.commit();
         }
       } catch (Exception e) {
-        e.printStackTrace();
+        logger.error("Exception setting value", e);
       }
     }
   }
@@ -124,7 +122,7 @@ public class Counters extends Configurable {
         statisticsDB.close();
       }
     } catch (DatabaseException e) {
-      e.printStackTrace();
+      logger.error("Exception thrown while trying to close statisticsDB", e);
     }
   }
 }

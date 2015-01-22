@@ -77,47 +77,29 @@ public class HtmlContentHandler extends DefaultHandler {
       String href = attributes.getValue("href");
       if (href != null) {
         anchorFlag = true;
-        curUrl = new ExtractedUrlAnchorPair();
-        curUrl.setHref(href);
-        curUrl.setTag(localName);
-        outgoingUrls.add(curUrl);
-      }
-      return;
-    }
+        addToOutgoingUrls(href, localName);
 
-    if (element == Element.IMG) {
+      }
+    } else if (element == Element.IMG) {
       String imgSrc = attributes.getValue("src");
       if (imgSrc != null) {
-        curUrl = new ExtractedUrlAnchorPair();
-        curUrl.setHref(imgSrc);
-        curUrl.setTag(localName);
-        outgoingUrls.add(curUrl);
-      }
-      return;
-    }
+        addToOutgoingUrls(imgSrc, localName);
 
-    if (element == Element.IFRAME || element == Element.FRAME || element == Element.EMBED) {
+      }
+    } else if (element == Element.IFRAME || element == Element.FRAME || element == Element.EMBED) {
       String src = attributes.getValue("src");
       if (src != null) {
-        curUrl = new ExtractedUrlAnchorPair();
-        curUrl.setHref(src);
-        curUrl.setTag(localName);
-        outgoingUrls.add(curUrl);
-      }
-      return;
-    }
+        addToOutgoingUrls(src, localName);
 
-    if (element == Element.BASE) {
+      }
+    } else if (element == Element.BASE) {
       if (base != null) { // We only consider the first occurrence of the Base element.
         String href = attributes.getValue("href");
         if (href != null) {
           base = href;
         }
       }
-      return;
-    }
-
-    if (element == Element.META) {
+    } else if (element == Element.META) {
       String equiv = attributes.getValue("http-equiv");
       if (equiv == null) { // This condition covers several cases of XHTML meta
         equiv = attributes.getValue("name");
@@ -134,27 +116,25 @@ public class HtmlContentHandler extends DefaultHandler {
           if (pos != -1) {
             metaRefresh = content.substring(pos + 4);
           }
-          curUrl = new ExtractedUrlAnchorPair();
-          curUrl.setHref(metaRefresh);
-          curUrl.setTag(localName);
-          outgoingUrls.add(curUrl);
+          addToOutgoingUrls(metaRefresh, localName);
         }
 
         // http-equiv="location" content="http://foo.bar/..."
         if (equiv.equals("location") && (metaLocation == null)) {
           metaLocation = content;
-          curUrl = new ExtractedUrlAnchorPair();
-          curUrl.setHref(metaRefresh);
-          curUrl.setTag(localName);
-          outgoingUrls.add(curUrl);
+          addToOutgoingUrls(metaRefresh, localName);
         }
       }
-      return;
-    }
-
-    if (element == Element.BODY) {
+    } else if (element == Element.BODY) {
       isWithinBodyElement = true;
     }
+  }
+
+  private void addToOutgoingUrls(String href, String tag) {
+    curUrl = new ExtractedUrlAnchorPair();
+    curUrl.setHref(href);
+    curUrl.setTag(tag);
+    outgoingUrls.add(curUrl);
   }
 
   @Override
@@ -174,8 +154,7 @@ public class HtmlContentHandler extends DefaultHandler {
         anchorText.delete(0, anchorText.length());
       }
       curUrl = null;
-    }
-    if (element == Element.BODY) {
+    } else if (element == Element.BODY) {
       isWithinBodyElement = false;
     }
   }

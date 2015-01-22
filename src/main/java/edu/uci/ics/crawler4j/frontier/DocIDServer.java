@@ -59,47 +59,52 @@ public class DocIDServer extends Configurable {
 
   /**
    * Returns the docid of an already seen url.
-     *
-     * @param url the URL for which the docid is returned.
-     * @return the docid of the url if it is seen before. Otherwise -1 is returned.
-     */
+   *
+   * @param url the URL for which the docid is returned.
+   * @return the docid of the url if it is seen before. Otherwise -1 is returned.
+   */
   public int getDocId(String url) {
     synchronized (mutex) {
-      if (docIDsDB == null) {
-        return -1;
-      }
-      OperationStatus result;
-      DatabaseEntry value = new DatabaseEntry();
-      try {
-        DatabaseEntry key = new DatabaseEntry(url.getBytes());
-        result = docIDsDB.get(null, key, value, null);
+      int docID = -1;
 
-        if (result == OperationStatus.SUCCESS && value.getData().length > 0) {
-          return Util.byteArray2Int(value.getData());
+      if (docIDsDB != null) {
+        OperationStatus result = null;
+        DatabaseEntry value = new DatabaseEntry();
+        try {
+          DatabaseEntry key = new DatabaseEntry(url.getBytes());
+          result = docIDsDB.get(null, key, value, null);
+
+        } catch (Exception e) {
+          logger.error("Exception thrown while getting DocID", e);
         }
-      } catch (Exception e) {
-        e.printStackTrace();
+
+        if (result != null && result == OperationStatus.SUCCESS && value.getData().length > 0) {
+          docID = Util.byteArray2Int(value.getData());
+        }
       }
-      return -1;
+
+      return docID;
     }
   }
 
   public int getNewDocID(String url) {
+    int docID = -1;
+
     synchronized (mutex) {
       try {
         // Make sure that we have not already assigned a docid for this URL
-        int docid = getDocId(url);
-        if (docid > 0) {
-          return docid;
-        }
+        docID = getDocId(url);
 
-        lastDocID++;
-        docIDsDB.put(null, new DatabaseEntry(url.getBytes()), new DatabaseEntry(Util.int2ByteArray(lastDocID)));
-        return lastDocID;
+        if (docID <= 0) {
+          lastDocID++;
+          docIDsDB.put(null, new DatabaseEntry(url.getBytes()), new DatabaseEntry(Util.int2ByteArray(lastDocID)));
+          docID = lastDocID;
+        }
       } catch (Exception e) {
-        e.printStackTrace();
+        logger.error("Exception thrown while getting new DocID", e);
       }
-      return -1;
+
+      return docID;
     }
   }
 
@@ -128,19 +133,21 @@ public class DocIDServer extends Configurable {
   }
 
   public int getDocCount() {
+    int count = -1;
+
     try {
-      return (int) docIDsDB.count();
+      count = (int) docIDsDB.count();
     } catch (DatabaseException e) {
-      e.printStackTrace();
+      logger.error("Exception thrown while getting DOC Count", e);
     }
-    return -1;
+    return count;
   }
 
   public void close() {
     try {
       docIDsDB.close();
     } catch (DatabaseException e) {
-      e.printStackTrace();
+      logger.error("Exception thrown while closing DocIDServer", e);
     }
   }
 }

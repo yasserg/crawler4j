@@ -57,30 +57,6 @@ public class WebURL implements Serializable {
     this.docid = docid;
   }
 
-  @Override
-  public int hashCode() {
-    return url.hashCode();
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-
-    WebURL otherUrl = (WebURL) o;
-    return url != null && url.equals(otherUrl.getURL());
-
-  }
-
-  @Override
-  public String toString() {
-    return url;
-  }
-
   /**
    * @return Url string
    */
@@ -214,5 +190,29 @@ public class WebURL implements Serializable {
 
   public void setTag(String tag) {
     this.tag = tag;
+  }
+
+  @Override
+  public int hashCode() {
+    return url.hashCode();
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+
+    WebURL otherUrl = (WebURL) o;
+    return url != null && url.equals(otherUrl.getURL());
+
+  }
+
+  @Override
+  public String toString() {
+    return url;
   }
 }

@@ -36,7 +36,7 @@ import java.util.List;
 /**
  * The controller that manages a crawling session. This class creates the
  * crawler threads and monitors their progress.
- * 
+ *
  * @author Yasser Ganjisaffar [lastname at gmail dot com]
  */
 public class CrawlController extends Configurable {
@@ -74,15 +74,16 @@ public class CrawlController extends Configurable {
   protected final Object waitingLock = new Object();
   protected final Environment env;
 
-  public CrawlController(CrawlConfig config, PageFetcher pageFetcher, RobotstxtServer robotstxtServer)
-      throws Exception {
+  public CrawlController(CrawlConfig config, PageFetcher pageFetcher, RobotstxtServer robotstxtServer) throws Exception {
     super(config);
 
     config.validate();
     File folder = new File(config.getCrawlStorageFolder());
     if (!folder.exists()) {
       if (!folder.mkdirs()) {
-        throw new Exception("Couldn't create this folder: " + folder.getAbsolutePath());
+        throw new Exception("couldn't create the storage folder: " + folder.getAbsolutePath() + " does it already exist ?");
+      } else {
+        logger.debug("Created folder: " + folder.getAbsolutePath());
       }
     }
 
@@ -96,11 +97,15 @@ public class CrawlController extends Configurable {
     File envHome = new File(config.getCrawlStorageFolder() + "/frontier");
     if (!envHome.exists()) {
       if (!envHome.mkdir()) {
-        throw new Exception("Couldn't create this folder: " + envHome.getAbsolutePath());
+        throw new Exception("Failed creating the frontier folder: " + envHome.getAbsolutePath());
+      } else {
+        logger.debug("Created folder: " + envHome.getAbsolutePath());
       }
     }
+
     if (!resumable) {
       IO.deleteFolderContents(envHome);
+      logger.info("Deleted contents of: " + envHome + " ( as you have configured resumable crawling to false )");
     }
 
     env = new Environment(envHome, envConfig);
@@ -192,9 +197,7 @@ public class CrawlController extends Configurable {
                   }
                 }
                 if (!someoneIsWorking) {
-                  // Make sure again that none of the threads
-                  // are
-                  // alive.
+                  // Make sure again that none of the threads are alive.
                   logger.info("It looks like no thread is working, waiting for 10 seconds to make sure...");
                   sleep(10);
 
@@ -220,10 +223,7 @@ public class CrawlController extends Configurable {
                     }
 
                     logger.info("All of the crawlers are stopped. Finishing the process...");
-                    // At this step, frontier notifies the
-                    // threads that were
-                    // waiting for new URLs and they should
-                    // stop
+                    // At this step, frontier notifies the threads that were waiting for new URLs and they should stop
                     frontier.finish();
                     for (T crawler : crawlers) {
                       crawler.onBeforeExit();
@@ -247,7 +247,7 @@ public class CrawlController extends Configurable {
               }
             }
           } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Unexpected Error", e);
           }
         }
       });
@@ -259,7 +259,7 @@ public class CrawlController extends Configurable {
       }
 
     } catch (Exception e) {
-      e.printStackTrace();
+      logger.error("Error happened", e);
     }
   }
 
@@ -275,16 +275,15 @@ public class CrawlController extends Configurable {
         try {
           waitingLock.wait();
         } catch (InterruptedException e) {
-          e.printStackTrace();
+          logger.error("Error occurred", e);
         }
       }
     }
   }
 
   /**
-   * Once the crawling session finishes the controller collects the local data
-   * of the crawler threads and stores them in a List. This function returns
-   * the reference to this list.
+   * Once the crawling session finishes the controller collects the local data of the crawler threads and stores them in a List.
+   * This function returns the reference to this list.
    *
    * @return List of Objects which are your local data
    */
@@ -330,16 +329,15 @@ public class CrawlController extends Configurable {
    *            the document id that you want to be assigned to this seed URL.
    *
    */
-    public void addSeed(String pageUrl, int docId) {
-      String canonicalUrl = URLCanonicalizer.getCanonicalURL(pageUrl);
-      if (canonicalUrl == null) {
-        logger.error("Invalid seed URL: {}", pageUrl);
-        return;
-      }
+  public void addSeed(String pageUrl, int docId) {
+    String canonicalUrl = URLCanonicalizer.getCanonicalURL(pageUrl);
+    if (canonicalUrl == null) {
+      logger.error("Invalid seed URL: {}", pageUrl);
+    } else {
       if (docId < 0) {
         docId = docIdServer.getDocId(canonicalUrl);
         if (docId > 0) {
-          // This URL is already seen.
+          logger.trace("This URL is already seen.");
           return;
         }
         docId = docIdServer.getNewDocID(canonicalUrl);
@@ -356,10 +354,11 @@ public class CrawlController extends Configurable {
       webUrl.setDocid(docId);
       webUrl.setDepth((short) 0);
       if (!robotstxtServer.allows(webUrl)) {
-        logger.info("Robots.txt does not allow this seed: {}", pageUrl);
+        logger.warn("Robots.txt does not allow this seed: {}", pageUrl); // using the WARN level here, as the user specifically asked to add this seed
       } else {
         frontier.schedule(webUrl);
       }
+    }
   }
 
   /**
@@ -381,13 +380,13 @@ public class CrawlController extends Configurable {
   public void addSeenUrl(String url, int docId) {
     String canonicalUrl = URLCanonicalizer.getCanonicalURL(url);
     if (canonicalUrl == null) {
-      logger.error("Invalid Url: {}", url);
-      return;
-    }
-    try {
-      docIdServer.addUrlAndDocId(canonicalUrl, docId);
-    } catch (Exception e) {
-      logger.error("Could not add seen url: {}", e.getMessage());
+      logger.error("Invalid Url: {} (can't cannonicalize it!)", url);
+    } else {
+      try {
+        docIdServer.addUrlAndDocId(canonicalUrl, docId);
+      } catch (Exception e) {
+        logger.error("Could not add seen url: {}", e.getMessage());
+      }
     }
   }
 
