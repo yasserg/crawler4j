@@ -39,7 +39,7 @@ public class RobotstxtParser {
     HostDirectives directives = null;
     boolean inMatchingUserAgent = false;
 
-    StringTokenizer st = new StringTokenizer(content, "\n");
+    StringTokenizer st = new StringTokenizer(content, "\n\r");
     while (st.hasMoreTokens()) {
       String line = st.nextToken();
 

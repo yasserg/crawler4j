@@ -107,8 +107,11 @@ public class RobotstxtServer {
           }
           directives = RobotstxtParser.parse(content, config.getUserAgentName());
         } else {
-          logger.warn("Can't read this robots.txt: {}  as it is not written in plain text", url.toExternalForm());
+          logger.info("Can't read this robots.txt: {}  as it is not written in plain text, contentType: {}, it might have been redirected to a regular page",
+              robotsTxtUrl.getURL(), page.getContentType());
         }
+      } else {
+        logger.debug("Can't read this robots.txt: {}  as it's status code is {}", robotsTxtUrl.getURL(), fetchResult.getStatusCode());
       }
     } catch (SocketException | UnknownHostException | SocketTimeoutException | NoHttpResponseException se) {
       // No logging here, as it just means that robots.txt doesn't exist on this server which is perfectly ok
