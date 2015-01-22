@@ -22,7 +22,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.crawler.exceptions.PageBiggerThanMaxSizeException;
+import edu.uci.ics.crawler4j.parser.HtmlParseData;
+import edu.uci.ics.crawler4j.parser.Parser;
 import org.apache.http.HttpStatus;
 
 import edu.uci.ics.crawler4j.crawler.Page;
@@ -106,9 +109,12 @@ public class RobotstxtServer {
             content = new String(page.getContentData(), page.getContentCharset());
           }
           directives = RobotstxtParser.parse(content, config.getUserAgentName());
+        } else if (page.getContentType().contains("html")) { // TODO This one should be upgraded to remove all html tags
+          String content = new String(page.getContentData());
+          directives = RobotstxtParser.parse(content, config.getUserAgentName());
         } else {
-          logger.info("Can't read this robots.txt: {}  as it is not written in plain text, contentType: {}, it might have been redirected to a regular page",
-              robotsTxtUrl.getURL(), page.getContentType());
+            logger.warn("Can't read this robots.txt: {}  as it is not written in plain text, contentType: {}",
+                robotsTxtUrl.getURL(), page.getContentType());
         }
       } else {
         logger.debug("Can't read this robots.txt: {}  as it's status code is {}", robotsTxtUrl.getURL(), fetchResult.getStatusCode());
