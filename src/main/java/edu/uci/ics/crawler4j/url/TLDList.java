@@ -25,37 +25,41 @@ public class TLDList {
 
   private TLDList() {
     try {
-      InputStream stream = null;
-
-      try {
+      URL url = new URL(TLD_NAMES_ONLINE_URL);
+      try (InputStream stream = url.openStream(); BufferedReader reader = new BufferedReader(new InputStreamReader(stream))) {
         logger.debug("Fetching the most updated TLD list online");
-        URL url = new URL(TLD_NAMES_ONLINE_URL);
-        stream = url.openStream();
-      } catch (Exception ex) {
-        logger.warn("Couldn't fetch the online list of TLDs from: {}", TLD_NAMES_ONLINE_URL);
-        logger.info("Fetching the list from my local file {}", TLD_NAMES_TXT_FILENAME);
 
-        stream = this.getClass().getResourceAsStream(TLD_NAMES_TXT_FILENAME);
-      }
-
-      if (stream == null) {
-        throw new Exception("Couldn't fetch the TLD list online or from a local file");
-      }
-      BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
-      String line;
-      while ((line = reader.readLine()) != null) {
-        line = line.trim();
-        if (line.isEmpty() || line.startsWith("//")) {
-          continue;
+        String line;
+        while ((line = reader.readLine()) != null) {
+          line = line.trim();
+          if (line.isEmpty() || line.startsWith("//")) {
+            continue;
+          }
+          tldSet.add(line);
         }
-        tldSet.add(line);
+      } catch (Exception ex) {
+        throw new Exception("Error while retrieving online TLD List");
       }
+    } catch (Exception ex) { // Reverting to offline TLD List
+      logger.warn("Couldn't fetch the online list of TLDs from: {}", TLD_NAMES_ONLINE_URL);
+      logger.info("Fetching the list from my local file {}", TLD_NAMES_TXT_FILENAME);
 
-      reader.close();
-      stream.close();
-    } catch (Exception e) {
-      logger.error("Couldn't find " + TLD_NAMES_TXT_FILENAME, e);
-      System.exit(-1);
+      try (InputStream stream = this.getClass().getResourceAsStream(TLD_NAMES_TXT_FILENAME);
+           BufferedReader reader = new BufferedReader(new InputStreamReader(stream))) {
+
+        String line;
+        while ((line = reader.readLine()) != null) {
+          line = line.trim();
+          if (line.isEmpty() || line.startsWith("//")) {
+            continue;
+          }
+          tldSet.add(line);
+        }
+      } catch (Exception ex2) {
+        logger.error("Couldn't find " + TLD_NAMES_TXT_FILENAME, ex2);
+        logger.error("No TLD List exiting...");
+        System.exit(-1);
+      }
     }
   }
 

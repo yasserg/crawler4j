@@ -2,6 +2,7 @@ Crawler4J Change Log
 
 Version 4.1 (2015)
 Enhancements
+- Issue 281: Upgrade try-catch to java7 "try with resources"
 - Issue 214: Always log if exception happens + Some code refactoring
 - Issue 326: PageFetcher is unreadable
 - Issue 325: Remove Non official http status codes

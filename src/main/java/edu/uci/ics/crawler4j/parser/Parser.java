@@ -87,21 +87,11 @@ public class Parser extends Configurable {
     } else { // isHTML
       Metadata metadata = new Metadata();
       HtmlContentHandler contentHandler = new HtmlContentHandler();
-      InputStream inputStream = null;
-      try {
-        inputStream = new ByteArrayInputStream(page.getContentData());
+      try (InputStream inputStream = new ByteArrayInputStream(page.getContentData())) {
         htmlParser.parse(inputStream, contentHandler, metadata, parseContext);
       } catch (Exception e) {
         logger.error("{}, while parsing: {}", e.getMessage(), page.getWebURL().getURL());
         throw new ParseException();
-      } finally {
-        try {
-          if (inputStream != null) {
-            inputStream.close();
-          }
-        } catch (IOException e) {
-          logger.error("{}, while parsing: {}", e.getMessage(), page.getWebURL().getURL());
-        }
       }
 
       if (page.getContentCharset() == null) {
