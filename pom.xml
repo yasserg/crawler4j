@@ -4,33 +4,21 @@
 	<artifactId>crawler4j</artifactId>
 	<packaging>jar</packaging>
 	<name>crawler4j</name>
-	<version>4.1</version>
+	<version>4.1-SNAPSHOT</version>
 	<description>Open Source Web Crawler for Java</description>
-	<url>http://code.google.com/p/crawler4j/</url>
+  <url>https://github.com/yasserg/crawler4j</url>
 	<licenses>
 		<license>
 			<name>The Apache Software License, Version 2.0</name>
 			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
 			<distribution>repo</distribution>
 		</license>
-	</licenses>
-	<scm>
-		<connection>scm:git:https://crawler4j.googlecode.com/git/</connection>
-		<developerConnection>scm:git:https://crawler4j.googlecode.com/git/</developerConnection>
-		<url>https://crawler4j.googlecode.com/git/</url>
-	</scm>
-
-	<developers>
-		<developer>
-			<name>Yasser Ganjisaffar</name>
-			<email>{lastname}@gmail.com</email>
-		</developer>
-
-        <developer>
-			<name>Avi Hayun</name>
-			<email>avraham2@gmail.com</email>
-		</developer>
-	</developers>
+  </licenses>
+  <scm>
+    <url>https://github.com/yasserg/crawler4j</url>
+    <connection>scm:git:git@github.com:yasserg/crawler4j.git</connection>
+    <developerConnection>scm:git:git@github.com:yasserg/crawler4j.git</developerConnection>
+  </scm>
 
 	<parent>
 		<groupId>org.sonatype.oss</groupId>
@@ -92,13 +80,13 @@
 
 	<dependencies>
 
-        <!-- Compile time Dependencies -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>1.7.7</version>
-            <scope>compile</scope>
-        </dependency>
+    <!-- Compile time Dependencies -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>1.7.7</version>
+      <scope>compile</scope>
+    </dependency>
 
 		<dependency>
 			<groupId>uk.org.lidalia</groupId>
@@ -106,12 +94,12 @@
 			<version>1.0.0</version>
 		</dependency>
 
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>1.1.2</version>
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>1.1.2</version>
 			<scope>test</scope>
-        </dependency>
+    </dependency>
 
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
@@ -132,7 +120,7 @@
 			<version>1.5</version>
 		</dependency>
 
-        <!-- Test Dependencies -->
+    <!-- Test Dependencies -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
