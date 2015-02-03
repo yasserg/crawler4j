@@ -1,4 +1,4 @@
-Crawler4J Change Log
+crawler4j Change Log
 
 Version 4.1 (2015)
 Enhancements
