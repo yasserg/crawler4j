@@ -22,7 +22,8 @@ crawler4j JARs are available on the [releases page](https://github.com/yasserg/c
 and at [Maven Central](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22edu.uci.ics%22%20AND%20a%3A%22crawler4j%22).
 
 If you use crawler4j without Maven, be aware that crawler4j jar file has a couple of
-external dependencies, whose JARs you need to add to your classpath as well.
+external dependencies. In [releases page](https://github.com/yasserg/crawler4j/releases), you can find a file named crawler4j-X.Y-with-dependencies.jar that includes crawler4j and all of its dependencies as a bundle.
+You can add download it and add it to your classpath to get all the dependencies covered.
 
 ## Quickstart
 You need to create a crawler class that extends WebCrawler. This class decides which URLs
