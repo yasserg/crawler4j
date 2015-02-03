@@ -75,6 +75,27 @@
 					</execution>
 				</executions>
 			</plugin>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>2.5.3</version>
+        <configuration>
+          <descriptorRefs>
+            <descriptorRef>jar-with-dependencies</descriptorRef>
+          </descriptorRefs>
+        </configuration>
+        <executions>
+          <execution>
+            <id>make-fat-jar</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <finalName>crawler4j-${project.version}</finalName>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
 		</plugins>
 	</build>
 
