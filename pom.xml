@@ -6,19 +6,19 @@
 	<name>crawler4j</name>
 	<version>4.2-SNAPSHOT</version>
 	<description>Open Source Web Crawler for Java</description>
-  <url>https://github.com/yasserg/crawler4j</url>
+	<url>https://github.com/yasserg/crawler4j</url>
 	<licenses>
 		<license>
 			<name>The Apache Software License, Version 2.0</name>
 			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
 			<distribution>repo</distribution>
 		</license>
-  </licenses>
-  <scm>
-    <url>https://github.com/yasserg/crawler4j</url>
-    <connection>scm:git:git@github.com:yasserg/crawler4j.git</connection>
-    <developerConnection>scm:git:git@github.com:yasserg/crawler4j.git</developerConnection>
-  </scm>
+	</licenses>
+	<scm>
+		<url>https://github.com/yasserg/crawler4j</url>
+		<connection>scm:git:git@github.com:yasserg/crawler4j.git</connection>
+		<developerConnection>scm:git:git@github.com:yasserg/crawler4j.git</developerConnection>
+	</scm>
 
 	<parent>
 		<groupId>org.sonatype.oss</groupId>
@@ -31,16 +31,16 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.2</version>
 				<configuration>
 					<source>1.7</source>
 					<target>1.7</target>
 				</configuration>
-				<version>2.3.2</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
-				<version>2.3</version>
+				<version>2.5</version>
 				<configuration>
 					<excludes>
 						<exclude>**/*.properties</exclude>
@@ -51,7 +51,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
-				<version>2.2.1</version>
+				<version>2.4</version>
 				<executions>
 					<execution>
 						<id>attach-sources</id>
@@ -65,7 +65,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.9</version>
+				<version>2.10.1</version>
 				<executions>
 					<execution>
 						<id>attach-javadocs</id>
@@ -75,27 +75,27 @@
 					</execution>
 				</executions>
 			</plugin>
-      <plugin>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <version>2.5.3</version>
-        <configuration>
-          <descriptorRefs>
-            <descriptorRef>jar-with-dependencies</descriptorRef>
-          </descriptorRefs>
-        </configuration>
-        <executions>
-          <execution>
-            <id>make-fat-jar</id>
-            <phase>package</phase>
-            <goals>
-              <goal>single</goal>
-            </goals>
-            <configuration>
-              <finalName>crawler4j-${project.version}</finalName>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>2.5.3</version>
+				<configuration>
+				  <descriptorRefs>
+					<descriptorRef>jar-with-dependencies</descriptorRef>
+				  </descriptorRefs>
+				</configuration>
+				<executions>
+				  <execution>
+					<id>make-fat-jar</id>
+					<phase>package</phase>
+					<goals>
+					  <goal>single</goal>
+					</goals>
+					<configuration>
+					  <finalName>crawler4j-${project.version}</finalName>
+					</configuration>
+				  </execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 
@@ -103,43 +103,43 @@
 
     <!-- Compile time Dependencies -->
     <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <version>1.7.7</version>
-      <scope>compile</scope>
+		<groupId>org.slf4j</groupId>
+		<artifactId>slf4j-api</artifactId>
+		<version>1.7.10</version>
+		<scope>compile</scope>
     </dependency>
 
-		<dependency>
-			<groupId>uk.org.lidalia</groupId>
-			<artifactId>lidalia-slf4j-ext</artifactId>
-			<version>1.0.0</version>
-		</dependency>
+	<dependency>
+		<groupId>uk.org.lidalia</groupId>
+		<artifactId>lidalia-slf4j-ext</artifactId>
+		<version>1.0.0</version>
+	</dependency>
 
     <dependency>
-      <groupId>ch.qos.logback</groupId>
-      <artifactId>logback-classic</artifactId>
-      <version>1.1.2</version>
-			<scope>test</scope>
+		<groupId>ch.qos.logback</groupId>
+		<artifactId>logback-classic</artifactId>
+		<version>1.1.2</version>
+		<scope>test</scope>
     </dependency>
 
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
-			<version>4.3.5</version>
-			<scope>compile</scope>
-		</dependency>
+	<dependency>
+		<groupId>org.apache.httpcomponents</groupId>
+		<artifactId>httpclient</artifactId>
+		<version>4.4</version>
+		<scope>compile</scope>
+	</dependency>
 
-		<dependency>
-			<groupId>com.sleepycat</groupId>
-			<artifactId>je</artifactId>
-			<version>5.0.73</version>
-		</dependency>
+	<dependency>
+		<groupId>com.sleepycat</groupId>
+		<artifactId>je</artifactId>
+		<version>5.0.73</version>
+	</dependency>
 
-		<dependency>
-			<groupId>org.apache.tika</groupId>
-			<artifactId>tika-parsers</artifactId>
-			<version>1.5</version>
-		</dependency>
+	<dependency>
+		<groupId>org.apache.tika</groupId>
+		<artifactId>tika-parsers</artifactId>
+		<version>1.5</version>
+	</dependency>
 
     <!-- Test Dependencies -->
 		<dependency>
