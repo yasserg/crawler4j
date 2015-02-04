@@ -41,7 +41,7 @@ import edu.uci.ics.crawler4j.util.Net;
 import edu.uci.ics.crawler4j.util.Util;
 
 /**
- * @author Yasser Ganjisaffar [lastname at gmail dot com]
+ * @author Yasser Ganjisaffar
  */
 public class Parser extends Configurable {
 

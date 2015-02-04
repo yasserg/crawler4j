@@ -39,7 +39,7 @@ import edu.uci.ics.crawler4j.util.IO;
  * The controller that manages a crawling session. This class creates the
  * crawler threads and monitors their progress.
  *
- * @author Yasser Ganjisaffar [lastname at gmail dot com]
+ * @author Yasser Ganjisaffar
  */
 public class CrawlController extends Configurable {
 

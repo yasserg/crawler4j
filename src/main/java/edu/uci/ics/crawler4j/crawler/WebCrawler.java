@@ -44,7 +44,7 @@ import uk.org.lidalia.slf4jext.LoggerFactory;
 /**
  * WebCrawler class in the Runnable class that is executed by each crawler thread.
  *
- * @author Yasser Ganjisaffar [lastname at gmail dot com]
+ * @author Yasser Ganjisaffar
  */
 public class WebCrawler implements Runnable {
 

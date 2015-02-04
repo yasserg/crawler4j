@@ -36,7 +36,7 @@ import edu.uci.ics.crawler4j.url.WebURL;
 import edu.uci.ics.crawler4j.util.Util;
 
 /**
- * @author Yasser Ganjisaffar [lastname at gmail dot com]
+ * @author Yasser Ganjisaffar
  */
 public class WorkQueues {
   private static final Logger logger = LoggerFactory.getLogger(WorkQueues.class);

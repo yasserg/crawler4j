@@ -27,7 +27,7 @@ import edu.uci.ics.crawler4j.robotstxt.RobotstxtConfig;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
 
 /**
- * @author Yasser Ganjisaffar [lastname at gmail dot com]
+ * @author Yasser Ganjisaffar
  */
 public class BasicCrawlController {
   private static final Logger logger = LoggerFactory.getLogger(BasicCrawlController.class);

@@ -37,7 +37,7 @@ import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.util.Util;
 
 /**
- * @author Yasser Ganjisaffar [lastname at gmail dot com]
+ * @author Yasser Ganjisaffar
  */
 public class Counters extends Configurable {
   private static final Logger logger = LoggerFactory.getLogger(Counters.class);

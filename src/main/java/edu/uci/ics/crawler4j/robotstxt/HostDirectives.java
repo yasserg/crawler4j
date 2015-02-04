@@ -18,7 +18,7 @@
 package edu.uci.ics.crawler4j.robotstxt;
 
 /**
- * @author Yasser Ganjisaffar [lastname at gmail dot com]
+ * @author Yasser Ganjisaffar
  */
 public class HostDirectives {
 

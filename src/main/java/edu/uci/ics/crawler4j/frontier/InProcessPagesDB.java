@@ -35,7 +35,7 @@ import edu.uci.ics.crawler4j.url.WebURL;
  * assigned to crawlers but are not yet processed.
  * It is used for resuming a previous crawl.
  *
- * @author Yasser Ganjisaffar [lastname at gmail dot com]
+ * @author Yasser Ganjisaffar
  */
 public class InProcessPagesDB extends WorkQueues {
 

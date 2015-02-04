@@ -30,7 +30,7 @@ import edu.uci.ics.crawler4j.url.WebURL;
 /**
  * This class contains the data for a fetched and parsed page.
  *
- * @author Yasser Ganjisaffar [lastname at gmail dot com]
+ * @author Yasser Ganjisaffar
  */
 public class Page {
 

@@ -20,7 +20,7 @@ package edu.uci.ics.crawler4j.robotstxt;
 import java.util.StringTokenizer;
 
 /**
- * @author Yasser Ganjisaffar [lastname at gmail dot com]
+ * @author Yasser Ganjisaffar
  */
 
 

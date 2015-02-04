@@ -28,7 +28,7 @@ import edu.uci.ics.crawler4j.crawler.WebCrawler;
 import edu.uci.ics.crawler4j.url.WebURL;
 
 /**
- * @author Yasser Ganjisaffar [lastname at gmail dot com]
+ * @author Yasser Ganjisaffar
  */
 public class StatusHandlerCrawler extends WebCrawler {
   private static final Logger logger = LoggerFactory.getLogger(StatusHandlerCrawler.class);

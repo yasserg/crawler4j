@@ -19,7 +19,7 @@ package edu.uci.ics.crawler4j.util;
 
 
 /**
- * @author Yasser Ganjisaffar [lastname at gmail dot com]
+ * @author Yasser Ganjisaffar
  */
 public class Util {
 

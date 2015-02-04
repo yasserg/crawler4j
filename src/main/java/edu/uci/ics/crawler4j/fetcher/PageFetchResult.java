@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 import edu.uci.ics.crawler4j.crawler.Page;
 
 /**
- * @author Yasser Ganjisaffar [lastname at gmail dot com]
+ * @author Yasser Ganjisaffar
  */
 public class PageFetchResult {
 
