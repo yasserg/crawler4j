@@ -12,7 +12,7 @@ To use the latest release of crawler4j, please use the following snippet in your
     <dependency>
         <groupId>edu.uci.ics</groupId>
         <artifactId>crawler4j</artifactId>
-        <version>4.0</version>
+        <version>4.1</version>
     </dependency>
 ```
 
@@ -44,7 +44,7 @@ public class MyCrawler extends WebCrawler {
      * "http://www.ics.uci.edu/".
      */
      @Override
-     public boolean shouldVisit(WebURL url) {
+     public boolean shouldVisit(Page page, WebURL url) {
          String href = url.getURL().toLowerCase();
          return !FILTERS.matcher(href).matches() 
                 && href.startsWith("http://www.ics.uci.edu/");
