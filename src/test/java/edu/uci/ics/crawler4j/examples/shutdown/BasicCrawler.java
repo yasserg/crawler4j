@@ -42,7 +42,7 @@ public class BasicCrawler extends WebCrawler {
   private static final String DOMAIN = "http://www.ics.uci.edu/";
 
   @Override
-  public boolean shouldVisit(Page page, WebURL url) {
+  public boolean shouldVisit(Page referringPage, WebURL url) {
     String href = url.getURL().toLowerCase();
     return !FILTERS.matcher(href).matches() && href.startsWith(DOMAIN);
   }

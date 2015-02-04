@@ -59,7 +59,7 @@ public class ImageCrawler extends WebCrawler {
   }
 
   @Override
-  public boolean shouldVisit(Page page, WebURL url) {
+  public boolean shouldVisit(Page referringPage, WebURL url) {
     String href = url.getURL().toLowerCase();
     if (filters.matcher(href).matches()) {
       return false;

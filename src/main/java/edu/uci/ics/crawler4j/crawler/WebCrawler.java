@@ -273,17 +273,19 @@ public class WebCrawler implements Runnable {
   /**
    * Classes that extends WebCrawler should overwrite this function to tell the
    * crawler whether the given url should be crawled or not. The following
-   * implementation indicates that all urls should be included in the crawl.
+   * default implementation indicates that all urls should be included in the crawl.
    *
    * @param url
    *            the url which we are interested to know whether it should be
    *            included in the crawl or not.
-   * @param page
-   *           Page context from which this URL was scraped
+   * @param referringPage
+   *           The Page in which this url was found or null if the url has been
+   *           a seed url.
    * @return if the url should be included in the crawl it returns true,
    *         otherwise false is returned.
    */
-  public boolean shouldVisit(Page page, WebURL url) {
+  public boolean shouldVisit(Page referringPage, WebURL url) {
+    // By default allow all urls to be crawled.
     return true;
   }
 

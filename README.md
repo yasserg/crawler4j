@@ -12,7 +12,7 @@ To use the latest release of crawler4j, please use the following snippet in your
     <dependency>
         <groupId>edu.uci.ics</groupId>
         <artifactId>crawler4j</artifactId>
-        <version>4.0</version>
+        <version>4.1</version>
     </dependency>
 ```
 
@@ -32,30 +32,32 @@ implementation:
 ```java
 public class MyCrawler extends WebCrawler {
 
-    private final static Pattern FILTERS = Pattern.compile(".*(\\.(css|js|gif|jpe?g" 
+    private final static Pattern FILTERS = Pattern.compile(".*(\\.(css|js|gif|jpe?g"
                                                            + "|png|mp3|mp3|zip|gz))$");
 
     /**
-     * You should implement this function to specify whether
-     * the given url should be crawled or not (based on your
-     * crawling logic). In this example, we are instructing
-     * the crawler to ignore urls that have css, js, git, ...
-     * extensions and to only accept urls that start with
-     * "http://www.ics.uci.edu/".
+     * This method receives two parameters. The first parameter is the page
+     * in which we have discovered this new url and the second parameter is
+     * the new url. You should implement this function to specify whether
+     * the given url should be crawled or not (based on your crawling logic).
+     * In this example, we are instructing the crawler to ignore urls that
+     * have css, js, git, ... extensions and to only accept urls that start
+     * with "http://www.ics.uci.edu/". In this case, we didn't need the
+     * referringPage parameter to make the decision.
      */
      @Override
-     public boolean shouldVisit(WebURL url) {
+     public boolean shouldVisit(Page referringPage, WebURL url) {
          String href = url.getURL().toLowerCase();
-         return !FILTERS.matcher(href).matches() 
+         return !FILTERS.matcher(href).matches()
                 && href.startsWith("http://www.ics.uci.edu/");
      }
 
      /**
-      * This function is called when a page is fetched and ready 
+      * This function is called when a page is fetched and ready
       * to be processed by your program.
       */
      @Override
-     public void visit(Page page) {          
+     public void visit(Page page) {
          String url = page.getWebURL().getURL();
          System.out.println("URL: " + url);
 
@@ -74,13 +76,13 @@ public class MyCrawler extends WebCrawler {
 ```
 As can be seen in the above code, there are two main functions that should be overridden:
 
-- shouldVisit: This function decides whether the given URL should be crawled or not. In 
+- shouldVisit: This function decides whether the given URL should be crawled or not. In
 the above example, this example is not allowing .css, .js and media files and only allows
  pages within 'www.ics.uci.edu' domain.
 - visit: This function is called after the content of a URL is downloaded successfully.
  You can easily get the url, text, links, html, and unique id of the downloaded page.
 
-You should also implement a controller class which specifies the seeds of the crawl, 
+You should also implement a controller class which specifies the seeds of the crawl,
 the folder in which intermediate crawl data should be stored and the number of concurrent
  threads:
 
@@ -114,7 +116,7 @@ public class Controller {
          * Start the crawl. This is a blocking operation, meaning that your code
          * will reach the line after this only when crawling is finished.
          */
-        controller.start(MyCrawler.class, numberOfCrawlers);    
+        controller.start(MyCrawler.class, numberOfCrawlers);
     }
 }
 ```
@@ -169,7 +171,7 @@ crawlConfig.setProxyPort(8080);
 ```
 If your proxy also needs authentication:
 ```java
-crawlConfig.setProxyUsername(username); 
+crawlConfig.setProxyUsername(username);
 crawlConfig.getProxyPassword(password);
 ```
 

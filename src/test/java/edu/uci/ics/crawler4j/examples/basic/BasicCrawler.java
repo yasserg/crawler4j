@@ -44,7 +44,7 @@ public class BasicCrawler extends WebCrawler {
    * should be crawled or not (based on your crawling logic).
    */
   @Override
-  public boolean shouldVisit(Page page, WebURL url) {
+  public boolean shouldVisit(Page referringPage, WebURL url) {
     String href = url.getURL().toLowerCase();
 
     return !BINARY_FILES_EXTENSIONS.matcher(href).matches() && href.startsWith("http://www.ics.uci.edu/");
