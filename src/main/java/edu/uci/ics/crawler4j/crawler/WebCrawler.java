@@ -279,8 +279,7 @@ public class WebCrawler implements Runnable {
    *            the url which we are interested to know whether it should be
    *            included in the crawl or not.
    * @param referringPage
-   *           The Page in which this url was found or null if the url has been
-   *           a seed url.
+   *           The Page in which this url was found.
    * @return if the url should be included in the crawl it returns true,
    *         otherwise false is returned.
    */
