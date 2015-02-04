@@ -65,7 +65,7 @@ public class BasicCrawler extends WebCrawler {
     String anchor = page.getWebURL().getAnchor();
 
     logger.debug("Docid: {}", docid);
-    logger.info("URL: ", url);
+    logger.info("URL: {}", url);
     logger.debug("Domain: '{}'", domain);
     logger.debug("Sub-domain: '{}'", subDomain);
     logger.debug("Path: '{}'", path);
