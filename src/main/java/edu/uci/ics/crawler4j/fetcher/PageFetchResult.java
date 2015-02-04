@@ -17,16 +17,15 @@
 
 package edu.uci.ics.crawler4j.fetcher;
 
-import java.io.EOFException;
 import java.io.IOException;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.util.EntityUtils;
-
-import edu.uci.ics.crawler4j.crawler.Page;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import edu.uci.ics.crawler4j.crawler.Page;
 
 /**
  * @author Yasser Ganjisaffar [lastname at gmail dot com]
@@ -90,7 +89,8 @@ public class PageFetchResult {
         EntityUtils.consume(entity);
       }
     } catch (IOException e) {
-      // We can EOFException (extends IOException) exception. It can happen on compressed streams which are not repeatable
+      // We can EOFException (extends IOException) exception. It can happen on compressed streams which are not
+      // repeatable
       // We can ignore this exception. It can happen if the stream is closed.
     } catch (Exception e) {
       logger.warn("Unexpected error occurred while trying to discard content", e);

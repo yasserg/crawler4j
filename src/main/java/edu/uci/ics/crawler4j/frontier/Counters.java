@@ -17,15 +17,24 @@
 
 package edu.uci.ics.crawler4j.frontier;
 
-import com.sleepycat.je.*;
-import edu.uci.ics.crawler4j.crawler.Configurable;
-import edu.uci.ics.crawler4j.crawler.CrawlConfig;
-import edu.uci.ics.crawler4j.util.Util;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.sleepycat.je.Cursor;
+import com.sleepycat.je.Database;
+import com.sleepycat.je.DatabaseConfig;
+import com.sleepycat.je.DatabaseEntry;
+import com.sleepycat.je.DatabaseException;
+import com.sleepycat.je.Environment;
+import com.sleepycat.je.OperationStatus;
+import com.sleepycat.je.Transaction;
+
+import edu.uci.ics.crawler4j.crawler.Configurable;
+import edu.uci.ics.crawler4j.crawler.CrawlConfig;
+import edu.uci.ics.crawler4j.util.Util;
 
 /**
  * @author Yasser Ganjisaffar [lastname at gmail dot com]
@@ -95,8 +104,7 @@ public class Counters extends Configurable {
         counterValues.put(name, value);
         if (statisticsDB != null) {
           Transaction txn = env.beginTransaction(null, null);
-          statisticsDB.put(txn, new DatabaseEntry(name.getBytes()),
-              new DatabaseEntry(Util.long2ByteArray(value)));
+          statisticsDB.put(txn, new DatabaseEntry(name.getBytes()), new DatabaseEntry(Util.long2ByteArray(value)));
           txn.commit();
         }
       } catch (Exception e) {

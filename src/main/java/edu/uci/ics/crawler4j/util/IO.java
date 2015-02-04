@@ -17,13 +17,10 @@
 
 package edu.uci.ics.crawler4j.util;
 
-import com.google.common.io.Files;
+import java.io.File;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.*;
-import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
 
 /**
  * @author Yasser Ganjisaffar [lastname at gmail dot com]

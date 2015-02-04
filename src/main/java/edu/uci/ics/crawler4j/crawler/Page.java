@@ -40,8 +40,8 @@ public class Page {
   protected WebURL url;
 
   /**
-  * Redirection flag
-  */
+   * Redirection flag
+   */
   protected boolean redirect;
 
   /**
@@ -50,8 +50,8 @@ public class Page {
   protected String redirectedToUrl;
 
   /**
-  * Status of the page
-  */
+   * Status of the page
+   */
   protected int statusCode;
 
   /**
@@ -78,8 +78,8 @@ public class Page {
   protected String contentCharset;
 
   /**
-  * Language of the Content.
-  */
+   * Language of the Content.
+   */
   private String language;
 
   /**

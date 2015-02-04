@@ -17,13 +17,14 @@
 
 package edu.uci.ics.crawler4j.examples.multiple;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.crawler.CrawlController;
 import edu.uci.ics.crawler4j.fetcher.PageFetcher;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtConfig;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author Yasser Ganjisaffar [lastname at gmail dot com]
@@ -76,8 +77,8 @@ public class MultipleCrawlerController {
     CrawlController controller1 = new CrawlController(config1, pageFetcher1, robotstxtServer);
     CrawlController controller2 = new CrawlController(config2, pageFetcher2, robotstxtServer);
 
-    String[] crawler1Domains = new String[] { "http://www.ics.uci.edu/", "http://www.cnn.com/" };
-    String[] crawler2Domains = new String[] { "http://en.wikipedia.org/" };
+    String[] crawler1Domains = new String[] {"http://www.ics.uci.edu/", "http://www.cnn.com/"};
+    String[] crawler2Domains = new String[] {"http://en.wikipedia.org/"};
 
     controller1.setCustomData(crawler1Domains);
     controller2.setCustomData(crawler2Domains);

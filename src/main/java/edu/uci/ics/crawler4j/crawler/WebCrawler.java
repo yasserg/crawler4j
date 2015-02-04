@@ -17,6 +17,13 @@
 
 package edu.uci.ics.crawler4j.crawler;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+
+import org.apache.http.HttpStatus;
+import org.apache.http.impl.EnglishReasonPhraseCatalog;
+
 import edu.uci.ics.crawler4j.crawler.exceptions.ContentFetchException;
 import edu.uci.ics.crawler4j.crawler.exceptions.PageBiggerThanMaxSizeException;
 import edu.uci.ics.crawler4j.crawler.exceptions.ParseException;
@@ -30,17 +37,9 @@ import edu.uci.ics.crawler4j.parser.ParseData;
 import edu.uci.ics.crawler4j.parser.Parser;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
 import edu.uci.ics.crawler4j.url.WebURL;
-
-import org.apache.http.HttpStatus;
-
-import org.apache.http.impl.EnglishReasonPhraseCatalog;
 import uk.org.lidalia.slf4jext.Level;
 import uk.org.lidalia.slf4jext.Logger;
 import uk.org.lidalia.slf4jext.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
 
 /**
  * WebCrawler class in the Runnable class that is executed by each crawler thread.
@@ -168,26 +167,26 @@ public class WebCrawler implements Runnable {
     // Sub-classed can override this to add their custom functionality
   }
 
-    /**
-     * This function is called before processing of the page's URL
-     * It can be overridden by subclasses for tweaking of the url before processing it.
-     * For example, http://abc.com/def?a=123 - http://abc.com/def
-     *
-     * @param curURL current URL which can be tweaked before processing
-     * @return tweaked WebURL
-     */
-    protected WebURL handleUrlBeforeProcess(WebURL curURL) {
-      return curURL;
-    }
+  /**
+   * This function is called before processing of the page's URL
+   * It can be overridden by subclasses for tweaking of the url before processing it.
+   * For example, http://abc.com/def?a=123 - http://abc.com/def
+   *
+   * @param curURL current URL which can be tweaked before processing
+   * @return tweaked WebURL
+   */
+  protected WebURL handleUrlBeforeProcess(WebURL curURL) {
+    return curURL;
+  }
 
-    /**
-     * This function is called if the content of a url is bigger than allowed size.
-     *
-     * @param urlStr - The URL which it's content is bigger than allowed size
-     */
-    protected void onPageBiggerThanMaxSize(String urlStr, long pageSize) {
-      logger.warn("Skipping a URL: {} which was bigger ( {} ) than max allowed size", urlStr, pageSize);
-    }
+  /**
+   * This function is called if the content of a url is bigger than allowed size.
+   *
+   * @param urlStr - The URL which it's content is bigger than allowed size
+   */
+  protected void onPageBiggerThanMaxSize(String urlStr, long pageSize) {
+    logger.warn("Skipping a URL: {} which was bigger ( {} ) than max allowed size", urlStr, pageSize);
+  }
 
   /**
    * This function is called if the crawler encountered an unexpected http status code ( a status code other than 3xx)
@@ -197,11 +196,11 @@ public class WebCrawler implements Runnable {
    * @param contentType Type of Content
    * @param description Error Description
    */
-    protected void onUnexpectedStatusCode(String urlStr, int statusCode, String contentType, String description) {
-      logger.warn("Skipping URL: {}, StatusCode: {}, {}, {}", urlStr, statusCode, contentType, description);
-      // Do nothing by default (except basic logging)
-      // Sub-classed can override this to add their custom functionality
-    }
+  protected void onUnexpectedStatusCode(String urlStr, int statusCode, String contentType, String description) {
+    logger.warn("Skipping URL: {}, StatusCode: {}, {}, {}", urlStr, statusCode, contentType, description);
+    // Do nothing by default (except basic logging)
+    // Sub-classed can override this to add their custom functionality
+  }
 
   /**
    * This function is called if the content of a url could not be fetched.
@@ -271,18 +270,18 @@ public class WebCrawler implements Runnable {
   }
 
   /**
-  * Classes that extends WebCrawler should overwrite this function to tell the
-  * crawler whether the given url should be crawled or not. The following
-  * implementation indicates that all urls should be included in the crawl.
-  *
-  * @param url
-  *            the url which we are interested to know whether it should be
-  *            included in the crawl or not.
-  * @param page
-  *           Page context from which this URL was scraped
-  * @return if the url should be included in the crawl it returns true,
-  *         otherwise false is returned.
-  */
+   * Classes that extends WebCrawler should overwrite this function to tell the
+   * crawler whether the given url should be crawled or not. The following
+   * implementation indicates that all urls should be included in the crawl.
+   *
+   * @param url
+   *            the url which we are interested to know whether it should be
+   *            included in the crawl or not.
+   * @param page
+   *           Page context from which this URL was scraped
+   * @return if the url should be included in the crawl it returns true,
+   *         otherwise false is returned.
+   */
   public boolean shouldVisit(Page page, WebURL url) {
     return true;
   }
@@ -308,15 +307,17 @@ public class WebCrawler implements Runnable {
 
       fetchResult = pageFetcher.fetchPage(curURL);
       int statusCode = fetchResult.getStatusCode();
-      handlePageStatusCode(curURL, statusCode, EnglishReasonPhraseCatalog.INSTANCE.getReason(statusCode, Locale.ENGLISH)); // Finds the status reason for all known statuses
+      handlePageStatusCode(curURL, statusCode, EnglishReasonPhraseCatalog.INSTANCE
+          .getReason(statusCode, Locale.ENGLISH)); // Finds the status reason for all known statuses
 
       Page page = new Page(curURL);
       page.setFetchResponseHeaders(fetchResult.getResponseHeaders());
       page.setStatusCode(statusCode);
       if (statusCode != HttpStatus.SC_OK) { // Not 200
-        if (statusCode == HttpStatus.SC_MOVED_PERMANENTLY || statusCode == HttpStatus.SC_MOVED_TEMPORARILY
-            || statusCode == HttpStatus.SC_MULTIPLE_CHOICES || statusCode == HttpStatus.SC_SEE_OTHER
-            || statusCode == HttpStatus.SC_TEMPORARY_REDIRECT || statusCode == 308) { // is 3xx  todo follow https://issues.apache.org/jira/browse/HTTPCORE-389
+        if (statusCode == HttpStatus.SC_MOVED_PERMANENTLY || statusCode == HttpStatus.SC_MOVED_TEMPORARILY ||
+            statusCode == HttpStatus.SC_MULTIPLE_CHOICES || statusCode == HttpStatus.SC_SEE_OTHER ||
+            statusCode == HttpStatus.SC_TEMPORARY_REDIRECT ||
+            statusCode == 308) { // is 3xx  todo follow https://issues.apache.org/jira/browse/HTTPCORE-389
 
           page.setRedirect(true);
           if (myController.getConfig().isFollowRedirects()) {
@@ -350,8 +351,10 @@ public class WebCrawler implements Runnable {
             }
           }
         } else { // All other http codes other than 3xx & 200
-          String description = EnglishReasonPhraseCatalog.INSTANCE.getReason(fetchResult.getStatusCode(), Locale.ENGLISH); // Finds the status reason for all known statuses
-          String contentType = fetchResult.getEntity() == null ? "" : fetchResult.getEntity().getContentType().getValue();
+          String description = EnglishReasonPhraseCatalog.INSTANCE
+              .getReason(fetchResult.getStatusCode(), Locale.ENGLISH); // Finds the status reason for all known statuses
+          String contentType =
+              fetchResult.getEntity() == null ? "" : fetchResult.getEntity().getContentType().getValue();
           onUnexpectedStatusCode(curURL.getURL(), fetchResult.getStatusCode(), contentType, description);
         }
 

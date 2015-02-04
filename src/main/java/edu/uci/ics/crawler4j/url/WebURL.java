@@ -69,7 +69,7 @@ public class WebURL implements Serializable {
 
     int domainStartIdx = url.indexOf("//") + 2;
     int domainEndIdx = url.indexOf('/', domainStartIdx);
-        domainEndIdx = domainEndIdx > domainStartIdx ? domainEndIdx : url.length();
+    domainEndIdx = domainEndIdx > domainStartIdx ? domainEndIdx : url.length();
     domain = url.substring(domainStartIdx, domainEndIdx);
     subDomain = "";
     String[] parts = domain.split("\\.");

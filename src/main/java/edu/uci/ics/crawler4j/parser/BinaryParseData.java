@@ -22,7 +22,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.io.UnsupportedEncodingException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -33,13 +32,14 @@ import javax.xml.transform.sax.SAXTransformerFactory;
 import javax.xml.transform.sax.TransformerHandler;
 import javax.xml.transform.stream.StreamResult;
 
-import edu.uci.ics.crawler4j.url.WebURL;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.AutoDetectParser;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import edu.uci.ics.crawler4j.url.WebURL;
 
 public class BinaryParseData implements ParseData {
 
@@ -48,7 +48,8 @@ public class BinaryParseData implements ParseData {
   private static final String DEFAULT_OUTPUT_FORMAT = "html";
 
   private static final Parser AUTO_DETECT_PARSER = new AutoDetectParser();
-  private static final SAXTransformerFactory SAX_TRANSFORMER_FACTORY = (SAXTransformerFactory) SAXTransformerFactory.newInstance();
+  private static final SAXTransformerFactory SAX_TRANSFORMER_FACTORY =
+      (SAXTransformerFactory) SAXTransformerFactory.newInstance();
 
   private final ParseContext context = new ParseContext();
   private Set<WebURL> outgoingUrls = new HashSet<>();
@@ -67,7 +68,8 @@ public class BinaryParseData implements ParseData {
       AUTO_DETECT_PARSER.parse(inputStream, handler, new Metadata(), context);
 
       // Hacking the following line to remove Tika's inserted DocType
-      String htmlContent = new String(outputStream.toByteArray(), DEFAULT_ENCODING).replace("http://www.w3.org/1999/xhtml", "");
+      String htmlContent =
+          new String(outputStream.toByteArray(), DEFAULT_ENCODING).replace("http://www.w3.org/1999/xhtml", "");
       setHtml(htmlContent);
     } catch (Exception e) {
       logger.error("Error parsing file", e);
@@ -81,7 +83,7 @@ public class BinaryParseData implements ParseData {
    * @param encoding output encoding, or <code>null</code> for the platform default
    */
   private static TransformerHandler getTransformerHandler(OutputStream out, String method, String encoding)
-        throws TransformerConfigurationException {
+      throws TransformerConfigurationException {
 
     TransformerHandler transformerHandler = SAX_TRANSFORMER_FACTORY.newTransformerHandler();
     Transformer transformer = transformerHandler.getTransformer();

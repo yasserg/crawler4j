@@ -31,7 +31,16 @@ public class HtmlContentHandler extends DefaultHandler {
   private final int MAX_ANCHOR_LENGTH = 100;
 
   private enum Element {
-    A, AREA, LINK, IFRAME, FRAME, EMBED, IMG, BASE, META, BODY
+    A,
+    AREA,
+    LINK,
+    IFRAME,
+    FRAME,
+    EMBED,
+    IMG,
+    BASE,
+    META,
+    BODY
   }
 
   private static class HtmlFactory {

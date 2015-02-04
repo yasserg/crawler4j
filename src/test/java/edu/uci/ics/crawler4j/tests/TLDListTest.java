@@ -1,10 +1,11 @@
 package edu.uci.ics.crawler4j.tests;
 
-import edu.uci.ics.crawler4j.url.URLCanonicalizer;
-import edu.uci.ics.crawler4j.url.WebURL;
+import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import edu.uci.ics.crawler4j.url.URLCanonicalizer;
+import edu.uci.ics.crawler4j.url.WebURL;
 
 public class TLDListTest {
 
@@ -14,7 +15,7 @@ public class TLDListTest {
     webUrl.setURL(URLCanonicalizer.getCanonicalURL(url));
   }
 
-    @Test
+  @Test
   public void testTLD() {
 
     setUrl("http://example.com");

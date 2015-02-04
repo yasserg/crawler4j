@@ -1,20 +1,23 @@
 package edu.uci.ics.crawler4j.crawler.authentication;
 
-import javax.swing.text.html.FormSubmitEvent.MethodType;
 import java.net.MalformedURLException;
 import java.net.URL;
+
+import javax.swing.text.html.FormSubmitEvent.MethodType;
 
 /**
  * Created by Avi Hayun on 11/23/2014.
  *
  * Abstract class containing authentication information needed to login into a user/password protected site<br>
- * This class should be extended by specific authentication types like form authentication and basic authentication etc<br>
+ * This class should be extended by specific authentication types like form authentication and basic authentication
+ * etc<br>
  * <br>
  * This class contains all of the mutual authentication data for all authentication types
  */
 public abstract class AuthInfo {
   public enum AuthenticationType {
-    BASIC_AUTHENTICATION, FORM_AUTHENTICATION
+    BASIC_AUTHENTICATION,
+    FORM_AUTHENTICATION
   }
 
   protected AuthenticationType authenticationType;
@@ -41,7 +44,8 @@ public abstract class AuthInfo {
    *
    * @throws MalformedURLException Make sure your URL is valid
    */
-  protected AuthInfo(AuthenticationType authenticationType, MethodType httpMethod, String loginUrl, String username, String password) throws MalformedURLException {
+  protected AuthInfo(AuthenticationType authenticationType, MethodType httpMethod, String loginUrl, String username,
+                     String password) throws MalformedURLException {
     this.authenticationType = authenticationType;
     this.httpMethod = httpMethod;
     URL url = new URL(loginUrl);

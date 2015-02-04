@@ -1,13 +1,16 @@
 package edu.uci.ics.crawler4j.crawler.authentication;
 
-import javax.swing.text.html.FormSubmitEvent.MethodType;
 import java.net.MalformedURLException;
+
+import javax.swing.text.html.FormSubmitEvent.MethodType;
 
 /**
  * Created by Avi Hayun on 11/25/2014.
  *
- * FormAuthInfo contains the authentication information needed for FORM authentication (extending AuthInfo which has all common auth info in it)
- * Basically, this is the most common authentication, where you will get to a site and you will need to enter a username and password into an HTML form
+ * FormAuthInfo contains the authentication information needed for FORM authentication (extending AuthInfo which has
+ * all common auth info in it)
+ * Basically, this is the most common authentication, where you will get to a site and you will need to enter a
+ * username and password into an HTML form
  */
 public class FormAuthInfo extends AuthInfo {
 
@@ -25,7 +28,8 @@ public class FormAuthInfo extends AuthInfo {
    *
    * @throws MalformedURLException Make sure your URL is valid
    */
-  public FormAuthInfo(String username, String password, String loginUrl, String usernameFormStr, String passwordFormStr) throws MalformedURLException {
+  public FormAuthInfo(String username, String password, String loginUrl, String usernameFormStr, String passwordFormStr)
+      throws MalformedURLException {
     super(AuthenticationType.FORM_AUTHENTICATION, MethodType.POST, loginUrl, username, password);
 
     this.usernameFormStr = usernameFormStr;

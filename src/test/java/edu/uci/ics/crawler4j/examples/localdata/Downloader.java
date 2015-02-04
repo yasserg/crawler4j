@@ -18,6 +18,8 @@
 package edu.uci.ics.crawler4j.examples.localdata;
 
 import org.apache.http.HttpStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.crawler.Page;
@@ -27,10 +29,6 @@ import edu.uci.ics.crawler4j.parser.HtmlParseData;
 import edu.uci.ics.crawler4j.parser.ParseData;
 import edu.uci.ics.crawler4j.parser.Parser;
 import edu.uci.ics.crawler4j.url.WebURL;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
 
 /**
  * This class is a demonstration of how crawler4j can be used to download a
@@ -90,8 +88,7 @@ public class Downloader {
     } catch (Exception e) {
       logger.error("Error occurred while fetching url: " + curURL.getURL(), e);
     } finally {
-      if (fetchResult != null)
-      {
+      if (fetchResult != null) {
         fetchResult.discardContentIfNotConsumed();
       }
     }

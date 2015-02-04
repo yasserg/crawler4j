@@ -17,16 +17,18 @@
 
 package edu.uci.ics.crawler4j.frontier;
 
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sleepycat.je.DatabaseException;
 import com.sleepycat.je.Environment;
+
 import edu.uci.ics.crawler4j.crawler.Configurable;
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.frontier.Counters.ReservedCounterNames;
 import edu.uci.ics.crawler4j.url.WebURL;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.List;
 
 /**
  * @author Yasser Ganjisaffar [lastname at gmail dot com]

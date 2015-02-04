@@ -1,7 +1,8 @@
 package edu.uci.ics.crawler4j.tests;
 
-import edu.uci.ics.crawler4j.url.WebURL;
 import org.junit.Test;
+
+import edu.uci.ics.crawler4j.url.WebURL;
 
 
 /**

@@ -31,7 +31,7 @@ import java.util.TreeMap;
 /**
  * See http://en.wikipedia.org/wiki/URL_normalization for a reference Note: some
  * parts of the code are adapted from: http://stackoverflow.com/a/4057470/405418
- * 
+ *
  * @author Yasser Ganjisaffar [lastname at gmail dot com]
  */
 public class URLCanonicalizer {
@@ -123,16 +123,16 @@ public class URLCanonicalizer {
 
       String[] tokens = pair.split("=", 2);
       switch (tokens.length) {
-      case 1:
-        if (pair.charAt(0) == '=') {
-          params.put("", tokens[0]);
-        } else {
-          params.put(tokens[0], "");
-        }
-        break;
-      case 2:
-        params.put(tokens[0], tokens[1]);
-        break;
+        case 1:
+          if (pair.charAt(0) == '=') {
+            params.put("", tokens[0]);
+          } else {
+            params.put(tokens[0], "");
+          }
+          break;
+        case 2:
+          params.put(tokens[0], tokens[1]);
+          break;
       }
     }
     return new TreeMap<>(params);

@@ -23,11 +23,11 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 
 import com.google.common.io.Files;
+
 import edu.uci.ics.crawler4j.crawler.Page;
 import edu.uci.ics.crawler4j.crawler.WebCrawler;
 import edu.uci.ics.crawler4j.parser.BinaryParseData;
 import edu.uci.ics.crawler4j.url.WebURL;
-import edu.uci.ics.crawler4j.util.IO;
 
 /**
  * @author Yasser Ganjisaffar [lastname at gmail dot com]
@@ -41,8 +41,8 @@ import edu.uci.ics.crawler4j.util.IO;
  */
 public class ImageCrawler extends WebCrawler {
 
-  private static final Pattern filters = Pattern.compile(".*(\\.(css|js|mid|mp2|mp3|mp4|wav|avi|mov|mpeg|ram|m4v|pdf"
-      + "|rm|smil|wmv|swf|wma|zip|rar|gz))$");
+  private static final Pattern filters = Pattern
+      .compile(".*(\\.(css|js|mid|mp2|mp3|mp4|wav|avi|mov|mpeg|ram|m4v|pdf" + "|rm|smil|wmv|swf|wma|zip|rar|gz))$");
 
   private static final Pattern imgPatterns = Pattern.compile(".*(\\.(bmp|gif|jpe?g|png|tiff?))$");
 
@@ -82,7 +82,8 @@ public class ImageCrawler extends WebCrawler {
     String url = page.getWebURL().getURL();
 
     // We are only interested in processing images which are bigger than 10k
-    if (!imgPatterns.matcher(url).matches() || !(page.getParseData() instanceof BinaryParseData || page.getContentData().length < 10 * 1024)) {
+    if (!imgPatterns.matcher(url).matches() ||
+        !(page.getParseData() instanceof BinaryParseData || page.getContentData().length < 10 * 1024)) {
       return;
     }
 

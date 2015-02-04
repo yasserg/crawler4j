@@ -1,12 +1,14 @@
 package edu.uci.ics.crawler4j.crawler.authentication;
 
-import javax.swing.text.html.FormSubmitEvent.MethodType;
 import java.net.MalformedURLException;
+
+import javax.swing.text.html.FormSubmitEvent.MethodType;
 
 /**
  * Created by Avi Hayun on 11/25/2014.
  *
- * BasicAuthInfo contains the authentication information needed for BASIC authentication (extending AuthInfo which has all common auth info in it)
+ * BasicAuthInfo contains the authentication information needed for BASIC authentication (extending AuthInfo which
+ * has all common auth info in it)
  *
  * BASIC authentication in PHP:
  * <ul>

@@ -17,10 +17,10 @@
 
 package edu.uci.ics.crawler4j.parser;
 
-import edu.uci.ics.crawler4j.url.WebURL;
-
 import java.util.HashSet;
 import java.util.Set;
+
+import edu.uci.ics.crawler4j.url.WebURL;
 
 public class TextParseData implements ParseData {
 

@@ -17,19 +17,20 @@
 
 package edu.uci.ics.crawler4j.examples.imagecrawler;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.crawler.CrawlController;
 import edu.uci.ics.crawler4j.fetcher.PageFetcher;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtConfig;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author Yasser Ganjisaffar [lastname at gmail dot com]
  */
 public class ImageCrawlController {
-    private static Logger logger = LoggerFactory.getLogger(ImageCrawlController.class);
+  private static Logger logger = LoggerFactory.getLogger(ImageCrawlController.class);
 
   public static void main(String[] args) throws Exception {
     if (args.length < 3) {
@@ -54,7 +55,7 @@ public class ImageCrawlController {
      */
     config.setIncludeBinaryContentInCrawling(true);
 
-    String[] crawlDomains = new String[] { "http://uci.edu/" };
+    String[] crawlDomains = new String[] {"http://uci.edu/"};
 
     PageFetcher pageFetcher = new PageFetcher(config);
     RobotstxtConfig robotstxtConfig = new RobotstxtConfig();

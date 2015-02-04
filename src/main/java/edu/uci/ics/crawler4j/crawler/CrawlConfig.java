@@ -17,10 +17,10 @@
 
 package edu.uci.ics.crawler4j.crawler;
 
-import edu.uci.ics.crawler4j.crawler.authentication.AuthInfo;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import edu.uci.ics.crawler4j.crawler.authentication.AuthInfo;
 
 public class CrawlConfig {
 
@@ -133,8 +133,8 @@ public class CrawlConfig {
   private String proxyPassword = null;
 
   /**
-  * List of possible authentications needed by crawler
-  */
+   * List of possible authentications needed by crawler
+   */
   private List<AuthInfo> authInfos;
 
   public CrawlConfig() {

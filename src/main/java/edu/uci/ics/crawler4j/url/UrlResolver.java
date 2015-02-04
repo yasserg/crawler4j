@@ -1,6 +1,6 @@
 /**
  * This class is adopted from Htmlunit with the following copyright:
- * 
+ *
  * Copyright (c) 2002-2012 Gargoyle Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -142,8 +142,7 @@ public final class UrlResolver {
       if (locationEndIndex >= 0) {
         startIndex = locationEndIndex;
       }
-    }
-    else {
+    } else {
       locationStartIndex = -1;
       locationEndIndex = -1;
     }
@@ -202,8 +201,7 @@ public final class UrlResolver {
       // The entire remaining parse string is assigned to the network
       // location/login (<net_loc>) of the URL.
       locationEndIndex = endIndex;
-    }
-    else if (startIndex < endIndex) {
+    } else if (startIndex < endIndex) {
       url.path_ = spec.substring(startIndex, endIndex);
     }
     // Set the network location/login (<net_loc>) of the URL.
@@ -323,10 +321,9 @@ public final class UrlResolver {
       final int lastSlashIndex = basePath.lastIndexOf('/');
 
       if (lastSlashIndex >= 0) {
-          path = basePath.substring(0, lastSlashIndex + 1);
+        path = basePath.substring(0, lastSlashIndex + 1);
       }
-   }
-    else {
+    } else {
       path = "/";
     }
     path = path.concat(url.path_);

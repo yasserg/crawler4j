@@ -17,22 +17,24 @@
 
 package edu.uci.ics.crawler4j.examples.localdata;
 
-import edu.uci.ics.crawler4j.crawler.Page;
-import edu.uci.ics.crawler4j.crawler.WebCrawler;
-import edu.uci.ics.crawler4j.parser.HtmlParseData;
-import edu.uci.ics.crawler4j.url.WebURL;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.UnsupportedEncodingException;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import edu.uci.ics.crawler4j.crawler.Page;
+import edu.uci.ics.crawler4j.crawler.WebCrawler;
+import edu.uci.ics.crawler4j.parser.HtmlParseData;
+import edu.uci.ics.crawler4j.url.WebURL;
+
 public class LocalDataCollectorCrawler extends WebCrawler {
   private Logger logger = LoggerFactory.getLogger(LocalDataCollectorCrawler.class);
 
-  Pattern filters = Pattern.compile(".*(\\.(css|js|bmp|gif|jpe?g" + "|png|tiff?|mid|mp2|mp3|mp4"
-      + "|wav|avi|mov|mpeg|ram|m4v|pdf" + "|rm|smil|wmv|swf|wma|zip|rar|gz))$");
+  Pattern filters = Pattern.compile(
+      ".*(\\.(css|js|bmp|gif|jpe?g" + "|png|tiff?|mid|mp2|mp3|mp4" + "|wav|avi|mov|mpeg|ram|m4v|pdf" +
+      "|rm|smil|wmv|swf|wma|zip|rar|gz))$");
 
   CrawlStat myCrawlStat;
 
@@ -69,7 +71,7 @@ public class LocalDataCollectorCrawler extends WebCrawler {
 
   /**
    * This function is called by controller to get the local data of this crawler when job is finished
-  */
+   */
   @Override
   public Object getMyLocalData() {
     return myCrawlStat;
@@ -89,6 +91,6 @@ public class LocalDataCollectorCrawler extends WebCrawler {
     // You can configure the log to output to file
     logger.info("Crawler {} > Processed Pages: {}", id, myCrawlStat.getTotalProcessedPages());
     logger.info("Crawler {} > Total Links Found: {}", id, myCrawlStat.getTotalLinks());
-    logger.info("Crawler {} > Total Text Size: {}", id,  myCrawlStat.getTotalTextSize());
+    logger.info("Crawler {} > Total Text Size: {}", id, myCrawlStat.getTotalTextSize());
   }
 }

@@ -17,22 +17,26 @@
 
 package edu.uci.ics.crawler4j.robotstxt;
 
-import java.net.*;
+import java.net.MalformedURLException;
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
+import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import edu.uci.ics.crawler4j.crawler.exceptions.PageBiggerThanMaxSizeException;
 import org.apache.http.HttpStatus;
+import org.apache.http.NoHttpResponseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import edu.uci.ics.crawler4j.crawler.Page;
+import edu.uci.ics.crawler4j.crawler.exceptions.PageBiggerThanMaxSizeException;
 import edu.uci.ics.crawler4j.fetcher.PageFetchResult;
 import edu.uci.ics.crawler4j.fetcher.PageFetcher;
 import edu.uci.ics.crawler4j.url.WebURL;
 import edu.uci.ics.crawler4j.util.Util;
-import org.apache.http.NoHttpResponseException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author Yasser Ganjisaffar [lastname at gmail dot com]
@@ -110,11 +114,12 @@ public class RobotstxtServer {
           String content = new String(page.getContentData());
           directives = RobotstxtParser.parse(content, config.getUserAgentName());
         } else {
-            logger.warn("Can't read this robots.txt: {}  as it is not written in plain text, contentType: {}",
-                robotsTxtUrl.getURL(), page.getContentType());
+          logger.warn("Can't read this robots.txt: {}  as it is not written in plain text, contentType: {}",
+                      robotsTxtUrl.getURL(), page.getContentType());
         }
       } else {
-        logger.debug("Can't read this robots.txt: {}  as it's status code is {}", robotsTxtUrl.getURL(), fetchResult.getStatusCode());
+        logger.debug("Can't read this robots.txt: {}  as it's status code is {}", robotsTxtUrl.getURL(),
+                     fetchResult.getStatusCode());
       }
     } catch (SocketException | UnknownHostException | SocketTimeoutException | NoHttpResponseException se) {
       // No logging here, as it just means that robots.txt doesn't exist on this server which is perfectly ok

@@ -17,15 +17,16 @@
 
 package edu.uci.ics.crawler4j.examples.shutdown;
 
+import java.util.Set;
+import java.util.regex.Pattern;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import edu.uci.ics.crawler4j.crawler.Page;
 import edu.uci.ics.crawler4j.crawler.WebCrawler;
 import edu.uci.ics.crawler4j.parser.HtmlParseData;
 import edu.uci.ics.crawler4j.url.WebURL;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.Set;
-import java.util.regex.Pattern;
 
 /**
  * @author Yasser Ganjisaffar [lastname at gmail dot com]
@@ -34,8 +35,9 @@ import java.util.regex.Pattern;
 public class BasicCrawler extends WebCrawler {
   private Logger logger = LoggerFactory.getLogger(BasicCrawler.class);
 
-  private final static Pattern FILTERS = Pattern.compile(".*(\\.(css|js|bmp|gif|jpe?g" + "|png|tiff?|mid|mp2|mp3|mp4"
-      + "|wav|avi|mov|mpeg|ram|m4v|pdf" + "|rm|smil|wmv|swf|wma|zip|rar|gz))$");
+  private final static Pattern FILTERS = Pattern.compile(
+      ".*(\\.(css|js|bmp|gif|jpe?g" + "|png|tiff?|mid|mp2|mp3|mp4" + "|wav|avi|mov|mpeg|ram|m4v|pdf" +
+      "|rm|smil|wmv|swf|wma|zip|rar|gz))$");
 
   private final static String DOMAIN = "http://www.ics.uci.edu/";
 

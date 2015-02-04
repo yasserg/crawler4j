@@ -17,8 +17,16 @@
 
 package edu.uci.ics.crawler4j.crawler;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sleepycat.je.Environment;
 import com.sleepycat.je.EnvironmentConfig;
+
 import edu.uci.ics.crawler4j.fetcher.PageFetcher;
 import edu.uci.ics.crawler4j.frontier.DocIDServer;
 import edu.uci.ics.crawler4j.frontier.Frontier;
@@ -26,12 +34,6 @@ import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
 import edu.uci.ics.crawler4j.url.URLCanonicalizer;
 import edu.uci.ics.crawler4j.url.WebURL;
 import edu.uci.ics.crawler4j.util.IO;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * The controller that manages a crawling session. This class creates the
@@ -74,14 +76,16 @@ public class CrawlController extends Configurable {
   protected final Object waitingLock = new Object();
   protected final Environment env;
 
-  public CrawlController(CrawlConfig config, PageFetcher pageFetcher, RobotstxtServer robotstxtServer) throws Exception {
+  public CrawlController(CrawlConfig config, PageFetcher pageFetcher, RobotstxtServer robotstxtServer)
+      throws Exception {
     super(config);
 
     config.validate();
     File folder = new File(config.getCrawlStorageFolder());
     if (!folder.exists()) {
       if (!folder.mkdirs()) {
-        throw new Exception("couldn't create the storage folder: " + folder.getAbsolutePath() + " does it already exist ?");
+        throw new Exception(
+            "couldn't create the storage folder: " + folder.getAbsolutePath() + " does it already exist ?");
       } else {
         logger.debug("Created folder: " + folder.getAbsolutePath());
       }
@@ -214,7 +218,9 @@ public class CrawlController extends Configurable {
                       if (queueLength > 0) {
                         continue;
                       }
-                      logger.info("No thread is working and no more URLs are in queue waiting for another 10 seconds to make sure...");
+                      logger.info(
+                          "No thread is working and no more URLs are in queue waiting for another 10 seconds to make " +
+                          "sure...");
                       sleep(10);
                       queueLength = frontier.getQueueLength();
                       if (queueLength > 0) {
@@ -282,7 +288,8 @@ public class CrawlController extends Configurable {
   }
 
   /**
-   * Once the crawling session finishes the controller collects the local data of the crawler threads and stores them in a List.
+   * Once the crawling session finishes the controller collects the local data of the crawler threads and stores them
+   * in a List.
    * This function returns the reference to this list.
    *
    * @return List of Objects which are your local data
@@ -354,7 +361,8 @@ public class CrawlController extends Configurable {
       webUrl.setDocid(docId);
       webUrl.setDepth((short) 0);
       if (!robotstxtServer.allows(webUrl)) {
-        logger.warn("Robots.txt does not allow this seed: {}", pageUrl); // using the WARN level here, as the user specifically asked to add this seed
+        logger.warn("Robots.txt does not allow this seed: {}",
+                    pageUrl); // using the WARN level here, as the user specifically asked to add this seed
       } else {
         frontier.schedule(webUrl);
       }

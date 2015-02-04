@@ -1,8 +1,5 @@
 package edu.uci.ics.crawler4j.url;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -10,9 +7,13 @@ import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
- * This class is a singleton which obtains a list of TLDs (from online or a local file) in order to compare against those TLDs
- * */
+ * This class is a singleton which obtains a list of TLDs (from online or a local file) in order to compare against
+ * those TLDs
+ */
 public class TLDList {
 
   private final static String TLD_NAMES_ONLINE_URL = "https://publicsuffix.org/list/effective_tld_names.dat";
@@ -26,7 +27,8 @@ public class TLDList {
   private TLDList() {
     try {
       URL url = new URL(TLD_NAMES_ONLINE_URL);
-      try (InputStream stream = url.openStream(); BufferedReader reader = new BufferedReader(new InputStreamReader(stream))) {
+      try (InputStream stream = url.openStream(); BufferedReader reader = new BufferedReader(
+          new InputStreamReader(stream))) {
         logger.debug("Fetching the most updated TLD list online");
 
         String line;

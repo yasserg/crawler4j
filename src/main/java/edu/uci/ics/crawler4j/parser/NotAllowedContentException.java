@@ -7,7 +7,7 @@ package edu.uci.ics.crawler4j.parser;
  * For example when the parser tries to parse binary content although the user configured it not to do it
  */
 public class NotAllowedContentException extends Exception {
-    public NotAllowedContentException() {
-      super("Not allowed to parse this type of content");
-    }
+  public NotAllowedContentException() {
+    super("Not allowed to parse this type of content");
+  }
 }
