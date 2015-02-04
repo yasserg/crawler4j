@@ -88,7 +88,7 @@ public class PageFetchResult {
       if (entity != null) {
         EntityUtils.consume(entity);
       }
-    } catch (IOException e) {
+    } catch (IOException ignored) {
       // We can EOFException (extends IOException) exception. It can happen on compressed streams which are not
       // repeatable
       // We can ignore this exception. It can happen if the stream is closed.

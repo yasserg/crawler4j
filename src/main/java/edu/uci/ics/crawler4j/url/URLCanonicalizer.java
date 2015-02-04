@@ -25,6 +25,7 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -43,10 +44,10 @@ public class URLCanonicalizer {
   public static String getCanonicalURL(String href, String context) {
 
     try {
-      URL canonicalURL = new URL(UrlResolver.resolveUrl(context == null ? "" : context, href));
+      URL canonicalURL = new URL(UrlResolver.resolveUrl((context == null) ? "" : context, href));
 
       String host = canonicalURL.getHost().toLowerCase();
-      if (host == "") {
+      if (Objects.equals(host, "")) {
         // This is an invalid Url.
         return null;
       }
@@ -74,14 +75,14 @@ public class URLCanonicalizer {
 
       final SortedMap<String, String> params = createParameterMap(canonicalURL.getQuery());
       final String queryString;
-      if (params != null && params.size() > 0) {
+      if ((params != null) && !params.isEmpty()) {
         String canonicalParams = canonicalize(params);
-        queryString = (canonicalParams.isEmpty() ? "" : "?" + canonicalParams);
+        queryString = (canonicalParams.isEmpty() ? "" : ("?" + canonicalParams));
       } else {
         queryString = "";
       }
 
-      if (path.length() == 0) {
+      if (path.isEmpty()) {
         path = "/";
       }
 
@@ -109,7 +110,7 @@ public class URLCanonicalizer {
    * @return Null if there is no query string.
    */
   private static SortedMap<String, String> createParameterMap(final String queryString) {
-    if (queryString == null || queryString.isEmpty()) {
+    if ((queryString == null) || queryString.isEmpty()) {
       return null;
     }
 
@@ -117,7 +118,7 @@ public class URLCanonicalizer {
     final Map<String, String> params = new HashMap<>(pairs.length);
 
     for (final String pair : pairs) {
-      if (pair.length() == 0) {
+      if (pair.isEmpty()) {
         continue;
       }
 
@@ -146,14 +147,14 @@ public class URLCanonicalizer {
    * @return Canonical form of query string.
    */
   private static String canonicalize(final SortedMap<String, String> sortedParamMap) {
-    if (sortedParamMap == null || sortedParamMap.isEmpty()) {
+    if ((sortedParamMap == null) || sortedParamMap.isEmpty()) {
       return "";
     }
 
-    final StringBuffer sb = new StringBuffer(100);
+    final StringBuilder sb = new StringBuilder(100);
     for (Map.Entry<String, String> pair : sortedParamMap.entrySet()) {
       final String key = pair.getKey().toLowerCase();
-      if (key.equals("jsessionid") || key.equals("phpsessid") || key.equals("aspsessionid")) {
+      if ("jsessionid".equals(key) || "phpsessid".equals(key) || "aspsessionid".equals(key)) {
         continue;
       }
       if (sb.length() > 0) {

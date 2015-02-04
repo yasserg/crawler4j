@@ -30,10 +30,10 @@ import edu.uci.ics.crawler4j.parser.HtmlParseData;
 import edu.uci.ics.crawler4j.url.WebURL;
 
 public class LocalDataCollectorCrawler extends WebCrawler {
-  private Logger logger = LoggerFactory.getLogger(LocalDataCollectorCrawler.class);
+  private static final Logger logger = LoggerFactory.getLogger(LocalDataCollectorCrawler.class);
 
-  Pattern filters = Pattern.compile(
-      ".*(\\.(css|js|bmp|gif|jpe?g" + "|png|tiff?|mid|mp2|mp3|mp4" + "|wav|avi|mov|mpeg|ram|m4v|pdf" +
+  private static final Pattern FILTERS = Pattern.compile(
+      ".*(\\.(css|js|bmp|gif|jpe?g|png|tiff?|mid|mp2|mp3|mp4|wav|avi|mov|mpeg|ram|m4v|pdf" +
       "|rm|smil|wmv|swf|wma|zip|rar|gz))$");
 
   CrawlStat myCrawlStat;
@@ -45,7 +45,7 @@ public class LocalDataCollectorCrawler extends WebCrawler {
   @Override
   public boolean shouldVisit(Page page, WebURL url) {
     String href = url.getURL().toLowerCase();
-    return !filters.matcher(href).matches() && href.startsWith("http://www.ics.uci.edu/");
+    return !FILTERS.matcher(href).matches() && href.startsWith("http://www.ics.uci.edu/");
   }
 
   @Override
@@ -64,7 +64,7 @@ public class LocalDataCollectorCrawler extends WebCrawler {
       }
     }
     // We dump this crawler statistics after processing every 50 pages
-    if (myCrawlStat.getTotalProcessedPages() % 50 == 0) {
+    if ((myCrawlStat.getTotalProcessedPages() % 50) == 0) {
       dumpMyData();
     }
   }

@@ -43,7 +43,7 @@ public class RobotstxtParser {
     while (st.hasMoreTokens()) {
       String line = st.nextToken();
 
-      int commentIndex = line.indexOf("#");
+      int commentIndex = line.indexOf('#');
       if (commentIndex > -1) {
         line = line.substring(0, commentIndex);
       }
@@ -53,17 +53,13 @@ public class RobotstxtParser {
 
       line = line.trim();
 
-      if (line.length() == 0) {
+      if (line.isEmpty()) {
         continue;
       }
 
       if (line.matches(PATTERNS_USERAGENT)) {
         String ua = line.substring(PATTERNS_USERAGENT_LENGTH).trim().toLowerCase();
-        if (ua.equals("*") || ua.contains(myUserAgent)) {
-          inMatchingUserAgent = true;
-        } else {
-          inMatchingUserAgent = false;
-        }
+        inMatchingUserAgent = "*".equals(ua) || ua.contains(myUserAgent);
       } else if (line.matches(PATTERNS_DISALLOW)) {
         if (!inMatchingUserAgent) {
           continue;
@@ -73,7 +69,7 @@ public class RobotstxtParser {
           path = path.substring(0, path.length() - 1);
         }
         path = path.trim();
-        if (path.length() > 0) {
+        if (!path.isEmpty()) {
           if (directives == null) {
             directives = new HostDirectives();
           }

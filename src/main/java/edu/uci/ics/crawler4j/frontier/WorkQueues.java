@@ -39,6 +39,7 @@ import edu.uci.ics.crawler4j.util.Util;
  * @author Yasser Ganjisaffar [lastname at gmail dot com]
  */
 public class WorkQueues {
+  private static final Logger logger = LoggerFactory.getLogger(WorkQueues.class);
 
   protected Database urlsDB = null;
   protected Environment env;
@@ -49,9 +50,7 @@ public class WorkQueues {
 
   protected final Object mutex = new Object();
 
-  private Logger logger = LoggerFactory.getLogger(WorkQueues.class);
-
-  public WorkQueues(Environment env, String dbName, boolean resumable) throws DatabaseException {
+  public WorkQueues(Environment env, String dbName, boolean resumable) {
     this.env = env;
     this.resumable = resumable;
     DatabaseConfig dbConfig = new DatabaseConfig();
@@ -62,13 +61,11 @@ public class WorkQueues {
     webURLBinding = new WebURLTupleBinding();
   }
 
-  public List<WebURL> get(int max) throws DatabaseException {
+  public List<WebURL> get(int max) {
     synchronized (mutex) {
-      int matches = 0;
       List<WebURL> results = new ArrayList<>(max);
 
       Cursor cursor = null;
-      OperationStatus result;
       DatabaseEntry key = new DatabaseEntry();
       DatabaseEntry value = new DatabaseEntry();
       Transaction txn;
@@ -79,9 +76,10 @@ public class WorkQueues {
       }
       try {
         cursor = urlsDB.openCursor(txn, null);
-        result = cursor.getFirst(key, value, null);
+        OperationStatus result = cursor.getFirst(key, value, null);
 
-        while (matches < max && result == OperationStatus.SUCCESS) {
+        int matches = 0;
+        while ((matches < max) && (result == OperationStatus.SUCCESS)) {
           if (value.getData().length > 0) {
             results.add(webURLBinding.entryToObject(value));
             matches++;
@@ -106,12 +104,10 @@ public class WorkQueues {
     }
   }
 
-  public void delete(int count) throws DatabaseException {
+  public void delete(int count) {
     synchronized (mutex) {
-      int matches = 0;
 
       Cursor cursor = null;
-      OperationStatus result;
       DatabaseEntry key = new DatabaseEntry();
       DatabaseEntry value = new DatabaseEntry();
       Transaction txn;
@@ -122,9 +118,10 @@ public class WorkQueues {
       }
       try {
         cursor = urlsDB.openCursor(txn, null);
-        result = cursor.getFirst(key, value, null);
+        OperationStatus result = cursor.getFirst(key, value, null);
 
-        while (matches < count && result == OperationStatus.SUCCESS) {
+        int matches = 0;
+        while ((matches < count) && (result == OperationStatus.SUCCESS)) {
           cursor.delete();
           matches++;
           result = cursor.getNext(key, value, null);
@@ -157,15 +154,15 @@ public class WorkQueues {
    * If depth is also equal, those found earlier (therefore, smaller docid) will
    * be crawled earlier.
    */
-  protected DatabaseEntry getDatabaseEntryKey(WebURL url) {
+  protected static DatabaseEntry getDatabaseEntryKey(WebURL url) {
     byte[] keyData = new byte[6];
     keyData[0] = url.getPriority();
-    keyData[1] = (url.getDepth() > Byte.MAX_VALUE ? Byte.MAX_VALUE : (byte) url.getDepth());
+    keyData[1] = ((url.getDepth() > Byte.MAX_VALUE) ? Byte.MAX_VALUE : (byte) url.getDepth());
     Util.putIntInByteArray(url.getDocid(), keyData, 2);
     return new DatabaseEntry(keyData);
   }
 
-  public void put(WebURL url) throws DatabaseException {
+  public void put(WebURL url) {
     DatabaseEntry value = new DatabaseEntry();
     webURLBinding.objectToEntry(url, value);
     Transaction txn;

@@ -131,7 +131,7 @@ public class PageFetcher extends Configurable {
     }
 
     httpClient = clientBuilder.build();
-    if (config.getAuthInfos() != null && !config.getAuthInfos().isEmpty()) {
+    if ((config.getAuthInfos() != null) && !config.getAuthInfos().isEmpty()) {
       doAuthetication(config.getAuthInfos());
     }
 
@@ -143,7 +143,7 @@ public class PageFetcher extends Configurable {
 
   private void doAuthetication(List<AuthInfo> authInfos) {
     for (AuthInfo authInfo : authInfos) {
-      if (authInfo.getAuthenticationType().equals(AuthInfo.AuthenticationType.BASIC_AUTHENTICATION)) {
+      if (authInfo.getAuthenticationType() == AuthInfo.AuthenticationType.BASIC_AUTHENTICATION) {
         doBasicLogin((BasicAuthInfo) authInfo);
       } else {
         doFormLogin((FormAuthInfo) authInfo);
@@ -167,9 +167,9 @@ public class PageFetcher extends Configurable {
 
   /**
    * FORM authentication<br/>
-   * Official Example: https://hc.apache.org/httpcomponents-client-ga/httpclient/examples/org/apache/http/examples
-   * /client/ClientFormLogin.java
-   * */
+   * Official Example:
+   *  https://hc.apache.org/httpcomponents-client-ga/httpclient/examples/org/apache/http/examples/client/ClientFormLogin.java
+   */
   private void doFormLogin(FormAuthInfo authInfo) {
     logger.info("FORM authentication for: " + authInfo.getLoginTarget());
     String fullUri =
@@ -204,7 +204,7 @@ public class PageFetcher extends Configurable {
       // Applying Politeness delay
       synchronized (mutex) {
         long now = (new Date()).getTime();
-        if (now - lastFetchTime < config.getPolitenessDelay()) {
+        if ((now - lastFetchTime) < config.getPolitenessDelay()) {
           Thread.sleep(config.getPolitenessDelay() - (now - lastFetchTime));
         }
         lastFetchTime = (new Date()).getTime();
@@ -250,7 +250,7 @@ public class PageFetcher extends Configurable {
       return fetchResult;
 
     } finally { // occurs also with thrown exceptions
-      if (fetchResult.getEntity() == null && get != null) {
+      if ((fetchResult.getEntity() == null) && (get != null)) {
         get.abort();
       }
     }

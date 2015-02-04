@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
  * @author Yasser Ganjisaffar [lastname at gmail dot com]
  */
 public class IO {
-  private static Logger logger = LoggerFactory.getLogger(IO.class);
+  private static final Logger logger = LoggerFactory.getLogger(IO.class);
 
   public static boolean deleteFolder(File folder) {
     return deleteFolderContents(folder) && folder.delete();

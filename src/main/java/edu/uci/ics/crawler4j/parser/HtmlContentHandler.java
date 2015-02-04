@@ -28,7 +28,7 @@ import org.xml.sax.helpers.DefaultHandler;
 
 public class HtmlContentHandler extends DefaultHandler {
 
-  private final int MAX_ANCHOR_LENGTH = 100;
+  private static final int MAX_ANCHOR_LENGTH = 100;
 
   private enum Element {
     A,
@@ -44,7 +44,7 @@ public class HtmlContentHandler extends DefaultHandler {
   }
 
   private static class HtmlFactory {
-    private static Map<String, Element> name2Element;
+    private static final Map<String, Element> name2Element;
 
     static {
       name2Element = new HashMap<>();
@@ -61,16 +61,16 @@ public class HtmlContentHandler extends DefaultHandler {
   private String base;
   private String metaRefresh;
   private String metaLocation;
-  private Map<String, String> metaTags = new HashMap<>();
+  private final Map<String, String> metaTags = new HashMap<>();
 
   private boolean isWithinBodyElement;
-  private StringBuilder bodyText;
+  private final StringBuilder bodyText;
 
-  private List<ExtractedUrlAnchorPair> outgoingUrls;
+  private final List<ExtractedUrlAnchorPair> outgoingUrls;
 
   private ExtractedUrlAnchorPair curUrl = null;
   private boolean anchorFlag = false;
-  private StringBuilder anchorText = new StringBuilder();
+  private final StringBuilder anchorText = new StringBuilder();
 
   public HtmlContentHandler() {
     isWithinBodyElement = false;
@@ -82,7 +82,7 @@ public class HtmlContentHandler extends DefaultHandler {
   public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
     Element element = HtmlFactory.getElement(localName);
 
-    if (element == Element.A || element == Element.AREA || element == Element.LINK) {
+    if ((element == Element.A) || (element == Element.AREA) || (element == Element.LINK)) {
       String href = attributes.getValue("href");
       if (href != null) {
         anchorFlag = true;
@@ -95,7 +95,7 @@ public class HtmlContentHandler extends DefaultHandler {
         addToOutgoingUrls(imgSrc, localName);
 
       }
-    } else if (element == Element.IFRAME || element == Element.FRAME || element == Element.EMBED) {
+    } else if ((element == Element.IFRAME) || (element == Element.FRAME) || (element == Element.EMBED)) {
       String src = attributes.getValue("src");
       if (src != null) {
         addToOutgoingUrls(src, localName);
@@ -115,12 +115,12 @@ public class HtmlContentHandler extends DefaultHandler {
       }
 
       String content = attributes.getValue("content");
-      if (equiv != null && content != null) {
+      if ((equiv != null) && (content != null)) {
         equiv = equiv.toLowerCase();
         metaTags.put(equiv, content);
 
         // http-equiv="refresh" content="0;URL=http://foo.bar/..."
-        if (equiv.equals("refresh") && (metaRefresh == null)) {
+        if ("refresh".equals(equiv) && (metaRefresh == null)) {
           int pos = content.toLowerCase().indexOf("url=");
           if (pos != -1) {
             metaRefresh = content.substring(pos + 4);
@@ -129,7 +129,7 @@ public class HtmlContentHandler extends DefaultHandler {
         }
 
         // http-equiv="location" content="http://foo.bar/..."
-        if (equiv.equals("location") && (metaLocation == null)) {
+        if ("location".equals(equiv) && (metaLocation == null)) {
           metaLocation = content;
           addToOutgoingUrls(metaRefresh, localName);
         }
@@ -149,7 +149,7 @@ public class HtmlContentHandler extends DefaultHandler {
   @Override
   public void endElement(String uri, String localName, String qName) throws SAXException {
     Element element = HtmlFactory.getElement(localName);
-    if (element == Element.A || element == Element.AREA || element == Element.LINK) {
+    if ((element == Element.A) || (element == Element.AREA) || (element == Element.LINK)) {
       anchorFlag = false;
       if (curUrl != null) {
         String anchor = anchorText.toString().replaceAll("\n", " ").replaceAll("\t", " ").trim();
@@ -169,7 +169,7 @@ public class HtmlContentHandler extends DefaultHandler {
   }
 
   @Override
-  public void characters(char ch[], int start, int length) throws SAXException {
+  public void characters(char[] ch, int start, int length) throws SAXException {
     if (isWithinBodyElement) {
       bodyText.append(ch, start, length);
 

@@ -12,7 +12,7 @@ import edu.uci.ics.crawler4j.url.WebURL;
  * Net related Utils
  */
 public class Net {
-  private static Pattern pattern = initializePattern();
+  private static final Pattern pattern = initializePattern();
 
   public static Set<WebURL> extractUrls(String input) {
     Set<WebURL> extractedUrls = new HashSet<>();
@@ -22,8 +22,9 @@ public class Net {
       while (matcher.find()) {
         WebURL webURL = new WebURL();
         String urlStr = matcher.group();
-        if (!urlStr.startsWith("http"))
+        if (!urlStr.startsWith("http")) {
           urlStr = "http://" + urlStr;
+        }
 
         webURL.setURL(urlStr);
         extractedUrls.add(webURL);

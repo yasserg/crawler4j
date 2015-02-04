@@ -47,8 +47,8 @@ public class Parser extends Configurable {
 
   protected static final Logger logger = LoggerFactory.getLogger(Parser.class);
 
-  private HtmlParser htmlParser;
-  private ParseContext parseContext;
+  private final HtmlParser htmlParser;
+  private final ParseContext parseContext;
 
   public Parser(CrawlConfig config) {
     super(config);
@@ -116,7 +116,7 @@ public class Parser extends Configurable {
       for (ExtractedUrlAnchorPair urlAnchorPair : contentHandler.getOutgoingUrls()) {
 
         String href = urlAnchorPair.getHref();
-        if (href == null || href.trim().length() == 0) {
+        if ((href == null) || href.trim().isEmpty()) {
           continue;
         }
 

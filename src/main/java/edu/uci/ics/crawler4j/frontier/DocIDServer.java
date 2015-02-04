@@ -45,7 +45,7 @@ public class DocIDServer extends Configurable {
 
   protected int lastDocID;
 
-  public DocIDServer(Environment env, CrawlConfig config) throws DatabaseException {
+  public DocIDServer(Environment env, CrawlConfig config) {
     super(config);
     DatabaseConfig dbConfig = new DatabaseConfig();
     dbConfig.setAllowCreate(true);
@@ -84,7 +84,7 @@ public class DocIDServer extends Configurable {
           logger.error("Exception thrown while getting DocID", e);
         }
 
-        if (result != null && result == OperationStatus.SUCCESS && value.getData().length > 0) {
+        if ((result != null) && (result == OperationStatus.SUCCESS) && (value.getData().length > 0)) {
           docID = Util.byteArray2Int(value.getData());
         }
       }
@@ -94,9 +94,9 @@ public class DocIDServer extends Configurable {
   }
 
   public int getNewDocID(String url) {
-    int docID = -1;
 
     synchronized (mutex) {
+      int docID = -1;
       try {
         // Make sure that we have not already assigned a docid for this URL
         docID = getDocId(url);
@@ -138,7 +138,7 @@ public class DocIDServer extends Configurable {
     return getDocId(url) != -1;
   }
 
-  public int getDocCount() {
+  public final int getDocCount() {
     int count = -1;
 
     try {

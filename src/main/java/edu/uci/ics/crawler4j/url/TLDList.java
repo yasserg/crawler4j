@@ -16,13 +16,13 @@ import org.slf4j.LoggerFactory;
  */
 public class TLDList {
 
-  private final static String TLD_NAMES_ONLINE_URL = "https://publicsuffix.org/list/effective_tld_names.dat";
-  private final static String TLD_NAMES_TXT_FILENAME = "/tld-names.txt";
-  private final static Logger logger = LoggerFactory.getLogger(TLDList.class);
+  private static final String TLD_NAMES_ONLINE_URL = "https://publicsuffix.org/list/effective_tld_names.dat";
+  private static final String TLD_NAMES_TXT_FILENAME = "/tld-names.txt";
+  private static final Logger logger = LoggerFactory.getLogger(TLDList.class);
 
-  private Set<String> tldSet = new HashSet<>(10000);
+  private final Set<String> tldSet = new HashSet<>(10000);
 
-  private static TLDList instance = new TLDList(); // Singleton
+  private static final TLDList instance = new TLDList(); // Singleton
 
   private TLDList() {
     try {

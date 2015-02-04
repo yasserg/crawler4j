@@ -69,7 +69,7 @@ public class WebURL implements Serializable {
 
     int domainStartIdx = url.indexOf("//") + 2;
     int domainEndIdx = url.indexOf('/', domainStartIdx);
-    domainEndIdx = domainEndIdx > domainStartIdx ? domainEndIdx : url.length();
+    domainEndIdx = (domainEndIdx > domainStartIdx) ? domainEndIdx : url.length();
     domain = url.substring(domainStartIdx, domainEndIdx);
     subDomain = "";
     String[] parts = domain.split("\\.");
@@ -80,8 +80,8 @@ public class WebURL implements Serializable {
         domain = parts[parts.length - 3] + "." + domain;
         limit = 3;
       }
-      for (int i = 0; i < parts.length - limit; i++) {
-        if (subDomain.length() > 0) {
+      for (int i = 0; i < (parts.length - limit); i++) {
+        if (!subDomain.isEmpty()) {
           subDomain += ".";
         }
         subDomain += parts[i];
@@ -202,12 +202,12 @@ public class WebURL implements Serializable {
     if (this == o) {
       return true;
     }
-    if (o == null || getClass() != o.getClass()) {
+    if ((o == null) || (getClass() != o.getClass())) {
       return false;
     }
 
     WebURL otherUrl = (WebURL) o;
-    return url != null && url.equals(otherUrl.getURL());
+    return (url != null) && url.equals(otherUrl.getURL());
 
   }
 

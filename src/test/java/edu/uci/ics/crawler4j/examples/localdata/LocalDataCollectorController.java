@@ -29,7 +29,7 @@ import edu.uci.ics.crawler4j.robotstxt.RobotstxtConfig;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
 
 public class LocalDataCollectorController {
-  private static Logger logger = LoggerFactory.getLogger(LocalDataCollectorController.class);
+  private static final Logger logger = LoggerFactory.getLogger(LocalDataCollectorController.class);
 
   public static void main(String[] args) throws Exception {
     if (args.length != 2) {

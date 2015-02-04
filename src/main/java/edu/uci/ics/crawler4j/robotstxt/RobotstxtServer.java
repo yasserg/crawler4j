@@ -24,7 +24,6 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.apache.http.HttpStatus;
 import org.apache.http.NoHttpResponseException;
@@ -70,7 +69,7 @@ public class RobotstxtServer {
 
         HostDirectives directives = host2directivesCache.get(host);
 
-        if (directives != null && directives.needsRefetch()) {
+        if ((directives != null) && directives.needsRefetch()) {
           synchronized (host2directivesCache) {
             host2directivesCache.remove(host);
             directives = null;
@@ -93,7 +92,7 @@ public class RobotstxtServer {
   private HostDirectives fetchDirectives(URL url) {
     WebURL robotsTxtUrl = new WebURL();
     String host = getHost(url);
-    String port = (url.getPort() == url.getDefaultPort() || url.getPort() == -1) ? "" : ":" + url.getPort();
+    String port = ((url.getPort() == url.getDefaultPort()) || (url.getPort() == -1)) ? "" : (":" + url.getPort());
     robotsTxtUrl.setURL("http://" + host + port + "/robots.txt");
     HostDirectives directives = null;
     PageFetchResult fetchResult = null;
@@ -141,7 +140,7 @@ public class RobotstxtServer {
       if (host2directivesCache.size() == config.getCacheSize()) {
         String minHost = null;
         long minAccessTime = Long.MAX_VALUE;
-        for (Entry<String, HostDirectives> entry : host2directivesCache.entrySet()) {
+        for (Map.Entry<String, HostDirectives> entry : host2directivesCache.entrySet()) {
           if (entry.getValue().getLastAccessTime() < minAccessTime) {
             minAccessTime = entry.getValue().getLastAccessTime();
             minHost = entry.getKey();

@@ -33,13 +33,13 @@ import edu.uci.ics.crawler4j.url.WebURL;
  */
 
 public class BasicCrawler extends WebCrawler {
-  private Logger logger = LoggerFactory.getLogger(BasicCrawler.class);
+  private static final Logger logger = LoggerFactory.getLogger(BasicCrawler.class);
 
-  private final static Pattern FILTERS = Pattern.compile(
-      ".*(\\.(css|js|bmp|gif|jpe?g" + "|png|tiff?|mid|mp2|mp3|mp4" + "|wav|avi|mov|mpeg|ram|m4v|pdf" +
+  private static final Pattern FILTERS = Pattern.compile(
+      ".*(\\.(css|js|bmp|gif|jpe?g|png|tiff?|mid|mp2|mp3|mp4|wav|avi|mov|mpeg|ram|m4v|pdf" +
       "|rm|smil|wmv|swf|wma|zip|rar|gz))$");
 
-  private final static String DOMAIN = "http://www.ics.uci.edu/";
+  private static final String DOMAIN = "http://www.ics.uci.edu/";
 
   @Override
   public boolean shouldVisit(Page page, WebURL url) {

@@ -50,7 +50,7 @@ public class ImageCrawler extends WebCrawler {
   private static String[] crawlDomains;
 
   public static void configure(String[] domain, String storageFolderName) {
-    ImageCrawler.crawlDomains = domain;
+    crawlDomains = domain;
 
     storageFolder = new File(storageFolderName);
     if (!storageFolder.exists()) {
@@ -83,13 +83,13 @@ public class ImageCrawler extends WebCrawler {
 
     // We are only interested in processing images which are bigger than 10k
     if (!imgPatterns.matcher(url).matches() ||
-        !(page.getParseData() instanceof BinaryParseData || page.getContentData().length < 10 * 1024)) {
+        !((page.getParseData() instanceof BinaryParseData) || (page.getContentData().length < (10 * 1024)))) {
       return;
     }
 
     // get a unique name for storing this image
-    String extension = url.substring(url.lastIndexOf("."));
-    String hashedName = UUID.randomUUID().toString() + extension;
+    String extension = url.substring(url.lastIndexOf('.'));
+    String hashedName = UUID.randomUUID() + extension;
 
     // store image
     String filename = storageFolder.getAbsolutePath() + "/" + hashedName;

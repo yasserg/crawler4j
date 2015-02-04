@@ -30,7 +30,7 @@ import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
  * @author Yasser Ganjisaffar [lastname at gmail dot com]
  */
 public class BasicCrawlController {
-  private static Logger logger = LoggerFactory.getLogger(BasicCrawlController.class);
+  private static final Logger logger = LoggerFactory.getLogger(BasicCrawlController.class);
 
   public static void main(String[] args) throws Exception {
     if (args.length != 2) {

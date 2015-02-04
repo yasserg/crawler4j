@@ -43,7 +43,7 @@ public class IdleConnectionMonitorThread extends Thread {
           connMgr.closeIdleConnections(30, TimeUnit.SECONDS);
         }
       }
-    } catch (InterruptedException ex) {
+    } catch (InterruptedException ignored) {
       // terminate
     }
   }

@@ -25,7 +25,8 @@ public class Util {
 
   public static byte[] long2ByteArray(long l) {
     byte[] array = new byte[8];
-    int i, shift;
+    int i;
+    int shift;
     for (i = 0, shift = 56; i < 8; i++, shift -= 8) {
       array[i] = (byte) (0xFF & (l >> shift));
     }
@@ -67,14 +68,14 @@ public class Util {
   }
 
   public static boolean hasBinaryContent(String contentType) {
-    String typeStr = contentType != null ? contentType.toLowerCase() : "";
+    String typeStr = (contentType != null) ? contentType.toLowerCase() : "";
 
     return typeStr.contains("image") || typeStr.contains("audio") || typeStr.contains("video") ||
            typeStr.contains("application");
   }
 
   public static boolean hasPlainTextContent(String contentType) {
-    String typeStr = contentType != null ? contentType.toLowerCase() : "";
+    String typeStr = (contentType != null) ? contentType.toLowerCase() : "";
 
     return typeStr.contains("text") && !typeStr.contains("html");
   }

@@ -83,11 +83,11 @@ public class CrawlController extends Configurable {
     config.validate();
     File folder = new File(config.getCrawlStorageFolder());
     if (!folder.exists()) {
-      if (!folder.mkdirs()) {
+      if (folder.mkdirs()) {
+        logger.debug("Created folder: " + folder.getAbsolutePath());
+      } else {
         throw new Exception(
             "couldn't create the storage folder: " + folder.getAbsolutePath() + " does it already exist ?");
-      } else {
-        logger.debug("Created folder: " + folder.getAbsolutePath());
       }
     }
 
@@ -100,10 +100,10 @@ public class CrawlController extends Configurable {
 
     File envHome = new File(config.getCrawlStorageFolder() + "/frontier");
     if (!envHome.exists()) {
-      if (!envHome.mkdir()) {
-        throw new Exception("Failed creating the frontier folder: " + envHome.getAbsolutePath());
-      } else {
+      if (envHome.mkdir()) {
         logger.debug("Created folder: " + envHome.getAbsolutePath());
+      } else {
+        throw new Exception("Failed creating the frontier folder: " + envHome.getAbsolutePath());
       }
     }
 
@@ -301,7 +301,7 @@ public class CrawlController extends Configurable {
   protected static void sleep(int seconds) {
     try {
       Thread.sleep(seconds * 1000);
-    } catch (Exception ignored) {
+    } catch (InterruptedException ignored) {
       // Do nothing
     }
   }
@@ -360,11 +360,11 @@ public class CrawlController extends Configurable {
       webUrl.setURL(canonicalUrl);
       webUrl.setDocid(docId);
       webUrl.setDepth((short) 0);
-      if (!robotstxtServer.allows(webUrl)) {
+      if (robotstxtServer.allows(webUrl)) {
+        frontier.schedule(webUrl);
+      } else {
         logger.warn("Robots.txt does not allow this seed: {}",
                     pageUrl); // using the WARN level here, as the user specifically asked to add this seed
-      } else {
-        frontier.schedule(webUrl);
       }
     }
   }
@@ -454,7 +454,7 @@ public class CrawlController extends Configurable {
   public void shutdown() {
     logger.info("Shutting down...");
     this.shuttingDown = true;
-    getPageFetcher().shutDown();
+    pageFetcher.shutDown();
     frontier.finish();
   }
 }

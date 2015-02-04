@@ -31,7 +31,7 @@ import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
  */
 
 public class ControllerWithShutdown {
-  private static Logger logger = LoggerFactory.getLogger(ControllerWithShutdown.class);
+  private static final Logger logger = LoggerFactory.getLogger(ControllerWithShutdown.class);
 
   public static void main(String[] args) throws Exception {
     if (args.length != 2) {

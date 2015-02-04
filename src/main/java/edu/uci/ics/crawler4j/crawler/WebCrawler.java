@@ -237,6 +237,7 @@ public class WebCrawler implements Runnable {
     return null;
   }
 
+  @Override
   public void run() {
     onStart();
     while (true) {
@@ -244,7 +245,7 @@ public class WebCrawler implements Runnable {
       isWaitingForNewURLs = true;
       frontier.getNextURLs(50, assignedURLs);
       isWaitingForNewURLs = false;
-      if (assignedURLs.size() == 0) {
+      if (assignedURLs.isEmpty()) {
         if (frontier.isFinished()) {
           return;
         }
@@ -387,7 +388,7 @@ public class WebCrawler implements Runnable {
           } else {
             webURL.setDocid(-1);
             webURL.setDepth((short) (curURL.getDepth() + 1));
-            if (maxCrawlDepth == -1 || curURL.getDepth() < maxCrawlDepth) {
+            if ((maxCrawlDepth == -1) || (curURL.getDepth() < maxCrawlDepth)) {
               if (shouldVisit(page, webURL)) {
                 if (robotstxtServer.allows(webURL)) {
                   webURL.setDocid(docIdServer.getNewDocID(webURL.getURL()));

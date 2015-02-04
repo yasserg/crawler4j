@@ -225,7 +225,7 @@ public final class UrlResolver {
     }
     for (int i = 1; i < length; i++) {
       c = scheme.charAt(i);
-      if (!Character.isLetterOrDigit(c) && c != '.' && c != '+' && c != '-') {
+      if (!Character.isLetterOrDigit(c) && (c != '.') && (c != '+') && (c != '-')) {
         return false;
       }
     }
@@ -264,7 +264,7 @@ public final class UrlResolver {
     //      a) If the embedded URL is entirely empty, it inherits the
     //         entire base URL (i.e., is set equal to the base URL)
     //         and we are done.
-    if (relativeUrl.length() == 0) {
+    if (relativeUrl.isEmpty()) {
       return new Url(baseUrl);
     }
     //      b) If the embedded URL starts with a scheme name, it is
@@ -284,7 +284,7 @@ public final class UrlResolver {
     url.location_ = baseUrl.location_;
     // Step 4: If the embedded URL path is preceded by a slash "/", the
     //         path is not relative and we skip to Step 7.
-    if ((url.path_ != null) && ((url.path_.length() > 0) && ('/' == url.path_.charAt(0)))) {
+    if ((url.path_ != null) && ((!url.path_.isEmpty()) && (url.path_.charAt(0) == '/'))) {
       url.path_ = removeLeadingSlashPoints(url.path_);
       return url;
     }

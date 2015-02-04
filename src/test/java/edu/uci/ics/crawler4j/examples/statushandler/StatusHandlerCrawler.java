@@ -31,10 +31,10 @@ import edu.uci.ics.crawler4j.url.WebURL;
  * @author Yasser Ganjisaffar [lastname at gmail dot com]
  */
 public class StatusHandlerCrawler extends WebCrawler {
-  private Logger logger = LoggerFactory.getLogger(StatusHandlerCrawler.class);
+  private static final Logger logger = LoggerFactory.getLogger(StatusHandlerCrawler.class);
 
-  private final static Pattern FILTERS = Pattern.compile(
-      ".*(\\.(css|js|bmp|gif|jpe?g" + "|png|tiff?|mid|mp2|mp3|mp4" + "|wav|avi|mov|mpeg|ram|m4v|pdf" +
+  private static final Pattern FILTERS = Pattern.compile(
+      ".*(\\.(css|js|bmp|gif|jpe?g|png|tiff?|mid|mp2|mp3|mp4|wav|avi|mov|mpeg|ram|m4v|pdf" +
       "|rm|smil|wmv|swf|wma|zip|rar|gz))$");
 
   /**

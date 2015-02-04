@@ -28,6 +28,7 @@ import java.util.Set;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.sax.SAXTransformerFactory;
 import javax.xml.transform.sax.TransformerHandler;
 import javax.xml.transform.stream.StreamResult;
@@ -49,7 +50,7 @@ public class BinaryParseData implements ParseData {
 
   private static final Parser AUTO_DETECT_PARSER = new AutoDetectParser();
   private static final SAXTransformerFactory SAX_TRANSFORMER_FACTORY =
-      (SAXTransformerFactory) SAXTransformerFactory.newInstance();
+      (SAXTransformerFactory) TransformerFactory.newInstance();
 
   private final ParseContext context = new ParseContext();
   private Set<WebURL> outgoingUrls = new HashSet<>();
@@ -68,9 +69,7 @@ public class BinaryParseData implements ParseData {
       AUTO_DETECT_PARSER.parse(inputStream, handler, new Metadata(), context);
 
       // Hacking the following line to remove Tika's inserted DocType
-      String htmlContent =
-          new String(outputStream.toByteArray(), DEFAULT_ENCODING).replace("http://www.w3.org/1999/xhtml", "");
-      setHtml(htmlContent);
+      this.html = new String(outputStream.toByteArray(), DEFAULT_ENCODING).replace("http://www.w3.org/1999/xhtml", "");
     } catch (Exception e) {
       logger.error("Error parsing file", e);
     }
@@ -119,6 +118,6 @@ public class BinaryParseData implements ParseData {
 
   @Override
   public String toString() {
-    return (html == null || html.isEmpty()) ? "No data parsed yet" : getHtml();
+    return ((html == null) || html.isEmpty()) ? "No data parsed yet" : html;
   }
 }

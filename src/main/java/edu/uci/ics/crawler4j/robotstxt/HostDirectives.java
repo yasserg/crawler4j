@@ -26,10 +26,10 @@ public class HostDirectives {
   // 24 hours, we have to re-fetch it.
   private static final long EXPIRATION_DELAY = 24 * 60 * 1000L;
 
-  private RuleSet disallows = new RuleSet();
-  private RuleSet allows = new RuleSet();
+  private final RuleSet disallows = new RuleSet();
+  private final RuleSet allows = new RuleSet();
 
-  private long timeFetched;
+  private final long timeFetched;
   private long timeLastAccessed;
 
   public HostDirectives() {
@@ -37,7 +37,7 @@ public class HostDirectives {
   }
 
   public boolean needsRefetch() {
-    return (System.currentTimeMillis() - timeFetched > EXPIRATION_DELAY);
+    return ((System.currentTimeMillis() - timeFetched) > EXPIRATION_DELAY);
   }
 
   public boolean allows(String path) {

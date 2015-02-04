@@ -40,11 +40,11 @@ import edu.uci.ics.crawler4j.util.Util;
  * @author Yasser Ganjisaffar [lastname at gmail dot com]
  */
 public class Counters extends Configurable {
-  private Logger logger = LoggerFactory.getLogger(Counters.class);
+  private static final Logger logger = LoggerFactory.getLogger(Counters.class);
 
-  public class ReservedCounterNames {
-    public final static String SCHEDULED_PAGES = "Scheduled-Pages";
-    public final static String PROCESSED_PAGES = "Processed-Pages";
+  public static class ReservedCounterNames {
+    public static final String SCHEDULED_PAGES = "Scheduled-Pages";
+    public static final String PROCESSED_PAGES = "Processed-Pages";
   }
 
   protected Database statisticsDB = null;
@@ -54,7 +54,7 @@ public class Counters extends Configurable {
 
   protected Map<String, Long> counterValues;
 
-  public Counters(Environment env, CrawlConfig config) throws DatabaseException {
+  public Counters(Environment env, CrawlConfig config) {
     super(config);
 
     this.env = env;
@@ -94,7 +94,7 @@ public class Counters extends Configurable {
 
   public long getValue(String name) {
     synchronized (mutex) {
-      return counterValues.get(name) == null ? 0 : counterValues.get(name);
+      return (counterValues.get(name) == null) ? 0 : counterValues.get(name);
     }
   }
 

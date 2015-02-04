@@ -30,7 +30,7 @@ import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
  * @author Yasser Ganjisaffar [lastname at gmail dot com]
  */
 public class ImageCrawlController {
-  private static Logger logger = LoggerFactory.getLogger(ImageCrawlController.class);
+  private static final Logger logger = LoggerFactory.getLogger(ImageCrawlController.class);
 
   public static void main(String[] args) throws Exception {
     if (args.length < 3) {
@@ -55,7 +55,7 @@ public class ImageCrawlController {
      */
     config.setIncludeBinaryContentInCrawling(true);
 
-    String[] crawlDomains = new String[] {"http://uci.edu/"};
+    String[] crawlDomains = {"http://uci.edu/"};
 
     PageFetcher pageFetcher = new PageFetcher(config);
     RobotstxtConfig robotstxtConfig = new RobotstxtConfig();

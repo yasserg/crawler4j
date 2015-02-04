@@ -137,9 +137,6 @@ public class CrawlConfig {
    */
   private List<AuthInfo> authInfos;
 
-  public CrawlConfig() {
-  }
-
   /**
    * Validates the configs specified by this instance.
    *

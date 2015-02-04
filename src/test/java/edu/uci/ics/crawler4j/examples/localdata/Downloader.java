@@ -35,10 +35,10 @@ import edu.uci.ics.crawler4j.url.WebURL;
  * single page and extract its title and text.
  */
 public class Downloader {
+  private static final Logger logger = LoggerFactory.getLogger(Downloader.class);
 
-  private Parser parser;
-  private PageFetcher pageFetcher;
-  private Logger logger = LoggerFactory.getLogger(Downloader.class);
+  private final Parser parser;
+  private final PageFetcher pageFetcher;
 
   public Downloader() {
     CrawlConfig config = new CrawlConfig();

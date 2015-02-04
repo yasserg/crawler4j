@@ -41,7 +41,7 @@ public class InProcessPagesDB extends WorkQueues {
 
   private static final Logger logger = LoggerFactory.getLogger(InProcessPagesDB.class);
 
-  public InProcessPagesDB(Environment env) throws DatabaseException {
+  public InProcessPagesDB(Environment env) {
     super(env, "InProcessPagesDB", true);
     long docCount = getLength();
     if (docCount > 0) {
@@ -54,12 +54,11 @@ public class InProcessPagesDB extends WorkQueues {
       try {
         DatabaseEntry key = getDatabaseEntryKey(webUrl);
         Cursor cursor = null;
-        OperationStatus result;
         DatabaseEntry value = new DatabaseEntry();
         Transaction txn = env.beginTransaction(null, null);
         try {
           cursor = urlsDB.openCursor(txn, null);
-          result = cursor.getSearchKey(key, value, null);
+          OperationStatus result = cursor.getSearchKey(key, value, null);
 
           if (result == OperationStatus.SUCCESS) {
             result = cursor.delete();

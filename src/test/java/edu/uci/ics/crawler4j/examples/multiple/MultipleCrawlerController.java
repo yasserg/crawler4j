@@ -31,7 +31,7 @@ import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
  */
 
 public class MultipleCrawlerController {
-  private static Logger logger = LoggerFactory.getLogger(MultipleCrawlerController.class);
+  private static final Logger logger = LoggerFactory.getLogger(MultipleCrawlerController.class);
 
   public static void main(String[] args) throws Exception {
     if (args.length != 1) {
@@ -77,8 +77,8 @@ public class MultipleCrawlerController {
     CrawlController controller1 = new CrawlController(config1, pageFetcher1, robotstxtServer);
     CrawlController controller2 = new CrawlController(config2, pageFetcher2, robotstxtServer);
 
-    String[] crawler1Domains = new String[] {"http://www.ics.uci.edu/", "http://www.cnn.com/"};
-    String[] crawler2Domains = new String[] {"http://en.wikipedia.org/"};
+    String[] crawler1Domains = {"http://www.ics.uci.edu/", "http://www.cnn.com/"};
+    String[] crawler2Domains = {"http://en.wikipedia.org/"};
 
     controller1.setCustomData(crawler1Domains);
     controller2.setCustomData(crawler2Domains);

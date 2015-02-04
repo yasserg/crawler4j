@@ -27,7 +27,6 @@ import com.sleepycat.je.Environment;
 
 import edu.uci.ics.crawler4j.crawler.Configurable;
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
-import edu.uci.ics.crawler4j.frontier.Counters.ReservedCounterNames;
 import edu.uci.ics.crawler4j.url.WebURL;
 
 /**
@@ -57,7 +56,7 @@ public class Frontier extends Configurable {
     try {
       workQueues = new WorkQueues(env, "PendingURLsDB", config.isResumableCrawling());
       if (config.isResumableCrawling()) {
-        scheduledPages = counters.getValue(ReservedCounterNames.SCHEDULED_PAGES);
+        scheduledPages = counters.getValue(Counters.ReservedCounterNames.SCHEDULED_PAGES);
         inProcessPages = new InProcessPagesDB(env);
         long numPreviouslyInProcessPages = inProcessPages.getLength();
         if (numPreviouslyInProcessPages > 0) {
@@ -65,7 +64,7 @@ public class Frontier extends Configurable {
           scheduledPages -= numPreviouslyInProcessPages;
 
           List<WebURL> urls = inProcessPages.get(100);
-          while (urls.size() > 0) {
+          while (!urls.isEmpty()) {
             scheduleAll(urls);
             inProcessPages.delete(urls.size());
             urls = inProcessPages.get(100);
@@ -86,7 +85,7 @@ public class Frontier extends Configurable {
     synchronized (mutex) {
       int newScheduledPage = 0;
       for (WebURL url : urls) {
-        if (maxPagesToFetch > 0 && (scheduledPages + newScheduledPage) >= maxPagesToFetch) {
+        if ((maxPagesToFetch > 0) && ((scheduledPages + newScheduledPage) >= maxPagesToFetch)) {
           break;
         }
 
@@ -160,7 +159,7 @@ public class Frontier extends Configurable {
   }
 
   public void setProcessed(WebURL webURL) {
-    counters.increment(ReservedCounterNames.PROCESSED_PAGES);
+    counters.increment(Counters.ReservedCounterNames.PROCESSED_PAGES);
     if (inProcessPages != null) {
       if (!inProcessPages.removeURL(webURL)) {
         logger.warn("Could not remove: {} from list of processed pages.", webURL.getURL());
@@ -177,7 +176,7 @@ public class Frontier extends Configurable {
   }
 
   public long getNumberOfProcessedPages() {
-    return counters.getValue(ReservedCounterNames.PROCESSED_PAGES);
+    return counters.getValue(Counters.ReservedCounterNames.PROCESSED_PAGES);
   }
 
   public boolean isFinished() {
