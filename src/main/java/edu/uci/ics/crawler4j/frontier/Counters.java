@@ -95,7 +95,11 @@ public class Counters extends Configurable {
 
   public long getValue(String name) {
     synchronized (mutex) {
-      return (counterValues.get(name) == null) ? 0 : counterValues.get(name);
+      Long value = counterValues.get(name);
+      if (value == null) {
+        return 0;
+      }
+      return value;
     }
   }
 

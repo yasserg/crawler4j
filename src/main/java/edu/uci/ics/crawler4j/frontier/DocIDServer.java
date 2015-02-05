@@ -36,15 +36,14 @@ import edu.uci.ics.crawler4j.util.Util;
  */
 
 public class DocIDServer extends Configurable {
+  private static final Logger logger = LoggerFactory.getLogger(DocIDServer.class);
 
+  private final Database docIDsDB;
   private static final String DATABASE_NAME = "DocIDs";
-  protected static final Logger logger = LoggerFactory.getLogger(DocIDServer.class);
 
-  protected Database docIDsDB = null;
+  private final Object mutex = new Object();
 
-  protected final Object mutex = new Object();
-
-  protected int lastDocID;
+  private int lastDocID;
 
   public DocIDServer(Environment env, CrawlConfig config) {
     super(config);
@@ -52,6 +51,7 @@ public class DocIDServer extends Configurable {
     dbConfig.setAllowCreate(true);
     dbConfig.setTransactional(config.isResumableCrawling());
     dbConfig.setDeferredWrite(!config.isResumableCrawling());
+    lastDocID = 0;
     docIDsDB = env.openDatabase(null, DATABASE_NAME, dbConfig);
     if (config.isResumableCrawling()) {
       int docCount = getDocCount();
@@ -59,8 +59,6 @@ public class DocIDServer extends Configurable {
         logger.info("Loaded {} URLs that had been detected in previous crawl.", docCount);
         lastDocID = docCount;
       }
-    } else {
-      lastDocID = 0;
     }
   }
 
@@ -72,46 +70,41 @@ public class DocIDServer extends Configurable {
    */
   public int getDocId(String url) {
     synchronized (mutex) {
-      int docID = -1;
+      OperationStatus result = null;
+      DatabaseEntry value = new DatabaseEntry();
+      try {
+        DatabaseEntry key = new DatabaseEntry(url.getBytes());
+        result = docIDsDB.get(null, key, value, null);
 
-      if (docIDsDB != null) {
-        OperationStatus result = null;
-        DatabaseEntry value = new DatabaseEntry();
-        try {
-          DatabaseEntry key = new DatabaseEntry(url.getBytes());
-          result = docIDsDB.get(null, key, value, null);
-
-        } catch (Exception e) {
-          logger.error("Exception thrown while getting DocID", e);
-        }
-
-        if ((result != null) && (result == OperationStatus.SUCCESS) && (value.getData().length > 0)) {
-          docID = Util.byteArray2Int(value.getData());
-        }
+      } catch (Exception e) {
+        logger.error("Exception thrown while getting DocID", e);
+        return -1;
       }
 
-      return docID;
+      if ((result == OperationStatus.SUCCESS) && (value.getData().length > 0)) {
+        return Util.byteArray2Int(value.getData());
+      }
+
+      return -1;
     }
   }
 
   public int getNewDocID(String url) {
-
     synchronized (mutex) {
-      int docID = -1;
       try {
         // Make sure that we have not already assigned a docid for this URL
-        docID = getDocId(url);
-
-        if (docID <= 0) {
-          lastDocID++;
-          docIDsDB.put(null, new DatabaseEntry(url.getBytes()), new DatabaseEntry(Util.int2ByteArray(lastDocID)));
-          docID = lastDocID;
+        int docID = getDocId(url);
+        if (docID > 0) {
+          return docID;
         }
+
+        ++lastDocID;
+        docIDsDB.put(null, new DatabaseEntry(url.getBytes()), new DatabaseEntry(Util.int2ByteArray(lastDocID)));
+        return lastDocID;
       } catch (Exception e) {
         logger.error("Exception thrown while getting new DocID", e);
+        return -1;
       }
-
-      return docID;
     }
   }
 
@@ -140,14 +133,12 @@ public class DocIDServer extends Configurable {
   }
 
   public final int getDocCount() {
-    int count = -1;
-
     try {
-      count = (int) docIDsDB.count();
+      return (int) docIDsDB.count();
     } catch (DatabaseException e) {
       logger.error("Exception thrown while getting DOC Count", e);
+      return -1;
     }
-    return count;
   }
 
   public void close() {
