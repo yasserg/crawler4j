@@ -124,14 +124,14 @@ public class HtmlContentHandler extends DefaultHandler {
           int pos = content.toLowerCase().indexOf("url=");
           if (pos != -1) {
             metaRefresh = content.substring(pos + 4);
+            addToOutgoingUrls(metaRefresh, localName);
           }
-          addToOutgoingUrls(metaRefresh, localName);
         }
 
         // http-equiv="location" content="http://foo.bar/..."
         if ("location".equals(equiv) && (metaLocation == null)) {
           metaLocation = content;
-          addToOutgoingUrls(metaRefresh, localName);
+          addToOutgoingUrls(metaLocation, localName);
         }
       }
     } else if (element == Element.BODY) {
