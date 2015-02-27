@@ -138,6 +138,11 @@ public class CrawlConfig {
   private List<AuthInfo> authInfos;
 
   /**
+  * get max in process pages by frontier
+  */
+
+  private int maxInPorcessPages = 100;
+  /**
    * Validates the configs specified by this instance.
    *
    * @throws Exception on Validation fail
@@ -415,6 +420,12 @@ public class CrawlConfig {
     this.authInfos = authInfos;
   }
 
+  public int getMaxInPorcessPages() {
+      return maxInPorcessPages;
+  }
+  public void setMaxInPorcessPages(int maxInPorcessPages) {
+      this.maxInPorcessPages = maxInPorcessPages;
+  }
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
