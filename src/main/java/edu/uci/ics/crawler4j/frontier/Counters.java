@@ -47,6 +47,7 @@ public class Counters extends Configurable {
     public static final String PROCESSED_PAGES = "Processed-Pages";
   }
 
+  private static final String DATABASE_NAME = "Statistics";
   protected Database statisticsDB = null;
   protected Environment env;
 
@@ -70,7 +71,7 @@ public class Counters extends Configurable {
       dbConfig.setAllowCreate(true);
       dbConfig.setTransactional(true);
       dbConfig.setDeferredWrite(false);
-      statisticsDB = env.openDatabase(null, "Statistics", dbConfig);
+      statisticsDB = env.openDatabase(null, DATABASE_NAME, dbConfig);
 
       OperationStatus result;
       DatabaseEntry key = new DatabaseEntry();

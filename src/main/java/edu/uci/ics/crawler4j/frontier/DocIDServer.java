@@ -37,6 +37,7 @@ import edu.uci.ics.crawler4j.util.Util;
 
 public class DocIDServer extends Configurable {
 
+  private static final String DATABASE_NAME = "DocIDs";
   protected static final Logger logger = LoggerFactory.getLogger(DocIDServer.class);
 
   protected Database docIDsDB = null;
@@ -51,7 +52,7 @@ public class DocIDServer extends Configurable {
     dbConfig.setAllowCreate(true);
     dbConfig.setTransactional(config.isResumableCrawling());
     dbConfig.setDeferredWrite(!config.isResumableCrawling());
-    docIDsDB = env.openDatabase(null, "DocIDs", dbConfig);
+    docIDsDB = env.openDatabase(null, DATABASE_NAME, dbConfig);
     if (config.isResumableCrawling()) {
       int docCount = getDocCount();
       if (docCount > 0) {

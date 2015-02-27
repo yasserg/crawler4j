@@ -40,9 +40,9 @@ import edu.uci.ics.crawler4j.url.WebURL;
 public class InProcessPagesDB extends WorkQueues {
 
   private static final Logger logger = LoggerFactory.getLogger(InProcessPagesDB.class);
-
+  private static final String DATABASE_NAME = "InProcessPagesDB";
   public InProcessPagesDB(Environment env) {
-    super(env, "InProcessPagesDB", true);
+    super(env, DATABASE_NAME, true);
     long docCount = getLength();
     if (docCount > 0) {
       logger.info("Loaded {} URLs that have been in process in the previous crawl.", docCount);

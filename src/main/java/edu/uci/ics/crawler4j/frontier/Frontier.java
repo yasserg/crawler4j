@@ -36,7 +36,7 @@ import edu.uci.ics.crawler4j.url.WebURL;
 public class Frontier extends Configurable {
 
   protected static final Logger logger = LoggerFactory.getLogger(Frontier.class);
-
+  private static final String DATABASE_NAME = "PendingURLsDB";
   protected WorkQueues workQueues;
 
   protected InProcessPagesDB inProcessPages;
@@ -54,7 +54,7 @@ public class Frontier extends Configurable {
     super(config);
     this.counters = new Counters(env, config);
     try {
-      workQueues = new WorkQueues(env, "PendingURLsDB", config.isResumableCrawling());
+      workQueues = new WorkQueues(env, DATABASE_NAME, config.isResumableCrawling());
       if (config.isResumableCrawling()) {
         scheduledPages = counters.getValue(Counters.ReservedCounterNames.SCHEDULED_PAGES);
         inProcessPages = new InProcessPagesDB(env);
