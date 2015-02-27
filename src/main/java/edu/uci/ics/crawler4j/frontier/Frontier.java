@@ -63,11 +63,11 @@ public class Frontier extends Configurable {
           logger.info("Rescheduling {} URLs from previous crawl.", numPreviouslyInProcessPages);
           scheduledPages -= numPreviouslyInProcessPages;
 
-          List<WebURL> urls = inProcessPages.get(100);
+          List<WebURL> urls = inProcessPages.get(config.getMaxInPorcessPages());
           while (!urls.isEmpty()) {
             scheduleAll(urls);
             inProcessPages.delete(urls.size());
-            urls = inProcessPages.get(100);
+            urls = inProcessPages.get(config.getMaxInPorcessPages());
           }
         }
       } else {
