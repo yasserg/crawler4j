@@ -34,8 +34,8 @@ import edu.uci.ics.crawler4j.url.WebURL;
  */
 
 public class Frontier extends Configurable {
-
   protected static final Logger logger = LoggerFactory.getLogger(Frontier.class);
+  
   private static final String DATABASE_NAME = "PendingURLsDB";
   protected WorkQueues workQueues;
 

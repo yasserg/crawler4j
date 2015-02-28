@@ -69,7 +69,6 @@ import edu.uci.ics.crawler4j.url.WebURL;
  * @author Yasser Ganjisaffar
  */
 public class PageFetcher extends Configurable {
-
   protected static final Logger logger = LoggerFactory.getLogger(PageFetcher.class);
 
   protected PoolingHttpClientConnectionManager connectionManager;
@@ -240,6 +239,15 @@ public class PageFetcher extends Configurable {
         // Checking maximum size
         if (fetchResult.getEntity() != null) {
           long size = fetchResult.getEntity().getContentLength();
+          if (size == -1) {
+            Header length = response.getLastHeader("Content-Length");
+            if (length == null) {
+              length = response.getLastHeader("Content-length");
+            }
+            if (length != null) {
+              size = Integer.parseInt(length.getValue());
+            }
+          }
           if (size > config.getMaxDownloadSize()) {
             throw new PageBiggerThanMaxSizeException(size);
           }
