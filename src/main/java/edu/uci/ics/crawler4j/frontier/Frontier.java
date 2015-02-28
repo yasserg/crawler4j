@@ -37,6 +37,7 @@ public class Frontier extends Configurable {
   protected static final Logger logger = LoggerFactory.getLogger(Frontier.class);
   
   private static final String DATABASE_NAME = "PendingURLsDB";
+  private static final int MAX_IN_PROCESS_PAGES = 100;
   protected WorkQueues workQueues;
 
   protected InProcessPagesDB inProcessPages;
@@ -63,11 +64,11 @@ public class Frontier extends Configurable {
           logger.info("Rescheduling {} URLs from previous crawl.", numPreviouslyInProcessPages);
           scheduledPages -= numPreviouslyInProcessPages;
 
-          List<WebURL> urls = inProcessPages.get(config.getMaxInPorcessPages());
+          List<WebURL> urls = inProcessPages.get(MAX_IN_PROCESS_PAGES);
           while (!urls.isEmpty()) {
             scheduleAll(urls);
             inProcessPages.delete(urls.size());
-            urls = inProcessPages.get(config.getMaxInPorcessPages());
+            urls = inProcessPages.get(MAX_IN_PROCESS_PAGES);
           }
         }
       } else {
