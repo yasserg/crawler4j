@@ -40,6 +40,7 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
@@ -197,9 +198,9 @@ public class PageFetcher extends Configurable {
     // Getting URL, setting headers & content
     PageFetchResult fetchResult = new PageFetchResult();
     String toFetchURL = webUrl.getURL();
-    HttpGet get = null;
+    HttpUriRequest request = null;
     try {
-      get = new HttpGet(toFetchURL);
+      request = newHttpUriRequest(toFetchURL);
       // Applying Politeness delay
       synchronized (mutex) {
         long now = (new Date()).getTime();
@@ -209,7 +210,7 @@ public class PageFetcher extends Configurable {
         lastFetchTime = (new Date()).getTime();
       }
 
-      HttpResponse response = httpClient.execute(get);
+      HttpResponse response = httpClient.execute(request);
       fetchResult.setEntity(response.getEntity());
       fetchResult.setResponseHeaders(response.getAllHeaders());
 
@@ -229,7 +230,7 @@ public class PageFetcher extends Configurable {
         }
       } else if (statusCode == HttpStatus.SC_OK) { // is 200, everything looks ok
         fetchResult.setFetchedUrl(toFetchURL);
-        String uri = get.getURI().toString();
+        String uri = request.getURI().toString();
         if (!uri.equals(toFetchURL)) {
           if (!URLCanonicalizer.getCanonicalURL(uri).equals(toFetchURL)) {
             fetchResult.setFetchedUrl(uri);
@@ -258,8 +259,8 @@ public class PageFetcher extends Configurable {
       return fetchResult;
 
     } finally { // occurs also with thrown exceptions
-      if ((fetchResult.getEntity() == null) && (get != null)) {
-        get.abort();
+      if ((fetchResult.getEntity() == null) && (request != null)) {
+        request.abort();
       }
     }
   }
@@ -270,4 +271,16 @@ public class PageFetcher extends Configurable {
       connectionMonitorThread.shutdown();
     }
   }
+
+  /**
+   * Creates a new HttpUriRequest for the given url. The default is to create a HttpGet without
+   * any further configuration. Subclasses may override this method and provide their own logic.
+   *
+   * @param url the url to be fetched
+   * @return the HttpUriRequest for the given url
+   */
+  protected HttpUriRequest newHttpUriRequest(String url) {
+    return new HttpGet(url);
+  }
+
 }
