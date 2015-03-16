@@ -18,7 +18,12 @@
 package edu.uci.ics.crawler4j.crawler;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+
+import org.apache.http.Header;
+import org.apache.http.message.BasicHeader;
 
 import edu.uci.ics.crawler4j.crawler.authentication.AuthInfo;
 
@@ -53,6 +58,11 @@ public class CrawlConfig {
    * servers. See http://en.wikipedia.org/wiki/User_agent for more details
    */
   private String userAgentString = "crawler4j (http://code.google.com/p/crawler4j/)";
+
+  /**
+   * Default request header values.
+   */
+  private Collection<BasicHeader> defaultHeaders = new HashSet<BasicHeader>();
 
   /**
    * Politeness delay in milliseconds (delay between sending two requests to
@@ -227,6 +237,32 @@ public class CrawlConfig {
    */
   public void setUserAgentString(String userAgentString) {
     this.userAgentString = userAgentString;
+  }
+
+  /**
+   * Return a copy of the default header collection.
+   * 
+   * @return defaultHeaders
+   */
+  public Collection<? extends Header> getDefaultHeaders() {
+    Collection<BasicHeader> copiedHeaders = new HashSet<BasicHeader>();
+    for (BasicHeader header : this.defaultHeaders) {
+      copiedHeaders.add(new BasicHeader(header.getName(), header.getValue()));
+    }
+    return copiedHeaders;
+  }
+  
+  /**
+   * Set the default header collection (creating copies of the headers).
+   * 
+   * @param defaultHeaders
+   */
+  public void setDefaultHeaders(Collection<? extends Header> defaultHeaders) {
+    Collection<BasicHeader> copiedHeaders = new HashSet<BasicHeader>();
+    for (Header header : defaultHeaders) {
+      copiedHeaders.add(new BasicHeader(header.getName(), header.getValue()));
+    }
+    this.defaultHeaders = copiedHeaders;
   }
 
   public int getPolitenessDelay() {
