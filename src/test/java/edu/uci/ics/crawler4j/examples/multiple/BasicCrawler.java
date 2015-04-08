@@ -31,7 +31,7 @@ import edu.uci.ics.crawler4j.url.WebURL;
 /**
  * @author Yasser Ganjisaffar
  */
-public class BasicCrawler extends WebCrawler {
+public class BasicCrawler extends WebCrawler<String[]> {
   private static final Logger logger = LoggerFactory.getLogger(BasicCrawler.class);
 
   private static final Pattern FILTERS = Pattern.compile(
@@ -42,7 +42,7 @@ public class BasicCrawler extends WebCrawler {
 
   @Override
   public void onStart() {
-    myCrawlDomains = (String[]) myController.getCustomData();
+    myCrawlDomains = myController.getCustomData();
   }
 
   @Override

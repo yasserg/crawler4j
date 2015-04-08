@@ -46,7 +46,7 @@ import uk.org.lidalia.slf4jext.LoggerFactory;
  *
  * @author Yasser Ganjisaffar
  */
-public class WebCrawler implements Runnable {
+public class WebCrawler<T> implements Runnable {
 
   protected static final Logger logger = LoggerFactory.getLogger(WebCrawler.class);
 
@@ -60,7 +60,7 @@ public class WebCrawler implements Runnable {
    * reference to the controller can be used for getting configurations of the
    * current crawl or adding new seeds during runtime.
    */
-  protected CrawlController myController;
+  protected CrawlController<T> myController;
 
   /**
    * The thread within which this crawler instance is running.
@@ -109,7 +109,7 @@ public class WebCrawler implements Runnable {
    * @param crawlController
    *            the controller that manages this crawling session
    */
-  public void init(int id, CrawlController crawlController) {
+  public void init(int id, CrawlController<T> crawlController) {
     this.myId = id;
     this.pageFetcher = crawlController.getPageFetcher();
     this.robotstxtServer = crawlController.getRobotstxtServer();

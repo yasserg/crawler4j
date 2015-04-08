@@ -41,7 +41,7 @@ import edu.uci.ics.crawler4j.util.IO;
  *
  * @author Yasser Ganjisaffar
  */
-public class CrawlController extends Configurable {
+public class CrawlController<T> extends Configurable {
 
   static final Logger logger = LoggerFactory.getLogger(CrawlController.class);
 
@@ -49,7 +49,7 @@ public class CrawlController extends Configurable {
    * The 'customData' object can be used for passing custom crawl-related
    * configurations to different components of the crawler.
    */
-  protected Object customData;
+  protected T customData;
 
   /**
    * Once the crawling session finishes the controller collects the local data
@@ -430,11 +430,11 @@ public class CrawlController extends Configurable {
     this.docIdServer = docIdServer;
   }
 
-  public Object getCustomData() {
+  public T getCustomData() {
     return customData;
   }
 
-  public void setCustomData(Object customData) {
+  public void setCustomData(T customData) {
     this.customData = customData;
   }
 
