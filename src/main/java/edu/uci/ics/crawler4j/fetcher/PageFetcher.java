@@ -19,6 +19,8 @@ package edu.uci.ics.crawler4j.fetcher;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Date;
@@ -26,12 +28,14 @@ import java.util.List;
 
 import javax.net.ssl.SSLContext;
 
+import edu.uci.ics.crawler4j.crawler.authentication.NtAuthInfo;
 import org.apache.http.Header;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.NTCredentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.CredentialsProvider;
@@ -145,10 +149,25 @@ public class PageFetcher extends Configurable {
     for (AuthInfo authInfo : authInfos) {
       if (authInfo.getAuthenticationType() == AuthInfo.AuthenticationType.BASIC_AUTHENTICATION) {
         doBasicLogin((BasicAuthInfo) authInfo);
-      } else {
+      } else if (authInfo.getAuthenticationType() == AuthInfo.AuthenticationType.NT_AUTHENTICATION) {
+        doNtLogin((NtAuthInfo)authInfo);
+      }else {
         doFormLogin((FormAuthInfo) authInfo);
       }
     }
+  }
+
+  private void doNtLogin(NtAuthInfo authInfo) {
+    logger.info("NT authentication for: " + authInfo.getLoginTarget());
+    HttpHost targetHost = new HttpHost(authInfo.getHost(), authInfo.getPort(), authInfo.getProtocol());
+    CredentialsProvider credsProvider = new BasicCredentialsProvider();
+    try {
+      credsProvider.setCredentials(new AuthScope(targetHost.getHostName(), targetHost.getPort()),
+              new NTCredentials(authInfo.getUsername(), authInfo.getPassword(), InetAddress.getLocalHost().getHostName(), authInfo.getDomain()));
+    } catch (UnknownHostException e) {
+      logger.error("Error creating NT credentials", e);
+    }
+    httpClient = HttpClients.custom().setDefaultCredentialsProvider(credsProvider).build();
   }
 
   /**
