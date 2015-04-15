@@ -150,24 +150,11 @@ public class PageFetcher extends Configurable {
       if (authInfo.getAuthenticationType() == AuthInfo.AuthenticationType.BASIC_AUTHENTICATION) {
         doBasicLogin((BasicAuthInfo) authInfo);
       } else if (authInfo.getAuthenticationType() == AuthInfo.AuthenticationType.NT_AUTHENTICATION) {
-        doNtLogin((NtAuthInfo)authInfo);
-      }else {
+        doNtLogin((NtAuthInfo) authInfo);
+      } else {
         doFormLogin((FormAuthInfo) authInfo);
       }
     }
-  }
-
-  private void doNtLogin(NtAuthInfo authInfo) {
-    logger.info("NT authentication for: " + authInfo.getLoginTarget());
-    HttpHost targetHost = new HttpHost(authInfo.getHost(), authInfo.getPort(), authInfo.getProtocol());
-    CredentialsProvider credsProvider = new BasicCredentialsProvider();
-    try {
-      credsProvider.setCredentials(new AuthScope(targetHost.getHostName(), targetHost.getPort()),
-              new NTCredentials(authInfo.getUsername(), authInfo.getPassword(), InetAddress.getLocalHost().getHostName(), authInfo.getDomain()));
-    } catch (UnknownHostException e) {
-      logger.error("Error creating NT credentials", e);
-    }
-    httpClient = HttpClients.custom().setDefaultCredentialsProvider(credsProvider).build();
   }
 
   /**
@@ -181,6 +168,23 @@ public class PageFetcher extends Configurable {
     CredentialsProvider credsProvider = new BasicCredentialsProvider();
     credsProvider.setCredentials(new AuthScope(targetHost.getHostName(), targetHost.getPort()),
                                  new UsernamePasswordCredentials(authInfo.getUsername(), authInfo.getPassword()));
+    httpClient = HttpClients.custom().setDefaultCredentialsProvider(credsProvider).build();
+  }
+
+  /**
+   * Do NT auth for Microsoft AD sites.
+   */
+  private void doNtLogin(NtAuthInfo authInfo) {
+    logger.info("NT authentication for: " + authInfo.getLoginTarget());
+    HttpHost targetHost = new HttpHost(authInfo.getHost(), authInfo.getPort(), authInfo.getProtocol());
+    CredentialsProvider credsProvider = new BasicCredentialsProvider();
+    try {
+      credsProvider.setCredentials(new AuthScope(targetHost.getHostName(), targetHost.getPort()),
+              new NTCredentials(authInfo.getUsername(), authInfo.getPassword(),
+                      InetAddress.getLocalHost().getHostName(), authInfo.getDomain()));
+    } catch (UnknownHostException e) {
+      logger.error("Error creating NT credentials", e);
+    }
     httpClient = HttpClients.custom().setDefaultCredentialsProvider(credsProvider).build();
   }
 
