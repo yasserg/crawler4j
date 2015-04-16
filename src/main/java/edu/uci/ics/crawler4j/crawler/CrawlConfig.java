@@ -241,24 +241,16 @@ public class CrawlConfig {
 
   /**
    * Return a copy of the default header collection.
-   * 
-   * @return defaultHeaders
    */
-  public Collection<? extends Header> getDefaultHeaders() {
-    Collection<BasicHeader> copiedHeaders = new HashSet<BasicHeader>();
-    for (BasicHeader header : this.defaultHeaders) {
-      copiedHeaders.add(new BasicHeader(header.getName(), header.getValue()));
-    }
-    return copiedHeaders;
+  public Collection<BasicHeader> getDefaultHeaders() {
+    return new HashSet<>(defaultHeaders);
   }
-  
+
   /**
-   * Set the default header collection (creating copies of the headers).
-   * 
-   * @param defaultHeaders
+   * Set the default header collection (creating copies of the provided headers).
    */
   public void setDefaultHeaders(Collection<? extends Header> defaultHeaders) {
-    Collection<BasicHeader> copiedHeaders = new HashSet<BasicHeader>();
+    Collection<BasicHeader> copiedHeaders = new HashSet<>();
     for (Header header : defaultHeaders) {
       copiedHeaders.add(new BasicHeader(header.getName(), header.getValue()));
     }
