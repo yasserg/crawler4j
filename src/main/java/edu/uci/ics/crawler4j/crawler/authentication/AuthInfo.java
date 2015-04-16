@@ -17,7 +17,8 @@ import javax.swing.text.html.FormSubmitEvent.MethodType;
 public abstract class AuthInfo {
   public enum AuthenticationType {
     BASIC_AUTHENTICATION,
-    FORM_AUTHENTICATION
+    FORM_AUTHENTICATION,
+    NT_AUTHENTICATION
   }
 
   protected AuthenticationType authenticationType;
