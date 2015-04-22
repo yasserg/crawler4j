@@ -123,8 +123,30 @@ public class CrawlController extends Configurable {
     shuttingDown = false;
   }
 
+  public interface WebCrawlerFactory<T extends WebCrawler> {
+    T newInstance() throws Exception;
+  }
+
+  private static class DefaultWebCrawlerFactory<T extends WebCrawler> implements WebCrawlerFactory<T> {
+    final Class<T> _c;
+
+    DefaultWebCrawlerFactory(Class<T> _c) {
+      this._c = _c;
+    }
+
+    @Override
+    public T newInstance() throws Exception {
+      try {
+        return _c.newInstance();
+      } catch (ReflectiveOperationException e) {
+        throw e;
+      }
+    }
+  }
+
   /**
    * Start the crawling session and wait for it to finish.
+   * This method utilizes default crawler factory that creates new crawler using Java reflection
    *
    * @param _c
    *            the class that implements the logic for crawler threads
@@ -134,11 +156,40 @@ public class CrawlController extends Configurable {
    * @param <T> Your class extending WebCrawler
    */
   public <T extends WebCrawler> void start(final Class<T> _c, final int numberOfCrawlers) {
-    this.start(_c, numberOfCrawlers, true);
+    this.start(new DefaultWebCrawlerFactory<>(_c), numberOfCrawlers, true);
+  }
+
+  /**
+   * Start the crawling session and wait for it to finish.
+   *
+   * @param crawlerFactory
+   *            factory to create crawlers on demand for each thread
+   * @param numberOfCrawlers
+   *            the number of concurrent threads that will be contributing in
+   *            this crawling session.
+   * @param <T> Your class extending WebCrawler
+   */
+  public <T extends WebCrawler> void start(final WebCrawlerFactory<T> crawlerFactory, final int numberOfCrawlers) {
+    this.start(crawlerFactory, numberOfCrawlers, true);
   }
 
   /**
    * Start the crawling session and return immediately.
+   *
+   * @param crawlerFactory
+   *            factory to create crawlers on demand for each thread
+   * @param numberOfCrawlers
+   *            the number of concurrent threads that will be contributing in
+   *            this crawling session.
+   * @param <T> Your class extending WebCrawler
+   */
+  public <T extends WebCrawler> void startNonBlocking(WebCrawlerFactory<T> crawlerFactory, final int numberOfCrawlers) {
+    this.start(crawlerFactory, numberOfCrawlers, false);
+  }
+
+  /**
+   * Start the crawling session and return immediately.
+   * This method utilizes default crawler factory that creates new crawler using Java reflection
    *
    * @param _c
    *            the class that implements the logic for crawler threads
@@ -148,10 +199,10 @@ public class CrawlController extends Configurable {
    * @param <T> Your class extending WebCrawler
    */
   public <T extends WebCrawler> void startNonBlocking(final Class<T> _c, final int numberOfCrawlers) {
-    this.start(_c, numberOfCrawlers, false);
+    this.start(new DefaultWebCrawlerFactory<>(_c), numberOfCrawlers, false);
   }
 
-  protected <T extends WebCrawler> void start(final Class<T> _c, final int numberOfCrawlers, boolean isBlocking) {
+  protected <T extends WebCrawler> void start(final WebCrawlerFactory<T> crawlerFactory, final int numberOfCrawlers, boolean isBlocking) {
     try {
       finished = false;
       crawlersLocalData.clear();
@@ -159,7 +210,7 @@ public class CrawlController extends Configurable {
       final List<T> crawlers = new ArrayList<>();
 
       for (int i = 1; i <= numberOfCrawlers; i++) {
-        T crawler = _c.newInstance();
+        T crawler = crawlerFactory.newInstance();
         Thread thread = new Thread(crawler, "Crawler " + i);
         crawler.setThread(thread);
         crawler.init(i, this);
@@ -186,7 +237,7 @@ public class CrawlController extends Configurable {
                   if (!thread.isAlive()) {
                     if (!shuttingDown) {
                       logger.info("Thread {} was dead, I'll recreate it", i);
-                      T crawler = _c.newInstance();
+                      T crawler = crawlerFactory.newInstance();
                       thread = new Thread(crawler, "Crawler " + (i + 1));
                       threads.remove(i);
                       threads.add(i, thread);
