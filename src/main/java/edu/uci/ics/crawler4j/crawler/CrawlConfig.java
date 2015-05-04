@@ -159,6 +159,22 @@ public class CrawlConfig {
     private String scriptPageURLPattern;
     
     private int berkeleyCacheSize = 1;
+
+    private List<String> previousCrawlUrls;
+
+    /**
+     * @return the previousCrawlUrls
+     */
+    public List<String> getPreviousCrawlUrls() {
+        return previousCrawlUrls;
+    }
+
+    /**
+     * @param previousCrawlUrls the previousCrawlUrls to set
+     */
+    public void setPreviousCrawlUrls(List<String> previousCrawlUrls) {
+        this.previousCrawlUrls = previousCrawlUrls;
+    }
     
     /**
      * List of possible authentications needed by crawler
