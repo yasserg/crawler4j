@@ -141,6 +141,12 @@
 		<version>1.5</version>
 	</dependency>
 
+        <dependency>
+	  <groupId>org.seleniumhq.selenium</groupId>
+	  <artifactId>selenium-htmlunit-driver</artifactId>
+	  <version>2.35.0</version>
+	</dependency>
+
     <!-- Test Dependencies -->
 		<dependency>
 			<groupId>junit</groupId>
