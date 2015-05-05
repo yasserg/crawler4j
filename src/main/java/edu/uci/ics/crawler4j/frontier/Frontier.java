@@ -200,6 +200,6 @@ public class Frontier extends Configurable {
     }
 
     public long getNumberOfScheduledPages() {
-        return counters.getValue(ReservedCounterNames.SCHEDULED_PAGES);
+        return counters.getValue(Counters.ReservedCounterNames.SCHEDULED_PAGES);
     }
 }
