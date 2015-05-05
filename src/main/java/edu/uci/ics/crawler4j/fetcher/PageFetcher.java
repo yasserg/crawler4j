@@ -25,7 +25,7 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
+import java.util.Random;
 import javax.net.ssl.SSLContext;
 
 import edu.uci.ics.crawler4j.crawler.authentication.NtAuthInfo;
