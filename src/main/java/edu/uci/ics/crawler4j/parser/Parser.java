@@ -22,7 +22,7 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.HashSet;
 import java.util.Set;
-
+import java.util.List;
 import org.apache.tika.language.LanguageIdentifier;
 import org.apache.tika.metadata.DublinCore;
 import org.apache.tika.metadata.Metadata;
@@ -39,7 +39,10 @@ import edu.uci.ics.crawler4j.url.URLCanonicalizer;
 import edu.uci.ics.crawler4j.url.WebURL;
 import edu.uci.ics.crawler4j.util.Net;
 import edu.uci.ics.crawler4j.util.Util;
-
+import java.io.IOException;
+import org.openqa.selenium.htmlunit.HtmlUnitDriver;
+import org.openqa.selenium.htmlunit.HtmlUnitWebElement;
+import com.gargoylesoftware.htmlunit.BrowserVersion;
 /**
  * @author Yasser Ganjisaffar
  */
@@ -200,5 +203,35 @@ public class Parser extends Configurable {
         //String pageCode = htmlUtilDriver.getPageSource();
         //FileUtils.write(new File("/home/mustafa/page-source.txt"), pageCode);
         return htmlUtilDriver.getPageSource();
+    }
+
+    /**
+     * Checks if the url match all URL rules
+     * 
+     * @param url
+     * @return
+     */
+    private boolean hasMatchUrlRules(String url) {
+        String excludeRule = config.getExcludeRuleRegex();
+
+        if (url.matches(commonExcludesRegex)
+            || (excludeRule != null && url.matches(excludeRule))) {
+            return false;
+        }
+
+        String domain = config.getDomain();
+
+        boolean isMatch = false;
+
+        if (domain != null) {
+            isMatch = url.startsWith(domain);
+        }
+		
+        List<String> previousCrawlUrls = config.getPreviousCrawlUrls();
+        if (previousCrawlUrls != null && previousCrawlUrls.contains(url)) {
+            isMatch = false;
+        }
+
+        return isMatch;
     }
 }

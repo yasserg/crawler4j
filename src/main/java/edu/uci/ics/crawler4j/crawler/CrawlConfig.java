@@ -26,6 +26,7 @@ import org.apache.http.Header;
 import org.apache.http.message.BasicHeader;
 
 import edu.uci.ics.crawler4j.crawler.authentication.AuthInfo;
+import org.apache.http.impl.cookie.BasicClientCookie;
 
 public class CrawlConfig {
 
