@@ -3,7 +3,6 @@ package edu.uci.ics.crawler4j.url;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -25,14 +24,13 @@ public class TLDList {
   private static final String TLD_NAMES_TXT_FILENAME = "/tld-names.txt";
   private static final Logger logger = LoggerFactory.getLogger(TLDList.class);
 
-  private static boolean online_update = false;
+  private static boolean onlineUpdate = false;
   private final Set<String> tldSet = new HashSet<>(10000);
 
   private static final TLDList instance = new TLDList(); // Singleton
 
   private TLDList() {
-    if (online_update)
-    {
+    if (onlineUpdate) {
       URL url;
       try {
         url = new URL(TLD_NAMES_ONLINE_URL);
@@ -41,17 +39,17 @@ public class TLDList {
         logger.error("Invalid URL: {}", TLD_NAMES_ONLINE_URL);
         throw new RuntimeException(e);
       }
-      
+
       try (InputStream stream = url.openStream()) {
         logger.debug("Fetching the most updated TLD list online");
         int n = readStream(stream);
         logger.info("Obtained {} TLD from URL {}", n, TLD_NAMES_ONLINE_URL);
         return;
-      } catch (Exception ex) {
-        logger.error("Couldn't fetch the online list of TLDs from: {}", TLD_NAMES_ONLINE_URL);
+      } catch (Exception e) {
+        logger.error("Couldn't fetch the online list of TLDs from: {}", TLD_NAMES_ONLINE_URL, e);
       }
     }
-   
+
     File f = new File(TLD_NAMES_TXT_FILENAME);
     if (f.exists()) {
       logger.debug("Fetching the list from a local file {}", TLD_NAMES_TXT_FILENAME);
@@ -59,14 +57,11 @@ public class TLDList {
         int n = readStream(tldFile);
         logger.info("Obtained {} TLD from local file {}", n, TLD_NAMES_TXT_FILENAME);
         return;
-      }
-      catch (FileNotFoundException e)
-      {} // Should not happen as we just checked this
-      catch (IOException e) {
-        logger.error("Couldn't read the TLD list from local file");
+      } catch (IOException e) {
+        logger.error("Couldn't read the TLD list from local file", e);
       }
     }
-    try (InputStream tldFile = this.getClass().getClassLoader().getResourceAsStream(TLD_NAMES_TXT_FILENAME)) {
+    try (InputStream tldFile = getClass().getClassLoader().getResourceAsStream(TLD_NAMES_TXT_FILENAME)) {
       int n = readStream(tldFile);
       logger.info("Obtained {} TLD from packaged file {}", n, TLD_NAMES_TXT_FILENAME);
     } catch (IOException e) {
@@ -74,9 +69,8 @@ public class TLDList {
       throw new RuntimeException(e);
     }
   }
- 
-  private int readStream(InputStream stream)
-  {
+
+  private int readStream(InputStream stream) {
     try (BufferedReader reader = new BufferedReader(new InputStreamReader(stream))) {
       String line;
       while ((line = reader.readLine()) != null) {
@@ -86,9 +80,7 @@ public class TLDList {
         }
         tldSet.add(line);
       }
-    }
-    catch (IOException e)
-    {
+    } catch (IOException e) {
       logger.warn("Error while reading TLD-list: {}", e.getMessage());
     }
     return tldSet.size();
@@ -97,9 +89,13 @@ public class TLDList {
   public static TLDList getInstance() {
     return instance;
   }
-  
+
+  /**
+   * If {@code online} is set to true, the list of TLD files will be downloaded and refreshed, otherwise the one
+   * cached in src/main/resources/tld-names.txt will be used.
+   */
   public static void setUseOnline(boolean online) {
-    online_update = online;
+    onlineUpdate = online;
   }
 
   public boolean contains(String str) {

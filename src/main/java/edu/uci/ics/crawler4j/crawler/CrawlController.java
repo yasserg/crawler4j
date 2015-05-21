@@ -93,8 +93,7 @@ public class CrawlController extends Configurable {
     }
 
     TLDList.setUseOnline(config.isOnlineTldListUpdate());
-    TLDList.getInstance();
-    
+
     boolean resumable = config.isResumableCrawling();
 
     EnvironmentConfig envConfig = new EnvironmentConfig();
