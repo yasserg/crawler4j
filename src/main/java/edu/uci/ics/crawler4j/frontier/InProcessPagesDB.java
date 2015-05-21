@@ -38,9 +38,9 @@ import edu.uci.ics.crawler4j.url.WebURL;
  */
 public class InProcessPagesDB extends WorkQueues {
   private static final Logger logger = LoggerFactory.getLogger(InProcessPagesDB.class);
-  
+
   private static final String DATABASE_NAME = "InProcessPagesDB";
-  
+
   public InProcessPagesDB(Environment env) {
     super(env, DATABASE_NAME, true);
     long docCount = getLength();
@@ -63,9 +63,8 @@ public class InProcessPagesDB extends WorkQueues {
             return true;
           }
         }
-      }
-      if (txn != null) {
-        txn.commit();
+      } finally {
+        commit(txn);
       }
     }
     return false;
