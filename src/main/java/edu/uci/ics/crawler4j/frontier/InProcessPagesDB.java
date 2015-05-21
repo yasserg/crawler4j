@@ -63,9 +63,10 @@ public class InProcessPagesDB extends WorkQueues {
             return true;
           }
         }
-      }
-      if (txn != null) {
-        txn.commit();
+      }finally {
+        if (txn != null) {
+          txn.commit();
+        }
       }
     }
     return false;
