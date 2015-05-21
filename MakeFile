@@ -1,0 +1,20 @@
+MAVEN=mvn
+
+all: package
+
+compile:
+	$(MAVEN) compile
+
+package:
+	$(MAVEN) package
+
+check:
+	$(MAVEN) test
+
+install:
+	$(MAVEN) install
+
+clean:
+	$(MAVEN) clean
+
+.PHONY: compile package dist clean install dist

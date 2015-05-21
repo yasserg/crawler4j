@@ -25,7 +25,7 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
+import java.util.Random;
 import javax.net.ssl.SSLContext;
 
 import edu.uci.ics.crawler4j.crawler.authentication.NtAuthInfo;
@@ -227,11 +227,13 @@ public class PageFetcher extends Configurable {
       request = newHttpUriRequest(toFetchURL);
       // Applying Politeness delay
       synchronized (mutex) {
-        long now = (new Date()).getTime();
-        if ((now - lastFetchTime) < config.getPolitenessDelay()) {
-          Thread.sleep(config.getPolitenessDelay() - (now - lastFetchTime));
-        }
-        lastFetchTime = (new Date()).getTime();
+          long now = (new Date()).getTime();
+          int randomNumber = new Random().nextInt(config.getPolitnessMaxRange() - config.getPolitnessMinRange()) + config.getPolitnessMinRange();
+          
+          if (now - lastFetchTime < randomNumber) {
+              Thread.sleep(randomNumber - (now - lastFetchTime));
+          }
+          lastFetchTime = (new Date()).getTime();
       }
 
       HttpResponse response = httpClient.execute(request);

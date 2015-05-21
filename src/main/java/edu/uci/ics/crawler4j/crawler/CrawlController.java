@@ -97,6 +97,8 @@ public class CrawlController extends Configurable {
     envConfig.setAllowCreate(true);
     envConfig.setTransactional(resumable);
     envConfig.setLocking(resumable);
+    envConfig.setCacheSize(config.getBerkeleyCacheSize() * 1024 * 1024);
+    envConfig.setSharedCache(false);
 
     File envHome = new File(config.getCrawlStorageFolder() + "/frontier");
     if (!envHome.exists()) {
