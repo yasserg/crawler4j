@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 public class TLDList {
 
   private static final String TLD_NAMES_ONLINE_URL = "https://publicsuffix.org/list/effective_tld_names.dat";
-  private static final String TLD_NAMES_TXT_FILENAME = "/tld-names.txt";
+  private static final String TLD_NAMES_TXT_FILENAME = "tld-names.txt";
   private static final Logger logger = LoggerFactory.getLogger(TLDList.class);
 
   private static boolean onlineUpdate = false;
