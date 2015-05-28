@@ -1,4 +1,4 @@
-# crawler4j
+# crawler4j [![Build Status](https://travis-ci.org/yasserg/crawler4j.svg?branch=master)](https://travis-ci.org/yasserg/crawler4j)
 crawler4j is an open source web crawler for Java which provides a simple interface for
 crawling the Web. Using it, you can setup a multi-threaded web crawler in few minutes.
 
