@@ -31,7 +31,7 @@ import javax.net.ssl.SSLContext;
 import edu.uci.ics.crawler4j.crawler.authentication.NtAuthInfo;
 import org.apache.http.Header;
 import org.apache.http.HttpHost;
-import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.auth.AuthScope;
@@ -234,7 +234,7 @@ public class PageFetcher extends Configurable {
         lastFetchTime = (new Date()).getTime();
       }
 
-      HttpResponse response = httpClient.execute(request);
+      CloseableHttpResponse response = httpClient.execute(request);
       fetchResult.setEntity(response.getEntity());
       fetchResult.setResponseHeaders(response.getAllHeaders());
 
