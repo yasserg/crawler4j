@@ -274,6 +274,8 @@ public class PageFetcher extends Configurable {
             }
           }
           if (size > config.getMaxDownloadSize()) {
+            //fix issue #52 - consume entity
+            response.close();
             throw new PageBiggerThanMaxSizeException(size);
           }
         }
