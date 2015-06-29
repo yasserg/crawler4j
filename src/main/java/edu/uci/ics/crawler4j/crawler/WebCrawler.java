@@ -315,7 +315,7 @@ public class WebCrawler implements Runnable {
       Page page = new Page(curURL);
       page.setFetchResponseHeaders(fetchResult.getResponseHeaders());
       page.setStatusCode(statusCode);
-      if (statusCode != HttpStatus.SC_OK) { // Not 200
+      if (statusCode < 200 || statusCode > 299) { // Not 2XX: 2XX status codes indicate success
         if (statusCode == HttpStatus.SC_MOVED_PERMANENTLY || statusCode == HttpStatus.SC_MOVED_TEMPORARILY ||
             statusCode == HttpStatus.SC_MULTIPLE_CHOICES || statusCode == HttpStatus.SC_SEE_OTHER ||
             statusCode == HttpStatus.SC_TEMPORARY_REDIRECT ||
