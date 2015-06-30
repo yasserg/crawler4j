@@ -252,7 +252,7 @@ public class PageFetcher extends Configurable {
           String movedToUrl = URLCanonicalizer.getCanonicalURL(header.getValue(), toFetchURL);
           fetchResult.setMovedToUrl(movedToUrl);
         }
-      } else if (statusCode == HttpStatus.SC_OK) { // is 200, everything looks ok
+      } else if (statusCode >= 200 && statusCode <= 299) { // is 2XX, everything looks ok
         fetchResult.setFetchedUrl(toFetchURL);
         String uri = request.getURI().toString();
         if (!uri.equals(toFetchURL)) {
