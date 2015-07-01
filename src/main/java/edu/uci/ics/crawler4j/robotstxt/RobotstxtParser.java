@@ -17,77 +17,77 @@
 
 package edu.uci.ics.crawler4j.robotstxt;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Yasser Ganjisaffar
  */
-
-
 public class RobotstxtParser {
+  private static final Logger logger = LoggerFactory.getLogger(RobotstxtParser.class);
+  private static final Pattern RULE_PATTERN = Pattern.compile("(?i)^([A-Za-z\\-]+):(.*)");
+  private static final HashSet<String> VALID_RULES = new HashSet<String>(Arrays.asList("allow", "disallow", "user-agent", "crawl-delay", "host", "sitemap"));  
 
-  private static final String PATTERNS_USERAGENT = "(?i)^User-agent:.*";
-  private static final String PATTERNS_DISALLOW = "(?i)Disallow:.*";
-  private static final String PATTERNS_ALLOW = "(?i)Allow:.*";
-
-  private static final int PATTERNS_USERAGENT_LENGTH = 11;
-  private static final int PATTERNS_DISALLOW_LENGTH = 9;
-  private static final int PATTERNS_ALLOW_LENGTH = 6;
-
-  public static HostDirectives parse(String content, String myUserAgent) {
-
-    HostDirectives directives = null;
-    boolean inMatchingUserAgent = false;
-
+  public static HostDirectives parse(String content, RobotstxtConfig config) {
+    HostDirectives directives = new HostDirectives(config);
     StringTokenizer st = new StringTokenizer(content, "\n\r");
+
+    Set<String> userAgents = new HashSet<String>();
+    UserAgentDirectives ua_directives = null;
+    
     while (st.hasMoreTokens()) {
       String line = st.nextToken();
 
+      // Strip comments
       int commentIndex = line.indexOf('#');
       if (commentIndex > -1) {
         line = line.substring(0, commentIndex);
       }
 
       // remove any html markup
-      line = line.replaceAll("<[^>]+>", "");
-
-      line = line.trim();
-
+      line = line.replaceAll("<[^>]+>", "").trim();
       if (line.isEmpty()) {
         continue;
       }
-
-      if (line.matches(PATTERNS_USERAGENT)) {
-        String ua = line.substring(PATTERNS_USERAGENT_LENGTH).trim().toLowerCase();
-        inMatchingUserAgent = "*".equals(ua) || ua.contains(myUserAgent);
-      } else if (line.matches(PATTERNS_DISALLOW)) {
-        if (!inMatchingUserAgent) {
-          continue;
-        }
-        String path = line.substring(PATTERNS_DISALLOW_LENGTH).trim();
-        if (path.endsWith("*")) {
-          path = path.substring(0, path.length() - 1);
-        }
-        path = path.trim();
-        if (!path.isEmpty()) {
-          if (directives == null) {
-            directives = new HostDirectives();
+      
+      Matcher m = RULE_PATTERN.matcher(line);
+      if (m.matches()) {
+        String rule = m.group(1).toLowerCase();
+        String value = m.group(2).trim();
+        
+        if (VALID_RULES.contains(rule)) {
+          if (rule.equals("user-agent")) {
+            String currentUserAgent = value.toLowerCase();
+            if (ua_directives != null) {
+              // If ua_directives is not null, this means that one or
+              // more rules followed the User-agent: definition list
+              // In that case, it's not allowed to add more user-agents,
+              // so this is an entirely new set of directives.
+              userAgents = new HashSet<String>();
+              directives.addDirectives(ua_directives);
+              ua_directives = null;
+            }
+            userAgents.add(currentUserAgent);
+          } else {
+            if (ua_directives == null) {
+              if (userAgents.isEmpty()) // No "User-agent": clause defaults to wildcard UA
+                userAgents.add("*");
+              ua_directives = new UserAgentDirectives(userAgents);
+            }
+            ua_directives.add(rule,  value);
           }
-          directives.addDisallow(path);
+        } else {
+          logger.info("Unrecognized rule in robots.txt: {}", rule);
         }
-      } else if (line.matches(PATTERNS_ALLOW)) {
-        if (!inMatchingUserAgent) {
-          continue;
-        }
-        String path = line.substring(PATTERNS_ALLOW_LENGTH).trim();
-        if (path.endsWith("*")) {
-          path = path.substring(0, path.length() - 1);
-        }
-        path = path.trim();
-        if (directives == null) {
-          directives = new HostDirectives();
-        }
-        directives.addAllow(path);
+      } else {
+        logger.debug("Unrecognized line in robots.txt: {}", line);
       }
     }
 
