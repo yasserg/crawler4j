@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import com.sleepycat.je.Cursor;
 import com.sleepycat.je.DatabaseEntry;
+import com.sleepycat.je.DatabaseException;
 import com.sleepycat.je.Environment;
 import com.sleepycat.je.OperationStatus;
 import com.sleepycat.je.Transaction;
@@ -41,8 +42,8 @@ public class InProcessPagesDB extends WorkQueues {
 
   private static final String DATABASE_NAME = "InProcessPagesDB";
 
-  public InProcessPagesDB(Environment env) {
-    super(env, DATABASE_NAME, true);
+  public InProcessPagesDB(Environment env, boolean resumable) {
+    super(env, DATABASE_NAME, resumable);
     long docCount = getLength();
     if (docCount > 0) {
       logger.info("Loaded {} URLs that have been in process in the previous crawl.", docCount);
@@ -51,6 +52,7 @@ public class InProcessPagesDB extends WorkQueues {
 
   public boolean removeURL(WebURL webUrl) {
     synchronized (mutex) {
+      boolean removed = false;
       DatabaseEntry key = getDatabaseEntryKey(webUrl);
       DatabaseEntry value = new DatabaseEntry();
       Transaction txn = beginTransaction();
@@ -60,11 +62,24 @@ public class InProcessPagesDB extends WorkQueues {
         if (result == OperationStatus.SUCCESS) {
           result = cursor.delete();
           if (result == OperationStatus.SUCCESS) {
+            removed = true;
             return true;
           }
         }
+      } catch (DatabaseException e) {
+        if (txn != null) {
+          txn.abort();
+          txn = null;
+        }
       } finally {
-        commit(txn);
+        if (txn != null) {
+          txn.commit();
+        }
+
+        if (removed && webUrl.getSeedDocid() >= 0)
+          seedDecrease(webUrl.getSeedDocid());
+        else
+          logger.error("URL {} was not present in list of processed pages.", webUrl.getURL());
       }
     }
     return false;

@@ -53,5 +53,12 @@ public class IdleConnectionMonitorThread extends Thread {
     synchronized (this) {
       notifyAll();
     }
+    
+    try
+    {
+        this.join();
+    }
+    catch (InterruptedException e)
+    {}
   }
 }

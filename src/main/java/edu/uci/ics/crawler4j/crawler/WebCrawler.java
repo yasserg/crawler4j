@@ -101,6 +101,11 @@ public class WebCrawler implements Runnable {
    */
   private boolean isWaitingForNewURLs;
 
+  /** 
+   * The queue of URLs for this crawler instance
+   */
+  private List<WebURL> assignedURLs = new ArrayList<>(50);
+  
   /**
    * Initializes the current instance of the crawler
    *
@@ -236,15 +241,41 @@ public class WebCrawler implements Runnable {
   public Object getMyLocalData() {
     return null;
   }
+  
+  /**
+   * Replace the list of URLs in progress with a new empty
+   * list and return the current list. This may be called by the
+   * CrawlController to relocate URLs to a newly started thread
+   * in case of a crash. Should only be called when the thread is dead.
+   * 
+   * @return The list of assigned URLs
+   */
+  public List<WebURL> extractAssignedURLs() {
+      List<WebURL> cur = assignedURLs;
+      assignedURLs = new ArrayList<WebURL>();
+      return cur;
+  }
+  
+  /**
+   * Add all urls from a list to the assigned URLs. This should be used
+   * with the result of extractAssignedURLs from a different instance.
+   * 
+   * @param list The list of assigned URLs to add
+   */
+  public void resume(List<WebURL> list) {
+      assignedURLs.addAll(list);
+  }
 
   @Override
   public void run() {
     onStart();
     while (true) {
-      List<WebURL> assignedURLs = new ArrayList<>(50);
-      isWaitingForNewURLs = true;
-      frontier.getNextURLs(50, assignedURLs);
-      isWaitingForNewURLs = false;
+      if (assignedURLs.isEmpty())
+      {
+        isWaitingForNewURLs = true;
+        frontier.getNextURLs(50, assignedURLs);
+        isWaitingForNewURLs = false;
+      }
       if (assignedURLs.isEmpty()) {
         if (frontier.isFinished()) {
           return;
@@ -256,16 +287,36 @@ public class WebCrawler implements Runnable {
         }
       } else {
         for (WebURL curURL : assignedURLs) {
-          if (curURL != null) {
-            curURL = handleUrlBeforeProcess(curURL);
-            processPage(curURL);
-            frontier.setProcessed(curURL);
+          if (null == curURL)
+            throw new RuntimeException("Unable to obtain the a proper URL from a non-empty list");
+          
+          // We should be extremely cautious with external elements messing
+          // with the URL as we need to remove it from the queue after processing.
+          // Therefore, a full copy is made before passing it along.
+          WebURL backup = new WebURL(curURL);
+          
+          try {
+            assignedURLs.remove(curURL);
+            WebURL fetchURL = handleUrlBeforeProcess(curURL);
+            if (fetchURL != null)
+              processPage(fetchURL);
+          } finally {
+            // Handle the finishing of the URL in the finally clause
+            // to make sure it is ALWAYS executed, no matter what.
+            boolean seedEnded = frontier.setProcessed(backup);
+            
+            // Now, we can run the handleSeedEnd if this is necessary
+            if (seedEnded)
+              handleSeedEnd(backup.getSeedDocid());
           }
           if (myController.isShuttingDown()) {
             logger.info("Exiting because of controller shutdown.");
             return;
           }
         }
+        
+        // Empty list of URLs as they've been processed now
+        assignedURLs.clear();
       }
     }
   }
@@ -298,6 +349,17 @@ public class WebCrawler implements Runnable {
   public void visit(Page page) {
     // Do nothing by default
     // Sub-classed should override this to add their custom functionality
+  }
+
+  /**
+   * Classes that extend WebCrawler can overwrite this function to perform
+   * an action when the last page resulting from a seed has been processed.
+   * 
+   * @param seedDocid The document ID of the seed
+   */
+  public void handleSeedEnd(int seedDocid) {
+      // Do nothing by default
+      // Sub-classes can override this to add their custom functionality
   }
 
   private void processPage(WebURL curURL) {
@@ -338,6 +400,7 @@ public class WebCrawler implements Runnable {
             webURL.setURL(movedToUrl);
             webURL.setParentDocid(curURL.getParentDocid());
             webURL.setParentUrl(curURL.getParentUrl());
+            webURL.setSeedDocid(curURL.getSeedDocid());
             webURL.setDepth(curURL.getDepth());
             webURL.setDocid(-1);
             webURL.setAnchor(curURL.getAnchor());
@@ -381,6 +444,7 @@ public class WebCrawler implements Runnable {
         for (WebURL webURL : parseData.getOutgoingUrls()) {
           webURL.setParentDocid(curURL.getDocid());
           webURL.setParentUrl(curURL.getURL());
+          webURL.setSeedDocid(curURL.getSeedDocid());
           int newdocid = docIdServer.getDocId(webURL.getURL());
           if (newdocid > 0) {
             // This is not the first time that this Url is visited. So, we set the depth to a negative number.
