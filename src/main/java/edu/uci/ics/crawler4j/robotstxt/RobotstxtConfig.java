@@ -30,6 +30,17 @@ public class RobotstxtConfig {
    * specific rules for this agent name.
    */
   private String userAgentName = "crawler4j";
+  
+  /**
+   * Whether to ignore user-agent strings in "Allow" rules. There are websites
+   * that use a white-list system where they explicitly allow Googlebot but disallow
+   * other bots. Setting this setting to true will ignore the user-agent and apply
+   * the "Allow" rule to all user-agents. This can still be overridden when a robots.txt
+   * explicitly disallows the configured User-agent, as such a rule supersedes
+   * the generic rule.
+   */
+  private boolean ignoreUserAgentInAllow = false;
+  
 
   /**
    * The maximum number of hosts for which their robots.txt is cached.
@@ -58,5 +69,13 @@ public class RobotstxtConfig {
 
   public void setCacheSize(int cacheSize) {
     this.cacheSize = cacheSize;
+  }
+  
+  public void setIgnoreUserAgentInAllow(boolean ignore) {
+    this.ignoreUserAgentInAllow = ignore;
+  }
+  
+  public boolean getIgnoreUserAgentInAllow() {
+    return ignoreUserAgentInAllow;
   }
 }

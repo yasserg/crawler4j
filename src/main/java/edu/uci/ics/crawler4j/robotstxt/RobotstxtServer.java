@@ -24,6 +24,7 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.http.HttpStatus;
 import org.apache.http.NoHttpResponseException;
@@ -46,7 +47,7 @@ public class RobotstxtServer {
 
   protected RobotstxtConfig config;
 
-  protected final Map<String, HostDirectives> host2directivesCache = new HashMap<>();
+  protected final Map<String, HostDirectives []> host2directivesCache = new HashMap<>();
 
   protected PageFetcher pageFetcher;
 
@@ -61,40 +62,40 @@ public class RobotstxtServer {
 
   /** Please note that in the case of a bad URL, TRUE will be returned */
   public boolean allows(WebURL webURL) {
-    if (config.isEnabled()) {
-      try {
-        URL url = new URL(webURL.getURL());
-        String host = getHost(url);
-        String path = url.getPath();
+    if (!config.isEnabled()) {
+      return true;
+    }
+    try {
+      URL url = new URL(webURL.getURL());
+      String host = getHost(url);
+      String path = url.getPath();
 
-        HostDirectives directives = host2directivesCache.get(host);
+      HostDirectives directives [] = host2directivesCache.get(host);
 
-        if ((directives != null) && directives.needsRefetch()) {
-          synchronized (host2directivesCache) {
-            host2directivesCache.remove(host);
-            directives = null;
-          }
+      if (directives != null && directives[0].needsRefetch()) {
+        synchronized (host2directivesCache) {
+          host2directivesCache.remove(host);
+          directives = null;
         }
-
-        if (directives == null) {
-          directives = fetchDirectives(url);
-        }
-
-        return directives.allows(path);
-      } catch (MalformedURLException e) {
-        logger.error("Bad URL in Robots.txt: " + webURL.getURL(), e);
       }
+      
+      if (directives == null) {
+        directives = fetchDirectives(url);
+      }
+      return directives[1].allows(path) || (directives[0].allows(path) && !directives[1].disallows(path));
+    } catch (MalformedURLException e) {
+      logger.error("Bad URL in Robots.txt: " + webURL.getURL(), e);
     }
 
     return true;
   }
 
-  private HostDirectives fetchDirectives(URL url) {
+  private HostDirectives [] fetchDirectives(URL url) {
     WebURL robotsTxtUrl = new WebURL();
     String host = getHost(url);
     String port = ((url.getPort() == url.getDefaultPort()) || (url.getPort() == -1)) ? "" : (":" + url.getPort());
     robotsTxtUrl.setURL("http://" + host + port + "/robots.txt");
-    HostDirectives directives = null;
+    HostDirectives [] directives = null;
     PageFetchResult fetchResult = null;
     try {
       fetchResult = pageFetcher.fetchPage(robotsTxtUrl);
@@ -102,16 +103,24 @@ public class RobotstxtServer {
         Page page = new Page(robotsTxtUrl);
         fetchResult.fetchContent(page);
         if (Util.hasPlainTextContent(page.getContentType())) {
-          String content;
-          if (page.getContentCharset() == null) {
-            content = new String(page.getContentData());
-          } else {
-            content = new String(page.getContentData(), page.getContentCharset());
+          try {
+            String content = "";
+            if (page.getContentData() != null) {
+              if (page.getContentCharset() == null && page.getContentData() != null) {
+                content = new String(page.getContentData());
+              } else {
+                content = new String(page.getContentData(), page.getContentCharset());
+              }
+              directives = RobotstxtParser.parse(content, config);
+            } else {
+              logger.info("No data received for robots.txt retrieved from URL: {}", robotsTxtUrl.getURL());
+            }
+          } catch (Exception e) {
+            logger.error("Error occurred while fetching (robots) url: " + robotsTxtUrl.getURL(), e);
           }
-          directives = RobotstxtParser.parse(content, config.getUserAgentName());
         } else if (page.getContentType().contains("html")) { // TODO This one should be upgraded to remove all html tags
           String content = new String(page.getContentData());
-          directives = RobotstxtParser.parse(content, config.getUserAgentName());
+          directives = RobotstxtParser.parse(content, config);
         } else {
           logger.warn("Can't read this robots.txt: {}  as it is not written in plain text, contentType: {}",
                       robotsTxtUrl.getURL(), page.getContentType());
@@ -133,16 +142,19 @@ public class RobotstxtServer {
     }
 
     if (directives == null) {
-      // We still need to have this object to keep track of the time we fetched it
-      directives = new HostDirectives();
+      // We still need to have this object to keep track of the time we
+      // fetched it
+      HostDirectives result [] =  {new HostDirectives(), new HostDirectives()};
+      directives = result;
     }
     synchronized (host2directivesCache) {
       if (host2directivesCache.size() == config.getCacheSize()) {
         String minHost = null;
         long minAccessTime = Long.MAX_VALUE;
-        for (Map.Entry<String, HostDirectives> entry : host2directivesCache.entrySet()) {
-          if (entry.getValue().getLastAccessTime() < minAccessTime) {
-            minAccessTime = entry.getValue().getLastAccessTime();
+        for (Entry<String, HostDirectives []> entry : host2directivesCache.entrySet()) {
+          long entryAccessTime = Math.max(entry.getValue()[0].getLastAccessTime(), entry.getValue()[1].getLastAccessTime());
+          if (entryAccessTime < minAccessTime) {
+            minAccessTime = entryAccessTime;
             minHost = entry.getKey();
           }
         }
