@@ -300,7 +300,7 @@ public class WebCrawler implements Runnable {
     // Sub-classed should override this to add their custom functionality
   }
 
-  private void processPage(WebURL curURL) {
+  protected void processPage(WebURL curURL) {
     PageFetchResult fetchResult = null;
     try {
       if (curURL == null) {
