@@ -25,9 +25,7 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
 import javax.net.ssl.SSLContext;
-
 import edu.uci.ics.crawler4j.crawler.authentication.NtAuthInfo;
 import org.apache.http.Header;
 import org.apache.http.HttpHost;
@@ -60,9 +58,9 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.ssl.SSLContexts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import edu.uci.ics.crawler4j.crawler.Configurable;
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
+import edu.uci.ics.crawler4j.crawler.ProxyConfig;
 import edu.uci.ics.crawler4j.crawler.authentication.AuthInfo;
 import edu.uci.ics.crawler4j.crawler.authentication.BasicAuthInfo;
 import edu.uci.ics.crawler4j.crawler.authentication.FormAuthInfo;
@@ -77,10 +75,12 @@ public class PageFetcher extends Configurable {
   protected static final Logger logger = LoggerFactory.getLogger(PageFetcher.class);
 
   protected PoolingHttpClientConnectionManager connectionManager;
-  protected CloseableHttpClient httpClient;
+  protected CloseableHttpClient[] httpClient;
   protected final Object mutex = new Object();
   protected long lastFetchTime = 0;
   protected IdleConnectionMonitorThread connectionMonitorThread = null;
+  protected long fetchsNumber = 0;
+  private int proxiesNumber = 1;
 
   public PageFetcher(CrawlConfig config) {
     super(config);
@@ -121,21 +121,28 @@ public class PageFetcher extends Configurable {
     clientBuilder.setUserAgent(config.getUserAgentString());
     clientBuilder.setDefaultHeaders(config.getDefaultHeaders());
 
-    if (config.getProxyHost() != null) {
-      if (config.getProxyUsername() != null) {
-        BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-        credentialsProvider.setCredentials(new AuthScope(config.getProxyHost(), config.getProxyPort()),
-                                           new UsernamePasswordCredentials(config.getProxyUsername(),
-                                                                           config.getProxyPassword()));
-        clientBuilder.setDefaultCredentialsProvider(credentialsProvider);
-      }
-
-      HttpHost proxy = new HttpHost(config.getProxyHost(), config.getProxyPort());
-      clientBuilder.setProxy(proxy);
-      logger.debug("Working through Proxy: {}", proxy.getHostName());
+    if (config.getProxies().length > 0) {
+        proxiesNumber = config.getProxies().length;
+        httpClient = new CloseableHttpClient[proxiesNumber];
+        int i = 0;
+        for (ProxyConfig proxyConfig : config.getProxies()) {
+            if (proxyConfig.getProxyUsername() != null) {
+                BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+                credentialsProvider.setCredentials(
+                        new AuthScope(proxyConfig.getProxyHost(), proxyConfig.getProxyPort()),
+                        new UsernamePasswordCredentials(proxyConfig.getProxyUsername(), proxyConfig.getProxyPassword())
+                );
+                clientBuilder.setDefaultCredentialsProvider(credentialsProvider);
+            }
+            
+            HttpHost proxy = new HttpHost(proxyConfig.getProxyHost(), proxyConfig.getProxyPort());
+            clientBuilder.setProxy(proxy);
+            httpClient[i++] = clientBuilder.build();
+        }
+    } else {
+        httpClient = new CloseableHttpClient[1];
+        httpClient[0] = clientBuilder.build();
     }
-
-    httpClient = clientBuilder.build();
     if ((config.getAuthInfos() != null) && !config.getAuthInfos().isEmpty()) {
       doAuthetication(config.getAuthInfos());
     }
@@ -144,6 +151,11 @@ public class PageFetcher extends Configurable {
       connectionMonitorThread = new IdleConnectionMonitorThread(connectionManager);
     }
     connectionMonitorThread.start();
+  }
+  
+  private CloseableHttpClient getHttpClient()
+  {
+      return httpClient[(int)(this.fetchsNumber % this.proxiesNumber)];
   }
 
   private void doAuthetication(List<AuthInfo> authInfos) {
@@ -169,7 +181,7 @@ public class PageFetcher extends Configurable {
     CredentialsProvider credsProvider = new BasicCredentialsProvider();
     credsProvider.setCredentials(new AuthScope(targetHost.getHostName(), targetHost.getPort()),
                                  new UsernamePasswordCredentials(authInfo.getUsername(), authInfo.getPassword()));
-    httpClient = HttpClients.custom().setDefaultCredentialsProvider(credsProvider).build();
+    httpClient[0] = HttpClients.custom().setDefaultCredentialsProvider(credsProvider).build();
   }
 
   /**
@@ -186,7 +198,7 @@ public class PageFetcher extends Configurable {
     } catch (UnknownHostException e) {
       logger.error("Error creating NT credentials", e);
     }
-    httpClient = HttpClients.custom().setDefaultCredentialsProvider(credsProvider).build();
+    httpClient[0] = HttpClients.custom().setDefaultCredentialsProvider(credsProvider).build();
   }
 
   /**
@@ -206,7 +218,7 @@ public class PageFetcher extends Configurable {
     try {
       UrlEncodedFormEntity entity = new UrlEncodedFormEntity(formParams, "UTF-8");
       httpPost.setEntity(entity);
-      httpClient.execute(httpPost);
+      getHttpClient().execute(httpPost);
       logger.debug("Successfully Logged in with user: " + authInfo.getUsername() + " to: " + authInfo.getHost());
     } catch (UnsupportedEncodingException e) {
       logger.error("Encountered a non supported encoding while trying to login to: " + authInfo.getHost(), e);
@@ -234,9 +246,11 @@ public class PageFetcher extends Configurable {
         lastFetchTime = (new Date()).getTime();
       }
 
-      CloseableHttpResponse response = httpClient.execute(request);
+      CloseableHttpResponse response = getHttpClient().execute(request);
       fetchResult.setEntity(response.getEntity());
       fetchResult.setResponseHeaders(response.getAllHeaders());
+      
+      this.fetchsNumber++;
 
       // Setting HttpStatus
       int statusCode = response.getStatusLine().getStatusCode();

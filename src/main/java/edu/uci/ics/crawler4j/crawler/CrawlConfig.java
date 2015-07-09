@@ -21,10 +21,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-
 import org.apache.http.Header;
 import org.apache.http.message.BasicHeader;
-
 import edu.uci.ics.crawler4j.crawler.authentication.AuthInfo;
 
 public class CrawlConfig {
@@ -124,30 +122,9 @@ public class CrawlConfig {
   private boolean onlineTldListUpdate = false;
 
   /**
-   * If crawler should run behind a proxy, this parameter can be used for
-   * specifying the proxy host.
+   * If crawler should run behind a proxy contains the proxies to use
    */
-  private String proxyHost = null;
-
-  /**
-   * If crawler should run behind a proxy, this parameter can be used for
-   * specifying the proxy port.
-   */
-  private int proxyPort = 80;
-
-  /**
-   * If crawler should run behind a proxy and user/pass is needed for
-   * authentication in proxy, this parameter can be used for specifying the
-   * username.
-   */
-  private String proxyUsername = null;
-
-  /**
-   * If crawler should run behind a proxy and user/pass is needed for
-   * authentication in proxy, this parameter can be used for specifying the
-   * password.
-   */
-  private String proxyPassword = null;
+  private ProxyConfig[] proxies = new ProxyConfig[0];
 
   /**
    * List of possible authentications needed by crawler
@@ -392,53 +369,23 @@ public class CrawlConfig {
     onlineTldListUpdate = online;
   }
 
-  public String getProxyHost() {
-    return proxyHost;
-  }
-
   /**
-   * @param proxyHost If crawler should run behind a proxy, this parameter can be used for specifying the proxy host.
+   * Get the list of proxies used
+   * @return
    */
-  public void setProxyHost(String proxyHost) {
-    this.proxyHost = proxyHost;
+  public ProxyConfig[] getProxies() {
+    return proxies;
   }
-
-  public int getProxyPort() {
-    return proxyPort;
-  }
-
+  
   /**
-   * @param proxyPort If crawler should run behind a proxy, this parameter can be used for specifying the proxy port.
+   * Set the list of proxies used
+   * @return
    */
-  public void setProxyPort(int proxyPort) {
-    this.proxyPort = proxyPort;
-  }
-
-  public String getProxyUsername() {
-    return proxyUsername;
-  }
-
-  /**
-   * @param proxyUsername
-   *        If crawler should run behind a proxy and user/pass is needed for
-   *        authentication in proxy, this parameter can be used for specifying the username.
-   */
-  public void setProxyUsername(String proxyUsername) {
-    this.proxyUsername = proxyUsername;
-  }
-
-  public String getProxyPassword() {
-    return proxyPassword;
-  }
-
-  /**
-   * If crawler should run behind a proxy and user/pass is needed for
-   * authentication in proxy, this parameter can be used for specifying the password.
-   *
-   * @param proxyPassword String Password
-   */
-  public void setProxyPassword(String proxyPassword) {
-    this.proxyPassword = proxyPassword;
+  public void setProxies(ProxyConfig[] proxies) {
+    if (proxies == null) {
+      throw new IllegalArgumentException("proxies cannot be null !");
+    }
+    this.proxies = proxies;
   }
 
   /**
@@ -480,10 +427,7 @@ public class CrawlConfig {
     sb.append("Max outgoing links to follow: " + getMaxOutgoingLinksToFollow() + "\n");
     sb.append("Max download size: " + getMaxDownloadSize() + "\n");
     sb.append("Should follow redirects?: " + isFollowRedirects() + "\n");
-    sb.append("Proxy host: " + getProxyHost() + "\n");
-    sb.append("Proxy port: " + getProxyPort() + "\n");
-    sb.append("Proxy username: " + getProxyUsername() + "\n");
-    sb.append("Proxy password: " + getProxyPassword() + "\n");
+    sb.append("Proxies (" + proxies.length + ") : " + proxies + "\n");
     return sb.toString();
   }
 }
