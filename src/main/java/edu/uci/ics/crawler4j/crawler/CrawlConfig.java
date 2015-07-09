@@ -225,6 +225,7 @@ public class CrawlConfig {
 
   /**
    * Return a copy of the default header collection.
+   * @return the set of default headers
    */
   public Collection<BasicHeader> getDefaultHeaders() {
     return new HashSet<>(defaultHeaders);
@@ -232,6 +233,7 @@ public class CrawlConfig {
 
   /**
    * Set the default header collection (creating copies of the provided headers).
+   * @param defaultHeaders the set of default headers
    */
   public void setDefaultHeaders(Collection<? extends Header> defaultHeaders) {
     Collection<BasicHeader> copiedHeaders = new HashSet<>();
@@ -364,6 +366,7 @@ public class CrawlConfig {
    * Should the TLD list be updated automatically on each run? Alternatively,
    * it can be loaded from the embedded tld-names.txt resource file that was
    * obtained from https://publicsuffix.org/list/effective_tld_names.dat
+   * @param online check online
    */
   public void setOnlineTldListUpdate(boolean online) {
     onlineTldListUpdate = online;
@@ -371,7 +374,7 @@ public class CrawlConfig {
 
   /**
    * Get the list of proxies used
-   * @return
+   * @return proxies list
    */
   public ProxyConfig[] getProxies() {
     return proxies;
@@ -379,7 +382,7 @@ public class CrawlConfig {
   
   /**
    * Set the list of proxies used
-   * @return
+   * @param proxies proxies list
    */
   public void setProxies(ProxyConfig[] proxies) {
     if (proxies == null) {
