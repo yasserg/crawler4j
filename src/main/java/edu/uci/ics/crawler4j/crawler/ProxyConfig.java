@@ -131,7 +131,11 @@ public class ProxyConfig implements Comparable<ProxyConfig>, Serializable
     @Override
     public String toString()
     {
-        return proxyHost + ":" + proxyPort + "/" + proxyUsername + ":" + proxyPassword;
+        if (proxyUsername == null) {
+            return proxyHost + ":" + proxyPort;
+        } else {
+            return proxyHost + ":" + proxyPort + "/" + proxyUsername + ":" + proxyPassword;
+        }
     }
     
     @Override

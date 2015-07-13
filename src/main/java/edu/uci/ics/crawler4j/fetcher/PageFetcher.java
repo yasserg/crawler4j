@@ -77,7 +77,7 @@ public class PageFetcher extends Configurable {
   protected PoolingHttpClientConnectionManager connectionManager;
   protected CloseableHttpClient[] httpClient;
   protected final Object mutex = new Object();
-  protected long lastFetchTime = 0;
+  protected long lastFetchTime[];
   protected IdleConnectionMonitorThread connectionMonitorThread = null;
   protected long fetchsNumber = 0;
   private int proxiesNumber = 1;
@@ -124,6 +124,7 @@ public class PageFetcher extends Configurable {
     if (config.getProxies().length > 0) {
         proxiesNumber = config.getProxies().length;
         httpClient = new CloseableHttpClient[proxiesNumber];
+        lastFetchTime = new long[proxiesNumber];
         int i = 0;
         for (ProxyConfig proxyConfig : config.getProxies()) {
             if (proxyConfig.getProxyUsername() != null) {
@@ -137,11 +138,15 @@ public class PageFetcher extends Configurable {
             
             HttpHost proxy = new HttpHost(proxyConfig.getProxyHost(), proxyConfig.getProxyPort());
             clientBuilder.setProxy(proxy);
-            httpClient[i++] = clientBuilder.build();
+            httpClient[i] = clientBuilder.build();
+            lastFetchTime[i] = 0;
+            i++;
         }
     } else {
         httpClient = new CloseableHttpClient[1];
         httpClient[0] = clientBuilder.build();
+        lastFetchTime = new long[1];
+        lastFetchTime[0] = 0;
     }
     if ((config.getAuthInfos() != null) && !config.getAuthInfos().isEmpty()) {
       doAuthetication(config.getAuthInfos());
@@ -155,7 +160,21 @@ public class PageFetcher extends Configurable {
   
   private CloseableHttpClient getHttpClient()
   {
-      return httpClient[(int)(this.fetchsNumber % this.proxiesNumber)];
+      return httpClient[this.getConnectionIndex()];
+  }
+  
+  public String currentProxy()
+  {
+      if (this.config.getProxies().length == 0) {
+          return "No proxy";
+      }
+      int index = (int) ((this.fetchsNumber - 1) % this.proxiesNumber);
+      return this.config.getProxies()[index].toString();
+  }
+  
+  public int getConnectionIndex()
+  {
+      return (int) (this.fetchsNumber % this.proxiesNumber);
   }
 
   private void doAuthetication(List<AuthInfo> authInfos) {
@@ -237,14 +256,15 @@ public class PageFetcher extends Configurable {
     HttpUriRequest request = null;
     try {
       request = newHttpUriRequest(toFetchURL);
+      
       // Applying Politeness delay
-      synchronized (mutex) {
-        long now = (new Date()).getTime();
-        if ((now - lastFetchTime) < config.getPolitenessDelay()) {
-          Thread.sleep(config.getPolitenessDelay() - (now - lastFetchTime));
-        }
-        lastFetchTime = (new Date()).getTime();
+      if (lastFetchTime[this.getConnectionIndex()] != 0) {
+          long delay = ((new Date()).getTime() - lastFetchTime[this.getConnectionIndex()]);
+          if (delay < config.getPolitenessDelay()) {
+              Thread.sleep(config.getPolitenessDelay() - delay);
+          }
       }
+      lastFetchTime[this.getConnectionIndex()] = (new Date()).getTime();
 
       CloseableHttpResponse response = getHttpClient().execute(request);
       fetchResult.setEntity(response.getEntity());
