@@ -388,10 +388,14 @@ public class WebCrawler implements Runnable {
           webURL.setDocid(-1);
           webURL.setAnchor(curURL.getAnchor());
           webURL.setPriority(curURL.getPriority());
+          
           if (shouldVisit(page, webURL)) {
             if (robotstxtServer.allows(webURL)) {
-              webURL.setDocid(docIdServer.getNewDocID(page.redirectedToUrl));
-              frontier.schedule(webURL);
+              int docid = docIdServer.getNewUnseenDocID(page.redirectedToUrl);
+              if (docid >= 0) {
+                webURL.setDocid(docid);
+                frontier.schedule(webURL);
+              }
             } else {
               logger.debug("Not visiting: {} as per the server's \"robots.txt\" policy", webURL.getURL());
             }
