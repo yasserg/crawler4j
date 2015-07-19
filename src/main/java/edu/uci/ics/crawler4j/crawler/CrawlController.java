@@ -36,6 +36,13 @@ import edu.uci.ics.crawler4j.url.URLCanonicalizer;
 import edu.uci.ics.crawler4j.url.WebURL;
 import edu.uci.ics.crawler4j.util.IO;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * The controller that manages a crawling session. This class creates the
  * crawler threads and monitors their progress.
@@ -254,8 +261,11 @@ public class CrawlController extends Configurable {
                     someoneIsWorking = true;
                   }
                 }
-                if (!someoneIsWorking) {
-                  // Make sure again that none of the threads are alive.
+                boolean shut_on_empty = config.isShutdownOnEmptyQueue();
+                if (!someoneIsWorking && shut_on_empty) {
+                  // Make sure again that none of the threads
+                  // are
+                  // alive.
                   logger.info("It looks like no thread is working, waiting for 10 seconds to make sure...");
                   sleep(10);
 
