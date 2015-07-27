@@ -1,12 +1,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>edu.uci.ics</groupId>
+	<groupId>com.encircle360</groupId>
 	<artifactId>crawler4j</artifactId>
 	<packaging>jar</packaging>
 	<name>crawler4j</name>
-	<version>4.2-SNAPSHOT</version>
+	<version>4.2</version>
 	<description>Open Source Web Crawler for Java</description>
-	<url>https://github.com/yasserg/crawler4j</url>
+	<url>https://github.com/PatrickHuetter/crawler4j</url>
 	<licenses>
 		<license>
 			<name>The Apache Software License, Version 2.0</name>
@@ -15,10 +15,11 @@
 		</license>
 	</licenses>
 	<scm>
-		<url>https://github.com/yasserg/crawler4j</url>
-		<connection>scm:git:git@github.com:yasserg/crawler4j.git</connection>
-		<developerConnection>scm:git:git@github.com:yasserg/crawler4j.git</developerConnection>
-	</scm>
+		<url>https://github.com/PatrickHuetter/crawler4j</url>
+		<connection>scm:git:git@github.com:PatrickHuetter/crawler4j.git</connection>
+		<developerConnection>scm:git:git@github.com:PatrickHuetter/crawler4j.git</developerConnection>
+	  	<tag>HEAD</tag>
+  </scm>
 
 	<parent>
 		<groupId>org.sonatype.oss</groupId>
@@ -96,8 +97,45 @@
 				  </execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<version>2.8.1</version>
+			</plugin>
 		</plugins>
 	</build>
+	
+	<profiles>
+		<profile>
+			<id>release</id>
+			<build>
+				<plugins>
+					<plugin>
+						<artifactId>maven-source-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>attach-sources</id>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<artifactId>maven-javadoc-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>attach-javadocs</id>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 
 	<dependencies>
 
@@ -158,5 +196,12 @@
 			<layout>default</layout>
 		</repository>
 	</repositories>
+
+	<distributionManagement>
+		<repository>
+			<id>bintray</id>
+			<url>https://api.bintray.com/maven/patrickhuetter/maven/com.encircle360.crawler4j</url>
+		</repository>
+	</distributionManagement>
 
 </project>

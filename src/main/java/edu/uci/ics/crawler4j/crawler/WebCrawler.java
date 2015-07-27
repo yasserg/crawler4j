@@ -70,28 +70,28 @@ public class WebCrawler implements Runnable {
   /**
    * The parser that is used by this crawler instance to parse the content of the fetched pages.
    */
-  private Parser parser;
+  protected Parser parser;
 
   /**
    * The fetcher that is used by this crawler instance to fetch the content of pages from the web.
    */
-  private PageFetcher pageFetcher;
+  protected PageFetcher pageFetcher;
 
   /**
    * The RobotstxtServer instance that is used by this crawler instance to
    * determine whether the crawler is allowed to crawl the content of each page.
    */
-  private RobotstxtServer robotstxtServer;
+  protected RobotstxtServer robotstxtServer;
 
   /**
    * The DocIDServer that is used by this crawler instance to map each URL to a unique docid.
    */
-  private DocIDServer docIdServer;
+  protected DocIDServer docIdServer;
 
   /**
    * The Frontier object that manages the crawl queue.
    */
-  private Frontier frontier;
+  protected Frontier frontier;
 
   /**
    * Is the current crawler instance waiting for new URLs? This field is
@@ -313,7 +313,7 @@ public class WebCrawler implements Runnable {
     // Sub-classed should override this to add their custom functionality
   }
 
-  private void processPage(WebURL curURL) {
+  protected void processPage(WebURL curURL) {
     PageFetchResult fetchResult = null;
     try {
       if (curURL == null) {
