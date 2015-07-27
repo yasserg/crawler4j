@@ -49,6 +49,7 @@ import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.impl.client.BasicCredentialsProvider;
@@ -102,7 +103,7 @@ public class PageFetcher extends Configurable {
           }
         }).build();
         SSLConnectionSocketFactory sslsf =
-            new SSLConnectionSocketFactory(sslContext, SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+            new SniSSLConnectionSocketFactory(sslContext, NoopHostnameVerifier.INSTANCE);
         connRegistryBuilder.register("https", sslsf);
       } catch (Exception e) {
         logger.warn("Exception thrown while trying to register https");
@@ -111,7 +112,7 @@ public class PageFetcher extends Configurable {
     }
 
     Registry<ConnectionSocketFactory> connRegistry = connRegistryBuilder.build();
-    connectionManager = new PoolingHttpClientConnectionManager(connRegistry);
+    connectionManager = new SniPoolingHttpClientConnectionManager(connRegistry);
     connectionManager.setMaxTotal(config.getMaxTotalConnections());
     connectionManager.setDefaultMaxPerRoute(config.getMaxConnectionsPerHost());
 
