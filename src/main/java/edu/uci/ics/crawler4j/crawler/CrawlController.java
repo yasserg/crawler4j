@@ -401,7 +401,7 @@ public class CrawlController extends Configurable {
    *
    */
   public void addSeed(String pageUrl, int docId) {
-    String canonicalUrl = URLCanonicalizer.getCanonicalURL(pageUrl);
+    String canonicalUrl = config.getUrlTransformer().getUrl(pageUrl);
     if (canonicalUrl == null) {
       logger.error("Invalid seed URL: {}", pageUrl);
     } else {
@@ -450,7 +450,7 @@ public class CrawlController extends Configurable {
    *
    */
   public void addSeenUrl(String url, int docId) {
-    String canonicalUrl = URLCanonicalizer.getCanonicalURL(url);
+    String canonicalUrl = config.getUrlTransformer().getUrl(url);
     if (canonicalUrl == null) {
       logger.error("Invalid Url: {} (can't cannonicalize it!)", url);
     } else {

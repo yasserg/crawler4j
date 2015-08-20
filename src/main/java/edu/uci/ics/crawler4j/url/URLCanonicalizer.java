@@ -35,13 +35,13 @@ import java.util.TreeMap;
  *
  * @author Yasser Ganjisaffar
  */
-public class URLCanonicalizer {
+public class URLCanonicalizer implements URLTransformer{
 
-  public static String getCanonicalURL(String url) {
-    return getCanonicalURL(url, null);
+  public String getUrl(String url) {
+    return getUrl(url, null);
   }
 
-  public static String getCanonicalURL(String href, String context) {
+  public String getUrl(String href, String context) {
 
     try {
       URL canonicalURL = new URL(UrlResolver.resolveUrl((context == null) ? "" : context, href));
@@ -93,7 +93,7 @@ public class URLCanonicalizer {
       }
 
       String protocol = canonicalURL.getProtocol().toLowerCase();
-      String pathAndQueryString = normalizePath(path) + queryString;
+      String pathAndQueryString = URLUtils.normalizePath(path) + queryString;
 
       URL result = new URL(protocol, host, port, pathAndQueryString);
       return result.toExternalForm();
@@ -160,36 +160,17 @@ public class URLCanonicalizer {
       if (sb.length() > 0) {
         sb.append('&');
       }
-      sb.append(percentEncodeRfc3986(pair.getKey()));
+      sb.append(URLUtils.percentEncodeRfc3986(pair.getKey()));
       if (!pair.getValue().isEmpty()) {
         sb.append('=');
-        sb.append(percentEncodeRfc3986(pair.getValue()));
+        sb.append(URLUtils.percentEncodeRfc3986(pair.getValue()));
       }
     }
     return sb.toString();
   }
 
-  /**
-   * Percent-encode values according the RFC 3986. The built-in Java
-   * URLEncoder does not encode according to the RFC, so we make the extra
-   * replacements.
-   *
-   * @param string
-   *            Decoded string.
-   * @return Encoded string per RFC 3986.
-   */
-  private static String percentEncodeRfc3986(String string) {
-    try {
-      string = string.replace("+", "%2B");
-      string = URLDecoder.decode(string, "UTF-8");
-      string = URLEncoder.encode(string, "UTF-8");
-      return string.replace("+", "%20").replace("*", "%2A").replace("%7E", "~");
-    } catch (Exception e) {
-      return string;
-    }
-  }
-
-  private static String normalizePath(final String path) {
-    return path.replace("%7E", "~").replace(" ", "%20");
+  @Override
+  public String toString() {
+    return getClass().getName();
   }
 }

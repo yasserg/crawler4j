@@ -249,14 +249,14 @@ public class PageFetcher extends Configurable {
 
         Header header = response.getFirstHeader("Location");
         if (header != null) {
-          String movedToUrl = URLCanonicalizer.getCanonicalURL(header.getValue(), toFetchURL);
+          String movedToUrl = config.getUrlTransformer().getUrl(header.getValue(), toFetchURL);
           fetchResult.setMovedToUrl(movedToUrl);
         }
       } else if (statusCode >= 200 && statusCode <= 299) { // is 2XX, everything looks ok
         fetchResult.setFetchedUrl(toFetchURL);
         String uri = request.getURI().toString();
         if (!uri.equals(toFetchURL)) {
-          if (!URLCanonicalizer.getCanonicalURL(uri).equals(toFetchURL)) {
+          if (!config.getUrlTransformer().getUrl(uri).equals(toFetchURL)) {
             fetchResult.setFetchedUrl(uri);
           }
         }
