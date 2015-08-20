@@ -1,6 +1,5 @@
 package edu.uci.ics.crawler4j.tests;
 
-import edu.uci.ics.crawler4j.url.URLCanonicalizer;
 import edu.uci.ics.crawler4j.url.URLEscapedFragment;
 import edu.uci.ics.crawler4j.url.URLTransformer;
 import org.junit.Test;
@@ -75,5 +74,17 @@ public class URLEscapedFragmentTest {
                 urlCanonicalizer.getUrl("http://www.example.com/index.html#!/test/123?key=value"));
         assertEquals("http://www.example.com/index.html?name=test&rame=base&_escaped_fragment_=%2Ftest%2F123%3Fkey%3Dvalue",
                 urlCanonicalizer.getUrl("http://www.example.com/index.html?name=test&rame=base#!/test/123?key=value"));
+
+        assertEquals("http://www.example.com/index.html?name=test&rame=base&_escaped_fragment_=%2Ftest%2F123%3Fkey%3Dvalue",
+                urlCanonicalizer.getUrl("#!/test/123?key=value", "http://www.example.com/index.html?name=test&rame=base&_escaped_fragment_=%2Ftest%2F123%3Fkey%3Dvalue"));
+
+        assertEquals("http://www.example.com/index.html?name=test&rame=base&_escaped_fragment_=%2Ftest%2F123%3Fkey%3Dvalue",
+                urlCanonicalizer.getUrl("#!/test/123?key=value", "http://www.example.com/index.html?name=test&rame=base&_escaped_fragment_"));
+
+        assertEquals("http://www.example.com/index.html?_escaped_fragment_=%2Ftest%2F123%3Fkey%3Dvalue",
+                urlCanonicalizer.getUrl("#!/test/123?key=value", "http://www.example.com/index.html?_escaped_fragment_"));
+
+        assertEquals("http://www.example.com/index.html?_escaped_fragment_=%2Ftest%2F123%3Fkey%3Dvalue",
+                urlCanonicalizer.getUrl("#!/test/123?key=value", "http://www.example.com/index.html?_escaped_fragment_="));
     }
 }

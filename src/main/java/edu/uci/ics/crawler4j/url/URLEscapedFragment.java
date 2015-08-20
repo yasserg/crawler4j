@@ -17,7 +17,8 @@
 
 package edu.uci.ics.crawler4j.url;
 
-import java.net.*;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.AbstractMap;
 import java.util.Objects;
 import java.util.regex.Pattern;
@@ -35,6 +36,7 @@ public class URLEscapedFragment implements URLTransformer {
     private static final String ESCAPED_FRAGMENT_PATTERN = "#!";
 
     private static final String ESCAPED_FRAGMENT_KEY = "_escaped_fragment_";
+    public static final String ESCAPED_FRAGMENT_KEY_GET_PATTERN = "[" + Pattern.quote("&") + "|" + Pattern.quote("?") + "]?" + Pattern.quote(ESCAPED_FRAGMENT_KEY) + "[" + Pattern.quote("=") + "]?";
 
     public String getUrl(String url) {
         return getUrl(url, null);
@@ -43,23 +45,24 @@ public class URLEscapedFragment implements URLTransformer {
     public String getUrl(String href, String context) {
 
         try {
-            URL canonicalURL = new URL(UrlResolver.resolveUrl((context == null) ? "" : context, href));
+            // Replace _escaped_fragment_ with its pattern before proceding the build of the new URL.
+            URL url = new URL(UrlResolver.resolveUrl((context == null) ? "" : context.replaceFirst(ESCAPED_FRAGMENT_KEY_GET_PATTERN, ESCAPED_FRAGMENT_PATTERN), href));
 
-            String host = canonicalURL.getHost().toLowerCase();
+            String host = url.getHost().toLowerCase();
             if (Objects.equals(host, "")) {
                 // This is an invalid Url.
                 return null;
             }
 
             final StringBuilder queryString = new StringBuilder();
-            if (canonicalURL.getQuery() != null) {
-                queryString.append("?").append(canonicalURL.getQuery());
+            if (url.getQuery() != null) {
+                queryString.append("?").append(url.getQuery());
             }
-            AbstractMap.SimpleImmutableEntry<String, String> escapedFragment = createEscapedFragment(canonicalURL);
-            if(escapedFragment != null){
-                if(queryString.length() == 0){
+            AbstractMap.SimpleImmutableEntry<String, String> escapedFragment = createEscapedFragment(url);
+            if (escapedFragment != null) {
+                if (queryString.length() == 0) {
                     queryString.append("?");
-                }else{
+                } else {
                     queryString.append("&");
                 }
                 queryString.append(URLUtils.percentEncodeRfc3986(escapedFragment.getKey())).append("=").append(URLUtils.percentEncodeRfc3986(escapedFragment
@@ -67,13 +70,13 @@ public class URLEscapedFragment implements URLTransformer {
             }
 
             //Drop default port: example.com:80 -> example.com
-            int port = canonicalURL.getPort();
-            if (port == canonicalURL.getDefaultPort()) {
+            int port = url.getPort();
+            if (port == url.getDefaultPort()) {
                 port = -1;
             }
 
-            String protocol = canonicalURL.getProtocol().toLowerCase();
-            String pathAndQueryString = canonicalURL.getPath() + queryString;
+            String protocol = url.getProtocol().toLowerCase();
+            String pathAndQueryString = url.getPath() + queryString;
 
             URL result = new URL(protocol, host, port, pathAndQueryString);
             return result.toExternalForm();
@@ -88,12 +91,12 @@ public class URLEscapedFragment implements URLTransformer {
      * @return Always return at least an empty map and have a maximum of one element which is the escaped fragment entry.
      */
     private static AbstractMap.SimpleImmutableEntry<String, String> createEscapedFragment(final URL url) {
-        final AbstractMap.SimpleImmutableEntry<String,String> escapedFragment;
+        final AbstractMap.SimpleImmutableEntry<String, String> escapedFragment;
         String urlAsString = url.toString();
         if (urlAsString.contains(ESCAPED_FRAGMENT_PATTERN)) {
             String[] pairs = urlAsString.split(Pattern.quote(ESCAPED_FRAGMENT_PATTERN), 2);
             escapedFragment = new AbstractMap.SimpleImmutableEntry(ESCAPED_FRAGMENT_KEY, pairs[1]);
-        }else {
+        } else {
             escapedFragment = null;
         }
         return escapedFragment;
