@@ -38,11 +38,11 @@ public class URLEscapedFragment implements URLTransformer {
     private static final String ESCAPED_FRAGMENT_KEY = "_escaped_fragment_";
     public static final String ESCAPED_FRAGMENT_KEY_GET_PATTERN = "[" + Pattern.quote("&") + "|" + Pattern.quote("?") + "]?" + Pattern.quote(ESCAPED_FRAGMENT_KEY) + "[" + Pattern.quote("=") + "]?";
 
-    public String getUrl(String url) {
-        return getUrl(url, null);
+    public String transform(String url) {
+        return transform(url, null);
     }
 
-    public String getUrl(String href, String context) {
+    public String transform(String href, String context) {
 
         try {
             // Replace _escaped_fragment_ with its pattern before proceding the build of the new URL.

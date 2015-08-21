@@ -28,12 +28,12 @@ public interface URLTransformer {
      * @param url url to transform
      * @return url transformed
      */
-    String getUrl(String url);
+    String transform(String url);
 
     /**
      * @param url url to transform
      * @param context The base URL in which to resolve the specification.
      * @return url transformed
      */
-    String getUrl(String url, String context);
+    String transform(String url, String context);
 }

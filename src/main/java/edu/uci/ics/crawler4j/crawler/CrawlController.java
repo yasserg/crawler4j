@@ -32,16 +32,8 @@ import edu.uci.ics.crawler4j.frontier.DocIDServer;
 import edu.uci.ics.crawler4j.frontier.Frontier;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
 import edu.uci.ics.crawler4j.url.TLDList;
-import edu.uci.ics.crawler4j.url.URLCanonicalizer;
 import edu.uci.ics.crawler4j.url.WebURL;
 import edu.uci.ics.crawler4j.util.IO;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * The controller that manages a crawling session. This class creates the
@@ -401,7 +393,7 @@ public class CrawlController extends Configurable {
    *
    */
   public void addSeed(String pageUrl, int docId) {
-    String canonicalUrl = config.getUrlTransformer().getUrl(pageUrl);
+    String canonicalUrl = config.getUrlTransformer().transform(pageUrl);
     if (canonicalUrl == null) {
       logger.error("Invalid seed URL: {}", pageUrl);
     } else {
@@ -450,7 +442,7 @@ public class CrawlController extends Configurable {
    *
    */
   public void addSeenUrl(String url, int docId) {
-    String canonicalUrl = config.getUrlTransformer().getUrl(url);
+    String canonicalUrl = config.getUrlTransformer().transform(url);
     if (canonicalUrl == null) {
       logger.error("Invalid Url: {} (can't cannonicalize it!)", url);
     } else {

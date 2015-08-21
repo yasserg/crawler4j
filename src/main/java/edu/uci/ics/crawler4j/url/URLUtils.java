@@ -22,7 +22,6 @@ import java.net.URLEncoder;
 
 /**
  * URL related methods.
- * @author Bounkong Khamphousone
  */
 public class URLUtils {
 

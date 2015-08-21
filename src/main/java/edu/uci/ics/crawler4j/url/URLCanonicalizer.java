@@ -21,8 +21,6 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -37,11 +35,11 @@ import java.util.TreeMap;
  */
 public class URLCanonicalizer implements URLTransformer{
 
-  public String getUrl(String url) {
-    return getUrl(url, null);
+  public String transform(String url) {
+    return transform(url, null);
   }
 
-  public String getUrl(String href, String context) {
+  public String transform(String href, String context) {
 
     try {
       URL canonicalURL = new URL(UrlResolver.resolveUrl((context == null) ? "" : context, href));
