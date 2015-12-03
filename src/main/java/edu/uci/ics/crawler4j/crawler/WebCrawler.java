@@ -387,6 +387,35 @@ public class WebCrawler implements Runnable {
         }
 
         parser.parse(page, curURL.getURL());
+        
+        // If the page is redirected by a <link rel="canonical"> tag or by
+        // a <meta name="fragment" content="!"> tag to the _escaped_fragment_ version
+        // of the page.
+        if (page.isRedirect()) {
+          WebURL webURL = new WebURL();
+          webURL.setURL(page.redirectedToUrl);
+          webURL.setParentDocid(curURL.getParentDocid());
+          webURL.setParentUrl(curURL.getParentUrl());
+          // Do increase the depth to avoid redirection loops
+          webURL.setDepth((short)(curURL.getDepth() + 1));
+          webURL.setDocid(-1);
+          webURL.setAnchor(curURL.getAnchor());
+          webURL.setPriority(curURL.getPriority());
+          
+          if (shouldVisit(page, webURL)) {
+            if (robotstxtServer.allows(webURL)) {
+              int docid = docIdServer.getNewUnseenDocID(page.redirectedToUrl);
+              if (docid >= 0) {
+                webURL.setDocid(docid);
+                frontier.schedule(webURL);
+              }
+            } else {
+              logger.debug("Not visiting: {} as per the server's \"robots.txt\" policy", webURL.getURL());
+            }
+          } else {
+            logger.debug("Not visiting: {} as per your \"shouldVisit\" policy", webURL.getURL());
+          }
+        }
 
         ParseData parseData = page.getParseData();
         List<WebURL> toSchedule = new ArrayList<>();

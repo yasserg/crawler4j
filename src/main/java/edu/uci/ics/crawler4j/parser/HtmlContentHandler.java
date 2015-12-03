@@ -61,6 +61,8 @@ public class HtmlContentHandler extends DefaultHandler {
   private String base;
   private String metaRefresh;
   private String metaLocation;
+  private String canonical;
+  
   private final Map<String, String> metaTags = new HashMap<>();
 
   private boolean isWithinBodyElement;
@@ -84,10 +86,15 @@ public class HtmlContentHandler extends DefaultHandler {
 
     if ((element == Element.A) || (element == Element.AREA) || (element == Element.LINK)) {
       String href = attributes.getValue("href");
+      String rel = attributes.getValue("rel");
+      
       if (href != null) {
         anchorFlag = true;
-        addToOutgoingUrls(href, localName);
 
+        if (rel != null && "canonical".equals(rel))
+            canonical = href;
+        else
+            addToOutgoingUrls(href, localName);
       }
     } else if (element == Element.IMG) {
       String imgSrc = attributes.getValue("src");
@@ -191,6 +198,10 @@ public class HtmlContentHandler extends DefaultHandler {
     return base;
   }
 
+  public String getCanonicalUrl() {
+    return canonical;
+  }
+  
   public Map<String, String> getMetaTags() {
     return metaTags;
   }

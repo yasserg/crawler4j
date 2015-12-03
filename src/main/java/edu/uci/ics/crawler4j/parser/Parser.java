@@ -100,6 +100,41 @@ public class Parser extends Configurable {
       if (page.getContentCharset() == null) {
         page.setContentCharset(metadata.get("Content-Encoding"));
       }
+      
+      // Handle canonical URLs as redirect, according to:
+      // https://support.google.com/webmasters/answer/139066?hl=en&rd=1
+      if (contentHandler.getCanonicalUrl() != null) {
+        String url = URLCanonicalizer.getCanonicalURL(contentHandler.getCanonicalUrl(), contextURL);
+        if (url != null && !url.equals(page.getWebURL().getURL())) {
+          page.setRedirect(true);
+          page.setRedirectedToUrl(url);
+          
+          // Do parse the retrieved content for additional links
+        }        
+      }
+      
+      // Handle fragment meta tag
+      // According to: https://developers.google.com/webmasters/ajax-crawling/docs/specification
+      // When a page contains a <meta name="fragment" content="!"> tag, this indicates
+      // that the page content is loaded through AJAX and a crawler that does not
+      // parse Javascript should request the same page with _escaped_fragment_=
+      // as a query parameter to get the appropriate content.
+      String fragment = contentHandler.getMetaTags().get("fragment");
+      if (fragment != null && "!".equals(fragment))
+      {
+          String currentUrl = page.getWebURL().getURL();
+          if (!currentUrl.contains("_escaped_fragment_"))
+          {
+              char connector = '?';
+              if (currentUrl.contains("&"))
+                  connector = '&';
+              String url = currentUrl + connector + "_escaped_fragment_=";
+              page.setRedirect(true);
+              page.setRedirectedToUrl(url);
+          
+              // Do parse the retrieved content for additional links
+          }
+      }
 
       HtmlParseData parseData = new HtmlParseData();
       parseData.setText(contentHandler.getBodyText().trim());

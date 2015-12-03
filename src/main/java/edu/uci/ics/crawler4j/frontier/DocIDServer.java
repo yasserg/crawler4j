@@ -88,6 +88,23 @@ public class DocIDServer extends Configurable {
       return -1;
     }
   }
+  
+  /**
+   * Attempt to get a new doc ID. If the URL was seen before,
+   * -1 will be returned. This is a synchronized combination
+   * of getNewDocID and getDocId.
+   * 
+   * @param url The url to get a doc id for
+   * @return A new doc id if the URL is unseen, -1 otherwise
+   */
+  public int getNewUnseenDocID(String url) {
+    synchronized (mutex) {
+        int docid = getDocId(url);
+        if (docid > 0)
+          return -1;
+        return getNewDocID(url);
+    }
+  }
 
   public int getNewDocID(String url) {
     synchronized (mutex) {

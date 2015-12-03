@@ -17,6 +17,7 @@
 
 package edu.uci.ics.crawler4j.url;
 
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -53,6 +54,20 @@ public class URLCanonicalizer {
       }
 
       String path = canonicalURL.getPath();
+      
+      // Extract the fragment, check if it confirms to the escaped
+      // fragment spec by Google at 
+      // https://developers.google.com/webmasters/ajax-crawling/docs/specification
+      // and if so, rewrite the URL to include the fragment as a _escaped_fragment_
+      // query parameter.
+      String fragment = canonicalURL.getRef();
+      if (fragment != null && fragment.length() > 1 && fragment.charAt(0) == '!') {
+        try {
+          fragment = URLEncoder.encode(fragment.substring(1), "UTF-8");
+        } catch (UnsupportedEncodingException e) {}
+      } else {
+        fragment = null;
+      }
 
       /*
        * Normalize: no empty segments (i.e., "//"), no segments equal to
@@ -73,7 +88,14 @@ public class URLCanonicalizer {
 
       path = path.trim();
 
-      final SortedMap<String, String> params = createParameterMap(canonicalURL.getQuery());
+      SortedMap<String, String> params = createParameterMap(canonicalURL.getQuery());
+      if (fragment != null)
+      {
+          if (params == null)
+              params = new TreeMap<String, String>();
+          params.put("_escaped_fragment_", fragment);
+      }
+      
       final String queryString;
       if ((params != null) && !params.isEmpty()) {
         String canonicalParams = canonicalize(params);
