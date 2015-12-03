@@ -4,7 +4,7 @@
 	<artifactId>crawler4j</artifactId>
 	<packaging>jar</packaging>
 	<name>crawler4j</name>
-	<version>4.2-SNAPSHOT</version>
+	<version>4.2</version>
 	<description>Open Source Web Crawler for Java</description>
 	<url>https://github.com/yasserg/crawler4j</url>
 	<licenses>
