@@ -12,7 +12,7 @@ public class TLDListTest {
   private final WebURL webUrl = new WebURL();
 
   private void setUrl(String url) {
-    webUrl.setURL(URLCanonicalizer.getCanonicalURL(url));
+    webUrl.setURL(new URLCanonicalizer().transform(url));
   }
 
   @Test

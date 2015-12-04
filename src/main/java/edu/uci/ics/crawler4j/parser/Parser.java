@@ -35,7 +35,6 @@ import edu.uci.ics.crawler4j.crawler.Configurable;
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.crawler.Page;
 import edu.uci.ics.crawler4j.crawler.exceptions.ParseException;
-import edu.uci.ics.crawler4j.url.URLCanonicalizer;
 import edu.uci.ics.crawler4j.url.WebURL;
 import edu.uci.ics.crawler4j.util.Net;
 import edu.uci.ics.crawler4j.util.Util;
@@ -127,7 +126,7 @@ public class Parser extends Configurable {
         String hrefLoweredCase = href.trim().toLowerCase();
         if (!hrefLoweredCase.contains("javascript:") && !hrefLoweredCase.contains("mailto:") &&
             !hrefLoweredCase.contains("@")) {
-          String url = URLCanonicalizer.getCanonicalURL(href, contextURL);
+          String url = config.getUrlTransformer().transform(href, contextURL);
           if (url != null) {
             WebURL webURL = new WebURL();
             webURL.setURL(url);

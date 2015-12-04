@@ -67,7 +67,6 @@ import edu.uci.ics.crawler4j.crawler.authentication.AuthInfo;
 import edu.uci.ics.crawler4j.crawler.authentication.BasicAuthInfo;
 import edu.uci.ics.crawler4j.crawler.authentication.FormAuthInfo;
 import edu.uci.ics.crawler4j.crawler.exceptions.PageBiggerThanMaxSizeException;
-import edu.uci.ics.crawler4j.url.URLCanonicalizer;
 import edu.uci.ics.crawler4j.url.WebURL;
 
 /**
@@ -249,14 +248,14 @@ public class PageFetcher extends Configurable {
 
         Header header = response.getFirstHeader("Location");
         if (header != null) {
-          String movedToUrl = URLCanonicalizer.getCanonicalURL(header.getValue(), toFetchURL);
+          String movedToUrl = config.getUrlTransformer().transform(header.getValue(), toFetchURL);
           fetchResult.setMovedToUrl(movedToUrl);
         }
       } else if (statusCode >= 200 && statusCode <= 299) { // is 2XX, everything looks ok
         fetchResult.setFetchedUrl(toFetchURL);
         String uri = request.getURI().toString();
         if (!uri.equals(toFetchURL)) {
-          if (!URLCanonicalizer.getCanonicalURL(uri).equals(toFetchURL)) {
+          if (!config.getUrlTransformer().transform(uri).equals(toFetchURL)) {
             fetchResult.setFetchedUrl(uri);
           }
         }

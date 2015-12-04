@@ -22,6 +22,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
+import edu.uci.ics.crawler4j.url.URLCanonicalizer;
+import edu.uci.ics.crawler4j.url.URLTransformer;
 import org.apache.http.Header;
 import org.apache.http.message.BasicHeader;
 
@@ -165,6 +167,11 @@ public class CrawlConfig {
   private List<AuthInfo> authInfos;
 
   /**
+   * Strategy to transform an URL
+   */
+  private URLTransformer urlTransformer = new URLCanonicalizer();
+
+  /**
    * Validates the configs specified by this instance.
    *
    * @throws Exception on Validation fail
@@ -181,6 +188,9 @@ public class CrawlConfig {
     }
     if (maxDepthOfCrawling > Short.MAX_VALUE) {
       throw new Exception("Maximum value for crawl depth is " + Short.MAX_VALUE);
+    }
+    if(urlTransformer == null){
+      throw new Exception("URL transformer strategy is not set in the CrawlConfig");
     }
   }
 
@@ -495,6 +505,20 @@ public class CrawlConfig {
     this.authInfos = authInfos;
   }
 
+  /**
+   * @return the url transformer strategy
+   */
+  public URLTransformer getUrlTransformer() {
+    return urlTransformer;
+  }
+
+  /**
+   * @param urlTransformer the url transformer strategy
+   */
+  public void setUrlTransformer(URLTransformer urlTransformer) {
+    this.urlTransformer = urlTransformer;
+  }
+
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
@@ -516,6 +540,7 @@ public class CrawlConfig {
     sb.append("Proxy port: " + getProxyPort() + "\n");
     sb.append("Proxy username: " + getProxyUsername() + "\n");
     sb.append("Proxy password: " + getProxyPassword() + "\n");
+    sb.append("URL transformer strategy: " + getUrlTransformer() + "\n");
     return sb.toString();
   }
 }
