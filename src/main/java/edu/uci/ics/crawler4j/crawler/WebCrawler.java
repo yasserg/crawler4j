@@ -268,7 +268,9 @@ public class WebCrawler implements Runnable {
           logger.error("Error occurred", e);
         }
       } else {
-        for (WebURL curURL : assignedURLs) {
+        while (!assignedURLs.isEmpty()) {
+          WebURL curURL = pageFetcher.getBestURL(assignedURLs);
+          assignedURLs.remove(curURL);
           if (curURL != null) {
             curURL = handleUrlBeforeProcess(curURL);
             processPage(curURL);

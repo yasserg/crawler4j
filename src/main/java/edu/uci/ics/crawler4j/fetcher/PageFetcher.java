@@ -25,7 +25,11 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import javax.net.ssl.SSLContext;
 
 import edu.uci.ics.crawler4j.crawler.authentication.NtAuthInfo;
@@ -79,7 +83,7 @@ public class PageFetcher extends Configurable {
   protected PoolingHttpClientConnectionManager connectionManager;
   protected CloseableHttpClient httpClient;
   protected final Object mutex = new Object();
-  protected long lastFetchTime = 0;
+  protected Map<String, Long> nextFetchTimes;
   protected IdleConnectionMonitorThread connectionMonitorThread = null;
 
   public PageFetcher(CrawlConfig config) {
@@ -135,6 +139,8 @@ public class PageFetcher extends Configurable {
       logger.debug("Working through Proxy: {}", proxy.getHostName());
     }
 
+    nextFetchTimes = new HashMap<String, Long>();
+    
     httpClient = clientBuilder.build();
     if ((config.getAuthInfos() != null) && !config.getAuthInfos().isEmpty()) {
       doAuthetication(config.getAuthInfos());
@@ -144,6 +150,94 @@ public class PageFetcher extends Configurable {
       connectionMonitorThread = new IdleConnectionMonitorThread(connectionManager);
     }
     connectionMonitorThread.start();
+  }
+  
+  public WebURL getBestURL(Collection<WebURL> urls) {
+    // Return null if there's nothing to choose from
+    if (urls.size() == 0)
+      return null;
+      
+    long now = System.currentTimeMillis();
+    Long min_delay = null;
+    WebURL min_url = null;
+    synchronized (nextFetchTimes) {
+      for (WebURL webUrl : urls) {
+        try {
+          URI url = new URI(webUrl.getURL());
+          String host = url.getHost();
+          Long target_time = nextFetchTimes.get(host);
+          if (target_time == null)
+            return webUrl;
+          
+          long delay = target_time - now;
+          // A negative time or 0 time is instant crawl
+          if (delay <= 0)
+              return webUrl;
+          
+          if (min_delay == null || delay < min_delay) {
+            min_delay = delay;
+            min_url = webUrl;
+          }
+        }
+        catch (URISyntaxException e) {
+          // Invalid URL, will not succeed, might as well get over with it
+          return webUrl;
+        }
+      }
+    }
+    
+    // There should be a 'best' URL always at this point
+    assert(min_url != null);
+    
+    // Return the best if one was found
+    return min_url;
+  }
+  
+  protected void enforcePolitenessDelay(WebURL webUrl) {
+   long std_delay = config.getPolitenessDelay();
+   long delay = 0;
+   long now = System.currentTimeMillis();
+   String hostname = webUrl.getURL();
+   
+   synchronized (nextFetchTimes) {
+     // Remove pages visited more than the politeness delay ago
+     ArrayList<String> hosts_to_remove = new ArrayList<String>();
+     for (Map.Entry<String, Long> entry : nextFetchTimes.entrySet())
+     {
+       if (entry.getValue() < now)
+         hosts_to_remove.add(entry.getKey());
+     }
+       
+     for (String host : hosts_to_remove)
+       nextFetchTimes.remove(host);
+   
+     long target_time = now;
+     try {
+       URI currentUrl = new URI(webUrl.getURL());
+       hostname = currentUrl.getHost();
+     }
+     catch (URISyntaxException e)
+     {}
+       
+     if (nextFetchTimes.containsKey(hostname))
+       target_time = nextFetchTimes.get(hostname);
+       
+     // Update now to incorporate time spent in the above processing
+     now = System.currentTimeMillis();
+     delay = Math.max(target_time - now, 0);
+       
+     // Update next fetch time
+     nextFetchTimes.put(hostname, target_time + std_delay);
+   }
+   
+   // Perform sleep unsynchronized
+   if (delay > 0) {
+     try {
+       Thread.sleep(delay);
+     }
+     catch (InterruptedException e)
+     {}
+   }
   }
 
   private void doAuthetication(List<AuthInfo> authInfos) {
@@ -226,13 +320,7 @@ public class PageFetcher extends Configurable {
     try {
       request = newHttpUriRequest(toFetchURL);
       // Applying Politeness delay
-      synchronized (mutex) {
-        long now = (new Date()).getTime();
-        if ((now - lastFetchTime) < config.getPolitenessDelay()) {
-          Thread.sleep(config.getPolitenessDelay() - (now - lastFetchTime));
-        }
-        lastFetchTime = (new Date()).getTime();
-      }
+      enforcePolitenessDelay(webUrl);
 
       CloseableHttpResponse response = httpClient.execute(request);
       fetchResult.setEntity(response.getEntity());
