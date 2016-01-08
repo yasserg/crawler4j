@@ -269,14 +269,14 @@ public class WebCrawler implements Runnable {
         }
       } else {
         for (WebURL curURL : assignedURLs) {
+          if (myController.isShuttingDown()) {
+            logger.info("Exiting because of controller shutdown.");
+            return;
+          }
           if (curURL != null) {
             curURL = handleUrlBeforeProcess(curURL);
             processPage(curURL);
             frontier.setProcessed(curURL);
-          }
-          if (myController.isShuttingDown()) {
-            logger.info("Exiting because of controller shutdown.");
-            return;
           }
         }
       }
