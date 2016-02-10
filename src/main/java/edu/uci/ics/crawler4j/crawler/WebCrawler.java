@@ -109,7 +109,7 @@ public class WebCrawler implements Runnable {
    * @param crawlController
    *            the controller that manages this crawling session
    */
-  public void init(int id, CrawlController crawlController) {
+  public void init(int id, CrawlController crawlController) throws InstantiationException, IllegalAccessException {
     this.myId = id;
     this.pageFetcher = crawlController.getPageFetcher();
     this.robotstxtServer = crawlController.getRobotstxtServer();

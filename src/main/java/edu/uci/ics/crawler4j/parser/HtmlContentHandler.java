@@ -32,6 +32,7 @@ public class HtmlContentHandler extends DefaultHandler {
 
   private enum Element {
     A,
+    SCRIPT,
     AREA,
     LINK,
     IFRAME,
@@ -89,11 +90,10 @@ public class HtmlContentHandler extends DefaultHandler {
         addToOutgoingUrls(href, localName);
 
       }
-    } else if (element == Element.IMG) {
-      String imgSrc = attributes.getValue("src");
-      if (imgSrc != null) {
-        addToOutgoingUrls(imgSrc, localName);
-
+    } else if ((element == Element.IMG) || (element == Element.SCRIPT)) {
+      String src = attributes.getValue("src");
+      if (src != null) {
+        addToOutgoingUrls(src, localName);
       }
     } else if ((element == Element.IFRAME) || (element == Element.FRAME) || (element == Element.EMBED)) {
       String src = attributes.getValue("src");
