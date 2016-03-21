@@ -175,7 +175,7 @@ crawlConfig.setProxyPort(8080);
 If your proxy also needs authentication:
 ```java
 crawlConfig.setProxyUsername(username);
-crawlConfig.getProxyPassword(password);
+crawlConfig.setProxyPassword(password);
 ```
 
 ### Resumable Crawling
