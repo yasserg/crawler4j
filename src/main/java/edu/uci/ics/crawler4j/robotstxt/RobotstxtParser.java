@@ -59,7 +59,7 @@ public class RobotstxtParser {
 
       if (line.matches(PATTERNS_USERAGENT)) {
         String ua = line.substring(PATTERNS_USERAGENT_LENGTH).trim().toLowerCase();
-        inMatchingUserAgent = "*".equals(ua) || ua.contains(myUserAgent);
+        inMatchingUserAgent = "*".equals(ua) || ua.contains(myUserAgent.toLowerCase());
       } else if (line.matches(PATTERNS_DISALLOW)) {
         if (!inMatchingUserAgent) {
           continue;
