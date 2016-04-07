@@ -20,6 +20,7 @@ package edu.uci.ics.crawler4j.frontier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sleepycat.je.Cursor;
 import com.sleepycat.je.Database;
 import com.sleepycat.je.DatabaseConfig;
 import com.sleepycat.je.DatabaseEntry;
@@ -38,7 +39,7 @@ import edu.uci.ics.crawler4j.util.Util;
 public class DocIDServer extends Configurable {
   private static final Logger logger = LoggerFactory.getLogger(DocIDServer.class);
 
-  private final Database docIDsDB;
+  private Database docIDsDB;
   private static final String DATABASE_NAME = "DocIDs";
 
   private final Object mutex = new Object();
@@ -138,6 +139,47 @@ public class DocIDServer extends Configurable {
     } catch (DatabaseException e) {
       logger.error("Exception thrown while getting DOC Count", e);
       return -1;
+    }
+  }
+  
+  /**
+   * Remove all elements from the Document ID server. This can be used in order
+   * to reset crawling in case of a long-running web crawler where pages actually need
+   * to be re-crawled after a period of time.
+   * 
+   * Running this while pages are enqueued can result in unexpected behavior because
+   * references to non-existing DocIDs may then occur.
+   */
+  public void clear() {
+    synchronized (mutex) {
+      try {
+        Cursor c = docIDsDB.openCursor(null, null);
+        DatabaseEntry k = new DatabaseEntry();
+        DatabaseEntry v = new DatabaseEntry();
+        long count = docIDsDB.count();
+        while (c.getNext(k, v, null) == OperationStatus.SUCCESS)
+          c.delete();
+        
+        logger.info("Succesfully removed {} elements from the database", count);
+      }
+      catch (DatabaseException e) {
+        logger.error("Could not remove all elements from DocIdServer: {}. Recreating database instead", e.getMessage());
+        logger.trace("Stacktrace: ", e);
+
+        // Get configuration from the current database
+        Environment env = docIDsDB.getEnvironment();
+        DatabaseConfig dbConfig = docIDsDB.getConfig();
+        
+        // Close and remove the database
+        docIDsDB.close();
+        env.removeDatabase(null,  "DocIDs");
+        
+        // Create/reopen the database with the same configuration
+        docIDsDB = env.openDatabase(null, "DocIDs", dbConfig);
+        
+        logger.info("Succesfully recreated the database");
+      }
+      lastDocID = 0;
     }
   }
 
