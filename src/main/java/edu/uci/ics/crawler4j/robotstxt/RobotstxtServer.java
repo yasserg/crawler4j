@@ -101,7 +101,7 @@ public class RobotstxtServer {
 	return directives;
 }
 
-  private HostDirectives fetchDirectives(URL url) {
+  public HostDirectives fetchDirectives(URL url) {
     WebURL robotsTxtUrl = new WebURL();
     String host = getHost(url);
     String port = ((url.getPort() == url.getDefaultPort()) || (url.getPort() == -1)) ? "" : (":" + url.getPort());
