@@ -70,7 +70,7 @@ public class WebCrawler implements Runnable {
   /**
    * The parser that is used by this crawler instance to parse the content of the fetched pages.
    */
-  private Parser parser;
+  protected Parser parser;
 
   /**
    * The fetcher that is used by this crawler instance to fetch the content of pages from the web.
