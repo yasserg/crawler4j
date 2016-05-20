@@ -17,14 +17,14 @@
 
 package edu.uci.ics.crawler4j.parser;
 
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.xml.sax.Attributes;
-import org.xml.sax.SAXException;
-import org.xml.sax.helpers.DefaultHandler;
 
 public class HtmlContentHandler extends DefaultHandler {
 
@@ -171,8 +171,10 @@ public class HtmlContentHandler extends DefaultHandler {
   @Override
   public void characters(char[] ch, int start, int length) throws SAXException {
     if (isWithinBodyElement) {
+      if (bodyText.length() > 0) {
+        bodyText.append(' ');
+      }
       bodyText.append(ch, start, length);
-
       if (anchorFlag) {
         anchorText.append(new String(ch, start, length));
       }
