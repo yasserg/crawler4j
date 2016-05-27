@@ -520,5 +520,6 @@ public class CrawlController extends Configurable {
     this.shuttingDown = true;
     pageFetcher.shutDown();
     frontier.finish();
+    env.close();
   }
 }
