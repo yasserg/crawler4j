@@ -35,6 +35,16 @@ public class CrawlConfig {
    */
   private String crawlStorageFolder;
 
+ /**
+  * The host used to initiate a Redis connection
+  */
+  private String redisHost = "localhost";
+
+  /**
+  * The port used to initiate a Redis connection
+  */
+  private int redisPort = 6379;
+
   /**
    * If this feature is enabled, you would be able to resume a previously
    * stopped/crashed crawl. However, it makes crawling slightly slower
@@ -495,10 +505,28 @@ public class CrawlConfig {
     this.authInfos = authInfos;
   }
 
-  @Override
+  public String getRedisHost() {
+    return redisHost;
+  }
+
+  public void setRedisHost(String redisHost) {
+    this.redisHost = redisHost;
+  }
+
+  public int getRedisPort() {
+    return redisPort;
+  }
+
+  public void setRedisPort(int redisPort) {
+    this.redisPort = redisPort;
+  }
+
+	@Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("Crawl storage folder: " + getCrawlStorageFolder() + "\n");
+    sb.append("Redis host: " + getRedisHost() + "\n");
+    sb.append("Redis port: " + getRedisPort() + "\n");
     sb.append("Resumable crawling: " + isResumableCrawling() + "\n");
     sb.append("Max depth of crawl: " + getMaxDepthOfCrawling() + "\n");
     sb.append("Max pages to fetch: " + getMaxPagesToFetch() + "\n");

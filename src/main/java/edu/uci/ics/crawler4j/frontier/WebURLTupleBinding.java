@@ -17,38 +17,51 @@
 
 package edu.uci.ics.crawler4j.frontier;
 
-import com.sleepycat.bind.tuple.TupleBinding;
-import com.sleepycat.bind.tuple.TupleInput;
-import com.sleepycat.bind.tuple.TupleOutput;
+import java.util.Map;
 
 import edu.uci.ics.crawler4j.url.WebURL;
 
 /**
  * @author Yasser Ganjisaffar
  */
-public class WebURLTupleBinding extends TupleBinding<WebURL> {
+public class WebURLTupleBinding {
 
-  @Override
-  public WebURL entryToObject(TupleInput input) {
+
+  public static final String URL = "url";
+  public static final String DOCID = "docid";
+  public static final String PARENT_DOCID = "parent_docid";
+  public static final String PARENT_URL = "parent_url";
+  public static final String DEPTH = "depth";
+  public static final String PRIORITY = "priority";
+  public static final String ANCHOR = "anchor";
+
+  public WebURL entryToObject(Map<String,String> input) {
     WebURL webURL = new WebURL();
-    webURL.setURL(input.readString());
-    webURL.setDocid(input.readInt());
-    webURL.setParentDocid(input.readInt());
-    webURL.setParentUrl(input.readString());
-    webURL.setDepth(input.readShort());
-    webURL.setPriority(input.readByte());
-    webURL.setAnchor(input.readString());
+    webURL.setURL(input.get(URL));
+    webURL.setDocid(Integer.parseInt(input.get(DOCID)));
+    webURL.setParentDocid(Integer.parseInt(input.get(PARENT_DOCID)));
+    webURL.setParentUrl(input.get(PARENT_URL));
+    webURL.setDepth(Short.parseShort(input.get(DEPTH)));
+    webURL.setPriority(Byte.parseByte(input.get(PRIORITY)));
+    webURL.setAnchor(input.get(ANCHOR));
     return webURL;
   }
 
-  @Override
-  public void objectToEntry(WebURL url, TupleOutput output) {
-    output.writeString(url.getURL());
-    output.writeInt(url.getDocid());
-    output.writeInt(url.getParentDocid());
-    output.writeString(url.getParentUrl());
-    output.writeShort(url.getDepth());
-    output.writeByte(url.getPriority());
-    output.writeString(url.getAnchor());
+
+  public void objectToEntry(WebURL url, Map<String,String> output) {
+    output.put(URL, url.getURL());
+    output.put(DOCID, String.valueOf(url.getDocid()));
+    output.put(PARENT_DOCID, String.valueOf(url.getParentDocid()));
+    String parentUrl = url.getParentUrl();
+    if(parentUrl != null) {
+      output.put(PARENT_URL, parentUrl);
+    }
+    output.put(DEPTH, String.valueOf(url.getDepth()));
+    output.put(PRIORITY, String.valueOf(url.getPriority()));
+    String anchor = url.getAnchor();
+    if(anchor != null) {
+      output.put(ANCHOR, anchor);
+    }
+
   }
 }

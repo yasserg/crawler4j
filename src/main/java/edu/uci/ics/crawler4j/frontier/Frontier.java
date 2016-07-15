@@ -19,15 +19,12 @@ package edu.uci.ics.crawler4j.frontier;
 
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.sleepycat.je.DatabaseException;
-import com.sleepycat.je.Environment;
-
 import edu.uci.ics.crawler4j.crawler.Configurable;
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.url.WebURL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import redis.clients.jedis.Jedis;
 
 /**
  * @author Yasser Ganjisaffar
@@ -36,7 +33,7 @@ import edu.uci.ics.crawler4j.url.WebURL;
 public class Frontier extends Configurable {
   protected static final Logger logger = LoggerFactory.getLogger(Frontier.class);
   
-  private static final String DATABASE_NAME = "PendingURLsDB";
+  private static final int DATABASE_INDEX = 2;
   private static final int IN_PROCESS_RESCHEDULE_BATCH_SIZE = 100;
   protected WorkQueues workQueues;
 
@@ -51,14 +48,14 @@ public class Frontier extends Configurable {
 
   protected Counters counters;
 
-  public Frontier(Environment env, CrawlConfig config) {
+  public Frontier(CrawlConfig config) {
     super(config);
-    this.counters = new Counters(env, config);
-    try {
-      workQueues = new WorkQueues(env, DATABASE_NAME, config.isResumableCrawling());
+    this.counters = new Counters(config);
+
+      workQueues = new WorkQueues(DATABASE_INDEX,config);
       if (config.isResumableCrawling()) {
         scheduledPages = counters.getValue(Counters.ReservedCounterNames.SCHEDULED_PAGES);
-        inProcessPages = new InProcessPagesDB(env);
+        inProcessPages = new InProcessPagesDB(config);
         long numPreviouslyInProcessPages = inProcessPages.getLength();
         if (numPreviouslyInProcessPages > 0) {
           logger.info("Rescheduling {} URLs from previous crawl.", numPreviouslyInProcessPages);
@@ -75,10 +72,7 @@ public class Frontier extends Configurable {
         inProcessPages = null;
         scheduledPages = 0;
       }
-    } catch (DatabaseException e) {
-      logger.error("Error while initializing the Frontier", e);
-      workQueues = null;
-    }
+
   }
 
   public void scheduleAll(List<WebURL> urls) {
@@ -90,12 +84,10 @@ public class Frontier extends Configurable {
           break;
         }
 
-        try {
+
           workQueues.put(url);
           newScheduledPage++;
-        } catch (DatabaseException e) {
-          logger.error("Error while putting the url in the work queue", e);
-        }
+
       }
       if (newScheduledPage > 0) {
         scheduledPages += newScheduledPage;
@@ -110,15 +102,13 @@ public class Frontier extends Configurable {
   public void schedule(WebURL url) {
     int maxPagesToFetch = config.getMaxPagesToFetch();
     synchronized (mutex) {
-      try {
+
         if (maxPagesToFetch < 0 || scheduledPages < maxPagesToFetch) {
           workQueues.put(url);
           scheduledPages++;
           counters.increment(Counters.ReservedCounterNames.SCHEDULED_PAGES);
         }
-      } catch (DatabaseException e) {
-        logger.error("Error while putting the url in the work queue", e);
-      }
+
     }
   }
 
@@ -128,7 +118,7 @@ public class Frontier extends Configurable {
         if (isFinished) {
           return;
         }
-        try {
+
           List<WebURL> curResults = workQueues.get(max);
           workQueues.delete(curResults.size());
           if (inProcessPages != null) {
@@ -137,9 +127,7 @@ public class Frontier extends Configurable {
             }
           }
           result.addAll(curResults);
-        } catch (DatabaseException e) {
-          logger.error("Error while getting next urls", e);
-        }
+
 
         if (result.size() > 0) {
           return;
@@ -197,5 +185,18 @@ public class Frontier extends Configurable {
     synchronized (waitingList) {
       waitingList.notifyAll();
     }
+  }
+
+  public void clearData() {
+    Jedis jedis = new Jedis(getConfig().getRedisHost(), getConfig().getRedisPort());
+    int[] dbs = new int[]{Counters.DATABASE_INDEX,
+                          DocIDServer.DATABASE_INDEX,
+                          Frontier.DATABASE_INDEX,
+                          InProcessPagesDB.DATABASE_INDEX};
+    for (int db : dbs) {
+      jedis.select(db);
+      jedis.flushDB();
+    }
+    jedis.close();
   }
 }

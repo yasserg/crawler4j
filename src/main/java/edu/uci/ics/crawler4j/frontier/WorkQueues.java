@@ -17,130 +17,104 @@
 
 package edu.uci.ics.crawler4j.frontier;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import com.sleepycat.je.Cursor;
-import com.sleepycat.je.Database;
-import com.sleepycat.je.DatabaseConfig;
-import com.sleepycat.je.DatabaseEntry;
-import com.sleepycat.je.Environment;
-import com.sleepycat.je.OperationStatus;
-import com.sleepycat.je.Transaction;
-
+import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.url.WebURL;
 import edu.uci.ics.crawler4j.util.Util;
+import redis.clients.jedis.Jedis;
 
 /**
  * @author Yasser Ganjisaffar
  */
 public class WorkQueues {
-  private final Database urlsDB;
-  private final Environment env;
+	public static final String KEY_PREFIX = "url:";
+	public static final String ALL_URLS = "url:urls";
+	private final Jedis urlsDB;
 
-  private final boolean resumable;
+	private final WebURLTupleBinding webURLBinding;
 
-  private final WebURLTupleBinding webURLBinding;
+	protected final Object mutex = new Object();
 
-  protected final Object mutex = new Object();
+	public WorkQueues(int databaseIndex,CrawlConfig crawlConfig) {
+		urlsDB = new Jedis(crawlConfig.getRedisHost(), crawlConfig.getRedisPort());
+		urlsDB.select(databaseIndex);
+		webURLBinding = new WebURLTupleBinding();
+	}
 
-  public WorkQueues(Environment env, String dbName, boolean resumable) {
-    this.env = env;
-    this.resumable = resumable;
-    DatabaseConfig dbConfig = new DatabaseConfig();
-    dbConfig.setAllowCreate(true);
-    dbConfig.setTransactional(resumable);
-    dbConfig.setDeferredWrite(!resumable);
-    urlsDB = env.openDatabase(null, dbName, dbConfig);
-    webURLBinding = new WebURLTupleBinding();
-  }
+	public List<WebURL> get(int max) {
+		synchronized (mutex) {
+			List<WebURL> results = new ArrayList<>(max);
+			Set<String> zrange = urlsDB.zrange(ALL_URLS, 0, max);
+			for (String s : zrange) {
+				Map<String, String> hmap = urlsDB.hgetAll(s);
+				WebURL webURL = webURLBinding.entryToObject(hmap);
+				results.add(webURL);
+			}
+			return results;
+		}
+	}
 
-  protected Transaction beginTransaction() {
-    return resumable ? env.beginTransaction(null, null) : null;
-  }
+	public void delete(int count) {
+		synchronized (mutex) {
+			if (count != 0) {
+				Set<String> zrange = urlsDB.zrange(ALL_URLS, 0, count - 1);
+				urlsDB.zrem(ALL_URLS, zrange.toArray(new String[zrange.size()]));
+				for (String key : zrange) {
+					urlsDB.del(key);
+				}
+			}
+		}
+	}
 
-  protected static void commit(Transaction tnx) {
-    if (tnx != null) {
-      tnx.commit();
-    }
-  }
+	/*
+	 * The key that is used for storing URLs determines the order
+	 * they are crawled. Lower key values results in earlier crawling.
+	 * Here our keys are 6 bytes. The first byte comes from the URL priority.
+	 * The second byte comes from depth of crawl at which this URL is first found.
+	 * The rest of the 4 bytes come from the docid of the URL. As a result,
+	 * URLs with lower priority numbers will be crawled earlier. If priority
+	 * numbers are the same, those found at lower depths will be crawled earlier.
+	 * If depth is also equal, those found earlier (therefore, smaller docid) will
+	 * be crawled earlier.
+	 */
+	protected static String getDatabaseEntryKey(WebURL url) {
+		byte depth = (url.getDepth() > Byte.MAX_VALUE) ? Byte.MAX_VALUE : (byte) url.getDepth();
+		byte priority = url.getPriority();
+		String key = KEY_PREFIX + priority + ":" + depth + ":" + url.getDocid();
+		return key;
+	}
 
-  protected Cursor openCursor(Transaction txn) {
-    return urlsDB.openCursor(txn, null);
-  }
+	protected static double getScore(WebURL url) {
+		byte[] keyData = new byte[8];
+		keyData[0] = url.getPriority();
+		keyData[1] = ((url.getDepth() > Byte.MAX_VALUE) ? Byte.MAX_VALUE : (byte) url.getDepth());
+		Util.putIntInByteArray(url.getDocid(), keyData, 2);
+		return ByteBuffer.wrap(keyData).getDouble();
+	}
 
-  public List<WebURL> get(int max) {
-    synchronized (mutex) {
-      List<WebURL> results = new ArrayList<>(max);
-      DatabaseEntry key = new DatabaseEntry();
-      DatabaseEntry value = new DatabaseEntry();
-      Transaction txn = beginTransaction();
-      try (Cursor cursor = openCursor(txn)) {
-        OperationStatus result = cursor.getFirst(key, value, null);
-        int matches = 0;
-        while ((matches < max) && (result == OperationStatus.SUCCESS)) {
-          if (value.getData().length > 0) {
-            results.add(webURLBinding.entryToObject(value));
-            matches++;
-          }
-          result = cursor.getNext(key, value, null);
-        }
-      }
-      commit(txn);
-      return results;
-    }
-  }
+	public void put(WebURL url) {
+		Map<String, String> value = new HashMap<>();
+		webURLBinding.objectToEntry(url, value);
+		String key = getDatabaseEntryKey(url);
+		urlsDB.hmset(key, value);
+		urlsDB.zadd(ALL_URLS, getScore(url), key);
+	}
 
-  public void delete(int count) {
-    synchronized (mutex) {
-      DatabaseEntry key = new DatabaseEntry();
-      DatabaseEntry value = new DatabaseEntry();
-      Transaction txn = beginTransaction();
-      try (Cursor cursor = openCursor(txn)) {
-        OperationStatus result = cursor.getFirst(key, value, null);
-        int matches = 0;
-        while ((matches < count) && (result == OperationStatus.SUCCESS)) {
-          cursor.delete();
-          matches++;
-          result = cursor.getNext(key, value, null);
-        }
-      }
-      commit(txn);
-    }
-  }
+	public Jedis getUrlsDB() {
+		return urlsDB;
+	}
 
-  /*
-   * The key that is used for storing URLs determines the order
-   * they are crawled. Lower key values results in earlier crawling.
-   * Here our keys are 6 bytes. The first byte comes from the URL priority.
-   * The second byte comes from depth of crawl at which this URL is first found.
-   * The rest of the 4 bytes come from the docid of the URL. As a result,
-   * URLs with lower priority numbers will be crawled earlier. If priority
-   * numbers are the same, those found at lower depths will be crawled earlier.
-   * If depth is also equal, those found earlier (therefore, smaller docid) will
-   * be crawled earlier.
-   */
-  protected static DatabaseEntry getDatabaseEntryKey(WebURL url) {
-    byte[] keyData = new byte[6];
-    keyData[0] = url.getPriority();
-    keyData[1] = ((url.getDepth() > Byte.MAX_VALUE) ? Byte.MAX_VALUE : (byte) url.getDepth());
-    Util.putIntInByteArray(url.getDocid(), keyData, 2);
-    return new DatabaseEntry(keyData);
-  }
+	public long getLength() {
+		return urlsDB.zcard(ALL_URLS);
+	}
 
-  public void put(WebURL url) {
-    DatabaseEntry value = new DatabaseEntry();
-    webURLBinding.objectToEntry(url, value);
-    Transaction txn = beginTransaction();
-    urlsDB.put(txn, getDatabaseEntryKey(url), value);
-    commit(txn);
-  }
-
-  public long getLength() {
-    return urlsDB.count();
-  }
-
-  public void close() {
-    urlsDB.close();
-  }
+	public void close() {
+		urlsDB.close();
+	}
 }

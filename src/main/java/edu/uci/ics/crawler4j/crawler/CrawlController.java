@@ -21,12 +21,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.sleepycat.je.Environment;
-import com.sleepycat.je.EnvironmentConfig;
-
 import edu.uci.ics.crawler4j.fetcher.PageFetcher;
 import edu.uci.ics.crawler4j.frontier.DocIDServer;
 import edu.uci.ics.crawler4j.frontier.Frontier;
@@ -35,13 +29,8 @@ import edu.uci.ics.crawler4j.url.TLDList;
 import edu.uci.ics.crawler4j.url.URLCanonicalizer;
 import edu.uci.ics.crawler4j.url.WebURL;
 import edu.uci.ics.crawler4j.util.IO;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * The controller that manages a crawling session. This class creates the
@@ -82,7 +71,7 @@ public class CrawlController extends Configurable {
   protected DocIDServer docIdServer;
 
   protected final Object waitingLock = new Object();
-  protected final Environment env;
+
 
   public CrawlController(CrawlConfig config, PageFetcher pageFetcher, RobotstxtServer robotstxtServer)
       throws Exception {
@@ -103,10 +92,7 @@ public class CrawlController extends Configurable {
 
     boolean resumable = config.isResumableCrawling();
 
-    EnvironmentConfig envConfig = new EnvironmentConfig();
-    envConfig.setAllowCreate(true);
-    envConfig.setTransactional(resumable);
-    envConfig.setLocking(resumable);
+
 
     File envHome = new File(config.getCrawlStorageFolder() + "/frontier");
     if (!envHome.exists()) {
@@ -117,14 +103,16 @@ public class CrawlController extends Configurable {
       }
     }
 
+    docIdServer = new DocIDServer(config);
+    frontier = new Frontier(config);
+
     if (!resumable) {
+      frontier.clearData();
       IO.deleteFolderContents(envHome);
       logger.info("Deleted contents of: " + envHome + " ( as you have configured resumable crawling to false )");
     }
 
-    env = new Environment(envHome, envConfig);
-    docIdServer = new DocIDServer(env, config);
-    frontier = new Frontier(env, config);
+
 
     this.pageFetcher = pageFetcher;
     this.robotstxtServer = robotstxtServer;
@@ -309,7 +297,7 @@ public class CrawlController extends Configurable {
 
                     finished = true;
                     waitingLock.notifyAll();
-                    env.close();
+
 
                     return;
                   }
