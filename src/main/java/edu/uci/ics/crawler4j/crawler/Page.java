@@ -17,6 +17,7 @@
 
 package edu.uci.ics.crawler4j.crawler;
 
+import java.io.IOException;
 import java.nio.charset.Charset;
 
 import org.apache.http.Header;
@@ -101,9 +102,9 @@ public class Page {
    * Loads the content of this page from a fetched HttpEntity.
    *
    * @param entity HttpEntity
-   * @throws Exception when load fails
+   * @throws IOException when load fails
    */
-  public void load(HttpEntity entity) throws Exception {
+  public void load(HttpEntity entity) throws IOException {
 
     contentType = null;
     Header type = entity.getContentType();

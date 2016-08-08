@@ -26,6 +26,7 @@ import org.apache.http.Header;
 import org.apache.http.message.BasicHeader;
 
 import edu.uci.ics.crawler4j.crawler.authentication.AuthInfo;
+import edu.uci.ics.crawler4j.crawler.exceptions.CrawlerConfigurationException;
 
 public class CrawlConfig {
 
@@ -167,20 +168,20 @@ public class CrawlConfig {
   /**
    * Validates the configs specified by this instance.
    *
-   * @throws Exception on Validation fail
+   * @throws CrawlerConfigurationException on Validation fail
    */
-  public void validate() throws Exception {
+  public void validate() throws CrawlerConfigurationException {
     if (crawlStorageFolder == null) {
-      throw new Exception("Crawl storage folder is not set in the CrawlConfig.");
+      throw new CrawlerConfigurationException("Crawl storage folder is not set in the CrawlConfig.");
     }
     if (politenessDelay < 0) {
-      throw new Exception("Invalid value for politeness delay: " + politenessDelay);
+      throw new CrawlerConfigurationException("Invalid value for politeness delay: " + politenessDelay);
     }
     if (maxDepthOfCrawling < -1) {
-      throw new Exception("Maximum crawl depth should be either a positive number or -1 for unlimited depth.");
+      throw new CrawlerConfigurationException("Maximum crawl depth should be either a positive number or -1 for unlimited depth.");
     }
     if (maxDepthOfCrawling > Short.MAX_VALUE) {
-      throw new Exception("Maximum value for crawl depth is " + Short.MAX_VALUE);
+      throw new CrawlerConfigurationException("Maximum value for crawl depth is " + Short.MAX_VALUE);
     }
   }
 
