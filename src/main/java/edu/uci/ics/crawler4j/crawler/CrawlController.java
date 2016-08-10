@@ -279,7 +279,7 @@ public class CrawlController extends Configurable {
                   if (!someoneIsWorking) {
                     if (!shuttingDown) {
                       long queueLength = frontier.getQueueLength();
-                      if (queueLength > 0) {
+                      if (! frontier.isFinished() && queueLength > 0) {
                         continue;
                       }
                       logger.info(
@@ -287,7 +287,7 @@ public class CrawlController extends Configurable {
                           "sure...");
                       sleep(10);
                       queueLength = frontier.getQueueLength();
-                      if (queueLength > 0) {
+                      if (! frontier.isFinished() && queueLength > 0) {
                         continue;
                       }
                     }

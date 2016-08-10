@@ -48,6 +48,7 @@ public class Frontier extends Configurable {
   protected boolean isFinished = false;
 
   protected long scheduledPages;
+  protected long fetchedPages = 0;
 
   protected Counters counters;
 
@@ -82,7 +83,7 @@ public class Frontier extends Configurable {
   }
 
   public void scheduleAll(List<WebURL> urls) {
-    int maxPagesToFetch = config.getMaxPagesToFetch();
+    int maxPagesToFetch = -1; //config.getMaxPagesToFetch();
     synchronized (mutex) {
       int newScheduledPage = 0;
       for (WebURL url : urls) {
@@ -108,7 +109,7 @@ public class Frontier extends Configurable {
   }
 
   public void schedule(WebURL url) {
-    int maxPagesToFetch = config.getMaxPagesToFetch();
+    int maxPagesToFetch = -1; //config.getMaxPagesToFetch();
     synchronized (mutex) {
       try {
         if (maxPagesToFetch < 0 || scheduledPages < maxPagesToFetch) {
@@ -123,8 +124,11 @@ public class Frontier extends Configurable {
   }
 
   public void getNextURLs(int max, List<WebURL> result) {
+	int maxPagesToFetch = config.getMaxPagesToFetch();
     while (true) {
       synchronized (mutex) {
+    	if (maxPagesToFetch > 0 && fetchedPages > maxPagesToFetch)
+    		finish();
         if (isFinished) {
           return;
         }
@@ -160,6 +164,7 @@ public class Frontier extends Configurable {
   }
 
   public void setProcessed(WebURL webURL) {
+    fetchedPages++;
     counters.increment(Counters.ReservedCounterNames.PROCESSED_PAGES);
     if (inProcessPages != null) {
       if (!inProcessPages.removeURL(webURL)) {
