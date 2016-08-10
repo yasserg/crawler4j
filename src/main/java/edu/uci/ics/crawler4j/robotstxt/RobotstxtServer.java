@@ -101,7 +101,8 @@ public class RobotstxtServer {
       if (fetchResult.getStatusCode() == HttpStatus.SC_OK) {
         Page page = new Page(robotsTxtUrl);
         fetchResult.fetchContent(page);
-        if (Util.hasPlainTextContent(page.getContentType())) {
+        String contentType = page.getContentType() == null ? "" : page.getContentType();
+        if (Util.hasPlainTextContent(contentType) || contentType.length() == 0) {
           String content;
           if (page.getContentCharset() == null) {
             content = new String(page.getContentData());
@@ -109,12 +110,12 @@ public class RobotstxtServer {
             content = new String(page.getContentData(), page.getContentCharset());
           }
           directives = RobotstxtParser.parse(content, config.getUserAgentName());
-        } else if (page.getContentType().contains("html")) { // TODO This one should be upgraded to remove all html tags
+        } else if (contentType.contains("html")) { // TODO This one should be upgraded to remove all html tags
           String content = new String(page.getContentData());
           directives = RobotstxtParser.parse(content, config.getUserAgentName());
         } else {
           logger.warn("Can't read this robots.txt: {}  as it is not written in plain text, contentType: {}",
-                      robotsTxtUrl.getURL(), page.getContentType());
+                      robotsTxtUrl.getURL(), contentType);
         }
       } else {
         logger.debug("Can't read this robots.txt: {}  as it's status code is {}", robotsTxtUrl.getURL(),
