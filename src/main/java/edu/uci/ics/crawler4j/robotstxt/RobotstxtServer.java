@@ -63,22 +63,10 @@ public class RobotstxtServer {
   public boolean allows(WebURL webURL) {
     if (config.isEnabled()) {
       try {
-        URL url = new URL(webURL.getURL());
-        String host = getHost(url);
-        String path = url.getPath();
-
-        HostDirectives directives = host2directivesCache.get(host);
-
-        if ((directives != null) && directives.needsRefetch()) {
-          synchronized (host2directivesCache) {
-            host2directivesCache.remove(host);
-            directives = null;
-          }
-        }
-
-        if (directives == null) {
-          directives = fetchDirectives(url);
-        }
+    	URL url = new URL(webURL.getURL());
+    	String host = getHost(url);
+    	String path = url.getPath();
+        HostDirectives directives = getDirectives(url, host);
 
         return directives.allows(path);
       } catch (MalformedURLException e) {
@@ -89,7 +77,31 @@ public class RobotstxtServer {
     return true;
   }
 
-  private HostDirectives fetchDirectives(URL url) {
+  public final HostDirectives getDirectives(WebURL webURL) throws MalformedURLException {
+	URL url = new URL(webURL.getURL());
+    String host = getHost(url);
+    return getDirectives(url, host);
+  }
+  
+  
+  protected final HostDirectives getDirectives(URL url, String host) {    
+	
+	HostDirectives directives = host2directivesCache.get(host);
+
+	if ((directives != null) && directives.needsRefetch()) {
+	  synchronized (host2directivesCache) {
+	    host2directivesCache.remove(host);
+	    directives = null;
+	  }
+	}
+
+	if (directives == null) {
+	  directives = fetchDirectives(url);
+	}
+	return directives;
+}
+
+  public HostDirectives fetchDirectives(URL url) {
     WebURL robotsTxtUrl = new WebURL();
     String host = getHost(url);
     String port = ((url.getPort() == url.getDefaultPort()) || (url.getPort() == -1)) ? "" : (":" + url.getPort());
