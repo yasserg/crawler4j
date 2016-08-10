@@ -172,7 +172,7 @@ public class HtmlContentHandler extends DefaultHandler {
   public void characters(char[] ch, int start, int length) throws SAXException {
     if (isWithinBodyElement) {
       bodyText.append(ch, start, length);
-
+      bodyText.append(' ');
       if (anchorFlag) {
         anchorText.append(new String(ch, start, length));
       }
@@ -180,7 +180,7 @@ public class HtmlContentHandler extends DefaultHandler {
   }
 
   public String getBodyText() {
-    return bodyText.toString();
+    return bodyText.toString().trim();
   }
 
   public List<ExtractedUrlAnchorPair> getOutgoingUrls() {
