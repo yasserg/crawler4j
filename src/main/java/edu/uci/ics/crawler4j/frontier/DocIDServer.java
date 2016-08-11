@@ -17,135 +17,108 @@
 
 package edu.uci.ics.crawler4j.frontier;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.sleepycat.je.Database;
-import com.sleepycat.je.DatabaseConfig;
-import com.sleepycat.je.DatabaseEntry;
-import com.sleepycat.je.DatabaseException;
-import com.sleepycat.je.Environment;
-import com.sleepycat.je.OperationStatus;
 
 import edu.uci.ics.crawler4j.crawler.Configurable;
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
-import edu.uci.ics.crawler4j.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import redis.clients.jedis.Jedis;
 
 /**
  * @author Yasser Ganjisaffar
  */
 
 public class DocIDServer extends Configurable {
-  private static final Logger logger = LoggerFactory.getLogger(DocIDServer.class);
+	private static final Logger logger = LoggerFactory.getLogger(DocIDServer.class);
 
-  private final Database docIDsDB;
-  private static final String DATABASE_NAME = "DocIDs";
+	private final Jedis docIDsDB;
+	public static final int DATABASE_INDEX = 1;
+	public static final String KEY_PREFIX = "url:";
 
-  private final Object mutex = new Object();
+	private final Object mutex = new Object();
 
-  private int lastDocID;
+	private int lastDocID;
 
-  public DocIDServer(Environment env, CrawlConfig config) {
-    super(config);
-    DatabaseConfig dbConfig = new DatabaseConfig();
-    dbConfig.setAllowCreate(true);
-    dbConfig.setTransactional(config.isResumableCrawling());
-    dbConfig.setDeferredWrite(!config.isResumableCrawling());
-    lastDocID = 0;
-    docIDsDB = env.openDatabase(null, DATABASE_NAME, dbConfig);
-    if (config.isResumableCrawling()) {
-      int docCount = getDocCount();
-      if (docCount > 0) {
-        logger.info("Loaded {} URLs that had been detected in previous crawl.", docCount);
-        lastDocID = docCount;
-      }
-    }
-  }
+	public DocIDServer(CrawlConfig config) {
+		super(config);
+		lastDocID = 0;
+		docIDsDB = new Jedis(config.getRedisHost(), config.getRedisPort());
+		docIDsDB.select(DATABASE_INDEX);
+		if (config.isResumableCrawling()) {
+			int docCount = getDocCount();
+			if (docCount > 0) {
+				logger.info("Loaded {} URLs that had been detected in previous crawl.", docCount);
+				lastDocID = docCount;
+			}
+		}
+	}
 
-  /**
-   * Returns the docid of an already seen url.
-   *
-   * @param url the URL for which the docid is returned.
-   * @return the docid of the url if it is seen before. Otherwise -1 is returned.
-   */
-  public int getDocId(String url) {
-    synchronized (mutex) {
-      OperationStatus result = null;
-      DatabaseEntry value = new DatabaseEntry();
-      try {
-        DatabaseEntry key = new DatabaseEntry(url.getBytes());
-        result = docIDsDB.get(null, key, value, null);
+	/**
+	 * Returns the docid of an already seen url.
+	 *
+	 * @param url the URL for which the docid is returned.
+	 * @return the docid of the url if it is seen before. Otherwise -1 is returned.
+	 */
+	public int getDocId(String url) {
+		synchronized (mutex) {
+			String result = docIDsDB.get(getKey(url));
+			return result == null ? -1 : Integer.valueOf(result);
+		}
+	}
 
-      } catch (Exception e) {
-        logger.error("Exception thrown while getting DocID", e);
-        return -1;
-      }
+	public int getNewDocID(String url) {
+		synchronized (mutex) {
+			try {
+				// Make sure that we have not already assigned a docid for this URL
+				int docID = getDocId(url);
+				if (docID > 0) {
+					return docID;
+				}
 
-      if ((result == OperationStatus.SUCCESS) && (value.getData().length > 0)) {
-        return Util.byteArray2Int(value.getData());
-      }
+				++lastDocID;
+				docIDsDB.set(getKey(url), String.valueOf(lastDocID));
+				return lastDocID;
+			}
+			catch (Exception e) {
+				logger.error("Exception thrown while getting new DocID", e);
+				return -1;
+			}
+		}
+	}
 
-      return -1;
-    }
-  }
+	public void addUrlAndDocId(String url, int docId) throws Exception {
+		synchronized (mutex) {
+			if (docId <= lastDocID) {
+				throw new Exception("Requested doc id: " + docId + " is not larger than: " + lastDocID);
+			}
 
-  public int getNewDocID(String url) {
-    synchronized (mutex) {
-      try {
-        // Make sure that we have not already assigned a docid for this URL
-        int docID = getDocId(url);
-        if (docID > 0) {
-          return docID;
-        }
+			// Make sure that we have not already assigned a docid for this URL
+			int prevDocid = getDocId(url);
+			if (prevDocid > 0) {
+				if (prevDocid == docId) {
+					return;
+				}
+				throw new Exception("Doc id: " + prevDocid + " is already assigned to URL: " + url);
+			}
 
-        ++lastDocID;
-        docIDsDB.put(null, new DatabaseEntry(url.getBytes()), new DatabaseEntry(Util.int2ByteArray(lastDocID)));
-        return lastDocID;
-      } catch (Exception e) {
-        logger.error("Exception thrown while getting new DocID", e);
-        return -1;
-      }
-    }
-  }
+			docIDsDB.set(getKey(url), String.valueOf(docId));
+			lastDocID = docId;
+		}
+	}
 
-  public void addUrlAndDocId(String url, int docId) throws Exception {
-    synchronized (mutex) {
-      if (docId <= lastDocID) {
-        throw new Exception("Requested doc id: " + docId + " is not larger than: " + lastDocID);
-      }
+	private String getKey(String url) {
+		return KEY_PREFIX + url;
+	}
 
-      // Make sure that we have not already assigned a docid for this URL
-      int prevDocid = getDocId(url);
-      if (prevDocid > 0) {
-        if (prevDocid == docId) {
-          return;
-        }
-        throw new Exception("Doc id: " + prevDocid + " is already assigned to URL: " + url);
-      }
+	public boolean isSeenBefore(String url) {
+		return getDocId(url) != -1;
+	}
 
-      docIDsDB.put(null, new DatabaseEntry(url.getBytes()), new DatabaseEntry(Util.int2ByteArray(docId)));
-      lastDocID = docId;
-    }
-  }
+	public final int getDocCount() {
+		return docIDsDB.keys(KEY_PREFIX + "*").size();
+	}
 
-  public boolean isSeenBefore(String url) {
-    return getDocId(url) != -1;
-  }
-
-  public final int getDocCount() {
-    try {
-      return (int) docIDsDB.count();
-    } catch (DatabaseException e) {
-      logger.error("Exception thrown while getting DOC Count", e);
-      return -1;
-    }
-  }
-
-  public void close() {
-    try {
-      docIDsDB.close();
-    } catch (DatabaseException e) {
-      logger.error("Exception thrown while closing DocIDServer", e);
-    }
-  }
+	public void close() {
+		docIDsDB.close();
+	}
 }

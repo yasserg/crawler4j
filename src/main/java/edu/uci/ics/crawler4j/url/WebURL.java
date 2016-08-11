@@ -19,19 +19,14 @@ package edu.uci.ics.crawler4j.url;
 
 import java.io.Serializable;
 
-import com.sleepycat.persist.model.Entity;
-import com.sleepycat.persist.model.PrimaryKey;
 
 /**
  * @author Yasser Ganjisaffar
  */
-
-@Entity
 public class WebURL implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  @PrimaryKey
   private String url;
 
   private int docid;

@@ -17,125 +17,55 @@
 
 package edu.uci.ics.crawler4j.frontier;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.sleepycat.je.Cursor;
-import com.sleepycat.je.Database;
-import com.sleepycat.je.DatabaseConfig;
-import com.sleepycat.je.DatabaseEntry;
-import com.sleepycat.je.DatabaseException;
-import com.sleepycat.je.Environment;
-import com.sleepycat.je.OperationStatus;
-import com.sleepycat.je.Transaction;
-
 import edu.uci.ics.crawler4j.crawler.Configurable;
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
-import edu.uci.ics.crawler4j.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import redis.clients.jedis.Jedis;
 
 /**
  * @author Yasser Ganjisaffar
  */
 public class Counters extends Configurable {
-  private static final Logger logger = LoggerFactory.getLogger(Counters.class);
+	private static final Logger logger = LoggerFactory.getLogger(Counters.class);
 
-  public static class ReservedCounterNames {
-    public static final String SCHEDULED_PAGES = "Scheduled-Pages";
-    public static final String PROCESSED_PAGES = "Processed-Pages";
-  }
+	public static class ReservedCounterNames {
+		public static final String SCHEDULED_PAGES = "Scheduled-Pages";
+		public static final String PROCESSED_PAGES = "Processed-Pages";
+	}
 
-  private static final String DATABASE_NAME = "Statistics";
-  protected Database statisticsDB = null;
-  protected Environment env;
+	public static final int DATABASE_INDEX = 0;
+	protected Jedis statisticsDB = null;
 
-  protected final Object mutex = new Object();
 
-  protected Map<String, Long> counterValues;
+	protected final Object mutex = new Object();
 
-  public Counters(Environment env, CrawlConfig config) {
-    super(config);
+	public Counters(CrawlConfig config) {
+		super(config);
+		statisticsDB = new Jedis(config.getRedisHost(), config.getRedisPort());
+		statisticsDB.select(DATABASE_INDEX);
+	}
 
-    this.env = env;
-    this.counterValues = new HashMap<>();
+	public long getValue(String name) {
+		String value = statisticsDB.get(name);
+		return value == null ? 0 : Long.parseLong(value);
+	}
 
-    /*
-     * When crawling is set to be resumable, we have to keep the statistics
-     * in a transactional database to make sure they are not lost if crawler
-     * is crashed or terminated unexpectedly.
-     */
-    if (config.isResumableCrawling()) {
-      DatabaseConfig dbConfig = new DatabaseConfig();
-      dbConfig.setAllowCreate(true);
-      dbConfig.setTransactional(true);
-      dbConfig.setDeferredWrite(false);
-      statisticsDB = env.openDatabase(null, DATABASE_NAME, dbConfig);
+	public void setValue(String name, Long value) {
+		statisticsDB.set(name, value.toString());
+	}
 
-      OperationStatus result;
-      DatabaseEntry key = new DatabaseEntry();
-      DatabaseEntry value = new DatabaseEntry();
-      Transaction tnx = env.beginTransaction(null, null);
-      Cursor cursor = statisticsDB.openCursor(tnx, null);
-      result = cursor.getFirst(key, value, null);
+	public void increment(String name) {
+		statisticsDB.incr(name);
+	}
 
-      while (result == OperationStatus.SUCCESS) {
-        if (value.getData().length > 0) {
-          String name = new String(key.getData());
-          long counterValue = Util.byteArray2Long(value.getData());
-          counterValues.put(name, counterValue);
-        }
-        result = cursor.getNext(key, value, null);
-      }
-      cursor.close();
-      tnx.commit();
-    }
-  }
+	public void increment(String name, long addition) {
+		statisticsDB.incrBy(name, addition);
+	}
 
-  public long getValue(String name) {
-    synchronized (mutex) {
-      Long value = counterValues.get(name);
-      if (value == null) {
-        return 0;
-      }
-      return value;
-    }
-  }
-
-  public void setValue(String name, long value) {
-    synchronized (mutex) {
-      try {
-        counterValues.put(name, value);
-        if (statisticsDB != null) {
-          Transaction txn = env.beginTransaction(null, null);
-          statisticsDB.put(txn, new DatabaseEntry(name.getBytes()), new DatabaseEntry(Util.long2ByteArray(value)));
-          txn.commit();
-        }
-      } catch (Exception e) {
-        logger.error("Exception setting value", e);
-      }
-    }
-  }
-
-  public void increment(String name) {
-    increment(name, 1);
-  }
-
-  public void increment(String name, long addition) {
-    synchronized (mutex) {
-      long prevValue = getValue(name);
-      setValue(name, prevValue + addition);
-    }
-  }
-
-  public void close() {
-    try {
-      if (statisticsDB != null) {
-        statisticsDB.close();
-      }
-    } catch (DatabaseException e) {
-      logger.error("Exception thrown while trying to close statisticsDB", e);
-    }
-  }
+	public void close() {
+		if (statisticsDB != null) {
+			statisticsDB.close();
+		}
+	}
 }

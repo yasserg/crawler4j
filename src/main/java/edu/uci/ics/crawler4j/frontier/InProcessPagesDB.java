@@ -18,16 +18,10 @@
 package edu.uci.ics.crawler4j.frontier;
 
 
+import edu.uci.ics.crawler4j.crawler.CrawlConfig;
+import edu.uci.ics.crawler4j.url.WebURL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.sleepycat.je.Cursor;
-import com.sleepycat.je.DatabaseEntry;
-import com.sleepycat.je.Environment;
-import com.sleepycat.je.OperationStatus;
-import com.sleepycat.je.Transaction;
-
-import edu.uci.ics.crawler4j.url.WebURL;
 
 /**
  * This class maintains the list of pages which are
@@ -39,10 +33,10 @@ import edu.uci.ics.crawler4j.url.WebURL;
 public class InProcessPagesDB extends WorkQueues {
   private static final Logger logger = LoggerFactory.getLogger(InProcessPagesDB.class);
 
-  private static final String DATABASE_NAME = "InProcessPagesDB";
+  public static final int DATABASE_INDEX = 3;
 
-  public InProcessPagesDB(Environment env) {
-    super(env, DATABASE_NAME, true);
+  public InProcessPagesDB(CrawlConfig crawlConfig) {
+    super(DATABASE_INDEX,crawlConfig);
     long docCount = getLength();
     if (docCount > 0) {
       logger.info("Loaded {} URLs that have been in process in the previous crawl.", docCount);
@@ -51,22 +45,10 @@ public class InProcessPagesDB extends WorkQueues {
 
   public boolean removeURL(WebURL webUrl) {
     synchronized (mutex) {
-      DatabaseEntry key = getDatabaseEntryKey(webUrl);
-      DatabaseEntry value = new DatabaseEntry();
-      Transaction txn = beginTransaction();
-      try (Cursor cursor = openCursor(txn)) {
-        OperationStatus result = cursor.getSearchKey(key, value, null);
-
-        if (result == OperationStatus.SUCCESS) {
-          result = cursor.delete();
-          if (result == OperationStatus.SUCCESS) {
-            return true;
-          }
-        }
-      } finally {
-        commit(txn);
-      }
+      String key = getDatabaseEntryKey(webUrl);
+      getUrlsDB().del(key);
+      getUrlsDB().zrem(ALL_URLS, key);
     }
-    return false;
+    return true;
   }
 }
