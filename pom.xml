@@ -4,7 +4,7 @@
 	<artifactId>crawler4j</artifactId>
 	<packaging>jar</packaging>
 	<name>crawler4j</name>
-	<version>4.3-SNAPSHOT</version>
+	<version>4.3-SNAPSHOT-code911</version>
 	<description>Open Source Web Crawler for Java</description>
 	<url>https://github.com/yasserg/crawler4j</url>
 	<licenses>
@@ -138,7 +138,7 @@
 	<dependency>
 		<groupId>org.apache.tika</groupId>
 		<artifactId>tika-parsers</artifactId>
-		<version>1.5</version>
+		<version>1.11</version>
 	</dependency>
 
     <!-- Test Dependencies -->

@@ -228,8 +228,9 @@ public class PageFetcher extends Configurable {
       // Applying Politeness delay
       synchronized (mutex) {
         long now = (new Date()).getTime();
-        if ((now - lastFetchTime) < config.getPolitenessDelay()) {
-          Thread.sleep(config.getPolitenessDelay() - (now - lastFetchTime));
+        int delay = config.getPolitenessDelay();
+        if ((now - lastFetchTime) < delay) {
+          Thread.sleep(delay - (now - lastFetchTime));
         }
         lastFetchTime = (new Date()).getTime();
       }
