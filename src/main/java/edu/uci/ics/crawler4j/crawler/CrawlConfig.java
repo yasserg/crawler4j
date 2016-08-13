@@ -42,6 +42,13 @@ public class CrawlConfig {
   private boolean resumableCrawling = false;
 
   /**
+   * Defines number of URL's a thread will catch from the queue and sequentially execute 
+   * before it gets the next set of URL's
+   */
+  
+  private int maxDownloadSequentially = 10;
+  
+  /**
    * Maximum depth of crawling For unlimited depth this parameter should be
    * set to -1
    */
@@ -184,6 +191,14 @@ public class CrawlConfig {
     }
   }
 
+  public int getMaxDownloadSequentially(){
+	  return maxDownloadSequentially;
+  }
+  
+  public void setMaxDownloadSequentially(int maxDownloadSequentially){
+	  this.maxDownloadSequentially = maxDownloadSequentially;
+  }
+  
   public String getCrawlStorageFolder() {
     return crawlStorageFolder;
   }

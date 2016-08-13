@@ -254,9 +254,9 @@ public class WebCrawler implements Runnable {
   public void run() {
     onStart();
     while (true) {
-      List<WebURL> assignedURLs = new ArrayList<>(50);
+      List<WebURL> assignedURLs = new ArrayList<>(myController.getConfig().getMaxDownloadSequentially());
       isWaitingForNewURLs = true;
-      frontier.getNextURLs(50, assignedURLs);
+      frontier.getNextURLs(myController.getConfig().getMaxDownloadSequentially(), assignedURLs);
       isWaitingForNewURLs = false;
       if (assignedURLs.isEmpty()) {
         if (frontier.isFinished()) {
