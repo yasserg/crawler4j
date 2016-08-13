@@ -24,6 +24,7 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
 
@@ -72,7 +73,7 @@ public class URLCanonicalizer {
 
       path = path.trim();
 
-      final LinkedHashMap<String, String> params = createParameterMap(canonicalURL.getQuery());
+      final LinkedHashMap<String, LinkedHashSet<String>> params = createParameterMap(canonicalURL.getQuery());
       final String queryString;
       if ((params != null) && !params.isEmpty()) {
         String canonicalParams = canonicalize(params);
@@ -108,13 +109,13 @@ public class URLCanonicalizer {
    *
    * @return Null if there is no query string.
    */
-  private static LinkedHashMap<String, String> createParameterMap(final String queryString) {
+  private static LinkedHashMap<String, LinkedHashSet<String>> createParameterMap(final String queryString) {
     if ((queryString == null) || queryString.isEmpty()) {
       return null;
     }
 
     final String[] pairs = queryString.split("&");
-    final Map<String, String> params = new LinkedHashMap<>(pairs.length);
+    final Map<String, LinkedHashSet<String>> params = new LinkedHashMap<>(pairs.length);
 
     for (final String pair : pairs) {
       if (pair.isEmpty()) {
@@ -122,17 +123,31 @@ public class URLCanonicalizer {
       }
 
       String[] tokens = pair.split("=", 2);
+      String key = null;
+      String value = null;
       switch (tokens.length) {
         case 1:
           if (pair.charAt(0) == '=') {
-            params.put("", tokens[0]);
+        	  key = "";
+        	  value = tokens[0];
           } else {
-            params.put(tokens[0], "");
+        	  key = tokens[0];
+        	  value = "";
           }
           break;
         case 2:
-          params.put(tokens[0], tokens[1]);
+        	key = tokens[0];
+      	  value = tokens[1];
           break;
+      }
+      if(key != null) {
+    	  LinkedHashSet<String> values = params.get(key);
+    	  if(values == null) {
+    		  values = new LinkedHashSet<>();
+    		  params.put(key, values);
+    	  }
+    	  if(value != null)
+    		  values.add(value);
       }
     }
     return new LinkedHashMap<>(params);
@@ -145,25 +160,27 @@ public class URLCanonicalizer {
    *            Parameter map whose name-value pairs are in order of insertion.
    * @return Canonical form of query string.
    */
-  private static String canonicalize(final LinkedHashMap<String, String> paramsMap) {
+  private static String canonicalize(final LinkedHashMap<String, LinkedHashSet<String>> paramsMap) {
     if ((paramsMap == null) || paramsMap.isEmpty()) {
       return "";
     }
 
     final StringBuilder sb = new StringBuilder(100);
-    for (Map.Entry<String, String> pair : paramsMap.entrySet()) {
-      final String key = pair.getKey().toLowerCase();
-      if ("jsessionid".equals(key) || "phpsessid".equals(key) || "aspsessionid".equals(key)) {
-        continue;
-      }
-      if (sb.length() > 0) {
-        sb.append('&');
-      }
-      sb.append(percentEncodeRfc3986(pair.getKey()));
-      if (!pair.getValue().isEmpty()) {
-        sb.append('=');
-        sb.append(percentEncodeRfc3986(pair.getValue()));
-      }
+    for (Map.Entry<String, LinkedHashSet<String>> pair : paramsMap.entrySet()) {
+    	final String key = pair.getKey().toLowerCase();
+    	if ("jsessionid".equals(key) || "phpsessid".equals(key) || "aspsessionid".equals(key)) {
+    		continue;
+    	}
+    	for(String value : pair.getValue()) {
+	      if (sb.length() > 0) {
+	        sb.append('&');
+	      }
+	      sb.append(percentEncodeRfc3986(pair.getKey()));
+	      if (!value.isEmpty()) {
+	        sb.append('=');
+	        sb.append(percentEncodeRfc3986(value));
+	      }
+    	}
     }
     return sb.toString();
   }
