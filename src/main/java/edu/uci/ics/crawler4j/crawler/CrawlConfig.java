@@ -17,15 +17,14 @@
 
 package edu.uci.ics.crawler4j.crawler;
 
+import edu.uci.ics.crawler4j.crawler.authentication.AuthInfo;
+import org.apache.http.Header;
+import org.apache.http.message.BasicHeader;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-
-import org.apache.http.Header;
-import org.apache.http.message.BasicHeader;
-
-import edu.uci.ics.crawler4j.crawler.authentication.AuthInfo;
 
 public class CrawlConfig {
 
@@ -163,6 +162,11 @@ public class CrawlConfig {
    * List of possible authentications needed by crawler
    */
   private List<AuthInfo> authInfos;
+
+  /**
+   * Should we skip SSL verification
+   */
+  private boolean skipSSLVerification = false;
 
   /**
    * Validates the configs specified by this instance.
@@ -517,5 +521,16 @@ public class CrawlConfig {
     sb.append("Proxy username: " + getProxyUsername() + "\n");
     sb.append("Proxy password: " + getProxyPassword() + "\n");
     return sb.toString();
+  }
+
+  public boolean getSkipSSLVerification() {
+    return skipSSLVerification;
+  }
+
+  /**
+   * Should we skip SSL verification
+   */
+  public void setSkipSSLVerification(boolean skipSSLVerification) {
+    this.skipSSLVerification = skipSSLVerification;
   }
 }
