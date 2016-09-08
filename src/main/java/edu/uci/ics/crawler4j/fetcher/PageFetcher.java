@@ -17,32 +17,23 @@
 
 package edu.uci.ics.crawler4j.fetcher;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-import javax.net.ssl.SSLContext;
-
+import edu.uci.ics.crawler4j.crawler.CrawlConfig;
+import edu.uci.ics.crawler4j.crawler.authentication.AuthInfo;
+import edu.uci.ics.crawler4j.crawler.authentication.BasicAuthInfo;
+import edu.uci.ics.crawler4j.crawler.authentication.FormAuthInfo;
 import edu.uci.ics.crawler4j.crawler.authentication.NtAuthInfo;
-import org.apache.http.Header;
+import edu.uci.ics.crawler4j.crawler.exceptions.PageBiggerThanMaxSizeException;
+import edu.uci.ics.crawler4j.url.WebURL;
 import org.apache.http.HttpHost;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.NTCredentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.config.Registry;
@@ -58,59 +49,59 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.ssl.SSLContexts;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import edu.uci.ics.crawler4j.crawler.Configurable;
-import edu.uci.ics.crawler4j.crawler.CrawlConfig;
-import edu.uci.ics.crawler4j.crawler.authentication.AuthInfo;
-import edu.uci.ics.crawler4j.crawler.authentication.BasicAuthInfo;
-import edu.uci.ics.crawler4j.crawler.authentication.FormAuthInfo;
-import edu.uci.ics.crawler4j.crawler.exceptions.PageBiggerThanMaxSizeException;
-import edu.uci.ics.crawler4j.url.URLCanonicalizer;
-import edu.uci.ics.crawler4j.url.WebURL;
+import javax.net.ssl.SSLContext;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
  * @author Yasser Ganjisaffar
  */
-public class PageFetcher extends Configurable {
-  protected static final Logger logger = LoggerFactory.getLogger(PageFetcher.class);
+public class PageFetcher extends PageFetcherBase {
 
   protected PoolingHttpClientConnectionManager connectionManager;
   protected CloseableHttpClient httpClient;
   protected final Object mutex = new Object();
   protected long lastFetchTime = 0;
   protected IdleConnectionMonitorThread connectionMonitorThread = null;
+  protected final Registry<ConnectionSocketFactory> connRegistry;
 
   public PageFetcher(CrawlConfig config) {
     super(config);
 
-    RequestConfig requestConfig =
-        RequestConfig.custom().setExpectContinueEnabled(false).setCookieSpec(CookieSpecs.DEFAULT)
-                     .setRedirectsEnabled(false).setSocketTimeout(config.getSocketTimeout())
-                     .setConnectTimeout(config.getConnectionTimeout()).build();
+    RequestConfig requestConfig = getRequestConfig(config);
 
     RegistryBuilder<ConnectionSocketFactory> connRegistryBuilder = RegistryBuilder.create();
     connRegistryBuilder.register("http", PlainConnectionSocketFactory.INSTANCE);
     if (config.isIncludeHttpsPages()) {
-      try { // Fixing: https://code.google.com/p/crawler4j/issues/detail?id=174
-        // By always trusting the ssl certificate
-        SSLContext sslContext = SSLContexts.custom().loadTrustMaterial(null, new TrustStrategy() {
-          @Override
-          public boolean isTrusted(final X509Certificate[] chain, String authType) {
-            return true;
-          }
-        }).build();
-        SSLConnectionSocketFactory sslsf =
-            new SSLConnectionSocketFactory(sslContext, SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
-        connRegistryBuilder.register("https", sslsf);
-      } catch (Exception e) {
-        logger.warn("Exception thrown while trying to register https");
-        logger.debug("Stacktrace", e);
+      if (config.getSkipSSLVerification()) {
+        try { // Fixing: https://code.google.com/p/crawler4j/issues/detail?id=174
+          // By always trusting the ssl certificate
+          SSLContext sslContext = SSLContexts.custom().loadTrustMaterial(null, new TrustStrategy() {
+            @Override
+            public boolean isTrusted(final X509Certificate[] chain, String authType) {
+              return true;
+            }
+          }).build();
+          SSLConnectionSocketFactory sslsf =
+                  new SSLConnectionSocketFactory(sslContext, SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+          connRegistryBuilder.register("https", sslsf);
+        } catch (Exception e) {
+          logger.warn("Exception thrown while trying to register https");
+          logger.debug("Stacktrace", e);
+        }
+      } else {
+        connRegistryBuilder.register("https", SSLConnectionSocketFactory.getSystemSocketFactory());
       }
     }
+    connRegistry = connRegistryBuilder.build();
 
-    Registry<ConnectionSocketFactory> connRegistry = connRegistryBuilder.build();
     connectionManager = new PoolingHttpClientConnectionManager(connRegistry);
     connectionManager.setMaxTotal(config.getMaxTotalConnections());
     connectionManager.setDefaultMaxPerRoute(config.getMaxConnectionsPerHost());
@@ -123,10 +114,7 @@ public class PageFetcher extends Configurable {
 
     if (config.getProxyHost() != null) {
       if (config.getProxyUsername() != null) {
-        BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-        credentialsProvider.setCredentials(new AuthScope(config.getProxyHost(), config.getProxyPort()),
-                                           new UsernamePasswordCredentials(config.getProxyUsername(),
-                                                                           config.getProxyPassword()));
+        BasicCredentialsProvider credentialsProvider = getCredentialsProvider(config);
         clientBuilder.setDefaultCredentialsProvider(credentialsProvider);
       }
 
@@ -235,53 +223,11 @@ public class PageFetcher extends Configurable {
       }
 
       CloseableHttpResponse response = httpClient.execute(request);
-      fetchResult.setEntity(response.getEntity());
-      fetchResult.setResponseHeaders(response.getAllHeaders());
-
-      // Setting HttpStatus
-      int statusCode = response.getStatusLine().getStatusCode();
-
-      // If Redirect ( 3xx )
-      if (statusCode == HttpStatus.SC_MOVED_PERMANENTLY || statusCode == HttpStatus.SC_MOVED_TEMPORARILY ||
-          statusCode == HttpStatus.SC_MULTIPLE_CHOICES || statusCode == HttpStatus.SC_SEE_OTHER ||
-          statusCode == HttpStatus.SC_TEMPORARY_REDIRECT ||
-          statusCode == 308) { // todo follow https://issues.apache.org/jira/browse/HTTPCORE-389
-
-        Header header = response.getFirstHeader("Location");
-        if (header != null) {
-          String movedToUrl = URLCanonicalizer.getCanonicalURL(header.getValue(), toFetchURL);
-          fetchResult.setMovedToUrl(movedToUrl);
-        }
-      } else if (statusCode >= 200 && statusCode <= 299) { // is 2XX, everything looks ok
-        fetchResult.setFetchedUrl(toFetchURL);
-        String uri = request.getURI().toString();
-        if (!uri.equals(toFetchURL)) {
-          if (!URLCanonicalizer.getCanonicalURL(uri).equals(toFetchURL)) {
-            fetchResult.setFetchedUrl(uri);
-          }
-        }
-
-        // Checking maximum size
-        if (fetchResult.getEntity() != null) {
-          long size = fetchResult.getEntity().getContentLength();
-          if (size == -1) {
-            Header length = response.getLastHeader("Content-Length");
-            if (length == null) {
-              length = response.getLastHeader("Content-length");
-            }
-            if (length != null) {
-              size = Integer.parseInt(length.getValue());
-            }
-          }
-          if (size > config.getMaxDownloadSize()) {
-            //fix issue #52 - consume entity
-            response.close();
-            throw new PageBiggerThanMaxSizeException(size);
-          }
-        }
+      try {
+        ParseResponse(fetchResult, toFetchURL, request, response);
+      } finally {
+        response.close();
       }
-
-      fetchResult.setStatusCode(statusCode);
       return fetchResult;
 
     } finally { // occurs also with thrown exceptions
@@ -296,17 +242,6 @@ public class PageFetcher extends Configurable {
       connectionManager.shutdown();
       connectionMonitorThread.shutdown();
     }
-  }
-
-  /**
-   * Creates a new HttpUriRequest for the given url. The default is to create a HttpGet without
-   * any further configuration. Subclasses may override this method and provide their own logic.
-   *
-   * @param url the url to be fetched
-   * @return the HttpUriRequest for the given url
-   */
-  protected HttpUriRequest newHttpUriRequest(String url) {
-    return new HttpGet(url);
   }
 
 }
