@@ -17,21 +17,18 @@
 
 package edu.uci.ics.crawler4j.fetcher;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-import javax.net.ssl.SSLContext;
-
+import edu.uci.ics.crawler4j.crawler.Configurable;
+import edu.uci.ics.crawler4j.crawler.CrawlConfig;
+import edu.uci.ics.crawler4j.crawler.authentication.AuthInfo;
+import edu.uci.ics.crawler4j.crawler.authentication.BasicAuthInfo;
+import edu.uci.ics.crawler4j.crawler.authentication.FormAuthInfo;
 import edu.uci.ics.crawler4j.crawler.authentication.NtAuthInfo;
+import edu.uci.ics.crawler4j.crawler.exceptions.PageBiggerThanMaxSizeException;
+import edu.uci.ics.crawler4j.fetcher.politness.PolitenessServer;
+import edu.uci.ics.crawler4j.url.URLCanonicalizer;
+import edu.uci.ics.crawler4j.url.WebURL;
 import org.apache.http.Header;
 import org.apache.http.HttpHost;
-import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.auth.AuthScope;
@@ -42,6 +39,7 @@ import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -61,14 +59,14 @@ import org.apache.http.ssl.SSLContexts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.uci.ics.crawler4j.crawler.Configurable;
-import edu.uci.ics.crawler4j.crawler.CrawlConfig;
-import edu.uci.ics.crawler4j.crawler.authentication.AuthInfo;
-import edu.uci.ics.crawler4j.crawler.authentication.BasicAuthInfo;
-import edu.uci.ics.crawler4j.crawler.authentication.FormAuthInfo;
-import edu.uci.ics.crawler4j.crawler.exceptions.PageBiggerThanMaxSizeException;
-import edu.uci.ics.crawler4j.url.URLCanonicalizer;
-import edu.uci.ics.crawler4j.url.WebURL;
+import javax.net.ssl.SSLContext;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Yasser Ganjisaffar
@@ -78,12 +76,13 @@ public class PageFetcher extends Configurable {
 
   protected PoolingHttpClientConnectionManager connectionManager;
   protected CloseableHttpClient httpClient;
-  protected final Object mutex = new Object();
-  protected long lastFetchTime = 0;
   protected IdleConnectionMonitorThread connectionMonitorThread = null;
+  protected PolitenessServer politenessServer = null;
 
-  public PageFetcher(CrawlConfig config) {
+  public PageFetcher(CrawlConfig config, PolitenessServer politenessServer) {
     super(config);
+
+    this.politenessServer = politenessServer;
 
     RequestConfig requestConfig =
         RequestConfig.custom().setExpectContinueEnabled(false).setCookieSpec(CookieSpecs.DEFAULT)
@@ -144,6 +143,7 @@ public class PageFetcher extends Configurable {
       connectionMonitorThread = new IdleConnectionMonitorThread(connectionManager);
     }
     connectionMonitorThread.start();
+
   }
 
   private void doAuthetication(List<AuthInfo> authInfos) {
@@ -225,13 +225,16 @@ public class PageFetcher extends Configurable {
     HttpUriRequest request = null;
     try {
       request = newHttpUriRequest(toFetchURL);
+
       // Applying Politeness delay
-      synchronized (mutex) {
-        long now = (new Date()).getTime();
-        if ((now - lastFetchTime) < config.getPolitenessDelay()) {
-          Thread.sleep(config.getPolitenessDelay() - (now - lastFetchTime));
+      long politenessDelay = politenessServer.applyPoliteness(webUrl);
+
+      if(politenessDelay != PolitenessServer.NO_POLITENESS_APPLIED) {
+        if(logger.isDebugEnabled()) {
+           logger.debug("Applying politeness delay: {} ms", politenessDelay);
         }
-        lastFetchTime = (new Date()).getTime();
+
+        Thread.sleep(politenessDelay);
       }
 
       CloseableHttpResponse response = httpClient.execute(request);
@@ -296,6 +299,12 @@ public class PageFetcher extends Configurable {
       connectionManager.shutdown();
       connectionMonitorThread.shutdown();
     }
+
+    if(politenessServer != null) {
+        politenessServer.shutdown();
+    }
+
+
   }
 
   /**

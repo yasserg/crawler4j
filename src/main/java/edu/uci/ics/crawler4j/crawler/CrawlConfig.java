@@ -17,15 +17,14 @@
 
 package edu.uci.ics.crawler4j.crawler;
 
+import edu.uci.ics.crawler4j.crawler.authentication.AuthInfo;
+import org.apache.http.Header;
+import org.apache.http.message.BasicHeader;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-
-import org.apache.http.Header;
-import org.apache.http.message.BasicHeader;
-
-import edu.uci.ics.crawler4j.crawler.authentication.AuthInfo;
 
 public class CrawlConfig {
 
@@ -65,9 +64,21 @@ public class CrawlConfig {
   private Collection<BasicHeader> defaultHeaders = new HashSet<BasicHeader>();
 
   /**
+   * Wait time for the {@link edu.uci.ics.crawler4j.fetcher.politness.PolitenessMonitorThread} before cleaning up expired entries.
+   * It is used a a multiplier. Actual value is politnessEntryExpiredWaitMultiplier * politenessEntryExpiredDelay in milliseconds.
+   */
+  private int politnessEntryExpiredWaitMultiplier = 4;
+
+  /**
+   * Politeness entry expired delay in milliseconds (delay before an entry is removed from the politeness server).
+   */
+  private int politenessEntryExpiredDelay = 800;
+
+  /**
    * Politeness delay in milliseconds (delay between sending two requests to
    * the same host).
    */
+
   private int politenessDelay = 200;
 
   /**
@@ -488,9 +499,26 @@ public class CrawlConfig {
     this.authInfos.add(authInfo);
   }
 
+  public int getPolitenessEntryExpiredDelay() {
+    return politenessEntryExpiredDelay;
+  }
+
+  public void setPolitenessEntryExpiredDelay(int politenessEntryExpiredDelay) {
+    this.politenessEntryExpiredDelay = politenessEntryExpiredDelay;
+  }
+
+  public int getPolitnessEntryExpiredWaitMultiplier() {
+    return politnessEntryExpiredWaitMultiplier;
+  }
+
+  public void setPolitnessEntryExpiredWaitMultiplier(int politnessEntryExpiredWaitMultiplier) {
+    this.politnessEntryExpiredWaitMultiplier = politnessEntryExpiredWaitMultiplier;
+  }
+
   /**
    * @param authInfos authenticationInformations to set
    */
+
   public void setAuthInfos(List<AuthInfo> authInfos) {
     this.authInfos = authInfos;
   }
