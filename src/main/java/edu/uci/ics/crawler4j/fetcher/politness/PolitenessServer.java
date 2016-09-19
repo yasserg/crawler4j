@@ -50,7 +50,7 @@ public class PolitenessServer extends Configurable {
                     long diff = (now - lastFetchTime.getTime());
 
                     if (diff < config.getPolitenessDelay()) {
-                        politenessDelay = config.getPolitenessDelay();
+                        politenessDelay = config.getPolitenessDelay() - diff;
 
                         if (logger.isDebugEnabled()) {
                             logger.debug("Applying politeness delay of {} ms for host {}", politenessDelay, host);
