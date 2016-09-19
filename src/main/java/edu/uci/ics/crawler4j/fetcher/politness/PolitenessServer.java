@@ -52,13 +52,9 @@ public class PolitenessServer extends Configurable {
                     if (diff < config.getPolitenessDelay()) {
                         politenessDelay = config.getPolitenessDelay() - diff;
 
-                        if (logger.isDebugEnabled()) {
-                            logger.debug("Applying politeness delay of {} ms for host {}", politenessDelay, host);
-                        }
+                        logger.debug("Applying politeness delay of {} ms for host {}", politenessDelay, host);
                     } else {
-                        if (logger.isDebugEnabled()) {
-                            logger.debug("Applying NO politeness delay, diff was {} ms for host {}", diff, host);
-                        }
+                        //nothing to do here
                     }
                 }
 
@@ -92,6 +88,10 @@ public class PolitenessServer extends Configurable {
         }
 
         return expired;
+    }
+
+    public int getSize() {
+        return seenHosts.size();
     }
 
     private String getHost(WebURL webURL) {

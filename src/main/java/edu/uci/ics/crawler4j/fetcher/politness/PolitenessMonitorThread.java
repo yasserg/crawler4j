@@ -24,9 +24,7 @@ public class PolitenessMonitorThread extends Thread {
 
                     int expired = politenessServer.removeExpiredEntries();
 
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Removed {} expired host entries.", expired);
-                    }
+                    logger.debug("Removed {} expired host entries.", expired);
                 }
             }
         } catch (InterruptedException ignored) {
