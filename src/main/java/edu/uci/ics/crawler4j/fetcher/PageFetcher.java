@@ -295,12 +295,6 @@ public class PageFetcher extends Configurable {
             connectionManager.shutdown();
             connectionMonitorThread.shutdown();
         }
-
-        if (politenessServer != null) {
-            politenessServer.shutdown();
-        }
-
-
     }
 
     /**

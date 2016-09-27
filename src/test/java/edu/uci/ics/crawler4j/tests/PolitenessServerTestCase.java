@@ -3,7 +3,6 @@ package edu.uci.ics.crawler4j.tests;
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.fetcher.politness.PolitenessServer;
 import edu.uci.ics.crawler4j.url.WebURL;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -22,6 +21,7 @@ public class PolitenessServerTestCase {
         CrawlConfig config = new CrawlConfig();
 
         config.setPolitenessDelay(100);
+        config.setPolitenessMaximumHostEntries(3);
 
         politenessServer = new PolitenessServer(config);
     }
@@ -114,10 +114,23 @@ public class PolitenessServerTestCase {
 
         assertEquals(PolitenessServer.NO_POLITENESS_APPLIED, politenessDelay);
 
+        webUrl.setURL("https://www.google.de/?gws_rd=ssl");
+
+        politenessDelay = politenessServer.applyPoliteness(webUrl);
+
+        assertEquals(PolitenessServer.NO_POLITENESS_APPLIED, politenessDelay);
+
+        webUrl.setURL("https://stackoverflow.com/");
+
+        politenessDelay = politenessServer.applyPoliteness(webUrl);
+
+        assertEquals(PolitenessServer.NO_POLITENESS_APPLIED, politenessDelay);
+
         //let's wait some time, it should not be listed anymore
         sleep(5000);
 
-        assertEquals(0, politenessServer.getSize());
+        //one entry should be evicted...
+        assertEquals(3, politenessServer.getSize());
 
     }
 
@@ -131,8 +144,4 @@ public class PolitenessServerTestCase {
     }
 
 
-    @After
-    public void cleanup() {
-        politenessServer.shutdown();
-    }
 }

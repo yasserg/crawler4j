@@ -17,6 +17,8 @@
 
 package edu.uci.ics.crawler4j.fetcher.politness;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import edu.uci.ics.crawler4j.crawler.Configurable;
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.url.WebURL;
@@ -26,38 +28,34 @@ import org.slf4j.LoggerFactory;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Date;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 public class PolitenessServer extends Configurable {
 
     private static final Logger logger = LoggerFactory.getLogger(PolitenessServer.class);
 
     public static int NO_POLITENESS_APPLIED = -1;
-    private PolitenessMonitorThread politenessMonitorThread;
 
-    private Map<String, Date> seenHosts;
+    private Cache<String, Date> seenHosts;
+
+    private Object mutex = new Object();
 
     public PolitenessServer(CrawlConfig config) {
         super(config);
-        this.seenHosts = new ConcurrentHashMap<>();
 
-        if (politenessMonitorThread == null) {
-            politenessMonitorThread = new PolitenessMonitorThread(this);
-        }
-        politenessMonitorThread.start();
+        this.seenHosts = CacheBuilder.newBuilder().maximumSize(config.getPolitenessMaximumHostEntries())
+                .expireAfterAccess(config.getPolitenessEntryExpiredDelay(), TimeUnit.MILLISECONDS).build();
     }
 
     public long applyPoliteness(WebURL url) {
+        synchronized (mutex) {
+            long politenessDelay = NO_POLITENESS_APPLIED;
 
-        long politenessDelay = NO_POLITENESS_APPLIED;
+            String host = getHost(url);
 
-        String host = getHost(url);
+            if (host != null) {
 
-        if (host != null) {
-            if (seenHosts.containsKey(host)) {
-
-                Date lastFetchTime = seenHosts.get(host);
+                Date lastFetchTime = seenHosts.getIfPresent(host);
 
                 if (lastFetchTime != null) {
                     long now = (new Date()).getTime();
@@ -71,40 +69,22 @@ public class PolitenessServer extends Configurable {
                         //nothing to do here
                     }
                 }
-
-            }
-            seenHosts.put(host, new Date());
-            return politenessDelay;
-        } else {
-            logger.warn("Could not determine host for: " + url.getURL());
-            return politenessDelay;
-        }
-
-    }
-
-    public int removeExpiredEntries() {
-
-        int expired = 0;
-
-        long now = (new Date()).getTime();
-
-        for (Map.Entry<String, Date> host : seenHosts.entrySet()) {
-
-            long diff = (now - host.getValue().getTime());
-
-            if (diff < config.getPolitenessEntryExpiredDelay()) {
-                //entry is not expired
-            } else {
-                seenHosts.remove(host.getKey());
-                expired++;
+                seenHosts.put(host, new Date());
             }
 
+            return politenessDelay;
         }
-
-        return expired;
     }
 
-    public int getSize() {
+    /**
+     * This can be used to force cache clean up. Per default it performs small amounts of maintenance during write operations,
+     * or during occasional read operations if writes are rare. See https://github.com/google/guava/wiki/CachesExplained
+     */
+    public void forceCleanUp() {
+        this.seenHosts.cleanUp();
+    }
+
+    public long getSize() {
         return seenHosts.size();
     }
 
@@ -118,12 +98,6 @@ public class PolitenessServer extends Configurable {
             logger.error("Could not determine host for: " + webURL.getURL(), e);
         }
         return host;
-    }
-
-    public synchronized void shutdown() {
-        if (politenessMonitorThread != null) {
-            politenessMonitorThread.shutdown();
-        }
     }
 
 }

@@ -64,10 +64,9 @@ public class CrawlConfig {
   private Collection<BasicHeader> defaultHeaders = new HashSet<BasicHeader>();
 
   /**
-   * Wait time for the {@link edu.uci.ics.crawler4j.fetcher.politness.PolitenessMonitorThread} before cleaning up expired entries.
-   * It is used a a multiplier. Actual value is politnessEntryExpiredWaitMultiplier * politenessEntryExpiredDelay in milliseconds.
+   * Maximum amount of hosts to be tracked in the {@link edu.uci.ics.crawler4j.fetcher.politness.PolitenessServer}
    */
-  private int politnessEntryExpiredWaitMultiplier = 4;
+  private int politenessMaximumHostEntries = 100;
 
   /**
    * Politeness entry expired delay in milliseconds (delay before an entry is removed from the politeness server).
@@ -507,12 +506,12 @@ public class CrawlConfig {
     this.politenessEntryExpiredDelay = politenessEntryExpiredDelay;
   }
 
-  public int getPolitnessEntryExpiredWaitMultiplier() {
-    return politnessEntryExpiredWaitMultiplier;
+  public int getPolitenessMaximumHostEntries() {
+    return politenessMaximumHostEntries;
   }
 
-  public void setPolitnessEntryExpiredWaitMultiplier(int politnessEntryExpiredWaitMultiplier) {
-    this.politnessEntryExpiredWaitMultiplier = politnessEntryExpiredWaitMultiplier;
+  public void setPolitenessMaximumHostEntries(int politenessMaximumHostEntries) {
+    this.politenessMaximumHostEntries = politenessMaximumHostEntries;
   }
 
   /**

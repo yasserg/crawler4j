@@ -130,6 +130,12 @@
 	</dependency>
 
 	<dependency>
+		<groupId>com.google.guava</groupId>
+		<artifactId>guava</artifactId>
+		<version>19.0</version>
+	</dependency>
+
+	<dependency>
 		<groupId>com.sleepycat</groupId>
 		<artifactId>je</artifactId>
 		<version>5.0.73</version>
