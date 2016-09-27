@@ -17,14 +17,14 @@
 
 package edu.uci.ics.crawler4j.examples.statushandler;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.crawler.CrawlController;
 import edu.uci.ics.crawler4j.fetcher.PageFetcher;
+import edu.uci.ics.crawler4j.fetcher.politness.PolitenessServer;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtConfig;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Yasser Ganjisaffar
@@ -95,7 +95,7 @@ public class StatusHandlerCrawlController {
     /*
      * Instantiate the controller for this crawl.
      */
-    PageFetcher pageFetcher = new PageFetcher(config);
+    PageFetcher pageFetcher = new PageFetcher(config, new PolitenessServer(config));
     RobotstxtConfig robotstxtConfig = new RobotstxtConfig();
     RobotstxtServer robotstxtServer = new RobotstxtServer(robotstxtConfig, pageFetcher);
     CrawlController controller = new CrawlController(config, pageFetcher, robotstxtServer);

@@ -17,14 +17,14 @@
 
 package edu.uci.ics.crawler4j.examples.multiple;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.crawler.CrawlController;
 import edu.uci.ics.crawler4j.fetcher.PageFetcher;
+import edu.uci.ics.crawler4j.fetcher.politness.PolitenessServer;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtConfig;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Yasser Ganjisaffar
@@ -65,8 +65,8 @@ public class MultipleCrawlerController {
     /*
      * We will use different PageFetchers for the two crawlers.
      */
-    PageFetcher pageFetcher1 = new PageFetcher(config1);
-    PageFetcher pageFetcher2 = new PageFetcher(config2);
+    PageFetcher pageFetcher1 = new PageFetcher(config1, new PolitenessServer(config1));
+    PageFetcher pageFetcher2 =new PageFetcher(config2, new PolitenessServer(config2));
 
     /*
      * We will use the same RobotstxtServer for both of the crawlers.

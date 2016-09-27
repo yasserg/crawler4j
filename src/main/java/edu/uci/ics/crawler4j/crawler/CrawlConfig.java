@@ -17,15 +17,14 @@
 
 package edu.uci.ics.crawler4j.crawler;
 
+import edu.uci.ics.crawler4j.crawler.authentication.AuthInfo;
+import org.apache.http.Header;
+import org.apache.http.message.BasicHeader;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-
-import org.apache.http.Header;
-import org.apache.http.message.BasicHeader;
-
-import edu.uci.ics.crawler4j.crawler.authentication.AuthInfo;
 
 public class CrawlConfig {
 
@@ -65,9 +64,20 @@ public class CrawlConfig {
   private Collection<BasicHeader> defaultHeaders = new HashSet<BasicHeader>();
 
   /**
+   * Maximum amount of hosts to be tracked in the {@link edu.uci.ics.crawler4j.fetcher.politness.PolitenessServer}
+   */
+  private int politenessMaximumHostEntries = 100;
+
+  /**
+   * Politeness entry expired delay in milliseconds (delay before an entry is removed from the politeness server).
+   */
+  private int politenessEntryExpiredDelay = 800;
+
+  /**
    * Politeness delay in milliseconds (delay between sending two requests to
    * the same host).
    */
+
   private int politenessDelay = 200;
 
   /**
@@ -488,9 +498,26 @@ public class CrawlConfig {
     this.authInfos.add(authInfo);
   }
 
+  public int getPolitenessEntryExpiredDelay() {
+    return politenessEntryExpiredDelay;
+  }
+
+  public void setPolitenessEntryExpiredDelay(int politenessEntryExpiredDelay) {
+    this.politenessEntryExpiredDelay = politenessEntryExpiredDelay;
+  }
+
+  public int getPolitenessMaximumHostEntries() {
+    return politenessMaximumHostEntries;
+  }
+
+  public void setPolitenessMaximumHostEntries(int politenessMaximumHostEntries) {
+    this.politenessMaximumHostEntries = politenessMaximumHostEntries;
+  }
+
   /**
    * @param authInfos authenticationInformations to set
    */
+
   public void setAuthInfos(List<AuthInfo> authInfos) {
     this.authInfos = authInfos;
   }
