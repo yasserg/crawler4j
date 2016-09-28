@@ -23,11 +23,12 @@ import java.util.Locale;
 
 import org.apache.http.HttpStatus;
 import org.apache.http.impl.EnglishReasonPhraseCatalog;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import edu.uci.ics.crawler4j.crawler.exceptions.ContentFetchException;
 import edu.uci.ics.crawler4j.crawler.exceptions.PageBiggerThanMaxSizeException;
 import edu.uci.ics.crawler4j.crawler.exceptions.ParseException;
-import edu.uci.ics.crawler4j.crawler.exceptions.RedirectException;
 import edu.uci.ics.crawler4j.fetcher.PageFetchResult;
 import edu.uci.ics.crawler4j.fetcher.PageFetcher;
 import edu.uci.ics.crawler4j.frontier.DocIDServer;
@@ -37,9 +38,6 @@ import edu.uci.ics.crawler4j.parser.ParseData;
 import edu.uci.ics.crawler4j.parser.Parser;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
 import edu.uci.ics.crawler4j.url.WebURL;
-import uk.org.lidalia.slf4jext.Level;
-import uk.org.lidalia.slf4jext.Logger;
-import uk.org.lidalia.slf4jext.LoggerFactory;
 
 /**
  * WebCrawler class in the Runnable class that is executed by each crawler thread.
@@ -321,7 +319,7 @@ public class WebCrawler implements Runnable {
         PageFetchResult fetchResult = null;
         try {
             if (curURL == null) {
-                throw new Exception("Failed processing a NULL url !?");
+                return;
             }
 
             fetchResult = pageFetcher.fetchPage(curURL);
@@ -348,16 +346,16 @@ public class WebCrawler implements Runnable {
                     if (myController.getConfig().isFollowRedirects()) {
                         String movedToUrl = fetchResult.getMovedToUrl();
                         if (movedToUrl == null) {
-                            throw new RedirectException(Level.WARN,
-                                                        "Unexpected error, URL: " + curURL +
-                                                        " is redirected to NOTHING");
+                            logger.warn("Unexpected error, URL: {} is redirected to NOTHING",
+                                        curURL);
+                            return;
                         }
                         page.setRedirectedToUrl(movedToUrl);
 
                         int newDocId = docIdServer.getDocId(movedToUrl);
                         if (newDocId > 0) {
-                            throw new RedirectException(Level.DEBUG, "Redirect page: " + curURL +
-                                                                     " is already seen");
+                            logger.debug("Redirect page: {} is already seen", curURL);
+                            return;
                         }
 
                         WebURL webURL = new WebURL();
@@ -396,8 +394,8 @@ public class WebCrawler implements Runnable {
             } else { // if status code is 200
                 if (!curURL.getURL().equals(fetchResult.getFetchedUrl())) {
                     if (docIdServer.isSeenBefore(fetchResult.getFetchedUrl())) {
-                        throw new RedirectException(Level.DEBUG, "Redirect page: " + curURL +
-                                                                 " has already been seen");
+                        logger.debug("Redirect page: {} has already been seen", curURL);
+                        return;
                     }
                     curURL.setURL(fetchResult.getFetchedUrl());
                     curURL.setDocid(docIdServer.getNewDocID(fetchResult.getFetchedUrl()));
@@ -452,8 +450,6 @@ public class WebCrawler implements Runnable {
             onParseError(curURL);
         } catch (ContentFetchException cfe) {
             onContentFetchError(curURL);
-        } catch (RedirectException re) {
-            logger.log(re.level, re.getMessage());
         } catch (NotAllowedContentException nace) {
             logger.debug(
                 "Skipping: {} as it contains binary content which you configured not to crawl",
