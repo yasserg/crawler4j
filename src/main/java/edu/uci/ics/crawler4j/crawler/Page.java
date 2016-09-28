@@ -122,7 +122,7 @@ public class Page {
       contentCharset = charset.displayName();
     }
 
-    contentData = EntityUtils.toByteArray(entity);
+    contentData = EntityUtils.toString(entity, "utf-8").getBytes();
   }
 
   public WebURL getWebURL() {
