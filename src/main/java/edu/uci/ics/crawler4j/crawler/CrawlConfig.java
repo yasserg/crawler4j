@@ -27,7 +27,7 @@ import org.apache.http.message.BasicHeader;
 
 import edu.uci.ics.crawler4j.crawler.authentication.AuthInfo;
 
-public class CrawlConfig {
+public class CrawlConfig<T> {
 
   /**
    * The folder which will be used by crawler for storing the intermediate
