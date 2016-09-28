@@ -93,12 +93,20 @@ public class RobotstxtServer {
     WebURL robotsTxtUrl = new WebURL();
     String host = getHost(url);
     String port = ((url.getPort() == url.getDefaultPort()) || (url.getPort() == -1)) ? "" : (":" + url.getPort());
-    robotsTxtUrl.setURL("http://" + host + port + "/robots.txt");
+    
     HostDirectives directives = null;
     PageFetchResult fetchResult = null;
     try {
+      // let's try to load robots.txt at the root of the complete url
+      // useful for http://web.archive.org for exemple	
+      robotsTxtUrl.setURL("http://" + host + port +url.getFile()+ "robots.txt");
       fetchResult = pageFetcher.fetchPage(robotsTxtUrl);
-      if (fetchResult.getStatusCode() == HttpStatus.SC_OK) {
+      // Then let's try at the root URL
+      if(fetchResult.getStatusCode() != HttpStatus.SC_OK && fetchResult.getStatusCode() != HttpStatus.SC_MOVED_TEMPORARILY){
+    	  robotsTxtUrl.setURL("http://" + host + port + "/robots.txt");
+      }
+      
+      if (fetchResult.getStatusCode() == HttpStatus.SC_OK || fetchResult.getStatusCode() == HttpStatus.SC_MOVED_TEMPORARILY) {
         Page page = new Page(robotsTxtUrl);
         fetchResult.fetchContent(page);
         String contentType = page.getContentType() == null ? "" : page.getContentType();
