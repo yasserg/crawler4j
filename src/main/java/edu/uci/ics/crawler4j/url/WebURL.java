@@ -17,10 +17,10 @@
 
 package edu.uci.ics.crawler4j.url;
 
-import java.io.Serializable;
-
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
+
+import java.io.Serializable;
 
 /**
  * @author Yasser Ganjisaffar
@@ -177,7 +177,14 @@ public class WebURL implements Serializable {
     return priority;
   }
 
+  /**
+   * Sets priority for this URL. A lower number results in higher priority. Only values
+   * between 0 and {@link Byte#MAX_VALUE} are allowed (inclusive).
+   */
   public void setPriority(byte priority) {
+    if (priority < 0) {
+      throw new IllegalArgumentException("Negative priority value was provided: " + priority);
+    }
     this.priority = priority;
   }
 
