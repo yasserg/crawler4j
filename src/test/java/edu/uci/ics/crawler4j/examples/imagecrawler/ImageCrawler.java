@@ -41,63 +41,65 @@ import edu.uci.ics.crawler4j.url.WebURL;
  */
 public class ImageCrawler extends WebCrawler {
 
-  private static final Pattern filters = Pattern
-      .compile(".*(\\.(css|js|mid|mp2|mp3|mp4|wav|avi|mov|mpeg|ram|m4v|pdf" + "|rm|smil|wmv|swf|wma|zip|rar|gz))$");
+    private static final Pattern filters = Pattern.compile(
+        ".*(\\.(css|js|mid|mp2|mp3|mp4|wav|avi|mov|mpeg|ram|m4v|pdf" +
+        "|rm|smil|wmv|swf|wma|zip|rar|gz))$");
 
-  private static final Pattern imgPatterns = Pattern.compile(".*(\\.(bmp|gif|jpe?g|png|tiff?))$");
+    private static final Pattern imgPatterns = Pattern.compile(".*(\\.(bmp|gif|jpe?g|png|tiff?))$");
 
-  private static File storageFolder;
-  private static String[] crawlDomains;
+    private static File storageFolder;
+    private static String[] crawlDomains;
 
-  public static void configure(String[] domain, String storageFolderName) {
-    crawlDomains = domain;
+    public static void configure(String[] domain, String storageFolderName) {
+        crawlDomains = domain;
 
-    storageFolder = new File(storageFolderName);
-    if (!storageFolder.exists()) {
-      storageFolder.mkdirs();
-    }
-  }
-
-  @Override
-  public boolean shouldVisit(Page referringPage, WebURL url) {
-    String href = url.getURL().toLowerCase();
-    if (filters.matcher(href).matches()) {
-      return false;
+        storageFolder = new File(storageFolderName);
+        if (!storageFolder.exists()) {
+            storageFolder.mkdirs();
+        }
     }
 
-    if (imgPatterns.matcher(href).matches()) {
-      return true;
+    @Override
+    public boolean shouldVisit(Page referringPage, WebURL url) {
+        String href = url.getURL().toLowerCase();
+        if (filters.matcher(href).matches()) {
+            return false;
+        }
+
+        if (imgPatterns.matcher(href).matches()) {
+            return true;
+        }
+
+        for (String domain : crawlDomains) {
+            if (href.startsWith(domain)) {
+                return true;
+            }
+        }
+        return false;
     }
 
-    for (String domain : crawlDomains) {
-      if (href.startsWith(domain)) {
-        return true;
-      }
+    @Override
+    public void visit(Page page) {
+        String url = page.getWebURL().getURL();
+
+        // We are only interested in processing images which are bigger than 10k
+        if (!imgPatterns.matcher(url).matches() ||
+            !((page.getParseData() instanceof BinaryParseData) ||
+              (page.getContentData().length < (10 * 1024)))) {
+            return;
+        }
+
+        // get a unique name for storing this image
+        String extension = url.substring(url.lastIndexOf('.'));
+        String hashedName = UUID.randomUUID() + extension;
+
+        // store image
+        String filename = storageFolder.getAbsolutePath() + "/" + hashedName;
+        try {
+            Files.write(page.getContentData(), new File(filename));
+            logger.info("Stored: {}", url);
+        } catch (IOException iox) {
+            logger.error("Failed to write file: " + filename, iox);
+        }
     }
-    return false;
-  }
-
-  @Override
-  public void visit(Page page) {
-    String url = page.getWebURL().getURL();
-
-    // We are only interested in processing images which are bigger than 10k
-    if (!imgPatterns.matcher(url).matches() ||
-        !((page.getParseData() instanceof BinaryParseData) || (page.getContentData().length < (10 * 1024)))) {
-      return;
-    }
-
-    // get a unique name for storing this image
-    String extension = url.substring(url.lastIndexOf('.'));
-    String hashedName = UUID.randomUUID() + extension;
-
-    // store image
-    String filename = storageFolder.getAbsolutePath() + "/" + hashedName;
-    try {
-      Files.write(page.getContentData(), new File(filename));
-      logger.info("Stored: {}", url);
-    } catch (IOException iox) {
-      logger.error("Failed to write file: " + filename, iox);
-    }
-  }
 }
