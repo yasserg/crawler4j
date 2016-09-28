@@ -135,16 +135,16 @@ public class CrawlController extends Configurable {
 
     private static class DefaultWebCrawlerFactory<T extends WebCrawler>
         implements WebCrawlerFactory<T> {
-        final Class<T> _c;
+        final Class<T> clazz;
 
-        DefaultWebCrawlerFactory(Class<T> _c) {
-            this._c = _c;
+        DefaultWebCrawlerFactory(Class<T> clazz) {
+            this.clazz = clazz;
         }
 
         @Override
         public T newInstance() throws Exception {
             try {
-                return _c.newInstance();
+                return clazz.newInstance();
             } catch (ReflectiveOperationException e) {
                 throw e;
             }
@@ -155,15 +155,15 @@ public class CrawlController extends Configurable {
      * Start the crawling session and wait for it to finish.
      * This method utilizes default crawler factory that creates new crawler using Java reflection
      *
-     * @param _c
+     * @param clazz
      *            the class that implements the logic for crawler threads
      * @param numberOfCrawlers
      *            the number of concurrent threads that will be contributing in
      *            this crawling session.
      * @param <T> Your class extending WebCrawler
      */
-    public <T extends WebCrawler> void start(final Class<T> _c, final int numberOfCrawlers) {
-        this.start(new DefaultWebCrawlerFactory<>(_c), numberOfCrawlers, true);
+    public <T extends WebCrawler> void start(Class<T> clazz, int numberOfCrawlers) {
+        this.start(new DefaultWebCrawlerFactory<>(clazz), numberOfCrawlers, true);
     }
 
     /**
@@ -176,8 +176,8 @@ public class CrawlController extends Configurable {
      *            this crawling session.
      * @param <T> Your class extending WebCrawler
      */
-    public <T extends WebCrawler> void start(final WebCrawlerFactory<T> crawlerFactory,
-                                             final int numberOfCrawlers) {
+    public <T extends WebCrawler> void start(WebCrawlerFactory<T> crawlerFactory,
+                                             int numberOfCrawlers) {
         this.start(crawlerFactory, numberOfCrawlers, true);
     }
 
@@ -262,8 +262,8 @@ public class CrawlController extends Configurable {
                                         someoneIsWorking = true;
                                     }
                                 }
-                                boolean shut_on_empty = config.isShutdownOnEmptyQueue();
-                                if (!someoneIsWorking && shut_on_empty) {
+                                boolean shutOnEmpty = config.isShutdownOnEmptyQueue();
+                                if (!someoneIsWorking && shutOnEmpty) {
                                     // Make sure again that none of the threads
                                     // are
                                     // alive.
@@ -437,8 +437,8 @@ public class CrawlController extends Configurable {
             if (robotstxtServer.allows(webUrl)) {
                 frontier.schedule(webUrl);
             } else {
-                logger.warn("Robots.txt does not allow this seed: {}",
-                            pageUrl); // using the WARN level here, as the user specifically asked to add this seed
+                // using the WARN level here, as the user specifically asked to add this seed
+                logger.warn("Robots.txt does not allow this seed: {}", pageUrl);
             }
         }
     }

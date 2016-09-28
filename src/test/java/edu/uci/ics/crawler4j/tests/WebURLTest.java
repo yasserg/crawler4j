@@ -4,7 +4,6 @@ import org.junit.Test;
 
 import edu.uci.ics.crawler4j.url.WebURL;
 
-
 /**
  * Created by Avi on 8/19/2014.
  *

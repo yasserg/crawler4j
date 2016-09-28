@@ -17,7 +17,6 @@
 
 package edu.uci.ics.crawler4j.util;
 
-
 /**
  * @author Yasser Ganjisaffar
  */

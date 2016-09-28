@@ -22,8 +22,6 @@ import java.util.StringTokenizer;
 /**
  * @author Yasser Ganjisaffar
  */
-
-
 public class RobotstxtParser {
 
     private static final String PATTERNS_USERAGENT = "(?i)^User-agent:.*";

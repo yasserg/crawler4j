@@ -45,7 +45,6 @@ public class WebURL implements Serializable {
     private byte priority;
     private String tag;
 
-
     /**
      * @return unique document id assigned to this Url.
      */

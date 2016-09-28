@@ -92,7 +92,6 @@ public class Page {
      */
     protected ParseData parseData;
 
-
     public Page(WebURL url) {
         this.url = url;
     }

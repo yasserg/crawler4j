@@ -27,7 +27,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 
-
 /**
  * See http://en.wikipedia.org/wiki/URL_normalization for a reference Note: some
  * parts of the code are adapted from: http://stackoverflow.com/a/4057470/405418
@@ -73,8 +72,7 @@ public class URLCanonicalizer {
 
             path = path.trim();
 
-            final LinkedHashMap<String, String> params =
-                createParameterMap(canonicalURL.getQuery());
+            Map<String, String> params = createParameterMap(canonicalURL.getQuery());
             final String queryString;
             if ((params != null) && !params.isEmpty()) {
                 String canonicalParams = canonicalize(params);
@@ -110,7 +108,7 @@ public class URLCanonicalizer {
      *
      * @return Null if there is no query string.
      */
-    private static LinkedHashMap<String, String> createParameterMap(final String queryString) {
+    private static Map<String, String> createParameterMap(String queryString) {
         if ((queryString == null) || queryString.isEmpty()) {
             return null;
         }
@@ -147,7 +145,7 @@ public class URLCanonicalizer {
      *            Parameter map whose name-value pairs are in order of insertion.
      * @return Canonical form of query string.
      */
-    private static String canonicalize(final LinkedHashMap<String, String> paramsMap) {
+    private static String canonicalize(Map<String, String> paramsMap) {
         if ((paramsMap == null) || paramsMap.isEmpty()) {
             return "";
         }

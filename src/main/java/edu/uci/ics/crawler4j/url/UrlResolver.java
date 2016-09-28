@@ -17,7 +17,6 @@
 
 package edu.uci.ics.crawler4j.url;
 
-
 public final class UrlResolver {
 
     /**
@@ -29,7 +28,7 @@ public final class UrlResolver {
      * @param relativeUrl The relative URL to resolve against the base URL.
      * @return the resolved specification.
      */
-    public static String resolveUrl(final String baseUrl, final String relativeUrl) {
+    public static String resolveUrl(String baseUrl, String relativeUrl) {
         if (baseUrl == null) {
             throw new IllegalArgumentException("Base URL must not be null");
         }
@@ -102,7 +101,7 @@ public final class UrlResolver {
         final int crosshatchIndex = indexOf(spec, '#', startIndex, endIndex);
 
         if (crosshatchIndex >= 0) {
-            url.fragment_ = spec.substring(crosshatchIndex + 1, endIndex);
+            url.fragment = spec.substring(crosshatchIndex + 1, endIndex);
             endIndex = crosshatchIndex;
         }
         // Section 2.4.2: Parsing the Scheme
@@ -118,7 +117,7 @@ public final class UrlResolver {
         if (colonIndex > 0) {
             final String scheme = spec.substring(startIndex, colonIndex);
             if (isValidScheme(scheme)) {
-                url.scheme_ = scheme;
+                url.scheme = scheme;
                 startIndex = colonIndex + 1;
             }
         }
@@ -166,7 +165,7 @@ public final class UrlResolver {
                 locationEndIndex = questionMarkIndex;
                 startIndex = questionMarkIndex;
             }
-            url.query_ = spec.substring(questionMarkIndex + 1, endIndex);
+            url.query = spec.substring(questionMarkIndex + 1, endIndex);
             endIndex = questionMarkIndex;
         }
         // Section 2.4.5: Parsing the Parameters
@@ -187,7 +186,7 @@ public final class UrlResolver {
                 locationEndIndex = semicolonIndex;
                 startIndex = semicolonIndex;
             }
-            url.parameters_ = spec.substring(semicolonIndex + 1, endIndex);
+            url.parameters = spec.substring(semicolonIndex + 1, endIndex);
             endIndex = semicolonIndex;
         }
         // Section 2.4.6: Parsing the Path
@@ -203,11 +202,11 @@ public final class UrlResolver {
             // location/login (<net_loc>) of the URL.
             locationEndIndex = endIndex;
         } else if (startIndex < endIndex) {
-            url.path_ = spec.substring(startIndex, endIndex);
+            url.path = spec.substring(startIndex, endIndex);
         }
         // Set the network location/login (<net_loc>) of the URL.
         if ((locationStartIndex >= 0) && (locationEndIndex >= 0)) {
-            url.location_ = spec.substring(locationStartIndex, locationEndIndex);
+            url.location = spec.substring(locationStartIndex, locationEndIndex);
         }
         return url;
     }
@@ -270,44 +269,44 @@ public final class UrlResolver {
         }
         //      b) If the embedded URL starts with a scheme name, it is
         //         interpreted as an absolute URL and we are done.
-        if (url.scheme_ != null) {
+        if (url.scheme != null) {
             return url;
         }
         //      c) Otherwise, the embedded URL inherits the scheme of
         //         the base URL.
-        url.scheme_ = baseUrl.scheme_;
+        url.scheme = baseUrl.scheme;
         // Step 3: If the embedded URL's <net_loc> is non-empty, we skip to
         //         Step 7.  Otherwise, the embedded URL inherits the <net_loc>
         //         (if any) of the base URL.
-        if (url.location_ != null) {
+        if (url.location != null) {
             return url;
         }
-        url.location_ = baseUrl.location_;
+        url.location = baseUrl.location;
         // Step 4: If the embedded URL path is preceded by a slash "/", the
         //         path is not relative and we skip to Step 7.
-        if ((url.path_ != null) && ((!url.path_.isEmpty()) && (url.path_.charAt(0) == '/'))) {
-            url.path_ = removeLeadingSlashPoints(url.path_);
+        if ((url.path != null) && ((!url.path.isEmpty()) && (url.path.charAt(0) == '/'))) {
+            url.path = removeLeadingSlashPoints(url.path);
             return url;
         }
         // Step 5: If the embedded URL path is empty (and not preceded by a
         //         slash), then the embedded URL inherits the base URL path,
         //         and
-        if (url.path_ == null) {
-            url.path_ = baseUrl.path_;
+        if (url.path == null) {
+            url.path = baseUrl.path;
             //  a) if the embedded URL's <params> is non-empty, we skip to
             //     step 7; otherwise, it inherits the <params> of the base
             //     URL (if any) and
-            if (url.parameters_ != null) {
+            if (url.parameters != null) {
                 return url;
             }
-            url.parameters_ = baseUrl.parameters_;
+            url.parameters = baseUrl.parameters;
             //  b) if the embedded URL's <query> is non-empty, we skip to
             //     step 7; otherwise, it inherits the <query> of the base
             //     URL (if any) and we skip to step 7.
-            if (url.query_ != null) {
+            if (url.query != null) {
                 return url;
             }
-            url.query_ = baseUrl.query_;
+            url.query = baseUrl.query;
             return url;
         }
         // Step 6: The last segment of the base URL's path (anything
@@ -315,7 +314,7 @@ public final class UrlResolver {
         //         slash is present) is removed and the embedded URL's path is
         //         appended in its place.  The following operations are
         //         then applied, in order, to the new path:
-        final String basePath = baseUrl.path_;
+        final String basePath = baseUrl.path;
         String path = "";
 
         if (basePath != null) {
@@ -327,7 +326,7 @@ public final class UrlResolver {
         } else {
             path = "/";
         }
-        path = path.concat(url.path_);
+        path = path.concat(url.path);
         //      a) All occurrences of "./", where "." is a complete path
         //         segment, are removed.
         int pathSegmentIndex;
@@ -372,7 +371,7 @@ public final class UrlResolver {
 
         path = removeLeadingSlashPoints(path);
 
-        url.path_ = path;
+        url.path = path;
         // Step 7: The resulting URL components, including any inherited from
         //         the base URL, are recombined to give the absolute form of
         //         the embedded URL.
@@ -396,18 +395,17 @@ public final class UrlResolver {
      * @author Martin Tamme
      */
     private static class Url {
-
-        String scheme_;
-        String location_;
-        String path_;
-        String parameters_;
-        String query_;
-        String fragment_;
+        String scheme;
+        String location;
+        String path;
+        String parameters;
+        String query;
+        String fragment;
 
         /**
          * Creates a <tt>Url</tt> object.
          */
-        public Url() {
+        private Url() {
         }
 
         /**
@@ -416,13 +414,13 @@ public final class UrlResolver {
          *
          * @param url a <tt>Url</tt> object.
          */
-        public Url(final Url url) {
-            scheme_ = url.scheme_;
-            location_ = url.location_;
-            path_ = url.path_;
-            parameters_ = url.parameters_;
-            query_ = url.query_;
-            fragment_ = url.fragment_;
+        private Url(Url url) {
+            scheme = url.scheme;
+            location = url.location;
+            path = url.path;
+            parameters = url.parameters;
+            query = url.query;
+            fragment = url.fragment;
         }
 
         /**
@@ -434,28 +432,28 @@ public final class UrlResolver {
         public String toString() {
             final StringBuilder sb = new StringBuilder();
 
-            if (scheme_ != null) {
-                sb.append(scheme_);
+            if (scheme != null) {
+                sb.append(scheme);
                 sb.append(':');
             }
-            if (location_ != null) {
+            if (location != null) {
                 sb.append("//");
-                sb.append(location_);
+                sb.append(location);
             }
-            if (path_ != null) {
-                sb.append(path_);
+            if (path != null) {
+                sb.append(path);
             }
-            if (parameters_ != null) {
+            if (parameters != null) {
                 sb.append(';');
-                sb.append(parameters_);
+                sb.append(parameters);
             }
-            if (query_ != null) {
+            if (query != null) {
                 sb.append('?');
-                sb.append(query_);
+                sb.append(query);
             }
-            if (fragment_ != null) {
+            if (fragment != null) {
                 sb.append('#');
-                sb.append(fragment_);
+                sb.append(fragment);
             }
             return sb.toString();
         }

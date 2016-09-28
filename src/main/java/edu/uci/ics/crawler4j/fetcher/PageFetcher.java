@@ -105,8 +105,9 @@ public class PageFetcher extends Configurable {
                             return true;
                         }
                     }).build();
-                SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslContext,
-                                                                                  SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+                SSLConnectionSocketFactory sslsf =
+                    new SSLConnectionSocketFactory(
+                        sslContext, SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
                 connRegistryBuilder.register("https", sslsf);
             } catch (Exception e) {
                 logger.warn("Exception thrown while trying to register https");

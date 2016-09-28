@@ -417,7 +417,8 @@ public class WebCrawler implements Runnable {
                     webURL.setParentUrl(curURL.getURL());
                     int newdocid = docIdServer.getDocId(webURL.getURL());
                     if (newdocid > 0) {
-                        // This is not the first time that this Url is visited. So, we set the depth to a negative number.
+                        // This is not the first time that this Url is visited. So, we set the
+                        // depth to a negative number.
                         webURL.setDepth((short) -1);
                         webURL.setDocid(newdocid);
                     } else {
@@ -430,7 +431,8 @@ public class WebCrawler implements Runnable {
                                     toSchedule.add(webURL);
                                 } else {
                                     logger.debug(
-                                        "Not visiting: {} as per the server's \"robots.txt\" policy",
+                                        "Not visiting: {} as per the server's \"robots.txt\" " +
+                                        "policy",
                                         webURL.getURL());
                                 }
                             } else {
