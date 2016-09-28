@@ -200,16 +200,15 @@ public class CrawlController extends Configurable {
      * Start the crawling session and return immediately.
      * This method utilizes default crawler factory that creates new crawler using Java reflection
      *
-     * @param _c
+     * @param clazz
      *            the class that implements the logic for crawler threads
      * @param numberOfCrawlers
      *            the number of concurrent threads that will be contributing in
      *            this crawling session.
      * @param <T> Your class extending WebCrawler
      */
-    public <T extends WebCrawler> void startNonBlocking(final Class<T> _c,
-                                                        final int numberOfCrawlers) {
-        this.start(new DefaultWebCrawlerFactory<>(_c), numberOfCrawlers, false);
+    public <T extends WebCrawler> void startNonBlocking(Class<T> clazz, int numberOfCrawlers) {
+        start(new DefaultWebCrawlerFactory<>(clazz), numberOfCrawlers, false);
     }
 
     protected <T extends WebCrawler> void start(final WebCrawlerFactory<T> crawlerFactory,
