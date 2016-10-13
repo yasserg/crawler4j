@@ -1,9 +1,14 @@
 target/
 .DS_STORE
-.idea/*
-*.iml
 .settings/*
 javadocs/*
 .classpath
 .project
 logs/
+
+# IntelliJ IDEA
+**/.idea/dictionaries/
+**/.idea/dataSources.*
+**/.idea/libraries/
+**/.idea/tasks.xml
+**/.idea/workspace.xml
