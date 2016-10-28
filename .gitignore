@@ -7,8 +7,5 @@ javadocs/*
 logs/
 
 # IntelliJ IDEA
-**/.idea/dictionaries/
-**/.idea/dataSources.*
-**/.idea/libraries/
-**/.idea/tasks.xml
-**/.idea/workspace.xml
+**/.idea
+*.iml
