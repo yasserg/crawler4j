@@ -9,13 +9,15 @@ public class HtmlContentMapper extends DefaultHtmlMapper {
     private static Map<String, String> customSafeElements = new LinkedHashMap<>();
 
     public HtmlContentMapper(String htmlFilterTag) {
-        customSafeElements.put(htmlFilterTag.toUpperCase(), htmlFilterTag.toLowerCase());
+        if (htmlFilterTag != null) {
+            customSafeElements.put(htmlFilterTag.toUpperCase(), htmlFilterTag.toLowerCase());
+        }
     }
 
     @Override
     public String mapSafeElement(String name) {
         String mapSafeElement = super.mapSafeElement(name);
-        if (mapSafeElement == null) {
+        if (customSafeElements.size() > 0 && mapSafeElement == null) {
             mapSafeElement = customSafeElements.get(name);
         }
         return mapSafeElement;
