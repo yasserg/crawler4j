@@ -79,8 +79,13 @@ public class BasicCrawler extends WebCrawler {
             Set<WebURL> links = htmlParseData.getOutgoingUrls();
 
             logger.debug("Text length: {}", text.length());
+            logger.debug("Text : {}", text);
             logger.debug("Html length: {}", html.length());
+            logger.debug("Html : {}", html);
             logger.debug("Number of outgoing links: {}", links.size());
+            for (WebURL link : links) {
+                logger.debug("Link : {}", link.getURL());
+            }
         }
 
         Header[] responseHeaders = page.getFetchResponseHeaders();

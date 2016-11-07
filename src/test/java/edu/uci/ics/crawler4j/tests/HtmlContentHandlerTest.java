@@ -19,7 +19,7 @@ public class HtmlContentHandlerTest {
     private HtmlContentHandler parseHtml(String html) throws Exception {
         ByteArrayInputStream bais = new ByteArrayInputStream(html.getBytes());
         Metadata metadata = new Metadata();
-        HtmlContentHandler contentHandler = new HtmlContentHandler();
+        HtmlContentHandler contentHandler = new HtmlContentHandler(null);
         parser.parse(bais, contentHandler, metadata, parseContext);
         return contentHandler;
     }
