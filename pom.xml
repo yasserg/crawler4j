@@ -129,14 +129,6 @@
     </build>
 
     <dependencies>
-
-        <!-- Compile time Dependencies -->
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>4.5.2</version>
-        </dependency>
-
         <dependency>
             <!-- Logging framework -->
             <groupId>org.slf4j</groupId>
