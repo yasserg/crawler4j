@@ -27,7 +27,9 @@ import org.apache.tika.language.LanguageIdentifier;
 import org.apache.tika.metadata.DublinCore;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.ParseContext;
+import org.apache.tika.parser.html.HtmlMapper;
 import org.apache.tika.parser.html.HtmlParser;
+import org.ccil.cowan.tagsoup.Schema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -91,8 +93,11 @@ public class Parser extends Configurable {
             }
         } else { // isHTML
             Metadata metadata = new Metadata();
-            HtmlContentHandler contentHandler = new HtmlContentHandler();
+            HtmlContentHandler contentHandler = new HtmlContentHandler(config.getHtmlFilterTag());
             try (InputStream inputStream = new ByteArrayInputStream(page.getContentData())) {
+                parseContext.set(Schema.class, new HTMLSchema(config.getHtmlFilterTag()));
+                parseContext.set(HtmlMapper.class,
+                                 new HtmlContentMapper(config.getHtmlFilterTag()));
                 htmlParser.parse(inputStream, contentHandler, metadata, parseContext);
             } catch (Exception e) {
                 logger.error("{}, while parsing: {}", e.getMessage(), page.getWebURL().getURL());

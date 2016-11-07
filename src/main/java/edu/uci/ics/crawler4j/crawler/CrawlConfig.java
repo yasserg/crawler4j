@@ -165,6 +165,14 @@ public class CrawlConfig {
     private List<AuthInfo> authInfos;
 
     /**
+     * Possibility to filter out certain parts of the html but
+     * will still follow the links in between the filter tags.
+     * eg. tag name "crawlerfilter", then all the html between those tags will not be
+     * processed in the text.
+     */
+    private String htmlFilterTag = null;
+
+    /**
      * Validates the configs specified by this instance.
      *
      * @throws Exception on Validation fail
@@ -502,6 +510,26 @@ public class CrawlConfig {
         this.authInfos = authInfos;
     }
 
+    /**
+     *
+     * @return the HTML filter tag
+     */
+    public String getHtmlFilterTag() {
+        return htmlFilterTag;
+    }
+
+    /**
+     * Possibility to filter out certain parts of the html but
+     * will still follow the links in between the filter tags.
+     * eg. tag name "crawlerfilter", then all the html between those tags will not be
+     * processed in the text.
+     *
+     * @param htmlFilterTag String containing the html filter tag eg "crawler-filter"
+     */
+    public void setHtmlFilterTag(String htmlFilterTag) {
+        this.htmlFilterTag = htmlFilterTag.toLowerCase();
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -523,6 +551,7 @@ public class CrawlConfig {
         sb.append("Proxy port: " + getProxyPort() + "\n");
         sb.append("Proxy username: " + getProxyUsername() + "\n");
         sb.append("Proxy password: " + getProxyPassword() + "\n");
+        sb.append("HTML filter tags: " + getHtmlFilterTag() + "\n");
         return sb.toString();
     }
 }

@@ -99,6 +99,17 @@ public class BasicCrawlController {
         config.setResumableCrawling(false);
 
     /*
+     * This config parameter is used to filter out certain parts of the text.
+     * When text / links are between the <crawlfilter>...</crawlfilter> tag,
+     * the text will not be added to the added to the Text.
+     * This will not affect the list of links, they will still be processed.
+     * Use case: to exclude the content of the navigation or footer put still
+     * want to follow the links.
+     * This will not work on the given seeds but is to give an idea for future projects
+     */
+        config.setHtmlFilterTag("crawlerfilter");
+
+    /*
      * Instantiate the controller for this crawl.
      */
         PageFetcher pageFetcher = new PageFetcher(config);
