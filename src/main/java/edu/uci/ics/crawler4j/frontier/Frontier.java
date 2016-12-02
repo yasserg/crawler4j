@@ -182,6 +182,10 @@ public class Frontier extends Configurable {
         return counters.getValue(Counters.ReservedCounterNames.PROCESSED_PAGES);
     }
 
+    public long getNumberOfScheduledPages() {
+        return counters.getValue(Counters.ReservedCounterNames.SCHEDULED_PAGES);
+    }
+
     public boolean isFinished() {
         return isFinished;
     }
