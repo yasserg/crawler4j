@@ -22,11 +22,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 public class HtmlContentHandler extends DefaultHandler {
+
+    protected static final Logger logger = LoggerFactory.getLogger(HtmlContentHandler.class);
 
     private static final int MAX_ANCHOR_LENGTH = 100;
 
@@ -71,17 +75,24 @@ public class HtmlContentHandler extends DefaultHandler {
     private ExtractedUrlAnchorPair curUrl = null;
     private boolean anchorFlag = false;
     private final StringBuilder anchorText = new StringBuilder();
+    private String htmlFilterTag = null;
+    private boolean isWithinFilteredHtml = false;
 
-    public HtmlContentHandler() {
+    public HtmlContentHandler(String htmlFilterTag) {
         isWithinBodyElement = false;
         bodyText = new StringBuilder();
         outgoingUrls = new ArrayList<>();
+        this.htmlFilterTag = htmlFilterTag;
     }
 
     @Override
     public void startElement(String uri, String localName, String qName, Attributes attributes)
         throws SAXException {
         Element element = HtmlFactory.getElement(localName);
+
+        if (htmlFilterTag != null && localName.equals(htmlFilterTag)) {
+            isWithinFilteredHtml = true;
+        }
 
         if ((element == Element.A) || (element == Element.AREA) || (element == Element.LINK)) {
             String href = attributes.getValue("href");
@@ -151,6 +162,10 @@ public class HtmlContentHandler extends DefaultHandler {
     @Override
     public void endElement(String uri, String localName, String qName) throws SAXException {
         Element element = HtmlFactory.getElement(localName);
+        if (htmlFilterTag != null && localName.equals(htmlFilterTag)) {
+            isWithinFilteredHtml = false;
+        }
+
         if ((element == Element.A) || (element == Element.AREA) || (element == Element.LINK)) {
             anchorFlag = false;
             if (curUrl != null) {
@@ -173,7 +188,7 @@ public class HtmlContentHandler extends DefaultHandler {
 
     @Override
     public void characters(char[] ch, int start, int length) throws SAXException {
-        if (isWithinBodyElement) {
+        if (isWithinBodyElement && !isWithinFilteredHtml) {
             if (bodyText.length() > 0) {
                 bodyText.append(' ');
             }
