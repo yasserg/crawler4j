@@ -231,6 +231,7 @@ public class CrawlController extends Configurable {
             }
 
             final CrawlController controller = this;
+            final CrawlConfig config = this.getConfig();
 
             Thread monitorThread = new Thread(new Runnable() {
 
@@ -240,7 +241,7 @@ public class CrawlController extends Configurable {
                         synchronized (waitingLock) {
 
                             while (true) {
-                                sleep(10);
+                                sleep(config.getThreadMonitoringDelaySeconds());
                                 boolean someoneIsWorking = false;
                                 for (int i = 0; i < threads.size(); i++) {
                                     Thread thread = threads.get(i);
@@ -267,9 +268,10 @@ public class CrawlController extends Configurable {
                                     // are
                                     // alive.
                                     logger.info(
-                                        "It looks like no thread is working, waiting for 10 " +
-                                        "seconds to make sure...");
-                                    sleep(10);
+                                        "It looks like no thread is working, waiting for " +
+                                         config.getThreadShutdownDelaySeconds() +
+                                         " seconds to make sure...");
+                                    sleep(config.getThreadShutdownDelaySeconds());
 
                                     someoneIsWorking = false;
                                     for (int i = 0; i < threads.size(); i++) {
@@ -287,9 +289,10 @@ public class CrawlController extends Configurable {
                                             }
                                             logger.info(
                                                 "No thread is working and no more URLs are in " +
-                                                "queue waiting for another 10 seconds to make " +
-                                                "sure...");
-                                            sleep(10);
+                                                "queue waiting for another " +
+                                                config.getThreadShutdownDelaySeconds() +
+                                                " seconds to make sure...");
+                                            sleep(config.getThreadShutdownDelaySeconds());
                                             queueLength = frontier.getQueueLength();
                                             if (queueLength > 0) {
                                                 continue;
@@ -308,8 +311,9 @@ public class CrawlController extends Configurable {
                                         }
 
                                         logger.info(
-                                            "Waiting for 10 seconds before final clean up...");
-                                        sleep(10);
+                                            "Waiting for " + config.getCleanupDelaySeconds() +
+                                            " seconds before final clean up...");
+                                        sleep(config.getCleanupDelaySeconds());
 
                                         frontier.close();
                                         docIdServer.close();
