@@ -338,8 +338,8 @@ public class WebCrawler implements Runnable {
                     statusCode == HttpStatus.SC_MOVED_TEMPORARILY ||
                     statusCode == HttpStatus.SC_MULTIPLE_CHOICES ||
                     statusCode == HttpStatus.SC_SEE_OTHER ||
-                    statusCode == HttpStatus.SC_TEMPORARY_REDIRECT || statusCode ==
-                                                                      308) { // is 3xx  todo
+                    statusCode == HttpStatus.SC_TEMPORARY_REDIRECT ||
+                    statusCode == 308) { // is 3xx  todo
                     // follow https://issues.apache.org/jira/browse/HTTPCORE-389
 
                     page.setRedirect(true);
@@ -401,8 +401,16 @@ public class WebCrawler implements Runnable {
                     curURL.setDocid(docIdServer.getNewDocID(fetchResult.getFetchedUrl()));
                 }
 
-                if (!fetchResult.fetchContent(page)) {
+                if (!fetchResult.fetchContent(page,
+                                              myController.getConfig().getMaxDownloadSize())) {
                     throw new ContentFetchException();
+                }
+
+                if (page.isTruncated()) {
+                    logger.warn(
+                        "Warning: unknown page size exceeded max-download-size, truncated to: " +
+                        "({}), at URL: {}",
+                        myController.getConfig().getMaxDownloadSize(), curURL.getURL());
                 }
 
                 parser.parse(page, curURL.getURL());
@@ -430,8 +438,7 @@ public class WebCrawler implements Runnable {
                                 } else {
                                     logger.debug(
                                         "Not visiting: {} as per the server's \"robots.txt\" " +
-                                        "policy",
-                                        webURL.getURL());
+                                        "policy", webURL.getURL());
                                 }
                             } else {
                                 logger.debug("Not visiting: {} as per your \"shouldVisit\" policy",

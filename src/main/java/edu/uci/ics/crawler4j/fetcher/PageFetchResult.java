@@ -72,9 +72,9 @@ public class PageFetchResult {
         this.fetchedUrl = fetchedUrl;
     }
 
-    public boolean fetchContent(Page page) {
+    public boolean fetchContent(Page page, int maxBytes) {
         try {
-            page.load(entity);
+            page.load(entity, maxBytes);
             page.setFetchResponseHeaders(responseHeaders);
             return true;
         } catch (Exception e) {

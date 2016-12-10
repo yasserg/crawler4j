@@ -1,18 +1,16 @@
 /**
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work for additional information regarding
+ * copyright ownership. The ASF licenses this file to You under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the License. You may obtain a
+ * copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 
 package edu.uci.ics.crawler4j.robotstxt;
@@ -101,9 +99,8 @@ public class RobotstxtServer {
             fetchResult = pageFetcher.fetchPage(robotsTxtUrl);
             if (fetchResult.getStatusCode() == HttpStatus.SC_OK) {
                 Page page = new Page(robotsTxtUrl);
-                fetchResult.fetchContent(page);
-                String contentType = page.getContentType() == null ? "" : page.getContentType();
-                if (Util.hasPlainTextContent(contentType) || contentType.length() == 0) {
+                fetchResult.fetchContent(page, 16384);
+                if (Util.hasPlainTextContent(page.getContentType())) {
                     String content;
                     if (page.getContentCharset() == null) {
                         content = new String(page.getContentData());
@@ -111,15 +108,16 @@ public class RobotstxtServer {
                         content = new String(page.getContentData(), page.getContentCharset());
                     }
                     directives = RobotstxtParser.parse(content, config.getUserAgentName());
-                } else if (contentType.contains(
-                    "html")) { // TODO This one should be upgraded to remove all html tags
+                } else if (page.getContentType().contains("html")) { // TODO This one should be
+                    // upgraded to remove all html
+                    // tags
                     String content = new String(page.getContentData());
                     directives = RobotstxtParser.parse(content, config.getUserAgentName());
                 } else {
                     logger.warn(
                         "Can't read this robots.txt: {}  as it is not written in plain text, " +
                         "contentType: {}",
-                        robotsTxtUrl.getURL(), contentType);
+                        robotsTxtUrl.getURL(), page.getContentType());
                 }
             } else {
                 logger.debug("Can't read this robots.txt: {}  as it's status code is {}",
@@ -127,8 +125,8 @@ public class RobotstxtServer {
             }
         } catch (SocketException | UnknownHostException | SocketTimeoutException |
             NoHttpResponseException se) {
-            // No logging here, as it just means that robots.txt doesn't exist on this server
-            // which is perfectly ok
+            // No logging here, as it just means that robots.txt doesn't exist on this server which
+            // is perfectly ok
         } catch (PageBiggerThanMaxSizeException pbtms) {
             logger.error("Error occurred while fetching (robots) url: {}, {}",
                          robotsTxtUrl.getURL(), pbtms.getMessage());

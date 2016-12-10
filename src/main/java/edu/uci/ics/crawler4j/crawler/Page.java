@@ -17,12 +17,14 @@
 
 package edu.uci.ics.crawler4j.crawler;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.entity.ContentType;
-import org.apache.http.util.EntityUtils;
 
 import edu.uci.ics.crawler4j.parser.ParseData;
 import edu.uci.ics.crawler4j.url.WebURL;
@@ -92,6 +94,11 @@ public class Page {
      */
     protected ParseData parseData;
 
+    /**
+     * Whether the content was truncated because the received data exceeded the imposed maximum
+     */
+    protected boolean truncated = false;
+
     public Page(WebURL url) {
         this.url = url;
     }
@@ -100,9 +107,10 @@ public class Page {
      * Loads the content of this page from a fetched HttpEntity.
      *
      * @param entity HttpEntity
+     * @param maxBytes The maximum number of bytes to read
      * @throws Exception when load fails
      */
-    public void load(HttpEntity entity) throws Exception {
+    public void load(HttpEntity entity, int maxBytes) throws Exception {
 
         contentType = null;
         Header type = entity.getContentType();
@@ -121,7 +129,58 @@ public class Page {
             contentCharset = charset.displayName();
         }
 
-        contentData = EntityUtils.toByteArray(entity);
+        contentData = toByteArray(entity, maxBytes);
+    }
+
+    /**
+     * Read contents from an entity, with a specified maximum. This is a replacement of
+     * EntityUtils.toByteArray because that function does not impose a maximum size.
+     *
+     * @param entity The entity from which to read
+     * @param maxBytes The maximum number of bytes to read
+     * @return A byte array containing maxBytes or fewer bytes read from the entity
+     *
+     * @throws IOException Thrown when reading fails for any reason
+     */
+    protected byte[] toByteArray(HttpEntity entity, int maxBytes) throws IOException {
+        if (entity == null) {
+            return new byte[0];
+        }
+
+        InputStream is = entity.getContent();
+        int size = (int) entity.getContentLength();
+        if (size <= 0 || size > maxBytes) {
+            size = maxBytes;
+        }
+
+        int actualSize = 0;
+
+        byte[] buf = new byte[size];
+        while (actualSize < size) {
+            int remain = size - actualSize;
+            int readBytes = is.read(buf, actualSize, Math.min(remain, 1500));
+
+            if (readBytes <= 0) {
+                break;
+            }
+
+            actualSize += readBytes;
+        }
+
+        // Poll to see if there are more bytes to read. If there are,
+        // the content has been truncated
+        int ch = is.read();
+        if (ch >= 0) {
+            truncated = true;
+        }
+
+        // If the actual size matches the size of the buffer, do not copy it
+        if (actualSize == buf.length) {
+            return buf;
+        }
+
+        // Return the subset of the byte buffer that was used
+        return Arrays.copyOfRange(buf, 0, actualSize);
     }
 
     public WebURL getWebURL() {
@@ -236,5 +295,9 @@ public class Page {
 
     public void setLanguage(String language) {
         this.language = language;
+    }
+
+    public boolean isTruncated() {
+        return truncated;
     }
 }
