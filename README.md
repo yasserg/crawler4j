@@ -130,6 +130,7 @@ public class Controller {
 - [Collecting data from threads](https://github.com/yasserg/crawler4j/tree/master/src/test/java/edu/uci/ics/crawler4j/examples/localdata): this example demonstrates how the controller can collect data/statistics from crawling threads.
 - [Multiple crawlers](https://github.com/yasserg/crawler4j/tree/master/src/test/java/edu/uci/ics/crawler4j/examples/multiple): this is a sample that shows how two distinct crawlers can run concurrently. For example, you might want to split your crawling into different domains and then take different crawling policies for each group. Each crawling controller can have its own configurations.
 - [Shutdown crawling](https://github.com/yasserg/crawler4j/tree/master/src/test/java/edu/uci/ics/crawler4j/examples/shutdown): this example shows have crawling can be terminated gracefully by sending the 'shutdown' command to the controller.
+- [Postgres/JDBC integration](https://github.com/rzo1/crawler4j-postgres-sample): this shows how to save the crawled content into a Postgres database (or any other JDBC repository).
 
 ## Configuration Details
 The controller class has a mandatory parameter of type [CrawlConfig](https://github.com/yasserg/crawler4j/blob/master/src/main/java/edu/uci/ics/crawler4j/crawler/CrawlConfig.java).
