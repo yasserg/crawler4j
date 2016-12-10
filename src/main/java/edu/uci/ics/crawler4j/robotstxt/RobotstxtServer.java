@@ -48,9 +48,16 @@ public class RobotstxtServer {
 
     protected PageFetcher pageFetcher;
 
+    private final int maxBytes;
+
     public RobotstxtServer(RobotstxtConfig config, PageFetcher pageFetcher) {
+        this(config, pageFetcher, 16384);
+    }
+
+    public RobotstxtServer(RobotstxtConfig config, PageFetcher pageFetcher, int maxBytes) {
         this.config = config;
         this.pageFetcher = pageFetcher;
+        this.maxBytes = maxBytes;
     }
 
     private static String getHost(URL url) {
@@ -99,7 +106,7 @@ public class RobotstxtServer {
             fetchResult = pageFetcher.fetchPage(robotsTxtUrl);
             if (fetchResult.getStatusCode() == HttpStatus.SC_OK) {
                 Page page = new Page(robotsTxtUrl);
-                fetchResult.fetchContent(page, 16384);
+                fetchResult.fetchContent(page, maxBytes);
                 if (Util.hasPlainTextContent(page.getContentType())) {
                     String content;
                     if (page.getContentCharset() == null) {
@@ -116,8 +123,7 @@ public class RobotstxtServer {
                 } else {
                     logger.warn(
                         "Can't read this robots.txt: {}  as it is not written in plain text, " +
-                        "contentType: {}",
-                        robotsTxtUrl.getURL(), page.getContentType());
+                        "contentType: {}", robotsTxtUrl.getURL(), page.getContentType());
                 }
             } else {
                 logger.debug("Can't read this robots.txt: {}  as it's status code is {}",
