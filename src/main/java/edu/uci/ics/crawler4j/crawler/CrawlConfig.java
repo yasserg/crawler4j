@@ -134,6 +134,21 @@ public class CrawlConfig {
     private boolean shutdownOnEmptyQueue = true;
 
     /**
+     * Wait this long before checking the status of the worker threads.
+     */
+    private int threadMonitoringDelaySeconds = 10;
+
+    /**
+     * Wait this long to verify the craweler threads are finished working.
+     */
+    private int threadShutdownDelaySeconds = 10;
+
+    /**
+     * Wait this long in seconds before launching cleanup.
+     */
+    private int cleanupDelaySeconds = 10;
+
+    /**
      * If crawler should run behind a proxy, this parameter can be used for
      * specifying the proxy host.
      */
@@ -502,6 +517,30 @@ public class CrawlConfig {
         this.authInfos = authInfos;
     }
 
+    public int getThreadMonitoringDelaySeconds() {
+        return threadMonitoringDelaySeconds;
+    }
+
+    public void setThreadMonitoringDelaySeconds(int delay) {
+        this.threadMonitoringDelaySeconds = delay;
+    }
+
+    public int getThreadShutdownDelaySeconds() {
+        return threadShutdownDelaySeconds;
+    }
+
+    public void setThreadShutdownDelaySeconds(int delay) {
+        this.threadShutdownDelaySeconds = delay;
+    }
+
+    public int getCleanupDelaySeconds() {
+        return cleanupDelaySeconds;
+    }
+
+    public void setCleanupDelaySeconds(int delay) {
+        this.cleanupDelaySeconds = delay;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -523,6 +562,9 @@ public class CrawlConfig {
         sb.append("Proxy port: " + getProxyPort() + "\n");
         sb.append("Proxy username: " + getProxyUsername() + "\n");
         sb.append("Proxy password: " + getProxyPassword() + "\n");
+        sb.append("Thread monitoring delay: " + getThreadMonitoringDelaySeconds() + "\n");
+        sb.append("Thread shutdown delay: " + getThreadShutdownDelaySeconds() + "\n");
+        sb.append("Cleanup delay: " + getCleanupDelaySeconds() + "\n");
         return sb.toString();
     }
 }
