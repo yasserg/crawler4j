@@ -7,6 +7,7 @@
 	<version>4.3-SNAPSHOT</version>
 	<description>Open Source Web Crawler for Java</description>
 	<url>https://github.com/yasserg/crawler4j</url>
+
 	<licenses>
 		<license>
 			<name>The Apache Software License, Version 2.0</name>
@@ -19,6 +20,18 @@
 		<connection>scm:git:git@github.com:yasserg/crawler4j.git</connection>
 		<developerConnection>scm:git:git@github.com:yasserg/crawler4j.git</developerConnection>
 	</scm>
+
+	<properties>
+		<slf4j.version>1.7.21</slf4j.version>
+		<logback.version>1.1.7</logback.version>
+		<guava.version>19.0</guava.version>
+		<apache.http.components.version>4.4</apache.http.components.version>
+		<je.version>5.0.73</je.version>
+		<apache.tika.version>1.14</apache.tika.version>
+		<!--test dependency versions -->
+		<junit.version>4.12</junit.version>
+		<wiremock.version>2.4.1</wiremock.version>
+	</properties>
 
 	<parent>
 		<groupId>org.sonatype.oss</groupId>
@@ -135,51 +148,52 @@
         <!-- Logging framework -->
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-api</artifactId>
-        <version>1.7.21</version>
+        <version>${slf4j.version}</version>
     </dependency>
     <dependency>
         <!-- Implementation of slf4j -->
         <groupId>ch.qos.logback</groupId>
         <artifactId>logback-classic</artifactId>
-        <version>1.1.7</version>
+        <version>${logback.version}</version>
         <scope>runtime</scope>
     </dependency>
     <dependency>
         <!-- Google's core Java libraries -->
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
-        <version>19.0</version>
+        <version>${guava.version}</version>
     </dependency>
 	<dependency>
 		<groupId>org.apache.httpcomponents</groupId>
 		<artifactId>httpclient</artifactId>
-		<version>4.4</version>
+		<version>${apache.http.components.version}</version>
 		<scope>compile</scope>
 	</dependency>
 
 	<dependency>
 		<groupId>com.sleepycat</groupId>
 		<artifactId>je</artifactId>
-		<version>5.0.73</version>
+		<version>${je.version}</version>
 	</dependency>
 
 	<dependency>
 		<groupId>org.apache.tika</groupId>
 		<artifactId>tika-parsers</artifactId>
-		<version>1.14</version>
+		<version>${apache.tika.version}</version>
 	</dependency>
 
     <!-- Test Dependencies -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.12</version>
+			<version>${junit.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.github.tomakehurst</groupId>
 			<artifactId>wiremock</artifactId>
-			<version>2.4.1</version>
+			<version>${wiremock.version}</version>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 
