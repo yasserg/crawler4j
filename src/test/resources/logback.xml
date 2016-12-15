@@ -16,6 +16,8 @@
         </encoder>
     </appender>
 
+    <logger name="com.github.tomakehurst" level="ERROR"/>
+    <logger name="org.eclipse.jetty" level="ERROR" />
 
     <root level="DEBUG">
         <appender-ref ref="STDOUT" />

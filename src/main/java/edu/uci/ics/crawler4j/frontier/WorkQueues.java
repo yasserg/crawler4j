@@ -35,112 +35,112 @@ import edu.uci.ics.crawler4j.util.Util;
  * @author Yasser Ganjisaffar
  */
 public class WorkQueues {
-  private final Database urlsDB;
-  private final Environment env;
+    private final Database urlsDB;
+    private final Environment env;
 
-  private final boolean resumable;
+    private final boolean resumable;
 
-  private final WebURLTupleBinding webURLBinding;
+    private final WebURLTupleBinding webURLBinding;
 
-  protected final Object mutex = new Object();
+    protected final Object mutex = new Object();
 
-  public WorkQueues(Environment env, String dbName, boolean resumable) {
-    this.env = env;
-    this.resumable = resumable;
-    DatabaseConfig dbConfig = new DatabaseConfig();
-    dbConfig.setAllowCreate(true);
-    dbConfig.setTransactional(resumable);
-    dbConfig.setDeferredWrite(!resumable);
-    urlsDB = env.openDatabase(null, dbName, dbConfig);
-    webURLBinding = new WebURLTupleBinding();
-  }
-
-  protected Transaction beginTransaction() {
-    return resumable ? env.beginTransaction(null, null) : null;
-  }
-
-  protected static void commit(Transaction tnx) {
-    if (tnx != null) {
-      tnx.commit();
+    public WorkQueues(Environment env, String dbName, boolean resumable) {
+        this.env = env;
+        this.resumable = resumable;
+        DatabaseConfig dbConfig = new DatabaseConfig();
+        dbConfig.setAllowCreate(true);
+        dbConfig.setTransactional(resumable);
+        dbConfig.setDeferredWrite(!resumable);
+        urlsDB = env.openDatabase(null, dbName, dbConfig);
+        webURLBinding = new WebURLTupleBinding();
     }
-  }
 
-  protected Cursor openCursor(Transaction txn) {
-    return urlsDB.openCursor(txn, null);
-  }
+    protected Transaction beginTransaction() {
+        return resumable ? env.beginTransaction(null, null) : null;
+    }
 
-  public List<WebURL> get(int max) {
-    synchronized (mutex) {
-      List<WebURL> results = new ArrayList<>(max);
-      DatabaseEntry key = new DatabaseEntry();
-      DatabaseEntry value = new DatabaseEntry();
-      Transaction txn = beginTransaction();
-      try (Cursor cursor = openCursor(txn)) {
-        OperationStatus result = cursor.getFirst(key, value, null);
-        int matches = 0;
-        while ((matches < max) && (result == OperationStatus.SUCCESS)) {
-          if (value.getData().length > 0) {
-            results.add(webURLBinding.entryToObject(value));
-            matches++;
-          }
-          result = cursor.getNext(key, value, null);
+    protected static void commit(Transaction tnx) {
+        if (tnx != null) {
+            tnx.commit();
         }
-      }
-      commit(txn);
-      return results;
     }
-  }
 
-  public void delete(int count) {
-    synchronized (mutex) {
-      DatabaseEntry key = new DatabaseEntry();
-      DatabaseEntry value = new DatabaseEntry();
-      Transaction txn = beginTransaction();
-      try (Cursor cursor = openCursor(txn)) {
-        OperationStatus result = cursor.getFirst(key, value, null);
-        int matches = 0;
-        while ((matches < count) && (result == OperationStatus.SUCCESS)) {
-          cursor.delete();
-          matches++;
-          result = cursor.getNext(key, value, null);
+    protected Cursor openCursor(Transaction txn) {
+        return urlsDB.openCursor(txn, null);
+    }
+
+    public List<WebURL> get(int max) {
+        synchronized (mutex) {
+            List<WebURL> results = new ArrayList<>(max);
+            DatabaseEntry key = new DatabaseEntry();
+            DatabaseEntry value = new DatabaseEntry();
+            Transaction txn = beginTransaction();
+            try (Cursor cursor = openCursor(txn)) {
+                OperationStatus result = cursor.getFirst(key, value, null);
+                int matches = 0;
+                while ((matches < max) && (result == OperationStatus.SUCCESS)) {
+                    if (value.getData().length > 0) {
+                        results.add(webURLBinding.entryToObject(value));
+                        matches++;
+                    }
+                    result = cursor.getNext(key, value, null);
+                }
+            }
+            commit(txn);
+            return results;
         }
-      }
-      commit(txn);
     }
-  }
 
-  /*
-   * The key that is used for storing URLs determines the order
-   * they are crawled. Lower key values results in earlier crawling.
-   * Here our keys are 6 bytes. The first byte comes from the URL priority.
-   * The second byte comes from depth of crawl at which this URL is first found.
-   * The rest of the 4 bytes come from the docid of the URL. As a result,
-   * URLs with lower priority numbers will be crawled earlier. If priority
-   * numbers are the same, those found at lower depths will be crawled earlier.
-   * If depth is also equal, those found earlier (therefore, smaller docid) will
-   * be crawled earlier.
-   */
-  protected static DatabaseEntry getDatabaseEntryKey(WebURL url) {
-    byte[] keyData = new byte[6];
-    keyData[0] = url.getPriority();
-    keyData[1] = ((url.getDepth() > Byte.MAX_VALUE) ? Byte.MAX_VALUE : (byte) url.getDepth());
-    Util.putIntInByteArray(url.getDocid(), keyData, 2);
-    return new DatabaseEntry(keyData);
-  }
+    public void delete(int count) {
+        synchronized (mutex) {
+            DatabaseEntry key = new DatabaseEntry();
+            DatabaseEntry value = new DatabaseEntry();
+            Transaction txn = beginTransaction();
+            try (Cursor cursor = openCursor(txn)) {
+                OperationStatus result = cursor.getFirst(key, value, null);
+                int matches = 0;
+                while ((matches < count) && (result == OperationStatus.SUCCESS)) {
+                    cursor.delete();
+                    matches++;
+                    result = cursor.getNext(key, value, null);
+                }
+            }
+            commit(txn);
+        }
+    }
 
-  public void put(WebURL url) {
-    DatabaseEntry value = new DatabaseEntry();
-    webURLBinding.objectToEntry(url, value);
-    Transaction txn = beginTransaction();
-    urlsDB.put(txn, getDatabaseEntryKey(url), value);
-    commit(txn);
-  }
+    /*
+     * The key that is used for storing URLs determines the order
+     * they are crawled. Lower key values results in earlier crawling.
+     * Here our keys are 6 bytes. The first byte comes from the URL priority.
+     * The second byte comes from depth of crawl at which this URL is first found.
+     * The rest of the 4 bytes come from the docid of the URL. As a result,
+     * URLs with lower priority numbers will be crawled earlier. If priority
+     * numbers are the same, those found at lower depths will be crawled earlier.
+     * If depth is also equal, those found earlier (therefore, smaller docid) will
+     * be crawled earlier.
+     */
+    protected static DatabaseEntry getDatabaseEntryKey(WebURL url) {
+        byte[] keyData = new byte[6];
+        keyData[0] = url.getPriority();
+        keyData[1] = ((url.getDepth() > Byte.MAX_VALUE) ? Byte.MAX_VALUE : (byte) url.getDepth());
+        Util.putIntInByteArray(url.getDocid(), keyData, 2);
+        return new DatabaseEntry(keyData);
+    }
 
-  public long getLength() {
-    return urlsDB.count();
-  }
+    public void put(WebURL url) {
+        DatabaseEntry value = new DatabaseEntry();
+        webURLBinding.objectToEntry(url, value);
+        Transaction txn = beginTransaction();
+        urlsDB.put(txn, getDatabaseEntryKey(url), value);
+        commit(txn);
+    }
 
-  public void close() {
-    urlsDB.close();
-  }
+    public long getLength() {
+        return urlsDB.count();
+    }
+
+    public void close() {
+        urlsDB.close();
+    }
 }

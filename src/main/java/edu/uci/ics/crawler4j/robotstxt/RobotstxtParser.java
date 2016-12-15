@@ -22,75 +22,73 @@ import java.util.StringTokenizer;
 /**
  * @author Yasser Ganjisaffar
  */
-
-
 public class RobotstxtParser {
 
-  private static final String PATTERNS_USERAGENT = "(?i)^User-agent:.*";
-  private static final String PATTERNS_DISALLOW = "(?i)Disallow:.*";
-  private static final String PATTERNS_ALLOW = "(?i)Allow:.*";
+    private static final String PATTERNS_USERAGENT = "(?i)^User-agent:.*";
+    private static final String PATTERNS_DISALLOW = "(?i)Disallow:.*";
+    private static final String PATTERNS_ALLOW = "(?i)Allow:.*";
 
-  private static final int PATTERNS_USERAGENT_LENGTH = 11;
-  private static final int PATTERNS_DISALLOW_LENGTH = 9;
-  private static final int PATTERNS_ALLOW_LENGTH = 6;
+    private static final int PATTERNS_USERAGENT_LENGTH = 11;
+    private static final int PATTERNS_DISALLOW_LENGTH = 9;
+    private static final int PATTERNS_ALLOW_LENGTH = 6;
 
-  public static HostDirectives parse(String content, String myUserAgent) {
+    public static HostDirectives parse(String content, String myUserAgent) {
 
-    HostDirectives directives = null;
-    boolean inMatchingUserAgent = false;
+        HostDirectives directives = null;
+        boolean inMatchingUserAgent = false;
 
-    StringTokenizer st = new StringTokenizer(content, "\n\r");
-    while (st.hasMoreTokens()) {
-      String line = st.nextToken();
+        StringTokenizer st = new StringTokenizer(content, "\n\r");
+        while (st.hasMoreTokens()) {
+            String line = st.nextToken();
 
-      int commentIndex = line.indexOf('#');
-      if (commentIndex > -1) {
-        line = line.substring(0, commentIndex);
-      }
+            int commentIndex = line.indexOf('#');
+            if (commentIndex > -1) {
+                line = line.substring(0, commentIndex);
+            }
 
-      // remove any html markup
-      line = line.replaceAll("<[^>]+>", "");
+            // remove any html markup
+            line = line.replaceAll("<[^>]+>", "");
 
-      line = line.trim();
+            line = line.trim();
 
-      if (line.isEmpty()) {
-        continue;
-      }
+            if (line.isEmpty()) {
+                continue;
+            }
 
-      if (line.matches(PATTERNS_USERAGENT)) {
-        String ua = line.substring(PATTERNS_USERAGENT_LENGTH).trim().toLowerCase();
-        inMatchingUserAgent = "*".equals(ua) || ua.contains(myUserAgent.toLowerCase());
-      } else if (line.matches(PATTERNS_DISALLOW)) {
-        if (!inMatchingUserAgent) {
-          continue;
+            if (line.matches(PATTERNS_USERAGENT)) {
+                String ua = line.substring(PATTERNS_USERAGENT_LENGTH).trim().toLowerCase();
+                inMatchingUserAgent = "*".equals(ua) || ua.contains(myUserAgent.toLowerCase());
+            } else if (line.matches(PATTERNS_DISALLOW)) {
+                if (!inMatchingUserAgent) {
+                    continue;
+                }
+                String path = line.substring(PATTERNS_DISALLOW_LENGTH).trim();
+                if (path.endsWith("*")) {
+                    path = path.substring(0, path.length() - 1);
+                }
+                path = path.trim();
+                if (!path.isEmpty()) {
+                    if (directives == null) {
+                        directives = new HostDirectives();
+                    }
+                    directives.addDisallow(path);
+                }
+            } else if (line.matches(PATTERNS_ALLOW)) {
+                if (!inMatchingUserAgent) {
+                    continue;
+                }
+                String path = line.substring(PATTERNS_ALLOW_LENGTH).trim();
+                if (path.endsWith("*")) {
+                    path = path.substring(0, path.length() - 1);
+                }
+                path = path.trim();
+                if (directives == null) {
+                    directives = new HostDirectives();
+                }
+                directives.addAllow(path);
+            }
         }
-        String path = line.substring(PATTERNS_DISALLOW_LENGTH).trim();
-        if (path.endsWith("*")) {
-          path = path.substring(0, path.length() - 1);
-        }
-        path = path.trim();
-        if (!path.isEmpty()) {
-          if (directives == null) {
-            directives = new HostDirectives();
-          }
-          directives.addDisallow(path);
-        }
-      } else if (line.matches(PATTERNS_ALLOW)) {
-        if (!inMatchingUserAgent) {
-          continue;
-        }
-        String path = line.substring(PATTERNS_ALLOW_LENGTH).trim();
-        if (path.endsWith("*")) {
-          path = path.substring(0, path.length() - 1);
-        }
-        path = path.trim();
-        if (directives == null) {
-          directives = new HostDirectives();
-        }
-        directives.addAllow(path);
-      }
+
+        return directives;
     }
-
-    return directives;
-  }
 }
