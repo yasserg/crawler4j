@@ -304,6 +304,24 @@ public class WebCrawler implements Runnable {
     }
 
     /**
+     * Determine whether links found at the given URL should be added to the queue for crawling.
+     * By default this method returns true always, but classes that extend WebCrawler can
+     * override it in order to implement particular policies about which pages should be
+     * mined for outgoing links and which should not.
+     *
+     * If links from the URL are not being followed, then we are not operating as
+     * a web crawler and need not check robots.txt before fetching the single URL.
+     * (see definition at http://www.robotstxt.org/faq/what.html).  Thus URLs that
+     * return false from this method will not be subject to robots.txt filtering.
+     *
+     * @param url the URL of the page under consideration
+     * @return true if outgoing links from this page should be added to the queue.
+     */
+    protected boolean shouldFollowLinksIn(WebURL url) {
+        return true;
+    }
+
+    /**
      * Classes that extends WebCrawler should overwrite this function to process
      * the content of the fetched and parsed page.
      *
@@ -366,7 +384,7 @@ public class WebCrawler implements Runnable {
                         webURL.setDocid(-1);
                         webURL.setAnchor(curURL.getAnchor());
                         if (shouldVisit(page, webURL)) {
-                            if (robotstxtServer.allows(webURL)) {
+                            if (!shouldFollowLinksIn(webURL) || robotstxtServer.allows(webURL)) {
                                 webURL.setDocid(docIdServer.getNewDocID(movedToUrl));
                                 frontier.schedule(webURL);
                             } else {
@@ -415,40 +433,46 @@ public class WebCrawler implements Runnable {
 
                 parser.parse(page, curURL.getURL());
 
-                ParseData parseData = page.getParseData();
-                List<WebURL> toSchedule = new ArrayList<>();
-                int maxCrawlDepth = myController.getConfig().getMaxDepthOfCrawling();
-                for (WebURL webURL : parseData.getOutgoingUrls()) {
-                    webURL.setParentDocid(curURL.getDocid());
-                    webURL.setParentUrl(curURL.getURL());
-                    int newdocid = docIdServer.getDocId(webURL.getURL());
-                    if (newdocid > 0) {
-                        // This is not the first time that this Url is visited. So, we set the
-                        // depth to a negative number.
-                        webURL.setDepth((short) -1);
-                        webURL.setDocid(newdocid);
-                    } else {
-                        webURL.setDocid(-1);
-                        webURL.setDepth((short) (curURL.getDepth() + 1));
-                        if ((maxCrawlDepth == -1) || (curURL.getDepth() < maxCrawlDepth)) {
-                            if (shouldVisit(page, webURL)) {
-                                if (robotstxtServer.allows(webURL)) {
-                                    webURL.setDocid(docIdServer.getNewDocID(webURL.getURL()));
-                                    toSchedule.add(webURL);
+                if (shouldFollowLinksIn(page.getWebURL())) {
+                    ParseData parseData = page.getParseData();
+                    List<WebURL> toSchedule = new ArrayList<>();
+                    int maxCrawlDepth = myController.getConfig().getMaxDepthOfCrawling();
+                    for (WebURL webURL : parseData.getOutgoingUrls()) {
+                        webURL.setParentDocid(curURL.getDocid());
+                        webURL.setParentUrl(curURL.getURL());
+                        int newdocid = docIdServer.getDocId(webURL.getURL());
+                        if (newdocid > 0) {
+                            // This is not the first time that this Url is visited. So, we set the
+                            // depth to a negative number.
+                            webURL.setDepth((short) -1);
+                            webURL.setDocid(newdocid);
+                        } else {
+                            webURL.setDocid(-1);
+                            webURL.setDepth((short) (curURL.getDepth() + 1));
+                            if ((maxCrawlDepth == -1) || (curURL.getDepth() < maxCrawlDepth)) {
+                                if (shouldVisit(page, webURL)) {
+                                    if (robotstxtServer.allows(webURL)) {
+                                        webURL.setDocid(docIdServer.getNewDocID(webURL.getURL()));
+                                        toSchedule.add(webURL);
+                                    } else {
+                                        logger.debug(
+                                            "Not visiting: {} as per the server's \"robots.txt\" " +
+                                            "policy", webURL.getURL());
+                                    }
                                 } else {
                                     logger.debug(
-                                        "Not visiting: {} as per the server's \"robots.txt\" " +
-                                        "policy", webURL.getURL());
+                                        "Not visiting: {} as per your \"shouldVisit\" policy",
+                                        webURL.getURL());
                                 }
-                            } else {
-                                logger.debug("Not visiting: {} as per your \"shouldVisit\" policy",
-                                             webURL.getURL());
                             }
                         }
                     }
+                    frontier.scheduleAll(toSchedule);
+                } else {
+                    logger.debug("Not looking for links in page {}, "
+                                 + "as per your \"shouldFollowLinksInPage\" policy",
+                                 page.getWebURL().getURL());
                 }
-                frontier.scheduleAll(toSchedule);
-
                 visit(page);
             }
         } catch (PageBiggerThanMaxSizeException e) {
