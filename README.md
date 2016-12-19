@@ -123,7 +123,32 @@ public class Controller {
     }
 }
 ```
+## Using a factory
+Using a factory can be convenient to integrate crawler4j in a IoC environement (like Spring, Guice) 
+or to pass information or a collaborator to each `WebCrawler` instance.
 
+```java
+public class MyCrawlerFactory implements CrawlController.WebCrawlerFactory {
+
+    Map<String, String> metadata;
+    SqlRepository repository;
+
+    public CsiCrawlerCrawlerControllerFactory(Map<String, String> metadata, SqlRepository repository) {
+        this.metadata = metadata;
+        this.repository = repository;
+    }
+
+    @Override
+    public WebCrawler newInstance() {
+        return new MyCrawler(metadata, repository);
+    }
+}
+```
+To use a factory just call the right method in the `CrawlController` (probably you will want to use the `startNonBlocking` if you are in Spring or Guice):
+```java
+            MyCrawlerFactory factory = new MyCrawlerFactory(metadata, repository);
+            controller.startNonBlocking(factory, numberOfCrawlers);
+```
 ## More Examples
 - [Basic crawler](https://github.com/yasserg/crawler4j/tree/master/src/test/java/edu/uci/ics/crawler4j/examples/basic): the full source code of the above example with more details.
 - [Image crawler](https://github.com/yasserg/crawler4j/tree/master/src/test/java/edu/uci/ics/crawler4j/examples/imagecrawler): a simple image crawler that downloads image content from the crawling domain and stores them in a folder. This example demonstrates how binary content can be fetched using crawler4j.
