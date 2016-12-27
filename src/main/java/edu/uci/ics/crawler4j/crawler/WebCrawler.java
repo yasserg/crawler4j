@@ -188,6 +188,15 @@ public class WebCrawler implements Runnable {
     }
 
     /**
+     * This function is called if the crawler encounters a page with a 3xx status code
+     *
+     * @param page Partial page object
+     */
+    protected void onRedirectedStatusCode(Page page) {
+        //Subclasses can override this to add their custom functionality
+    }
+
+    /**
      * This function is called if the crawler encountered an unexpected http status code ( a
      * status code other than 3xx)
      *
@@ -361,15 +370,17 @@ public class WebCrawler implements Runnable {
                     // follow https://issues.apache.org/jira/browse/HTTPCORE-389
 
                     page.setRedirect(true);
-                    if (myController.getConfig().isFollowRedirects()) {
-                        String movedToUrl = fetchResult.getMovedToUrl();
-                        if (movedToUrl == null) {
-                            logger.warn("Unexpected error, URL: {} is redirected to NOTHING",
-                                        curURL);
-                            return;
-                        }
-                        page.setRedirectedToUrl(movedToUrl);
 
+                    String movedToUrl = fetchResult.getMovedToUrl();
+                    if (movedToUrl == null) {
+                        logger.warn("Unexpected error, URL: {} is redirected to NOTHING",
+                                    curURL);
+                        return;
+                    }
+                    page.setRedirectedToUrl(movedToUrl);
+                    onRedirectedStatusCode(page);
+
+                    if (myController.getConfig().isFollowRedirects()) {
                         int newDocId = docIdServer.getDocId(movedToUrl);
                         if (newDocId > 0) {
                             logger.debug("Redirect page: {} is already seen", curURL);
