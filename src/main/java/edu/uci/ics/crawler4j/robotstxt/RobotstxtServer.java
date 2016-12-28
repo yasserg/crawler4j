@@ -66,31 +66,31 @@ public class RobotstxtServer {
 
     /** Please note that in the case of a bad URL, TRUE will be returned */
     public boolean allows(WebURL webURL) {
-        if (config.isEnabled()) {
-            try {
-                URL url = new URL(webURL.getURL());
-                String host = getHost(url);
-                String path = url.getPath();
+        if (!config.isEnabled()) {
+            return true;
+        }
+        try {
+            URL url = new URL(webURL.getURL());
+            String host = getHost(url);
+            String path = url.getPath();
 
-                HostDirectives directives = host2directivesCache.get(host);
+            HostDirectives directives = host2directivesCache.get(host);
 
-                if ((directives != null) && directives.needsRefetch()) {
-                    synchronized (host2directivesCache) {
-                        host2directivesCache.remove(host);
-                        directives = null;
-                    }
+            if (directives != null && directives.needsRefetch()) {
+                synchronized (host2directivesCache) {
+                    host2directivesCache.remove(host);
+                    directives = null;
                 }
-
-                if (directives == null) {
-                    directives = fetchDirectives(url);
-                }
-
-                return directives.allows(path);
-            } catch (MalformedURLException e) {
-                logger.error("Bad URL in Robots.txt: " + webURL.getURL(), e);
             }
+            if (directives == null) {
+                directives = fetchDirectives(url);
+            }
+            return directives.allows(path);
+        } catch (MalformedURLException e) {
+            logger.error("Bad URL in Robots.txt: " + webURL.getURL(), e);
         }
 
+        logger.warn("RobotstxtServer: default: allow", webURL.getURL());
         return true;
     }
 
@@ -99,14 +99,35 @@ public class RobotstxtServer {
         String host = getHost(url);
         String port = ((url.getPort() == url.getDefaultPort()) || (url.getPort() == -1)) ? "" :
                       (":" + url.getPort());
-        robotsTxtUrl.setURL("http://" + host + port + "/robots.txt");
+        String proto = url.getProtocol();
+        robotsTxtUrl.setURL(proto + "://" + host + port + "/robots.txt");
         HostDirectives directives = null;
         PageFetchResult fetchResult = null;
         try {
-            fetchResult = pageFetcher.fetchPage(robotsTxtUrl);
+            for (int redir = 0; redir < 3; ++redir) {
+                fetchResult = pageFetcher.fetchPage(robotsTxtUrl);
+                int status = fetchResult.getStatusCode();
+                // Follow redirects up to 3 levels
+                if ((status == HttpStatus.SC_MULTIPLE_CHOICES ||
+                     status == HttpStatus.SC_MOVED_PERMANENTLY ||
+                     status == HttpStatus.SC_MOVED_TEMPORARILY ||
+                     status == HttpStatus.SC_SEE_OTHER ||
+                     status == HttpStatus.SC_TEMPORARY_REDIRECT || status == 308) &&
+                    // SC_PERMANENT_REDIRECT RFC7538
+                    fetchResult.getMovedToUrl() != null) {
+                    robotsTxtUrl.setURL(fetchResult.getMovedToUrl());
+                    fetchResult.discardContentIfNotConsumed();
+                } else {
+                    // Done on all other occasions
+                    break;
+                }
+            }
+
             if (fetchResult.getStatusCode() == HttpStatus.SC_OK) {
                 Page page = new Page(robotsTxtUrl);
-                fetchResult.fetchContent(page, maxBytes);
+                // Most recent answer on robots.txt max size is
+                // https://goo.gl/OqpKbP
+                fetchResult.fetchContent(page, 10_000 * 1024);
                 if (Util.hasPlainTextContent(page.getContentType())) {
                     String content;
                     if (page.getContentCharset() == null) {
@@ -114,12 +135,13 @@ public class RobotstxtServer {
                     } else {
                         content = new String(page.getContentData(), page.getContentCharset());
                     }
-                    directives = RobotstxtParser.parse(content, config.getUserAgentName());
-                } else if (page.getContentType().contains("html")) { // TODO This one should be
-                    // upgraded to remove all html
-                    // tags
+                    directives = RobotstxtParser.parse(content, config);
+                } else if (page.getContentType()
+                               .contains(
+                                   "html")) { // TODO This one should be upgraded to remove all
+                    // html tags
                     String content = new String(page.getContentData());
-                    directives = RobotstxtParser.parse(content, config.getUserAgentName());
+                    directives = RobotstxtParser.parse(content, config);
                 } else {
                     logger.warn(
                         "Can't read this robots.txt: {}  as it is not written in plain text, " +
@@ -131,8 +153,9 @@ public class RobotstxtServer {
             }
         } catch (SocketException | UnknownHostException | SocketTimeoutException |
             NoHttpResponseException se) {
-            // No logging here, as it just means that robots.txt doesn't exist on this server which
-            // is perfectly ok
+            // No logging here, as it just means that robots.txt doesn't exist on this server
+            // which is perfectly ok
+            logger.trace("robots.txt probably does not exist.", se);
         } catch (PageBiggerThanMaxSizeException pbtms) {
             logger.error("Error occurred while fetching (robots) url: {}, {}",
                          robotsTxtUrl.getURL(), pbtms.getMessage());
@@ -146,15 +169,16 @@ public class RobotstxtServer {
 
         if (directives == null) {
             // We still need to have this object to keep track of the time we fetched it
-            directives = new HostDirectives();
+            directives = new HostDirectives(config);
         }
         synchronized (host2directivesCache) {
             if (host2directivesCache.size() == config.getCacheSize()) {
                 String minHost = null;
                 long minAccessTime = Long.MAX_VALUE;
                 for (Map.Entry<String, HostDirectives> entry : host2directivesCache.entrySet()) {
-                    if (entry.getValue().getLastAccessTime() < minAccessTime) {
-                        minAccessTime = entry.getValue().getLastAccessTime();
+                    long entryAccessTime = entry.getValue().getLastAccessTime();
+                    if (entryAccessTime < minAccessTime) {
+                        minAccessTime = entryAccessTime;
                         minHost = entry.getKey();
                     }
                 }
