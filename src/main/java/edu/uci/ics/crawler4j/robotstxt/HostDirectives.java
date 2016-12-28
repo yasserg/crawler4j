@@ -17,6 +17,7 @@
 
 package edu.uci.ics.crawler4j.robotstxt;
 
+import java.util.Set;
 import java.util.TreeSet;
 
 /**
@@ -32,7 +33,7 @@ public class HostDirectives {
     public static final int UNDEFINED = 3;
 
     /** A list of rule sets, sorted on match with the configured user agent */
-    private TreeSet<UserAgentDirectives> rules;
+    private Set<UserAgentDirectives> rules;
 
     private final long timeFetched;
     private long timeLastAccessed;
@@ -43,7 +44,8 @@ public class HostDirectives {
         timeFetched = System.currentTimeMillis();
         config = configuration;
         userAgent = config.getUserAgentName().toLowerCase();
-        rules = new TreeSet<UserAgentDirectives>(new UserAgentDirectives.UserAgentComparator(userAgent));
+        rules = new TreeSet<UserAgentDirectives>(
+            new UserAgentDirectives.UserAgentComparator(userAgent));
     }
 
     public boolean needsRefetch() {
@@ -70,7 +72,8 @@ public class HostDirectives {
         this.userAgent = userAgent.toLowerCase();
 
         // Re-order the set
-        TreeSet<UserAgentDirectives> replace = new TreeSet<UserAgentDirectives>(new UserAgentDirectives.UserAgentComparator(this.userAgent));
+        Set<UserAgentDirectives> replace = new TreeSet<UserAgentDirectives>(
+            new UserAgentDirectives.UserAgentComparator(this.userAgent));
         replace.addAll(rules);
         rules = replace;
     }
@@ -110,8 +113,9 @@ public class HostDirectives {
 
             // If ignoreUADisc is disabled and the current UA doesn't match,
             // the rest will not match so we are done here.
-            if (score == 0 && !ignoreUADisc)
+            if (score == 0 && !ignoreUADisc) {
                 break;
+            }
 
             // Match the rule to the path
             result = ua.checkAccess(path, userAgent);
