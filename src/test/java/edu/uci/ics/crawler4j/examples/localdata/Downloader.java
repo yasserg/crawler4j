@@ -40,13 +40,13 @@ public class Downloader {
     private final Parser parser;
     private final PageFetcher pageFetcher;
 
-    public Downloader() {
+    public Downloader() throws InstantiationException, IllegalAccessException {
         CrawlConfig config = new CrawlConfig();
         parser = new Parser(config);
         pageFetcher = new PageFetcher(config);
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InstantiationException, IllegalAccessException {
         Downloader downloader = new Downloader();
         downloader.processUrl("http://en.wikipedia.org/wiki/Main_Page/");
         downloader.processUrl("http://www.yahoo.com/");

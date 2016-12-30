@@ -40,7 +40,8 @@ public class HtmlContentHandler extends DefaultHandler {
         IMG,
         BASE,
         META,
-        BODY
+        BODY,
+        SCRIPT
     }
 
     private static class HtmlFactory {
@@ -97,7 +98,7 @@ public class HtmlContentHandler extends DefaultHandler {
 
             }
         } else if ((element == Element.IFRAME) || (element == Element.FRAME) ||
-                   (element == Element.EMBED)) {
+                   (element == Element.EMBED) || (element == Element.SCRIPT)) {
             String src = attributes.getValue("src");
             if (src != null) {
                 addToOutgoingUrls(src, localName);
