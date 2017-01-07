@@ -20,6 +20,28 @@ To use the latest release of crawler4j, please use the following snippet in your
     </dependency>
 ```
 
+#### Snapshot
+
+You can add the following to use the next SNAPSHOT release
+
+```xml
+    <repositories>
+        <repository>
+            <id>onebeartoe</id>
+            <name>onebeartoe</name>
+            <url>https://repository-onebeartoe.forge.cloudbees.com/snapshot/</url>
+        </repository>
+    </repositories>
+    
+    <dependencies>
+        <dependency>
+            <groupId>edu.uci.ics</groupId>
+            <artifactId>crawler4j</artifactId>
+            <version>4.3-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
+```
+
 ### Without Maven
 
 crawler4j JARs are available on the [releases page](https://github.com/yasserg/crawler4j/releases)
