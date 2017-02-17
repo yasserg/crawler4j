@@ -20,11 +20,11 @@ package edu.uci.ics.crawler4j.crawler;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.util.Arrays;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.entity.ContentType;
+import org.apache.http.util.ByteArrayBuffer;
 
 import edu.uci.ics.crawler4j.parser.ParseData;
 import edu.uci.ics.crawler4j.url.WebURL;
@@ -146,41 +146,36 @@ public class Page {
         if (entity == null) {
             return new byte[0];
         }
+        try (InputStream is = entity.getContent()) {
+            int size = (int) entity.getContentLength();
+            int readBufferLength = size;
 
-        InputStream is = entity.getContent();
-        int size = (int) entity.getContentLength();
-        if (size <= 0 || size > maxBytes) {
-            size = maxBytes;
-        }
-
-        int actualSize = 0;
-
-        byte[] buf = new byte[size];
-        while (actualSize < size) {
-            int remain = size - actualSize;
-            int readBytes = is.read(buf, actualSize, Math.min(remain, 1500));
-
-            if (readBytes <= 0) {
-                break;
+            if (readBufferLength <= 0) {
+                readBufferLength = 4096;
             }
+            // in case when the maxBytes is less than the actual page size
+            readBufferLength = Math.min(readBufferLength, maxBytes);
 
-            actualSize += readBytes;
+            // We allocate the buffer with either the actual size of the entity (if available)
+            // or with the default 4KiB if the server did not return a value to avoid allocating
+            // the full maxBytes (for the cases when the actual size will be smaller than maxBytes).
+            ByteArrayBuffer buffer = new ByteArrayBuffer(readBufferLength);
+
+            byte[] tmpBuff = new byte[4096];
+            int dataLength;
+
+            while ((dataLength = is.read(tmpBuff)) != -1) {
+                if (maxBytes > 0 && (buffer.length() + dataLength) > maxBytes) {
+                    truncated = true;
+                    dataLength = maxBytes - buffer.length();
+                }
+                buffer.append(tmpBuff, 0, dataLength);
+                if (truncated) {
+                    break;
+                }
+            }
+            return buffer.toByteArray();
         }
-
-        // Poll to see if there are more bytes to read. If there are,
-        // the content has been truncated
-        int ch = is.read();
-        if (ch >= 0) {
-            truncated = true;
-        }
-
-        // If the actual size matches the size of the buffer, do not copy it
-        if (actualSize == buf.length) {
-            return buf;
-        }
-
-        // Return the subset of the byte buffer that was used
-        return Arrays.copyOfRange(buf, 0, actualSize);
     }
 
     public WebURL getWebURL() {
