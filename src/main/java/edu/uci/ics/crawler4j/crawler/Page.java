@@ -83,6 +83,11 @@ public class Page {
   private String language;
 
   /**
+   * The time to fetch the page
+   */
+  protected long fetchTime;
+
+  /**
    * Headers which were present in the response of the fetch request
    */
   protected Header[] fetchResponseHeaders;
@@ -91,7 +96,6 @@ public class Page {
    * The parsed data populated by parsers
    */
   protected ParseData parseData;
-
 
   public Page(WebURL url) {
     this.url = url;
@@ -237,5 +241,16 @@ public class Page {
 
   public void setLanguage(String language) {
     this.language = language;
+  }
+
+  /**
+   * @return time to fetch the page
+   */
+  public long getFetchTime() {
+    return fetchTime;
+  }
+
+  public void setFetchTime(long fetchTime) {
+    this.fetchTime = fetchTime;
   }
 }

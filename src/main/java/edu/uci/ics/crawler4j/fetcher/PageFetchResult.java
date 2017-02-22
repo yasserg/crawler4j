@@ -39,6 +39,7 @@ public class PageFetchResult {
   protected Header[] responseHeaders = null;
   protected String fetchedUrl = null;
   protected String movedToUrl = null;
+  protected long fetchTime = 0;
 
   public int getStatusCode() {
     return statusCode;
@@ -103,5 +104,13 @@ public class PageFetchResult {
 
   public void setMovedToUrl(String movedToUrl) {
     this.movedToUrl = movedToUrl;
+  }
+
+  public long getFetchTime() {
+    return fetchTime;
+  }
+
+  public void setFetchTime(long fetchTime) {
+    this.fetchTime = fetchTime;
   }
 }

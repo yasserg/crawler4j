@@ -234,6 +234,8 @@ public class PageFetcher extends Configurable {
         lastFetchTime = (new Date()).getTime();
       }
 
+      long start = System.currentTimeMillis();
+
       CloseableHttpResponse response = httpClient.execute(request);
       fetchResult.setEntity(response.getEntity());
       fetchResult.setResponseHeaders(response.getAllHeaders());
@@ -281,6 +283,7 @@ public class PageFetcher extends Configurable {
         }
       }
 
+      fetchResult.setFetchTime(System.currentTimeMillis() - start);
       fetchResult.setStatusCode(statusCode);
       return fetchResult;
 
