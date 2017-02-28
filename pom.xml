@@ -22,11 +22,11 @@
 	</scm>
 
 	<properties>
-		<slf4j.version>1.7.21</slf4j.version>
+		<slf4j.version>1.7.22</slf4j.version>
 		<logback.version>1.1.7</logback.version>
-		<guava.version>19.0</guava.version>
-		<apache.http.components.version>4.5.2</apache.http.components.version>
-		<je.version>5.0.73</je.version>
+		<guava.version>21.0</guava.version>
+		<apache.http.components.version>4.5.3</apache.http.components.version>
+		<je.version>5.0.84</je.version>
 		<apache.tika.version>1.14</apache.tika.version>
 		<!--test dependency versions -->
 		<junit.version>4.12</junit.version>
@@ -145,7 +145,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.7.7.201606060606</version>
+                <version>0.7.9</version>
                 <executions>
                     <execution>
                         <id>pre-unit-test</id>
