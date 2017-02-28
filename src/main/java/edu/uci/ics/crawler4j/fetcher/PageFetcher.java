@@ -76,10 +76,9 @@ import edu.uci.ics.crawler4j.url.WebURL;
  */
 public class PageFetcher extends Configurable {
     protected static final Logger logger = LoggerFactory.getLogger(PageFetcher.class);
-
+    protected final Object mutex = new Object();
     protected PoolingHttpClientConnectionManager connectionManager;
     protected CloseableHttpClient httpClient;
-    protected final Object mutex = new Object();
     protected long lastFetchTime = 0;
     protected IdleConnectionMonitorThread connectionMonitorThread = null;
 
@@ -106,8 +105,8 @@ public class PageFetcher extends Configurable {
                             return true;
                         }
                     }).build();
-                SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
-                    sslContext, NoopHostnameVerifier.INSTANCE);
+                SSLConnectionSocketFactory sslsf =
+                    new SniSSLConnectionSocketFactory(sslContext, NoopHostnameVerifier.INSTANCE);
                 connRegistryBuilder.register("https", sslsf);
             } catch (Exception e) {
                 logger.warn("Exception thrown while trying to register https");
@@ -116,7 +115,7 @@ public class PageFetcher extends Configurable {
         }
 
         Registry<ConnectionSocketFactory> connRegistry = connRegistryBuilder.build();
-        connectionManager = new PoolingHttpClientConnectionManager(connRegistry);
+        connectionManager = new SniPoolingHttpClientConnectionManager(connRegistry);
         connectionManager.setMaxTotal(config.getMaxTotalConnections());
         connectionManager.setDefaultMaxPerRoute(config.getMaxConnectionsPerHost());
 

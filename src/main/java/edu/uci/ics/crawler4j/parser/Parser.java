@@ -27,7 +27,9 @@ import org.apache.tika.language.LanguageIdentifier;
 import org.apache.tika.metadata.DublinCore;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.ParseContext;
+import org.apache.tika.parser.html.HtmlMapper;
 import org.apache.tika.parser.html.HtmlParser;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,10 +52,11 @@ public class Parser extends Configurable {
     private final HtmlParser htmlParser;
     private final ParseContext parseContext;
 
-    public Parser(CrawlConfig config) {
+    public Parser(CrawlConfig config) throws InstantiationException, IllegalAccessException {
         super(config);
         htmlParser = new HtmlParser();
         parseContext = new ParseContext();
+        parseContext.set(HtmlMapper.class, AllTagMapper.class.newInstance());
     }
 
     public void parse(Page page, String contextURL)

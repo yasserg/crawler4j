@@ -106,8 +106,11 @@ public class WebCrawler implements Runnable {
      *            the id of this crawler instance
      * @param crawlController
      *            the controller that manages this crawling session
+     * @throws IllegalAccessException
+     * @throws InstantiationException
      */
-    public void init(int id, CrawlController crawlController) {
+    public void init(int id, CrawlController crawlController)
+        throws InstantiationException, IllegalAccessException {
         this.myId = id;
         this.pageFetcher = crawlController.getPageFetcher();
         this.robotstxtServer = crawlController.getRobotstxtServer();
@@ -185,6 +188,15 @@ public class WebCrawler implements Runnable {
     protected void onPageBiggerThanMaxSize(String urlStr, long pageSize) {
         logger.warn("Skipping a URL: {} which was bigger ( {} ) than max allowed size", urlStr,
                     pageSize);
+    }
+
+    /**
+     * This function is called if the crawler encounters a page with a 3xx status code
+     *
+     * @param page Partial page object
+     */
+    protected void onRedirectedStatusCode(Page page) {
+        //Subclasses can override this to add their custom functionality
     }
 
     /**
@@ -304,6 +316,24 @@ public class WebCrawler implements Runnable {
     }
 
     /**
+     * Determine whether links found at the given URL should be added to the queue for crawling.
+     * By default this method returns true always, but classes that extend WebCrawler can
+     * override it in order to implement particular policies about which pages should be
+     * mined for outgoing links and which should not.
+     *
+     * If links from the URL are not being followed, then we are not operating as
+     * a web crawler and need not check robots.txt before fetching the single URL.
+     * (see definition at http://www.robotstxt.org/faq/what.html).  Thus URLs that
+     * return false from this method will not be subject to robots.txt filtering.
+     *
+     * @param url the URL of the page under consideration
+     * @return true if outgoing links from this page should be added to the queue.
+     */
+    protected boolean shouldFollowLinksIn(WebURL url) {
+        return true;
+    }
+
+    /**
      * Classes that extends WebCrawler should overwrite this function to process
      * the content of the fetched and parsed page.
      *
@@ -343,15 +373,17 @@ public class WebCrawler implements Runnable {
                     // follow https://issues.apache.org/jira/browse/HTTPCORE-389
 
                     page.setRedirect(true);
-                    if (myController.getConfig().isFollowRedirects()) {
-                        String movedToUrl = fetchResult.getMovedToUrl();
-                        if (movedToUrl == null) {
-                            logger.warn("Unexpected error, URL: {} is redirected to NOTHING",
-                                        curURL);
-                            return;
-                        }
-                        page.setRedirectedToUrl(movedToUrl);
 
+                    String movedToUrl = fetchResult.getMovedToUrl();
+                    if (movedToUrl == null) {
+                        logger.warn("Unexpected error, URL: {} is redirected to NOTHING",
+                                    curURL);
+                        return;
+                    }
+                    page.setRedirectedToUrl(movedToUrl);
+                    onRedirectedStatusCode(page);
+
+                    if (myController.getConfig().isFollowRedirects()) {
                         int newDocId = docIdServer.getDocId(movedToUrl);
                         if (newDocId > 0) {
                             logger.debug("Redirect page: {} is already seen", curURL);
@@ -366,7 +398,7 @@ public class WebCrawler implements Runnable {
                         webURL.setDocid(-1);
                         webURL.setAnchor(curURL.getAnchor());
                         if (shouldVisit(page, webURL)) {
-                            if (robotstxtServer.allows(webURL)) {
+                            if (!shouldFollowLinksIn(webURL) || robotstxtServer.allows(webURL)) {
                                 webURL.setDocid(docIdServer.getNewDocID(movedToUrl));
                                 frontier.schedule(webURL);
                             } else {
@@ -415,40 +447,46 @@ public class WebCrawler implements Runnable {
 
                 parser.parse(page, curURL.getURL());
 
-                ParseData parseData = page.getParseData();
-                List<WebURL> toSchedule = new ArrayList<>();
-                int maxCrawlDepth = myController.getConfig().getMaxDepthOfCrawling();
-                for (WebURL webURL : parseData.getOutgoingUrls()) {
-                    webURL.setParentDocid(curURL.getDocid());
-                    webURL.setParentUrl(curURL.getURL());
-                    int newdocid = docIdServer.getDocId(webURL.getURL());
-                    if (newdocid > 0) {
-                        // This is not the first time that this Url is visited. So, we set the
-                        // depth to a negative number.
-                        webURL.setDepth((short) -1);
-                        webURL.setDocid(newdocid);
-                    } else {
-                        webURL.setDocid(-1);
-                        webURL.setDepth((short) (curURL.getDepth() + 1));
-                        if ((maxCrawlDepth == -1) || (curURL.getDepth() < maxCrawlDepth)) {
-                            if (shouldVisit(page, webURL)) {
-                                if (robotstxtServer.allows(webURL)) {
-                                    webURL.setDocid(docIdServer.getNewDocID(webURL.getURL()));
-                                    toSchedule.add(webURL);
+                if (shouldFollowLinksIn(page.getWebURL())) {
+                    ParseData parseData = page.getParseData();
+                    List<WebURL> toSchedule = new ArrayList<>();
+                    int maxCrawlDepth = myController.getConfig().getMaxDepthOfCrawling();
+                    for (WebURL webURL : parseData.getOutgoingUrls()) {
+                        webURL.setParentDocid(curURL.getDocid());
+                        webURL.setParentUrl(curURL.getURL());
+                        int newdocid = docIdServer.getDocId(webURL.getURL());
+                        if (newdocid > 0) {
+                            // This is not the first time that this Url is visited. So, we set the
+                            // depth to a negative number.
+                            webURL.setDepth((short) -1);
+                            webURL.setDocid(newdocid);
+                        } else {
+                            webURL.setDocid(-1);
+                            webURL.setDepth((short) (curURL.getDepth() + 1));
+                            if ((maxCrawlDepth == -1) || (curURL.getDepth() < maxCrawlDepth)) {
+                                if (shouldVisit(page, webURL)) {
+                                    if (robotstxtServer.allows(webURL)) {
+                                        webURL.setDocid(docIdServer.getNewDocID(webURL.getURL()));
+                                        toSchedule.add(webURL);
+                                    } else {
+                                        logger.debug(
+                                            "Not visiting: {} as per the server's \"robots.txt\" " +
+                                            "policy", webURL.getURL());
+                                    }
                                 } else {
                                     logger.debug(
-                                        "Not visiting: {} as per the server's \"robots.txt\" " +
-                                        "policy", webURL.getURL());
+                                        "Not visiting: {} as per your \"shouldVisit\" policy",
+                                        webURL.getURL());
                                 }
-                            } else {
-                                logger.debug("Not visiting: {} as per your \"shouldVisit\" policy",
-                                             webURL.getURL());
                             }
                         }
                     }
+                    frontier.scheduleAll(toSchedule);
+                } else {
+                    logger.debug("Not looking for links in page {}, "
+                                 + "as per your \"shouldFollowLinksInPage\" policy",
+                                 page.getWebURL().getURL());
                 }
-                frontier.scheduleAll(toSchedule);
-
                 visit(page);
             }
         } catch (PageBiggerThanMaxSizeException e) {
