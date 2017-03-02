@@ -194,6 +194,14 @@ Since, "A" is a seed page, it will have a depth of 0. "B" will have depth of 1 a
 ```java
 crawlConfig.setMaxDepthOfCrawling(maxDepthOfCrawling);
 ```
+### Enable SSL
+To enable SSL simply:
+
+```java
+CrawlConfig config = new CrawlConfig();
+
+config.setIncludeHttpsPages(true);
+```
 
 ### Maximum number of pages to crawl
 Although by default there is no limit on the number of pages to crawl, you can set a limit
