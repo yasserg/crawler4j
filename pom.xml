@@ -20,6 +20,16 @@
 		<connection>scm:git:git@github.com:yasserg/crawler4j.git</connection>
 		<developerConnection>scm:git:git@github.com:yasserg/crawler4j.git</developerConnection>
 	</scm>
+	<distributionManagement>
+		<snapshotRepository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+		</snapshotRepository>
+		<repository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+		</repository>
+	</distributionManagement>	
 
 	<properties>
 		<slf4j.version>1.7.22</slf4j.version>
