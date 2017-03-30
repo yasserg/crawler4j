@@ -40,13 +40,11 @@
   </component>
   <component name="EclipseCodeFormatter">
     <option name="defaultSettings" value="true" />
-    <option name="id" value="1418113193485" />
+    <option name="id" value="1429122236621" />
     <option name="name" value="default" />
-    <option name="pathToConfigFileJava" value="$USER_HOME$/Dropbox/Work/fwd/Forward-formatter.xml" />
-    <option name="selectedJavaProfile" value="Forward" />
-  </component>
-  <component name="EntryPointsManager">
-    <entry_points version="2.0" />
+    <option name="optimizeImports" value="false" />
+    <option name="pathToConfigFileJava" value="$PROJECT_DIR$/../dd4-trunk-new/google-eclipse-style-celi.xml" />
+    <option name="selectedJavaProfile" value="GoogleCeliStyle" />
   </component>
   <component name="MavenProjectsManager">
     <option name="originalFiles">
@@ -354,17 +352,7 @@
       </profile-state>
     </entry>
   </component>
-  <component name="ProjectLevelVcsManager" settingsEditedManually="false">
-    <OptionsSetting value="true" id="Add" />
-    <OptionsSetting value="true" id="Remove" />
-    <OptionsSetting value="true" id="Checkout" />
-    <OptionsSetting value="true" id="Update" />
-    <OptionsSetting value="true" id="Status" />
-    <OptionsSetting value="true" id="Edit" />
-    <ConfirmationsSetting value="0" id="Add" />
-    <ConfirmationsSetting value="0" id="Remove" />
-  </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_8" default="false" assert-keyword="true" jdk-15="true" project-jdk-name="JDK 1.7" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_8" default="false" project-jdk-name="1.8 OpenJDK" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/classes" />
   </component>
 </project>
