@@ -4,7 +4,7 @@
 	<artifactId>crawler4j</artifactId>
 	<packaging>jar</packaging>
 	<name>crawler4j</name>
-	<version>4.3-SNAPSHOT</version>
+	<version>4.3</version>
 	<description>Open Source Web Crawler for Java</description>
 	<url>https://github.com/yasserg/crawler4j</url>
 
@@ -19,7 +19,8 @@
 		<url>https://github.com/yasserg/crawler4j</url>
 		<connection>scm:git:git@github.com:yasserg/crawler4j.git</connection>
 		<developerConnection>scm:git:git@github.com:yasserg/crawler4j.git</developerConnection>
-	</scm>
+	  <tag>crawler4j-4.3</tag>
+  </scm>
 	<distributionManagement>
 		<snapshotRepository>
 			<id>ossrh</id>
