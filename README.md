@@ -6,6 +6,15 @@
 crawler4j is an open source web crawler for Java which provides a simple interface for
 crawling the Web. Using it, you can setup a multi-threaded web crawler in few minutes.
 
+## Table of content
+
+- [Installation](#installation)
+- [Quickstart](#quickstart)   
+- [Using a factory](#using-factory)
+- [More Examples](#more-examples)
+- [Configuration Details](#configuration-details)
+- [License](#license)
+
 ## Installation
 
 ### Using Maven
@@ -16,7 +25,7 @@ To use the latest release of crawler4j, please use the following snippet in your
     <dependency>
         <groupId>edu.uci.ics</groupId>
         <artifactId>crawler4j</artifactId>
-        <version>4.2</version>
+        <version>4.3</version>
     </dependency>
 ```
 
@@ -37,19 +46,21 @@ You can add the following to use the next SNAPSHOT release
         <dependency>
             <groupId>edu.uci.ics</groupId>
             <artifactId>crawler4j</artifactId>
-            <version>4.3-SNAPSHOT</version>
+            <version>4.4-SNAPSHOT</version>
         </dependency>
     </dependencies>
 ```
 
 ### Without Maven
 
-crawler4j JARs are available on the [releases page](https://github.com/yasserg/crawler4j/releases)
-and at [Maven Central](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22edu.uci.ics%22%20AND%20a%3A%22crawler4j%22).
+From 4.3 if you need a jar that includes all dependencies (aka fatjar) you have to build it yourself. Clone the repo and
+run:
 
-If you use crawler4j without Maven, be aware that crawler4j jar file has a couple of
-external dependencies. In [releases page](https://github.com/yasserg/crawler4j/releases), you can find a file named crawler4j-X.Y-with-dependencies.jar that includes crawler4j and all of its dependencies as a bundle.
-You can add download it and add it to your classpath to get all the dependencies covered.
+```bash
+    $ mvn package -Pfatjar
+```
+
+you will find in `target/` folder a jar named like `crawler4j-X.Y-with-dependencies.jar`.
 
 ## Quickstart
 You need to create a crawler class that extends WebCrawler. This class decides which URLs
@@ -259,6 +270,6 @@ crawlConfig.setUserAgentString(userAgentString);
 
 ## License
 
-Copyright (c) 2010-2016 Yasser Ganjisaffar
+Copyright (c) 2010-2017 Yasser Ganjisaffar
 
 Published under [Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0), see LICENSE
