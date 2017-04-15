@@ -1,18 +1,17 @@
 package edu.uci.ics.crawler4j.tests;
 
-import static org.junit.Assert.assertEquals;
-
-import java.io.ByteArrayInputStream;
-
+import edu.uci.ics.crawler4j.parser.AllTagMapper;
+import edu.uci.ics.crawler4j.parser.ExtractedUrlAnchorPair;
+import edu.uci.ics.crawler4j.parser.HtmlContentHandler;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.html.HtmlMapper;
 import org.apache.tika.parser.html.HtmlParser;
 import org.junit.Test;
 
-import edu.uci.ics.crawler4j.parser.AllTagMapper;
-import edu.uci.ics.crawler4j.parser.ExtractedUrlAnchorPair;
-import edu.uci.ics.crawler4j.parser.HtmlContentHandler;
+import java.io.ByteArrayInputStream;
+
+import static org.junit.Assert.assertEquals;
 
 public class HtmlContentHandlerTest {
 
@@ -49,19 +48,18 @@ public class HtmlContentHandlerTest {
     @Test
     public void testTableInBody() throws Exception {
         HtmlContentHandler parse = parseHtml(
-            "<html><body><table><tr><th>Hello</th><th>there</th></tr>" +
-            "<tr><td>mr</td><td>bear</td></tr></html>");
+            "<html><body><table><tr><th>Hello</th><th>there</th></tr>" + "<tr><td>mr</td><td>bear</td></tr></html>");
         assertEquals("Hello there mr bear", parse.getBodyText());
     }
 
     @Test
-    public void testSciptInHead() throws Exception {
+    public void testScriptInHead() throws Exception {
 
-        HtmlContentHandler parse = parseHtml("<html><head>" +
-            "<script src=\"/js/app.js\"></script>" +
-            "</head></html>");
+        HtmlContentHandler parse = parseHtml(
+            "<html><head>" + "<script src=\"/js/app.js\"></script>" + "</head></html>");
 
-        ExtractedUrlAnchorPair script = parse.getOutgoingUrls().get(0);
+        ExtractedUrlAnchorPair script = parse.getOutgoingUrls()
+            .get(0);
         assertEquals("/js/app.js", script.getHref());
     }
 

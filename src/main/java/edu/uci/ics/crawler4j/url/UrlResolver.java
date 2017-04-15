@@ -1,13 +1,13 @@
 /**
  * This class is adopted from Htmlunit with the following copyright:
- *
+ * <p>
  * Copyright (c) 2002-2012 Gargoyle Software Inc.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -45,14 +45,13 @@ public final class UrlResolver {
      * Returns the index within the specified string of the first occurrence of
      * the specified search character.
      *
-     * @param s the string to search
+     * @param s          the string to search
      * @param searchChar the character to search for
      * @param beginIndex the index at which to start the search
-     * @param endIndex the index at which to stop the search
+     * @param endIndex   the index at which to stop the search
      * @return the index of the first occurrence of the character in the string or <tt>-1</tt>
      */
-    private static int indexOf(final String s, final char searchChar, final int beginIndex,
-                               final int endIndex) {
+    private static int indexOf(final String s, final char searchChar, final int beginIndex, final int endIndex) {
         for (int i = beginIndex; i < endIndex; i++) {
             if (s.charAt(i) == searchChar) {
                 return i;
@@ -64,17 +63,17 @@ public final class UrlResolver {
     /**
      * Parses a given specification using the algorithm depicted in
      * <a href="http://www.faqs.org/rfcs/rfc1808.html">RFC1808</a>:
-     *
+     * <p>
      * Section 2.4: Parsing a URL
-     *
-     *   An accepted method for parsing URLs is useful to clarify the
-     *   generic-RL syntax of Section 2.2 and to describe the algorithm for
-     *   resolving relative URLs presented in Section 4. This section
-     *   describes the parsing rules for breaking down a URL (relative or
-     *   absolute) into the component parts described in Section 2.1.  The
-     *   rules assume that the URL has already been separated from any
-     *   surrounding text and copied to a "parse string". The rules are
-     *   listed in the order in which they would be applied by the parser.
+     * <p>
+     * An accepted method for parsing URLs is useful to clarify the
+     * generic-RL syntax of Section 2.2 and to describe the algorithm for
+     * resolving relative URLs presented in Section 4. This section
+     * describes the parsing rules for breaking down a URL (relative or
+     * absolute) into the component parts described in Section 2.1.  The
+     * rules assume that the URL has already been separated from any
+     * surrounding text and copied to a "parse string". The rules are
+     * listed in the order in which they would be applied by the parser.
      *
      * @param spec The specification to parse.
      * @return the parsed specification.
@@ -235,16 +234,16 @@ public final class UrlResolver {
     /**
      * Resolves a given relative URL against a base URL using the algorithm
      * depicted in <a href="http://www.faqs.org/rfcs/rfc1808.html">RFC1808</a>:
-     *
+     * <p>
      * Section 4: Resolving Relative URLs
-     *
-     *   This section describes an example algorithm for resolving URLs within
-     *   a context in which the URLs may be relative, such that the result is
-     *   always a URL in absolute form. Although this algorithm cannot
-     *   guarantee that the resulting URL will equal that intended by the
-     *   original author, it does guarantee that any valid URL (relative or
-     *   absolute) can be consistently transformed to an absolute form given a
-     *   valid base URL.
+     * <p>
+     * This section describes an example algorithm for resolving URLs within
+     * a context in which the URLs may be relative, such that the result is
+     * always a URL in absolute form. Although this algorithm cannot
+     * guarantee that the resulting URL will equal that intended by the
+     * original author, it does guarantee that any valid URL (relative or
+     * absolute) can be consistently transformed to an absolute form given a
+     * valid base URL.
      *
      * @param baseUrl     The base URL in which to resolve the specification.
      * @param relativeUrl The relative URL to resolve against the base URL.
@@ -333,7 +332,7 @@ public final class UrlResolver {
 
         while ((pathSegmentIndex = path.indexOf("/./")) >= 0) {
             path = path.substring(0, pathSegmentIndex + 1)
-                       .concat(path.substring(pathSegmentIndex + 3));
+                .concat(path.substring(pathSegmentIndex + 3));
         }
         //      b) If the path ends with "." as a complete path segment,
         //         that "." is removed.
@@ -353,8 +352,8 @@ public final class UrlResolver {
                 continue;
             }
             if (!"..".equals(pathSegment.substring(slashIndex))) {
-                path =
-                    path.substring(0, slashIndex + 1).concat(path.substring(pathSegmentIndex + 4));
+                path = path.substring(0, slashIndex + 1)
+                    .concat(path.substring(pathSegmentIndex + 4));
             }
         }
         //      d) If the path ends with "<segment>/..", where <segment> is a

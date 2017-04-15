@@ -5,9 +5,9 @@
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,42 +17,16 @@
 
 package edu.uci.ics.crawler4j.crawler;
 
+import edu.uci.ics.crawler4j.crawler.authentication.AuthInfo;
+import org.apache.http.Header;
+import org.apache.http.message.BasicHeader;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
-import org.apache.http.Header;
-import org.apache.http.message.BasicHeader;
-
-import edu.uci.ics.crawler4j.crawler.authentication.AuthInfo;
-
 public class CrawlConfig {
-
-    /**
-     * The folder which will be used by crawler for storing the intermediate
-     * crawl data. The content of this folder should not be modified manually.
-     */
-    private String crawlStorageFolder;
-
-    /**
-     * If this feature is enabled, you would be able to resume a previously
-     * stopped/crashed crawl. However, it makes crawling slightly slower
-     */
-    private boolean resumableCrawling = false;
-
-    /**
-     * Maximum depth of crawling For unlimited depth this parameter should be
-     * set to -1
-     */
-    private int maxDepthOfCrawling = -1;
-
-    /**
-     * Maximum number of pages to fetch For unlimited number of pages, this
-     * parameter should be set to -1
-     */
-    private int maxPagesToFetch = -1;
-
     /**
      * user-agent string that is used for representing your crawler to web
      * servers. See http://en.wikipedia.org/wiki/User_agent for more details
@@ -185,79 +159,12 @@ public class CrawlConfig {
      * @throws Exception on Validation fail
      */
     public void validate() throws Exception {
-        if (crawlStorageFolder == null) {
-            throw new Exception("Crawl storage folder is not set in the CrawlConfig.");
-        }
         if (politenessDelay < 0) {
             throw new Exception("Invalid value for politeness delay: " + politenessDelay);
         }
-        if (maxDepthOfCrawling < -1) {
-            throw new Exception(
-                "Maximum crawl depth should be either a positive number or -1 for unlimited depth" +
-                ".");
-        }
-        if (maxDepthOfCrawling > Short.MAX_VALUE) {
-            throw new Exception("Maximum value for crawl depth is " + Short.MAX_VALUE);
-        }
-    }
-
-    public String getCrawlStorageFolder() {
-        return crawlStorageFolder;
     }
 
     /**
-     * The folder which will be used by crawler for storing the intermediate
-     * crawl data. The content of this folder should not be modified manually.
-     *
-     * @param crawlStorageFolder The folder for the crawler's storage
-     */
-    public void setCrawlStorageFolder(String crawlStorageFolder) {
-        this.crawlStorageFolder = crawlStorageFolder;
-    }
-
-    public boolean isResumableCrawling() {
-        return resumableCrawling;
-    }
-
-    /**
-     * If this feature is enabled, you would be able to resume a previously
-     * stopped/crashed crawl. However, it makes crawling slightly slower
-     *
-     * @param resumableCrawling Should crawling be resumable between runs ?
-     */
-    public void setResumableCrawling(boolean resumableCrawling) {
-        this.resumableCrawling = resumableCrawling;
-    }
-
-    public int getMaxDepthOfCrawling() {
-        return maxDepthOfCrawling;
-    }
-
-    /**
-     * Maximum depth of crawling For unlimited depth this parameter should be set to -1
-     *
-     * @param maxDepthOfCrawling Depth of crawling (all links on current page = depth of 1)
-     */
-    public void setMaxDepthOfCrawling(int maxDepthOfCrawling) {
-        this.maxDepthOfCrawling = maxDepthOfCrawling;
-    }
-
-    public int getMaxPagesToFetch() {
-        return maxPagesToFetch;
-    }
-
-    /**
-     * Maximum number of pages to fetch For unlimited number of pages, this parameter should be
-     * set to -1
-     *
-     * @param maxPagesToFetch How many pages to fetch from all threads together ?
-     */
-    public void setMaxPagesToFetch(int maxPagesToFetch) {
-        this.maxPagesToFetch = maxPagesToFetch;
-    }
-
-    /**
-     *
      * @return userAgentString
      */
     public String getUserAgentString() {
@@ -300,8 +207,7 @@ public class CrawlConfig {
      * Politeness delay in milliseconds (delay between sending two requests to
      * the same host).
      *
-     * @param politenessDelay
-     *            the delay in milliseconds.
+     * @param politenessDelay the delay in milliseconds.
      */
     public void setPolitenessDelay(int politenessDelay) {
         this.politenessDelay = politenessDelay;
@@ -323,9 +229,8 @@ public class CrawlConfig {
     }
 
     /**
-     *
      * @param includeBinaryContentInCrawling Should we fetch binary content such as images,
-     * audio, ...?
+     *                                       audio, ...?
      */
     public void setIncludeBinaryContentInCrawling(boolean includeBinaryContentInCrawling) {
         this.includeBinaryContentInCrawling = includeBinaryContentInCrawling;
@@ -403,7 +308,7 @@ public class CrawlConfig {
 
     /**
      * @param maxDownloadSize Max allowed size of a page. Pages larger than this size will not be
-     * fetched.
+     *                        fetched.
      */
     public void setMaxDownloadSize(int maxDownloadSize) {
         this.maxDownloadSize = maxDownloadSize;
@@ -450,7 +355,7 @@ public class CrawlConfig {
 
     /**
      * @param proxyHost If crawler should run behind a proxy, this parameter can be used for
-     * specifying the proxy host.
+     *                  specifying the proxy host.
      */
     public void setProxyHost(String proxyHost) {
         this.proxyHost = proxyHost;
@@ -462,7 +367,7 @@ public class CrawlConfig {
 
     /**
      * @param proxyPort If crawler should run behind a proxy, this parameter can be used for
-     * specifying the proxy port.
+     *                  specifying the proxy port.
      */
     public void setProxyPort(int proxyPort) {
         this.proxyPort = proxyPort;
@@ -473,9 +378,8 @@ public class CrawlConfig {
     }
 
     /**
-     * @param proxyUsername
-     *        If crawler should run behind a proxy and user/pass is needed for
-     *        authentication in proxy, this parameter can be used for specifying the username.
+     * @param proxyUsername If crawler should run behind a proxy and user/pass is needed for
+     *                      authentication in proxy, this parameter can be used for specifying the username.
      */
     public void setProxyUsername(String proxyUsername) {
         this.proxyUsername = proxyUsername;
@@ -502,19 +406,19 @@ public class CrawlConfig {
         return authInfos;
     }
 
+    /**
+     * @param authInfos authenticationInformations to set
+     */
+    public void setAuthInfos(List<AuthInfo> authInfos) {
+        this.authInfos = authInfos;
+    }
+
     public void addAuthInfo(AuthInfo authInfo) {
         if (this.authInfos == null) {
             this.authInfos = new ArrayList<AuthInfo>();
         }
 
         this.authInfos.add(authInfo);
-    }
-
-    /**
-     * @param authInfos authenticationInformations to set
-     */
-    public void setAuthInfos(List<AuthInfo> authInfos) {
-        this.authInfos = authInfos;
     }
 
     public int getThreadMonitoringDelaySeconds() {
@@ -544,10 +448,6 @@ public class CrawlConfig {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("Crawl storage folder: " + getCrawlStorageFolder() + "\n");
-        sb.append("Resumable crawling: " + isResumableCrawling() + "\n");
-        sb.append("Max depth of crawl: " + getMaxDepthOfCrawling() + "\n");
-        sb.append("Max pages to fetch: " + getMaxPagesToFetch() + "\n");
         sb.append("User agent string: " + getUserAgentString() + "\n");
         sb.append("Include https pages: " + isIncludeHttpsPages() + "\n");
         sb.append("Include binary content: " + isIncludeBinaryContentInCrawling() + "\n");

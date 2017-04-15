@@ -1,11 +1,10 @@
 package edu.uci.ics.crawler4j.tests;
 
-import static org.junit.Assert.assertEquals;
-
-import org.junit.Test;
-
 import edu.uci.ics.crawler4j.url.URLCanonicalizer;
 import edu.uci.ics.crawler4j.url.WebURL;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 public class TLDListTest {
 

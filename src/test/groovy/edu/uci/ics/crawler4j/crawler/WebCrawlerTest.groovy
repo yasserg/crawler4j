@@ -85,7 +85,8 @@ class WebCrawlerTest extends Specification {
 
         controller.start(ShouldNotVisitPageWebCrawler.class, 1)
 
-        then: "links in ${pageWhichLinksMustNotBeVisited} should not be visited"
+        then:
+        "links in ${pageWhichLinksMustNotBeVisited} should not be visited"
         verify(exactly(1), getRequestedFor(urlEqualTo("/robots.txt")))
         verify(exactly(1), getRequestedFor(urlEqualTo("/some/page1.html")))
         verify(exactly(1), getRequestedFor(urlEqualTo("/some/${pageWhichLinksMustNotBeVisited}")))
@@ -98,7 +99,7 @@ class ShouldNotVisitPageWebCrawler extends WebCrawler {
 
     @Override
     boolean shouldFollowLinksIn(WebURL url) {
-        if ( url.path.endsWith(WebCrawlerTest.pageWhichLinksMustNotBeVisited) ) return false
+        if (url.path.endsWith(WebCrawlerTest.pageWhichLinksMustNotBeVisited)) return false
         return true
     }
 }

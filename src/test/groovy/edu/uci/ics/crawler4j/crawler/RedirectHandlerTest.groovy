@@ -36,7 +36,8 @@ class RedirectHandlerTest extends Specification {
     public WireMockRule wireMockRule = new WireMockRule()
 
     def "follow redirects"(int redirectStatus) {
-        given: "an index page with a ${redirectStatus}"
+        given:
+        "an index page with a ${redirectStatus}"
         stubFor(get(urlEqualTo("/some/index.html"))
                 .willReturn(aResponse()
                 .withStatus(redirectStatus)
@@ -90,8 +91,8 @@ class RedirectHandlerTest extends Specification {
 
         where:
         redirectStatus | _
-        301 | _
-        302 | _
+        301            | _
+        302            | _
     }
 }
 
