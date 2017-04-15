@@ -1,9 +1,9 @@
 package edu.uci.ics.crawler4j.robotstxt;
 
-import java.util.regex.Pattern;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.regex.Pattern;
 
 public class PathRule {
     protected static final Logger logger = LoggerFactory.getLogger(PathRule.class);
@@ -12,13 +12,24 @@ public class PathRule {
     public Pattern pattern;
 
     /**
+     * Create a new path rule, based on the specified pattern
+     *
+     * @param type    Either HostDirectives.ALLOWS or HostDirectives.DISALLOWS
+     * @param pattern The pattern for this rule
+     */
+    public PathRule(int type, String pattern) {
+        this.type = type;
+        this.pattern = robotsPatternToRegexp(pattern);
+    }
+
+    /**
      * Match a pattern defined in a robots.txt file to a path
      * Following the pattern definition as stated on:
      * https://support.google.com/webmasters/answer/6062596?hl=en&ref_topic=6061961
-     *
+     * <p>
      * This page defines the following items:
-     *    * matches any sequence of characters, including /
-     *    $ matches the end of the line
+     * * matches any sequence of characters, including /
+     * $ matches the end of the line
      *
      * @param pattern The pattern to convert
      * @return The compiled regexp pattern created from the robots.txt pattern
@@ -53,7 +64,9 @@ public class PathRule {
                 if (quoteBuf.length() > 0) {
                     // The quoted character buffer is not empty, so add them before adding
                     // the wildcard matcher
-                    regexp.append("\\Q").append(quoteBuf).append("\\E");
+                    regexp.append("\\Q")
+                        .append(quoteBuf)
+                        .append("\\E");
                     quoteBuf = new StringBuilder();
                 }
                 if (pos == pattern.length() - 1) {
@@ -66,12 +79,14 @@ public class PathRule {
                 }
             } else if (ch == '$' && pos == pattern.length() - 1) {
                 // A $ at the end of the pattern indicates that the path should end here in order
-              // to match
+                // to match
                 // This explicitly disallows prefix matching
                 if (quoteBuf.length() > 0) {
                     // The quoted character buffer is not empty, so add them before adding
                     // the end-of-line matcher
-                    regexp.append("\\Q").append(quoteBuf).append("\\E");
+                    regexp.append("\\Q")
+                        .append(quoteBuf)
+                        .append("\\E");
                     quoteBuf = new StringBuilder();
                 }
                 regexp.append(ch);
@@ -84,7 +99,9 @@ public class PathRule {
 
         // Add quoted string buffer: enclosed between \Q and \E
         if (quoteBuf.length() > 0) {
-            regexp.append("\\Q").append(quoteBuf).append("\\E");
+            regexp.append("\\Q")
+                .append(quoteBuf)
+                .append("\\E");
         }
 
         // Add a wildcard pattern after the path to allow matches where this
@@ -101,22 +118,12 @@ public class PathRule {
      * Check if the specified path matches a robots.txt pattern
      *
      * @param pattern The pattern to match
-     * @param path The path to match with the pattern
+     * @param path    The path to match with the pattern
      * @return True when the pattern matches, false if it does not
      */
     public static boolean matchesRobotsPattern(String pattern, String path) {
-        return robotsPatternToRegexp(pattern).matcher(path).matches();
-    }
-
-    /**
-     * Create a new path rule, based on the specified pattern
-     *
-     * @param type Either HostDirectives.ALLOWS or HostDirectives.DISALLOWS
-     * @param pattern The pattern for this rule
-     */
-    public PathRule(int type, String pattern) {
-        this.type = type;
-        this.pattern = robotsPatternToRegexp(pattern);
+        return robotsPatternToRegexp(pattern).matcher(path)
+            .matches();
     }
 
     /**
@@ -126,6 +133,7 @@ public class PathRule {
      * @return True when the path matches, false when it does not
      */
     public boolean matches(String path) {
-        return this.pattern.matcher(path).matches();
+        return this.pattern.matcher(path)
+            .matches();
     }
 }

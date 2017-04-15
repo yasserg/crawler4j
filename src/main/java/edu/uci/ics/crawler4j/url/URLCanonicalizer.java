@@ -5,9 +5,9 @@
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -42,10 +42,10 @@ public class URLCanonicalizer {
     public static String getCanonicalURL(String href, String context) {
 
         try {
-            URL canonicalURL =
-                new URL(UrlResolver.resolveUrl((context == null) ? "" : context, href));
+            URL canonicalURL = new URL(UrlResolver.resolveUrl((context == null) ? "" : context, href));
 
-            String host = canonicalURL.getHost().toLowerCase();
+            String host = canonicalURL.getHost()
+                .toLowerCase();
             if (Objects.equals(host, "")) {
                 // This is an invalid Url.
                 return null;
@@ -58,7 +58,8 @@ public class URLCanonicalizer {
        * ".", and no segments equal to ".." that are preceded by a segment
        * not equal to "..".
        */
-            path = new URI(path.replace("\\", "/")).normalize().toString();
+            path = new URI(path.replace("\\", "/")).normalize()
+                .toString();
 
             int idx = path.indexOf("//");
             while (idx >= 0) {
@@ -91,7 +92,8 @@ public class URLCanonicalizer {
                 port = -1;
             }
 
-            String protocol = canonicalURL.getProtocol().toLowerCase();
+            String protocol = canonicalURL.getProtocol()
+                .toLowerCase();
             String pathAndQueryString = normalizePath(path) + queryString;
 
             URL result = new URL(protocol, host, port, pathAndQueryString);
@@ -123,16 +125,16 @@ public class URLCanonicalizer {
 
             String[] tokens = pair.split("=", 2);
             switch (tokens.length) {
-                case 1:
-                    if (pair.charAt(0) == '=') {
-                        params.put("", tokens[0]);
-                    } else {
-                        params.put(tokens[0], "");
-                    }
-                    break;
-                case 2:
-                    params.put(tokens[0], tokens[1]);
-                    break;
+            case 1:
+                if (pair.charAt(0) == '=') {
+                    params.put("", tokens[0]);
+                } else {
+                    params.put(tokens[0], "");
+                }
+                break;
+            case 2:
+                params.put(tokens[0], tokens[1]);
+                break;
             }
         }
         return new LinkedHashMap<>(params);
@@ -152,7 +154,8 @@ public class URLCanonicalizer {
 
         final StringBuilder sb = new StringBuilder(100);
         for (Map.Entry<String, String> pair : paramsMap.entrySet()) {
-            final String key = pair.getKey().toLowerCase();
+            final String key = pair.getKey()
+                .toLowerCase();
             if ("jsessionid".equals(key) || "phpsessid".equals(key) || "aspsessionid".equals(key)) {
                 continue;
             }
@@ -160,7 +163,8 @@ public class URLCanonicalizer {
                 sb.append('&');
             }
             sb.append(percentEncodeRfc3986(pair.getKey()));
-            if (!pair.getValue().isEmpty()) {
+            if (!pair.getValue()
+                .isEmpty()) {
                 sb.append('=');
                 sb.append(percentEncodeRfc3986(pair.getValue()));
             }
@@ -182,13 +186,16 @@ public class URLCanonicalizer {
             string = string.replace("+", "%2B");
             string = URLDecoder.decode(string, "UTF-8");
             string = URLEncoder.encode(string, "UTF-8");
-            return string.replace("+", "%20").replace("*", "%2A").replace("%7E", "~");
+            return string.replace("+", "%20")
+                .replace("*", "%2A")
+                .replace("%7E", "~");
         } catch (Exception e) {
             return string;
         }
     }
 
     private static String normalizePath(final String path) {
-        return path.replace("%7E", "~").replace(" ", "%20");
+        return path.replace("%7E", "~")
+            .replace(" ", "%20");
     }
 }

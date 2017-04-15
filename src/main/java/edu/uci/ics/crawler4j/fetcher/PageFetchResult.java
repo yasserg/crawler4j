@@ -5,9 +5,9 @@
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,15 +17,14 @@
 
 package edu.uci.ics.crawler4j.fetcher;
 
-import java.io.IOException;
-
+import edu.uci.ics.crawler4j.crawler.Page;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.uci.ics.crawler4j.crawler.Page;
+import java.io.IOException;
 
 /**
  * @author Yasser Ganjisaffar
@@ -78,8 +77,8 @@ public class PageFetchResult {
             page.setFetchResponseHeaders(responseHeaders);
             return true;
         } catch (Exception e) {
-            logger.info("Exception while fetching content for: {} [{}]", page.getWebURL().getURL(),
-                        e.getMessage());
+            logger.info("Exception while fetching content for: {} [{}]", page.getWebURL()
+                .getURL(), e.getMessage());
         }
         return false;
     }

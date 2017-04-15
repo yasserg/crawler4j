@@ -1,12 +1,10 @@
 package edu.uci.ics.crawler4j.tests;
 
-import org.junit.Test;
-
 import edu.uci.ics.crawler4j.url.WebURL;
+import org.junit.Test;
 
 /**
  * Created by Avi on 8/19/2014.
- *
  */
 public class WebURLTest {
 

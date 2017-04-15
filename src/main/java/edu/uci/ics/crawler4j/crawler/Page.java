@@ -5,9 +5,9 @@
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,17 +17,16 @@
 
 package edu.uci.ics.crawler4j.crawler;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.Charset;
-
+import edu.uci.ics.crawler4j.parser.ParseData;
+import edu.uci.ics.crawler4j.url.WebURL;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.util.ByteArrayBuffer;
 
-import edu.uci.ics.crawler4j.parser.ParseData;
-import edu.uci.ics.crawler4j.url.WebURL;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
 
 /**
  * This class contains the data for a fetched and parsed page.
@@ -78,26 +77,22 @@ public class Page {
      * For example: "UTF-8"
      */
     protected String contentCharset;
-
-    /**
-     * Language of the Content.
-     */
-    private String language;
-
     /**
      * Headers which were present in the response of the fetch request
      */
     protected Header[] fetchResponseHeaders;
-
     /**
      * The parsed data populated by parsers
      */
     protected ParseData parseData;
-
     /**
      * Whether the content was truncated because the received data exceeded the imposed maximum
      */
     protected boolean truncated = false;
+    /**
+     * Language of the Content.
+     */
+    private String language;
 
     public Page(WebURL url) {
         this.url = url;
@@ -124,7 +119,8 @@ public class Page {
             contentEncoding = encoding.getValue();
         }
 
-        Charset charset = ContentType.getOrDefault(entity).getCharset();
+        Charset charset = ContentType.getOrDefault(entity)
+            .getCharset();
         if (charset != null) {
             contentCharset = charset.displayName();
         }

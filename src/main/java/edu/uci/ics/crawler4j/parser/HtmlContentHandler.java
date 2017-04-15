@@ -5,9 +5,9 @@
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,62 +17,28 @@
 
 package edu.uci.ics.crawler4j.parser;
 
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.xml.sax.Attributes;
-import org.xml.sax.SAXException;
-import org.xml.sax.helpers.DefaultHandler;
-
 public class HtmlContentHandler extends DefaultHandler {
 
     private static final int MAX_ANCHOR_LENGTH = 100;
-
-    private enum Element {
-        A,
-        AREA,
-        LINK,
-        IFRAME,
-        FRAME,
-        EMBED,
-        IMG,
-        BASE,
-        META,
-        BODY,
-        SCRIPT
-    }
-
-    private static class HtmlFactory {
-        private static final Map<String, Element> name2Element;
-
-        static {
-            name2Element = new HashMap<>();
-            for (Element element : Element.values()) {
-                name2Element.put(element.toString().toLowerCase(), element);
-            }
-        }
-
-        public static Element getElement(String name) {
-            return name2Element.get(name);
-        }
-    }
-
+    private final Map<String, String> metaTags = new HashMap<>();
+    private final StringBuilder bodyText;
+    private final List<ExtractedUrlAnchorPair> outgoingUrls;
+    private final StringBuilder anchorText = new StringBuilder();
     private String base;
     private String metaRefresh;
     private String metaLocation;
-    private final Map<String, String> metaTags = new HashMap<>();
-
     private boolean isWithinBodyElement;
-    private final StringBuilder bodyText;
-
-    private final List<ExtractedUrlAnchorPair> outgoingUrls;
-
     private ExtractedUrlAnchorPair curUrl = null;
     private boolean anchorFlag = false;
-    private final StringBuilder anchorText = new StringBuilder();
-
     public HtmlContentHandler() {
         isWithinBodyElement = false;
         bodyText = new StringBuilder();
@@ -80,8 +46,7 @@ public class HtmlContentHandler extends DefaultHandler {
     }
 
     @Override
-    public void startElement(String uri, String localName, String qName, Attributes attributes)
-        throws SAXException {
+    public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
         Element element = HtmlFactory.getElement(localName);
 
         if ((element == Element.A) || (element == Element.AREA) || (element == Element.LINK)) {
@@ -97,8 +62,8 @@ public class HtmlContentHandler extends DefaultHandler {
                 addToOutgoingUrls(imgSrc, localName);
 
             }
-        } else if ((element == Element.IFRAME) || (element == Element.FRAME) ||
-                   (element == Element.EMBED) || (element == Element.SCRIPT)) {
+        } else if ((element == Element.IFRAME) || (element == Element.FRAME) || (element == Element.EMBED) || (element
+            == Element.SCRIPT)) {
             String src = attributes.getValue("src");
             if (src != null) {
                 addToOutgoingUrls(src, localName);
@@ -124,7 +89,8 @@ public class HtmlContentHandler extends DefaultHandler {
 
                 // http-equiv="refresh" content="0;URL=http://foo.bar/..."
                 if ("refresh".equals(equiv) && (metaRefresh == null)) {
-                    int pos = content.toLowerCase().indexOf("url=");
+                    int pos = content.toLowerCase()
+                        .indexOf("url=");
                     if (pos != -1) {
                         metaRefresh = content.substring(pos + 4);
                         addToOutgoingUrls(metaRefresh, localName);
@@ -155,8 +121,10 @@ public class HtmlContentHandler extends DefaultHandler {
         if ((element == Element.A) || (element == Element.AREA) || (element == Element.LINK)) {
             anchorFlag = false;
             if (curUrl != null) {
-                String anchor =
-                    anchorText.toString().replaceAll("\n", " ").replaceAll("\t", " ").trim();
+                String anchor = anchorText.toString()
+                    .replaceAll("\n", " ")
+                    .replaceAll("\t", " ")
+                    .trim();
                 if (!anchor.isEmpty()) {
                     if (anchor.length() > MAX_ANCHOR_LENGTH) {
                         anchor = anchor.substring(0, MAX_ANCHOR_LENGTH) + "...";
@@ -199,5 +167,25 @@ public class HtmlContentHandler extends DefaultHandler {
 
     public Map<String, String> getMetaTags() {
         return metaTags;
+    }
+
+    private enum Element {
+        A, AREA, LINK, IFRAME, FRAME, EMBED, IMG, BASE, META, BODY, SCRIPT
+    }
+
+    private static class HtmlFactory {
+        private static final Map<String, Element> name2Element;
+
+        static {
+            name2Element = new HashMap<>();
+            for (Element element : Element.values()) {
+                name2Element.put(element.toString()
+                    .toLowerCase(), element);
+            }
+        }
+
+        public static Element getElement(String name) {
+            return name2Element.get(name);
+        }
     }
 }

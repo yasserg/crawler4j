@@ -1,16 +1,15 @@
 package edu.uci.ics.crawler4j.examples.fetcher;
 
-import java.io.IOException;
-import java.util.Date;
-
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpHead;
-
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.crawler.exceptions.PageBiggerThanMaxSizeException;
 import edu.uci.ics.crawler4j.fetcher.PageFetchResult;
 import edu.uci.ics.crawler4j.fetcher.PageFetcher;
 import edu.uci.ics.crawler4j.url.WebURL;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpHead;
+
+import java.io.IOException;
+import java.util.Date;
 
 public class PageFetcherHtmlOnly extends PageFetcher {
 
@@ -40,10 +39,11 @@ public class PageFetcherHtmlOnly extends PageFetcher {
             fetchResult.setEntity(response.getEntity());
             fetchResult.setResponseHeaders(response.getAllHeaders());
             fetchResult.setFetchedUrl(toFetchURL);
-            fetchResult.setStatusCode(response.getStatusLine().getStatusCode());
+            fetchResult.setStatusCode(response.getStatusLine()
+                .getStatusCode());
 
-            String contentType = response.containsHeader("Content-Type") ?
-                                 response.getFirstHeader("Content-Type").getValue() : null;
+            String contentType = response.containsHeader("Content-Type") ? response.getFirstHeader("Content-Type")
+                .getValue() : null;
             String typeStr = (contentType != null) ? contentType.toLowerCase() : "";
 
             if (typeStr.equals("") || (typeStr.contains("text") && typeStr.contains("html"))) {

@@ -5,9 +5,9 @@
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,24 +17,20 @@
 
 package edu.uci.ics.crawler4j.crawler;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-
 import com.google.common.io.Files;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.sleepycat.je.Environment;
 import com.sleepycat.je.EnvironmentConfig;
-
 import edu.uci.ics.crawler4j.fetcher.PageFetcher;
 import edu.uci.ics.crawler4j.frontier.Frontier;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
 import edu.uci.ics.crawler4j.url.TLDList;
 import edu.uci.ics.crawler4j.url.URLCanonicalizer;
 import edu.uci.ics.crawler4j.url.WebURL;
-import edu.uci.ics.crawler4j.util.IO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The controller that manages a crawling session. This class creates the
@@ -45,39 +41,33 @@ import edu.uci.ics.crawler4j.util.IO;
 public class CrawlController extends Configurable {
 
     static final Logger logger = LoggerFactory.getLogger(CrawlController.class);
-
+    protected final Object waitingLock = new Object();
+    protected final Environment env;
     /**
      * The 'customData' object can be used for passing custom crawl-related
      * configurations to different components of the crawler.
      */
     protected Object customData;
-
     /**
      * Once the crawling session finishes the controller collects the local data
      * of the crawler threads and stores them in this List.
      */
     protected List<Object> crawlersLocalData = new ArrayList<>();
-
     /**
      * Is the crawling of this session finished?
      */
     protected boolean finished;
-
     /**
      * Is the crawling session set to 'shutdown'. Crawler threads monitor this
      * flag and when it is set they will no longer process new pages.
      */
     protected boolean shuttingDown;
-
     protected PageFetcher pageFetcher;
     protected RobotstxtServer robotstxtServer;
     protected Frontier frontier;
 
-    protected final Object waitingLock = new Object();
-    protected final Environment env;
-
-    public CrawlController(CrawlConfig config, PageFetcher pageFetcher,
-                           RobotstxtServer robotstxtServer) throws Exception {
+    public CrawlController(CrawlConfig config, PageFetcher pageFetcher, RobotstxtServer robotstxtServer)
+        throws Exception {
         super(config);
 
         config.validate();
@@ -97,25 +87,11 @@ public class CrawlController extends Configurable {
         shuttingDown = false;
     }
 
-    public interface WebCrawlerFactory<T extends WebCrawler> {
-        T newInstance() throws Exception;
-    }
-
-    private static class DefaultWebCrawlerFactory<T extends WebCrawler>
-        implements WebCrawlerFactory<T> {
-        final Class<T> clazz;
-
-        DefaultWebCrawlerFactory(Class<T> clazz) {
-            this.clazz = clazz;
-        }
-
-        @Override
-        public T newInstance() throws Exception {
-            try {
-                return clazz.newInstance();
-            } catch (ReflectiveOperationException e) {
-                throw e;
-            }
+    protected static void sleep(int seconds) {
+        try {
+            Thread.sleep(seconds * 1000);
+        } catch (InterruptedException ignored) {
+            // Do nothing
         }
     }
 
@@ -144,8 +120,7 @@ public class CrawlController extends Configurable {
      *            this crawling session.
      * @param <T> Your class extending WebCrawler
      */
-    public <T extends WebCrawler> void start(WebCrawlerFactory<T> crawlerFactory,
-                                             int numberOfCrawlers) {
+    public <T extends WebCrawler> void start(WebCrawlerFactory<T> crawlerFactory, int numberOfCrawlers) {
         this.start(crawlerFactory, numberOfCrawlers, true);
     }
 
@@ -160,7 +135,7 @@ public class CrawlController extends Configurable {
      * @param <T> Your class extending WebCrawler
      */
     public <T extends WebCrawler> void startNonBlocking(WebCrawlerFactory<T> crawlerFactory,
-                                                        final int numberOfCrawlers) {
+        final int numberOfCrawlers) {
         this.start(crawlerFactory, numberOfCrawlers, false);
     }
 
@@ -179,8 +154,8 @@ public class CrawlController extends Configurable {
         start(new DefaultWebCrawlerFactory<>(clazz), numberOfCrawlers, false);
     }
 
-    protected <T extends WebCrawler> void start(final WebCrawlerFactory<T> crawlerFactory,
-                                                final int numberOfCrawlers, boolean isBlocking) {
+    protected <T extends WebCrawler> void start(final WebCrawlerFactory<T> crawlerFactory, final int numberOfCrawlers,
+        boolean isBlocking) {
         try {
             finished = false;
             crawlersLocalData.clear();
@@ -226,7 +201,8 @@ public class CrawlController extends Configurable {
                                             crawlers.remove(i);
                                             crawlers.add(i, crawler);
                                         }
-                                    } else if (crawlers.get(i).isNotWaitingForNewURLs()) {
+                                    } else if (crawlers.get(i)
+                                        .isNotWaitingForNewURLs()) {
                                         someoneIsWorking = true;
                                     }
                                 }
@@ -235,17 +211,15 @@ public class CrawlController extends Configurable {
                                     // Make sure again that none of the threads
                                     // are
                                     // alive.
-                                    logger.info(
-                                        "It looks like no thread is working, waiting for " +
-                                         config.getThreadShutdownDelaySeconds() +
-                                         " seconds to make sure...");
+                                    logger.info("It looks like no thread is working, waiting for "
+                                        + config.getThreadShutdownDelaySeconds() + " seconds to make sure...");
                                     sleep(config.getThreadShutdownDelaySeconds());
 
                                     someoneIsWorking = false;
                                     for (int i = 0; i < threads.size(); i++) {
                                         Thread thread = threads.get(i);
-                                        if (thread.isAlive() &&
-                                            crawlers.get(i).isNotWaitingForNewURLs()) {
+                                        if (thread.isAlive() && crawlers.get(i)
+                                            .isNotWaitingForNewURLs()) {
                                             someoneIsWorking = true;
                                         }
                                     }
@@ -255,11 +229,9 @@ public class CrawlController extends Configurable {
                                             if (queueLength > 0) {
                                                 continue;
                                             }
-                                            logger.info(
-                                                "No thread is working and no more URLs are in " +
-                                                "queue waiting for another " +
-                                                config.getThreadShutdownDelaySeconds() +
-                                                " seconds to make sure...");
+                                            logger.info("No thread is working and no more URLs are in "
+                                                + "queue waiting for another " + config.getThreadShutdownDelaySeconds()
+                                                + " seconds to make sure...");
                                             sleep(config.getThreadShutdownDelaySeconds());
                                             queueLength = 1;
                                             if (queueLength > 0) {
@@ -267,9 +239,7 @@ public class CrawlController extends Configurable {
                                             }
                                         }
 
-                                        logger.info(
-                                            "All of the crawlers are stopped. Finishing the " +
-                                            "process...");
+                                        logger.info("All of the crawlers are stopped. Finishing the " + "process...");
                                         // At this step, frontier notifies the threads that were
                                         // waiting for new URLs and they should stop
                                         frontier.finish();
@@ -278,9 +248,8 @@ public class CrawlController extends Configurable {
                                             crawlersLocalData.add(crawler.getMyLocalData());
                                         }
 
-                                        logger.info(
-                                            "Waiting for " + config.getCleanupDelaySeconds() +
-                                            " seconds before final clean up...");
+                                        logger.info("Waiting for " + config.getCleanupDelaySeconds()
+                                            + " seconds before final clean up...");
                                         sleep(config.getCleanupDelaySeconds());
 
                                         frontier.close();
@@ -340,14 +309,6 @@ public class CrawlController extends Configurable {
      */
     public List<Object> getCrawlersLocalData() {
         return crawlersLocalData;
-    }
-
-    protected static void sleep(int seconds) {
-        try {
-            Thread.sleep(seconds * 1000);
-        } catch (InterruptedException ignored) {
-            // Do nothing
-        }
     }
 
     /**
@@ -437,5 +398,26 @@ public class CrawlController extends Configurable {
         this.shuttingDown = true;
         pageFetcher.shutDown();
         frontier.finish();
+    }
+
+    public interface WebCrawlerFactory<T extends WebCrawler> {
+        T newInstance() throws Exception;
+    }
+
+    private static class DefaultWebCrawlerFactory<T extends WebCrawler> implements WebCrawlerFactory<T> {
+        final Class<T> clazz;
+
+        DefaultWebCrawlerFactory(Class<T> clazz) {
+            this.clazz = clazz;
+        }
+
+        @Override
+        public T newInstance() throws Exception {
+            try {
+                return clazz.newInstance();
+            } catch (ReflectiveOperationException e) {
+                throw e;
+            }
+        }
     }
 }

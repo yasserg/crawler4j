@@ -1,13 +1,13 @@
 /**
  * This class is adopted from Htmlunit with the following copyright:
- *
+ * <p>
  * Copyright (c) 2002-2012 Gargoyle Software Inc.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -51,8 +51,7 @@ public final class UrlResolver {
      * @param endIndex the index at which to stop the search
      * @return the index of the first occurrence of the character in the string or <tt>-1</tt>
      */
-    private static int indexOf(final String s, final char searchChar, final int beginIndex,
-                               final int endIndex) {
+    private static int indexOf(final String s, final char searchChar, final int beginIndex, final int endIndex) {
         for (int i = beginIndex; i < endIndex; i++) {
             if (s.charAt(i) == searchChar) {
                 return i;
@@ -333,7 +332,7 @@ public final class UrlResolver {
 
         while ((pathSegmentIndex = path.indexOf("/./")) >= 0) {
             path = path.substring(0, pathSegmentIndex + 1)
-                       .concat(path.substring(pathSegmentIndex + 3));
+                .concat(path.substring(pathSegmentIndex + 3));
         }
         //      b) If the path ends with "." as a complete path segment,
         //         that "." is removed.
@@ -353,8 +352,8 @@ public final class UrlResolver {
                 continue;
             }
             if (!"..".equals(pathSegment.substring(slashIndex))) {
-                path =
-                    path.substring(0, slashIndex + 1).concat(path.substring(pathSegmentIndex + 4));
+                path = path.substring(0, slashIndex + 1)
+                    .concat(path.substring(pathSegmentIndex + 4));
             }
         }
         //      d) If the path ends with "<segment>/..", where <segment> is a
