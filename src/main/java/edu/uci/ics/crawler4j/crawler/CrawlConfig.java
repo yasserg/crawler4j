@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import org.apache.http.Header;
+import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.message.BasicHeader;
 
 import edu.uci.ics.crawler4j.crawler.authentication.AuthInfo;
@@ -178,6 +179,11 @@ public class CrawlConfig {
      * List of possible authentications needed by crawler
      */
     private List<AuthInfo> authInfos;
+
+    /**
+     * Cookie policy
+     */
+    private String cookiePolicy = CookieSpecs.STANDARD;
 
     /**
      * Validates the configs specified by this instance.
@@ -541,6 +547,14 @@ public class CrawlConfig {
         this.cleanupDelaySeconds = delay;
     }
 
+    public String getCookiePolicy() {
+        return cookiePolicy;
+    }
+
+    public void setCookiePolicy(String cookiePolicy) {
+        this.cookiePolicy = cookiePolicy;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -565,6 +579,7 @@ public class CrawlConfig {
         sb.append("Thread monitoring delay: " + getThreadMonitoringDelaySeconds() + "\n");
         sb.append("Thread shutdown delay: " + getThreadShutdownDelaySeconds() + "\n");
         sb.append("Cleanup delay: " + getCleanupDelaySeconds() + "\n");
+        sb.append("Cookie policy: " + getCookiePolicy() + "\n");
         return sb.toString();
     }
 }
