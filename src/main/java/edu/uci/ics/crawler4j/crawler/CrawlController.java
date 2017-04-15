@@ -21,6 +21,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.common.io.Files;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +29,6 @@ import com.sleepycat.je.Environment;
 import com.sleepycat.je.EnvironmentConfig;
 
 import edu.uci.ics.crawler4j.fetcher.PageFetcher;
-import edu.uci.ics.crawler4j.frontier.DocIDServer;
 import edu.uci.ics.crawler4j.frontier.Frontier;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
 import edu.uci.ics.crawler4j.url.TLDList;
@@ -72,7 +72,6 @@ public class CrawlController extends Configurable {
     protected PageFetcher pageFetcher;
     protected RobotstxtServer robotstxtServer;
     protected Frontier frontier;
-    protected DocIDServer docIdServer;
 
     protected final Object waitingLock = new Object();
     protected final Environment env;
@@ -82,44 +81,13 @@ public class CrawlController extends Configurable {
         super(config);
 
         config.validate();
-        File folder = new File(config.getCrawlStorageFolder());
-        if (!folder.exists()) {
-            if (folder.mkdirs()) {
-                logger.debug("Created folder: " + folder.getAbsolutePath());
-            } else {
-                throw new Exception(
-                    "couldn't create the storage folder: " + folder.getAbsolutePath() +
-                    " does it already exist ?");
-            }
-        }
 
         TLDList.setUseOnline(config.isOnlineTldListUpdate());
 
-        boolean resumable = config.isResumableCrawling();
-
         EnvironmentConfig envConfig = new EnvironmentConfig();
         envConfig.setAllowCreate(true);
-        envConfig.setTransactional(resumable);
-        envConfig.setLocking(resumable);
 
-        File envHome = new File(config.getCrawlStorageFolder() + "/frontier");
-        if (!envHome.exists()) {
-            if (envHome.mkdir()) {
-                logger.debug("Created folder: " + envHome.getAbsolutePath());
-            } else {
-                throw new Exception(
-                    "Failed creating the frontier folder: " + envHome.getAbsolutePath());
-            }
-        }
-
-        if (!resumable) {
-            IO.deleteFolderContents(envHome);
-            logger.info("Deleted contents of: " + envHome +
-                        " ( as you have configured resumable crawling to false )");
-        }
-
-        env = new Environment(envHome, envConfig);
-        docIdServer = new DocIDServer(env, config);
+        env = new Environment(Files.createTempDir(), envConfig);
         frontier = new Frontier(env, config);
 
         this.pageFetcher = pageFetcher;
@@ -283,7 +251,7 @@ public class CrawlController extends Configurable {
                                     }
                                     if (!someoneIsWorking) {
                                         if (!shuttingDown) {
-                                            long queueLength = frontier.getQueueLength();
+                                            long queueLength = 1;
                                             if (queueLength > 0) {
                                                 continue;
                                             }
@@ -293,7 +261,7 @@ public class CrawlController extends Configurable {
                                                 config.getThreadShutdownDelaySeconds() +
                                                 " seconds to make sure...");
                                             sleep(config.getThreadShutdownDelaySeconds());
-                                            queueLength = frontier.getQueueLength();
+                                            queueLength = 1;
                                             if (queueLength > 0) {
                                                 continue;
                                             }
@@ -316,7 +284,6 @@ public class CrawlController extends Configurable {
                                         sleep(config.getCleanupDelaySeconds());
 
                                         frontier.close();
-                                        docIdServer.close();
                                         pageFetcher.shutDown();
 
                                         finished = true;
@@ -385,17 +352,6 @@ public class CrawlController extends Configurable {
 
     /**
      * Adds a new seed URL. A seed URL is a URL that is fetched by the crawler
-     * to extract new URLs in it and follow them for crawling.
-     *
-     * @param pageUrl
-     *            the URL of the seed
-     */
-    public void addSeed(String pageUrl) {
-        addSeed(pageUrl, -1);
-    }
-
-    /**
-     * Adds a new seed URL. A seed URL is a URL that is fetched by the crawler
      * to extract new URLs in it and follow them for crawling. You can also
      * specify a specific document id to be assigned to this seed URL. This
      * document id needs to be unique. Also, note that if you add three seeds
@@ -413,64 +369,20 @@ public class CrawlController extends Configurable {
      *            the document id that you want to be assigned to this seed URL.
      *
      */
-    public void addSeed(String pageUrl, int docId) {
+    public void addSeed(String pageUrl) {
         String canonicalUrl = URLCanonicalizer.getCanonicalURL(pageUrl);
         if (canonicalUrl == null) {
             logger.error("Invalid seed URL: {}", pageUrl);
         } else {
-            if (docId < 0) {
-                docId = docIdServer.getDocId(canonicalUrl);
-                if (docId > 0) {
-                    logger.trace("This URL is already seen.");
-                    return;
-                }
-                docId = docIdServer.getNewDocID(canonicalUrl);
-            } else {
-                try {
-                    docIdServer.addUrlAndDocId(canonicalUrl, docId);
-                } catch (Exception e) {
-                    logger.error("Could not add seed: {}", e.getMessage());
-                }
-            }
 
             WebURL webUrl = new WebURL();
             webUrl.setURL(canonicalUrl);
-            webUrl.setDocid(docId);
             webUrl.setDepth((short) 0);
             if (robotstxtServer.allows(webUrl)) {
                 frontier.schedule(webUrl);
             } else {
                 // using the WARN level here, as the user specifically asked to add this seed
                 logger.warn("Robots.txt does not allow this seed: {}", pageUrl);
-            }
-        }
-    }
-
-    /**
-     * This function can called to assign a specific document id to a url. This
-     * feature is useful when you have had a previous crawl and have stored the
-     * Urls and their associated document ids and want to have a new crawl which
-     * is aware of the previously seen Urls and won't re-crawl them.
-     *
-     * Note that if you add three seen Urls with document ids 1,2, and 7. Then
-     * the next URL that is found during the crawl will get a doc id of 8. Also
-     * you need to ensure to add seen Urls in increasing order of document ids.
-     *
-     * @param url
-     *            the URL of the page
-     * @param docId
-     *            the document id that you want to be assigned to this URL.
-     *
-     */
-    public void addSeenUrl(String url, int docId) {
-        String canonicalUrl = URLCanonicalizer.getCanonicalURL(url);
-        if (canonicalUrl == null) {
-            logger.error("Invalid Url: {} (can't cannonicalize it!)", url);
-        } else {
-            try {
-                docIdServer.addUrlAndDocId(canonicalUrl, docId);
-            } catch (Exception e) {
-                logger.error("Could not add seen url: {}", e.getMessage());
             }
         }
     }
@@ -497,14 +409,6 @@ public class CrawlController extends Configurable {
 
     public void setFrontier(Frontier frontier) {
         this.frontier = frontier;
-    }
-
-    public DocIDServer getDocIdServer() {
-        return docIdServer;
-    }
-
-    public void setDocIdServer(DocIDServer docIdServer) {
-        this.docIdServer = docIdServer;
     }
 
     public Object getCustomData() {

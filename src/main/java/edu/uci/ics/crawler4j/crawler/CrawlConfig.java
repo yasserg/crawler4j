@@ -28,31 +28,6 @@ import org.apache.http.message.BasicHeader;
 import edu.uci.ics.crawler4j.crawler.authentication.AuthInfo;
 
 public class CrawlConfig {
-
-    /**
-     * The folder which will be used by crawler for storing the intermediate
-     * crawl data. The content of this folder should not be modified manually.
-     */
-    private String crawlStorageFolder;
-
-    /**
-     * If this feature is enabled, you would be able to resume a previously
-     * stopped/crashed crawl. However, it makes crawling slightly slower
-     */
-    private boolean resumableCrawling = false;
-
-    /**
-     * Maximum depth of crawling For unlimited depth this parameter should be
-     * set to -1
-     */
-    private int maxDepthOfCrawling = -1;
-
-    /**
-     * Maximum number of pages to fetch For unlimited number of pages, this
-     * parameter should be set to -1
-     */
-    private int maxPagesToFetch = -1;
-
     /**
      * user-agent string that is used for representing your crawler to web
      * servers. See http://en.wikipedia.org/wiki/User_agent for more details
@@ -185,75 +160,9 @@ public class CrawlConfig {
      * @throws Exception on Validation fail
      */
     public void validate() throws Exception {
-        if (crawlStorageFolder == null) {
-            throw new Exception("Crawl storage folder is not set in the CrawlConfig.");
-        }
         if (politenessDelay < 0) {
             throw new Exception("Invalid value for politeness delay: " + politenessDelay);
         }
-        if (maxDepthOfCrawling < -1) {
-            throw new Exception(
-                "Maximum crawl depth should be either a positive number or -1 for unlimited depth" +
-                ".");
-        }
-        if (maxDepthOfCrawling > Short.MAX_VALUE) {
-            throw new Exception("Maximum value for crawl depth is " + Short.MAX_VALUE);
-        }
-    }
-
-    public String getCrawlStorageFolder() {
-        return crawlStorageFolder;
-    }
-
-    /**
-     * The folder which will be used by crawler for storing the intermediate
-     * crawl data. The content of this folder should not be modified manually.
-     *
-     * @param crawlStorageFolder The folder for the crawler's storage
-     */
-    public void setCrawlStorageFolder(String crawlStorageFolder) {
-        this.crawlStorageFolder = crawlStorageFolder;
-    }
-
-    public boolean isResumableCrawling() {
-        return resumableCrawling;
-    }
-
-    /**
-     * If this feature is enabled, you would be able to resume a previously
-     * stopped/crashed crawl. However, it makes crawling slightly slower
-     *
-     * @param resumableCrawling Should crawling be resumable between runs ?
-     */
-    public void setResumableCrawling(boolean resumableCrawling) {
-        this.resumableCrawling = resumableCrawling;
-    }
-
-    public int getMaxDepthOfCrawling() {
-        return maxDepthOfCrawling;
-    }
-
-    /**
-     * Maximum depth of crawling For unlimited depth this parameter should be set to -1
-     *
-     * @param maxDepthOfCrawling Depth of crawling (all links on current page = depth of 1)
-     */
-    public void setMaxDepthOfCrawling(int maxDepthOfCrawling) {
-        this.maxDepthOfCrawling = maxDepthOfCrawling;
-    }
-
-    public int getMaxPagesToFetch() {
-        return maxPagesToFetch;
-    }
-
-    /**
-     * Maximum number of pages to fetch For unlimited number of pages, this parameter should be
-     * set to -1
-     *
-     * @param maxPagesToFetch How many pages to fetch from all threads together ?
-     */
-    public void setMaxPagesToFetch(int maxPagesToFetch) {
-        this.maxPagesToFetch = maxPagesToFetch;
     }
 
     /**
@@ -544,10 +453,6 @@ public class CrawlConfig {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("Crawl storage folder: " + getCrawlStorageFolder() + "\n");
-        sb.append("Resumable crawling: " + isResumableCrawling() + "\n");
-        sb.append("Max depth of crawl: " + getMaxDepthOfCrawling() + "\n");
-        sb.append("Max pages to fetch: " + getMaxPagesToFetch() + "\n");
         sb.append("User agent string: " + getUserAgentString() + "\n");
         sb.append("Include https pages: " + isIncludeHttpsPages() + "\n");
         sb.append("Include binary content: " + isIncludeBinaryContentInCrawling() + "\n");

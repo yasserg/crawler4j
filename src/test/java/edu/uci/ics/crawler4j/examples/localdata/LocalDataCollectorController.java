@@ -44,8 +44,6 @@ public class LocalDataCollectorController {
         int numberOfCrawlers = Integer.parseInt(args[1]);
 
         CrawlConfig config = new CrawlConfig();
-        config.setCrawlStorageFolder(rootFolder);
-        config.setMaxPagesToFetch(10);
         config.setPolitenessDelay(1000);
 
         PageFetcher pageFetcher = new PageFetcher(config);
