@@ -143,8 +143,7 @@ public class URLCanonicalizer {
     /**
      * Canonicalize the query string.
      *
-     * @param paramsMap
-     *            Parameter map whose name-value pairs are in order of insertion.
+     * @param paramsMap Parameter map whose name-value pairs are in order of insertion.
      * @return Canonical form of query string.
      */
     private static String canonicalize(Map<String, String> paramsMap) {
@@ -177,8 +176,7 @@ public class URLCanonicalizer {
      * URLEncoder does not encode according to the RFC, so we make the extra
      * replacements.
      *
-     * @param string
-     *            Decoded string.
+     * @param string Decoded string.
      * @return Encoded string per RFC 3986.
      */
     private static String percentEncodeRfc3986(String string) {

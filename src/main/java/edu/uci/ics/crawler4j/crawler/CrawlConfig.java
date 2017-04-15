@@ -165,7 +165,6 @@ public class CrawlConfig {
     }
 
     /**
-     *
      * @return userAgentString
      */
     public String getUserAgentString() {
@@ -208,8 +207,7 @@ public class CrawlConfig {
      * Politeness delay in milliseconds (delay between sending two requests to
      * the same host).
      *
-     * @param politenessDelay
-     *            the delay in milliseconds.
+     * @param politenessDelay the delay in milliseconds.
      */
     public void setPolitenessDelay(int politenessDelay) {
         this.politenessDelay = politenessDelay;
@@ -231,9 +229,8 @@ public class CrawlConfig {
     }
 
     /**
-     *
      * @param includeBinaryContentInCrawling Should we fetch binary content such as images,
-     * audio, ...?
+     *                                       audio, ...?
      */
     public void setIncludeBinaryContentInCrawling(boolean includeBinaryContentInCrawling) {
         this.includeBinaryContentInCrawling = includeBinaryContentInCrawling;
@@ -311,7 +308,7 @@ public class CrawlConfig {
 
     /**
      * @param maxDownloadSize Max allowed size of a page. Pages larger than this size will not be
-     * fetched.
+     *                        fetched.
      */
     public void setMaxDownloadSize(int maxDownloadSize) {
         this.maxDownloadSize = maxDownloadSize;
@@ -358,7 +355,7 @@ public class CrawlConfig {
 
     /**
      * @param proxyHost If crawler should run behind a proxy, this parameter can be used for
-     * specifying the proxy host.
+     *                  specifying the proxy host.
      */
     public void setProxyHost(String proxyHost) {
         this.proxyHost = proxyHost;
@@ -370,7 +367,7 @@ public class CrawlConfig {
 
     /**
      * @param proxyPort If crawler should run behind a proxy, this parameter can be used for
-     * specifying the proxy port.
+     *                  specifying the proxy port.
      */
     public void setProxyPort(int proxyPort) {
         this.proxyPort = proxyPort;
@@ -381,9 +378,8 @@ public class CrawlConfig {
     }
 
     /**
-     * @param proxyUsername
-     *        If crawler should run behind a proxy and user/pass is needed for
-     *        authentication in proxy, this parameter can be used for specifying the username.
+     * @param proxyUsername If crawler should run behind a proxy and user/pass is needed for
+     *                      authentication in proxy, this parameter can be used for specifying the username.
      */
     public void setProxyUsername(String proxyUsername) {
         this.proxyUsername = proxyUsername;

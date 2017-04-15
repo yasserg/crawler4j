@@ -17,14 +17,13 @@
 
 package edu.uci.ics.crawler4j.frontier;
 
-import com.sleepycat.je.DatabaseException;
-import com.sleepycat.je.Environment;
 import edu.uci.ics.crawler4j.crawler.Configurable;
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.url.WebURL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -32,107 +31,33 @@ import java.util.List;
  */
 
 public class Frontier extends Configurable {
-    protected static final Logger logger = LoggerFactory.getLogger(Frontier.class);
+    private static final Logger logger = LoggerFactory.getLogger(Frontier.class);
+    private boolean isShutdown = false;
+    private WorkQueues workQueues;
 
-    private static final String DATABASE_NAME = "PendingURLsDB";
-    private static final int IN_PROCESS_RESCHEDULE_BATCH_SIZE = 100;
-    protected final Object mutex = new Object();
-    protected final Object waitingList = new Object();
-    protected WorkQueues workQueues;
-    protected boolean isFinished = false;
-
-    protected long scheduledPages;
-
-    public Frontier(Environment env, CrawlConfig config) {
+    public Frontier(CrawlConfig config) {
         super(config);
-        try {
-            workQueues = new WorkQueues(env, DATABASE_NAME);
-            scheduledPages = 0;
-        } catch (DatabaseException e) {
-            logger.error("Error while initializing the Frontier", e);
-            workQueues = null;
-        }
+        workQueues = new WorkQueues();
     }
 
     public void scheduleAll(List<WebURL> urls) {
-        synchronized (mutex) {
-            int newScheduledPage = 0;
-            for (WebURL url : urls) {
-                try {
-                    workQueues.put(url);
-                    newScheduledPage++;
-                } catch (DatabaseException e) {
-                    logger.error("Error while putting the url in the work queue", e);
-                }
-            }
-            if (newScheduledPage > 0) {
-                scheduledPages += newScheduledPage;
-            }
-            synchronized (waitingList) {
-                waitingList.notifyAll();
-            }
-        }
+
     }
 
     public void schedule(WebURL url) {
-        synchronized (mutex) {
-            try {
-                workQueues.put(url);
-                scheduledPages++;
-            } catch (DatabaseException e) {
-                logger.error("Error while putting the url in the work queue", e);
-            }
-        }
+        scheduleAll(Collections.singletonList(url));
     }
 
     public void getNextURLs(int max, List<WebURL> result) {
-        while (true) {
-            synchronized (mutex) {
-                if (isFinished) {
-                    return;
-                }
-                try {
-                    List<WebURL> curResults = workQueues.get(max);
-                    workQueues.delete(curResults.size());
-                    result.addAll(curResults);
-                } catch (DatabaseException e) {
-                    logger.error("Error while getting next urls", e);
-                }
-
-                if (result.size() > 0) {
-                    return;
-                }
-            }
-
-            try {
-                synchronized (waitingList) {
-                    waitingList.wait();
-                }
-            } catch (InterruptedException ignored) {
-                // Do nothing
-            }
-            if (isFinished) {
-                return;
-            }
-        }
-    }
-
-    public void setProcessed(WebURL webURL) {
 
     }
 
-    public boolean isFinished() {
-        return isFinished;
+    public boolean isShutdown() {
+        return isShutdown;
     }
 
-    public void close() {
-        workQueues.close();
-    }
-
-    public void finish() {
-        isFinished = true;
-        synchronized (waitingList) {
-            waitingList.notifyAll();
-        }
+    public void shutdown() {
+        workQueues.shutdown();
+        isShutdown = true;
     }
 }

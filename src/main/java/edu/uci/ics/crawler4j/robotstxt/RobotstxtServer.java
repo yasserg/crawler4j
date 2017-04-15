@@ -60,7 +60,9 @@ public class RobotstxtServer {
             .toLowerCase();
     }
 
-    /** Please note that in the case of a bad URL, TRUE will be returned */
+    /**
+     * Please note that in the case of a bad URL, TRUE will be returned
+     */
     public boolean allows(WebURL webURL) {
         if (!config.isEnabled()) {
             return true;

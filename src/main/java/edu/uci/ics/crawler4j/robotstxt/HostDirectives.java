@@ -31,7 +31,9 @@ public class HostDirectives {
     // 24 hours, we have to re-fetch it.
     private static final long EXPIRATION_DELAY = 24 * 60 * 1000L;
     private final long timeFetched;
-    /** A list of rule sets, sorted on match with the configured user agent */
+    /**
+     * A list of rule sets, sorted on match with the configured user agent
+     */
     private Set<UserAgentDirectives> rules;
     private long timeLastAccessed;
     private RobotstxtConfig config;

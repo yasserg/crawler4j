@@ -39,6 +39,7 @@ public class HtmlContentHandler extends DefaultHandler {
     private boolean isWithinBodyElement;
     private ExtractedUrlAnchorPair curUrl = null;
     private boolean anchorFlag = false;
+
     public HtmlContentHandler() {
         isWithinBodyElement = false;
         bodyText = new StringBuilder();

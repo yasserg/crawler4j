@@ -24,6 +24,7 @@ public abstract class AuthInfo {
     protected int port;
     protected String username;
     protected String password;
+
     /**
      * Constructs a new AuthInfo.
      */
