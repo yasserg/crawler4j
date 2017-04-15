@@ -37,7 +37,6 @@ import org.apache.http.auth.NTCredentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -87,7 +86,7 @@ public class PageFetcher extends Configurable {
 
         RequestConfig requestConfig = RequestConfig.custom()
                                                    .setExpectContinueEnabled(false)
-                                                   .setCookieSpec(CookieSpecs.STANDARD)
+                                                   .setCookieSpec(config.getCookiePolicy())
                                                    .setRedirectsEnabled(false)
                                                    .setSocketTimeout(config.getSocketTimeout())
                                                    .setConnectTimeout(config.getConnectionTimeout())
