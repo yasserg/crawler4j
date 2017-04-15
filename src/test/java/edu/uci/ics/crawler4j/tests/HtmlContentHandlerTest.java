@@ -55,7 +55,7 @@ public class HtmlContentHandlerTest {
     }
 
     @Test
-    public void testSciptInHead() throws Exception {
+    public void testScriptInHead() throws Exception {
 
         HtmlContentHandler parse = parseHtml("<html><head>" +
             "<script src=\"/js/app.js\"></script>" +
