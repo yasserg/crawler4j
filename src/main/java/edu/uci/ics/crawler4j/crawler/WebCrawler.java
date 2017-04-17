@@ -33,6 +33,7 @@ import edu.uci.ics.crawler4j.fetcher.PageFetchResult;
 import edu.uci.ics.crawler4j.fetcher.PageFetcher;
 import edu.uci.ics.crawler4j.frontier.DocIDServer;
 import edu.uci.ics.crawler4j.frontier.Frontier;
+import edu.uci.ics.crawler4j.parser.HtmlParseData;
 import edu.uci.ics.crawler4j.parser.NotAllowedContentException;
 import edu.uci.ics.crawler4j.parser.ParseData;
 import edu.uci.ics.crawler4j.parser.Parser;
@@ -300,7 +301,8 @@ public class WebCrawler implements Runnable {
     /**
      * Classes that extends WebCrawler should overwrite this function to tell the
      * crawler whether the given url should be crawled or not. The following
-     * default implementation indicates that all urls should be included in the crawl.
+     * default implementation indicates that all urls should be included in the crawl
+     * except those with a nofollow flag.
      *
      * @param url
      *            the url which we are interested to know whether it should be
@@ -311,7 +313,16 @@ public class WebCrawler implements Runnable {
      *         otherwise false is returned.
      */
     public boolean shouldVisit(Page referringPage, WebURL url) {
-        // By default allow all urls to be crawled.
+        if (myController.getConfig().isRespectNoFollow()) {
+            return !((referringPage != null &&
+                    referringPage.getContentType() != null &&
+                    referringPage.getContentType().contains("html") &&
+                    ((HtmlParseData)referringPage.getParseData())
+                        .getMetaTagValue("robots")
+                        .contains("nofollow")) ||
+                    url.getAttribute("rel").contains("nofollow"));
+        }
+
         return true;
     }
 
@@ -487,7 +498,17 @@ public class WebCrawler implements Runnable {
                                  + "as per your \"shouldFollowLinksInPage\" policy",
                                  page.getWebURL().getURL());
                 }
-                visit(page);
+
+                boolean noIndex = myController.getConfig().isRespectNoIndex() &&
+                    page.getContentType() != null &&
+                    page.getContentType().contains("html") &&
+                    ((HtmlParseData)page.getParseData())
+                        .getMetaTagValue("robots").
+                        contains("noindex");
+
+                if (!noIndex) {
+                    visit(page);
+                }
             }
         } catch (PageBiggerThanMaxSizeException e) {
             onPageBiggerThanMaxSize(curURL.getURL(), e.getPageSize());
