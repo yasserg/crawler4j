@@ -18,6 +18,7 @@
 package edu.uci.ics.crawler4j.crawler;
 
 import java.io.File;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -68,6 +69,16 @@ public class CrawlController extends Configurable {
      * flag and when it is set they will no longer process new pages.
      */
     protected boolean shuttingDown;
+
+    /**
+     * Instant when the crawl was launched
+     */
+    protected Instant crawlLaunchedTimestamp = null;
+
+    /**
+     * Instance when the crawl terminated
+     */
+    protected Instant crawlCompletedTimestamp = null;
 
     protected PageFetcher pageFetcher;
     protected RobotstxtServer robotstxtServer;
@@ -213,6 +224,10 @@ public class CrawlController extends Configurable {
 
     protected <T extends WebCrawler> void start(final WebCrawlerFactory<T> crawlerFactory,
                                                 final int numberOfCrawlers, boolean isBlocking) {
+
+        crawlCompletedTimestamp = null;
+        crawlLaunchedTimestamp = Instant.now();
+
         try {
             finished = false;
             crawlersLocalData.clear();
@@ -309,6 +324,8 @@ public class CrawlController extends Configurable {
                                             crawler.onBeforeExit();
                                             crawlersLocalData.add(crawler.getMyLocalData());
                                         }
+
+                                        crawlCompletedTimestamp = Instant.now();
 
                                         logger.info(
                                             "Waiting for " + config.getCleanupDelaySeconds() +
@@ -533,5 +550,70 @@ public class CrawlController extends Configurable {
         this.shuttingDown = true;
         pageFetcher.shutDown();
         frontier.finish();
+    }
+
+    /**
+     * Get the number of elapsed seconds since the crawl began or
+     * the total number of seconds the crawl took to complete
+     */
+    public long getCrawlElapsedSeconds() {
+        if (crawlLaunchedTimestamp == null) {
+            return 0;
+        }
+
+        if (crawlCompletedTimestamp != null) {
+            return crawlCompletedTimestamp.getEpochSecond() -
+                crawlLaunchedTimestamp.getEpochSecond();
+        } else {
+            return Instant.now().getEpochSecond() -
+                crawlLaunchedTimestamp.getEpochSecond();
+        }
+    }
+
+    /**
+     * Get the number of processed URLs
+     */
+    public long getProcessedUrlCount() {
+        return getFrontier().getNumberOfProcessedPages();
+    }
+
+    /**
+     * Get the total number of scheduled URLs
+     */
+    public long getScheduledUrlCount() {
+        return getFrontier().getNumberOfScheduledPages();
+    }
+
+    /**
+     * Get the percentage of URLs crawled
+     *
+     * WARNING: currently this is only accurate if you crawl *all* URLs
+     *
+     */
+    public double getPercentageComplete() {
+        long processedUrls = getProcessedUrlCount();
+        long totalUrls = getScheduledUrlCount();
+
+        if (totalUrls == 0) {
+            return 0.0;
+        }
+
+        double rate = (double)processedUrls / totalUrls;
+        return (double) Math.round(rate * 100) / 100;
+    }
+
+    /**
+     * Get the number of URLs crawled per second
+     */
+    public double getUrlCrawlRateSeconds() {
+        long elapsedSeconds = getCrawlElapsedSeconds();
+        long processedUrls = getProcessedUrlCount();
+
+        if (elapsedSeconds == 0) {
+            return 0.0;
+        }
+
+        double rate = (double)processedUrls / elapsedSeconds;
+        return (double) Math.round(rate * 100) / 100;
     }
 }
