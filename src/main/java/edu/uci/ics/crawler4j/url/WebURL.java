@@ -19,6 +19,8 @@ package edu.uci.ics.crawler4j.url;
 
 import java.io.Serializable;
 
+import java.util.Map;
+
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
 
@@ -44,6 +46,7 @@ public class WebURL implements Serializable {
     private String anchor;
     private byte priority;
     private String tag;
+    private Map<String, String> attributes;
 
     /**
      * @return unique document id assigned to this Url.
@@ -190,6 +193,21 @@ public class WebURL implements Serializable {
 
     public void setTag(String tag) {
         this.tag = tag;
+    }
+
+    public Map<String, String> getAttributes() {
+        return attributes;
+    }
+
+    public void setAttributes(Map<String, String> attributes) {
+        this.attributes = attributes;
+    }
+
+    public String getAttribute(String name) {
+        if (attributes == null) {
+            return "";
+        }
+        return attributes.getOrDefault(name, "");
     }
 
     @Override

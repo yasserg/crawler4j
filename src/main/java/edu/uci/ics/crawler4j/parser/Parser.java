@@ -138,6 +138,7 @@ public class Parser extends Configurable {
                         webURL.setURL(url);
                         webURL.setTag(urlAnchorPair.getTag());
                         webURL.setAnchor(urlAnchorPair.getAnchor());
+                        webURL.setAttributes(urlAnchorPair.getAttributes());
                         outgoingUrls.add(webURL);
                         urlCount++;
                         if (urlCount > config.getMaxOutgoingLinksToFollow()) {

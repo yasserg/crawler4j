@@ -88,21 +88,18 @@ public class HtmlContentHandler extends DefaultHandler {
             String href = attributes.getValue("href");
             if (href != null) {
                 anchorFlag = true;
-                addToOutgoingUrls(href, localName);
-
+                addToOutgoingUrls(href, localName, attributes);
             }
         } else if (element == Element.IMG) {
             String imgSrc = attributes.getValue("src");
             if (imgSrc != null) {
                 addToOutgoingUrls(imgSrc, localName);
-
             }
         } else if ((element == Element.IFRAME) || (element == Element.FRAME) ||
                    (element == Element.EMBED) || (element == Element.SCRIPT)) {
             String src = attributes.getValue("src");
             if (src != null) {
                 addToOutgoingUrls(src, localName);
-
             }
         } else if (element == Element.BASE) {
             if (base != null) { // We only consider the first occurrence of the Base element.
@@ -146,6 +143,18 @@ public class HtmlContentHandler extends DefaultHandler {
         curUrl = new ExtractedUrlAnchorPair();
         curUrl.setHref(href);
         curUrl.setTag(tag);
+        outgoingUrls.add(curUrl);
+    }
+
+    private void addToOutgoingUrls(String href, String tag, Attributes attributes) {
+        curUrl = new ExtractedUrlAnchorPair();
+        curUrl.setHref(href);
+        curUrl.setTag(tag);
+        for (int x = 0; x < attributes.getLength(); x++) {
+            String attrName = attributes.getLocalName(x);
+            String attrVal = attributes.getValue(attrName);
+            curUrl.setAttribute(attrName, attrVal);
+        }
         outgoingUrls.add(curUrl);
     }
 

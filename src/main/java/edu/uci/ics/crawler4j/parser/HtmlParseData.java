@@ -63,6 +63,10 @@ public class HtmlParseData implements ParseData {
         this.metaTags = metaTags;
     }
 
+    public String getMetaTagValue(String metaTag) {
+        return metaTags.getOrDefault(metaTag, "");
+    }
+
     @Override
     public Set<WebURL> getOutgoingUrls() {
         return outgoingUrls;
