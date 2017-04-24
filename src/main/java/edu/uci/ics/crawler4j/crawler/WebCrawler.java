@@ -178,6 +178,11 @@ public class WebCrawler implements Runnable {
      * @return tweaked WebURL
      */
     protected WebURL handleUrlBeforeProcess(WebURL curURL) {
+        CrawlConfig config = myController.getConfig();
+        if (config.isEnforceHttps() && curURL.getScheme().equals("http")) {
+            curURL.setScheme("https");
+        }
+
         return curURL;
     }
 

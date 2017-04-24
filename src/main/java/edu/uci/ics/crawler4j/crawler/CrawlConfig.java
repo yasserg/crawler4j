@@ -78,6 +78,11 @@ public class CrawlConfig {
     private boolean includeHttpsPages = true;
 
     /**
+     * Should we enforce https?
+     */
+    private boolean enforceHttps = false;
+
+    /**
      * Should we fetch binary content such as images, audio, ...?
      */
     private boolean includeBinaryContentInCrawling = false;
@@ -587,6 +592,14 @@ public class CrawlConfig {
         this.respectNoIndex = respectNoIndex;
     }
 
+    public boolean isEnforceHttps() {
+        return enforceHttps;
+    }
+
+    public void setEnforceHttps(boolean enforceHttps) {
+        this.enforceHttps = enforceHttps;
+    }
+
     public RequestConfig getRequestConfig() {
         if (requestConfig == null) {
             return RequestConfig.custom()
@@ -632,6 +645,7 @@ public class CrawlConfig {
         sb.append("Cookie policy: " + getCookiePolicy() + "\n");
         sb.append("Respect nofollow: " + isRespectNoFollow() + "\n");
         sb.append("Respect noindex: " + isRespectNoIndex() + "\n");
+        sb.append("Enforce https: " + isEnforceHttps() + "\n");
         return sb.toString();
     }
 }

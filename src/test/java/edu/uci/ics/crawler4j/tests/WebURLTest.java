@@ -1,5 +1,7 @@
 package edu.uci.ics.crawler4j.tests;
 
+import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
 
 import edu.uci.ics.crawler4j.url.WebURL;
@@ -14,5 +16,21 @@ public class WebURLTest {
     public void testNoLastSlash() {
         WebURL webUrl = new WebURL();
         webUrl.setURL("http://google.com");
+    }
+
+    @Test
+    public void testSchemeParsing() {
+        WebURL webUrl = new WebURL();
+
+        webUrl.setURL("http://example.com");
+        assertEquals("http", webUrl.getScheme());
+
+        webUrl.setURL("//example.com");
+        assertEquals("http", webUrl.getScheme());
+
+        webUrl.setURL("http://example.com");
+        webUrl.setScheme("https");
+        assertEquals("https", webUrl.getScheme());
+        assertEquals("https://example.com", webUrl.toString());
     }
 }
