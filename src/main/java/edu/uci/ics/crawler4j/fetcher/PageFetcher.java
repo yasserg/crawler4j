@@ -84,14 +84,7 @@ public class PageFetcher extends Configurable {
     public PageFetcher(CrawlConfig config) {
         super(config);
 
-        RequestConfig requestConfig = RequestConfig.custom()
-                                                   .setExpectContinueEnabled(false)
-                                                   .setCookieSpec(config.getCookiePolicy())
-                                                   .setRedirectsEnabled(false)
-                                                   .setSocketTimeout(config.getSocketTimeout())
-                                                   .setConnectTimeout(config.getConnectionTimeout())
-                                                   .build();
-
+        RequestConfig requestConfig = config.getRequestConfig();
         RegistryBuilder<ConnectionSocketFactory> connRegistryBuilder = RegistryBuilder.create();
         connRegistryBuilder.register("http", PlainConnectionSocketFactory.INSTANCE);
         if (config.isIncludeHttpsPages()) {
