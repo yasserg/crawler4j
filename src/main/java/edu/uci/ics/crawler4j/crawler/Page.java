@@ -25,11 +25,11 @@ import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.util.ByteArrayBuffer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import edu.uci.ics.crawler4j.parser.ParseData;
 import edu.uci.ics.crawler4j.url.WebURL;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * This class contains the data for a fetched and parsed page.
@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
  */
 public class Page {
 
-    private final static Logger logger = LoggerFactory.getLogger(Page.class);
+    protected final Logger logger = LoggerFactory.getLogger(Page.class);
 
     /**
      * The URL of this page.
