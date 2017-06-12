@@ -28,6 +28,8 @@ import org.apache.http.util.ByteArrayBuffer;
 
 import edu.uci.ics.crawler4j.parser.ParseData;
 import edu.uci.ics.crawler4j.url.WebURL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class contains the data for a fetched and parsed page.
@@ -35,6 +37,8 @@ import edu.uci.ics.crawler4j.url.WebURL;
  * @author Yasser Ganjisaffar
  */
 public class Page {
+
+    private final static Logger logger = LoggerFactory.getLogger(Page.class);
 
     /**
      * The URL of this page.
@@ -124,7 +128,15 @@ public class Page {
             contentEncoding = encoding.getValue();
         }
 
-        Charset charset = ContentType.getOrDefault(entity).getCharset();
+        Charset charset = null;
+
+        try {
+            charset = ContentType.getOrDefault(entity).getCharset();
+        } catch (Exception e) {
+            logger.warn("parse charset failed", e);
+            charset = Charset.forName("UTF-8");
+        }
+
         if (charset != null) {
             contentCharset = charset.displayName();
         }
