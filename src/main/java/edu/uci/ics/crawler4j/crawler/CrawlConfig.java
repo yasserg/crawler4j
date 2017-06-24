@@ -24,6 +24,7 @@ import java.util.List;
 
 import org.apache.http.Header;
 import org.apache.http.client.config.CookieSpecs;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.message.BasicHeader;
 
 import edu.uci.ics.crawler4j.crawler.authentication.AuthInfo;
@@ -194,6 +195,11 @@ public class CrawlConfig {
      * Whether to honor "noindex" flag
      */
     private boolean respectNoIndex = true;
+
+    /**
+     * HTTP client RequestConfig
+     */
+    private RequestConfig requestConfig;
 
     /**
      * Validates the configs specified by this instance.
@@ -579,6 +585,24 @@ public class CrawlConfig {
 
     public void setRespectNoIndex(boolean respectNoIndex) {
         this.respectNoIndex = respectNoIndex;
+    }
+
+    public RequestConfig getRequestConfig() {
+        if (requestConfig == null) {
+            return RequestConfig.custom()
+            .setExpectContinueEnabled(false)
+            .setCookieSpec(getCookiePolicy())
+            .setRedirectsEnabled(false)
+            .setSocketTimeout(getSocketTimeout())
+            .setConnectTimeout(getConnectionTimeout())
+            .build();
+        }
+
+        return requestConfig;
+    }
+
+    public void overrideRequestConfig(RequestConfig config) {
+        this.requestConfig = config;
     }
 
     @Override
