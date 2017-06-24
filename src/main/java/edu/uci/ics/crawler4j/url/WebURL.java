@@ -40,6 +40,7 @@ public class WebURL implements Serializable {
     private int parentDocid;
     private String parentUrl;
     private short depth;
+    private String scheme;
     private String domain;
     private String subDomain;
     private String path;
@@ -67,11 +68,27 @@ public class WebURL implements Serializable {
     }
 
     public void setURL(String url) {
+        boolean validUrl = url.startsWith("//") ||
+            url.startsWith("http://") ||
+            url.startsWith("https://");
+
+        if (!validUrl) {
+            throw new IllegalArgumentException("Invalid URL supplied.");
+        }
+
         this.url = url;
 
-        int domainStartIdx = url.indexOf("//") + 2;
+        int schemeEndsIdx = url.indexOf("//");
+        int domainStartIdx = schemeEndsIdx + 2;
         int domainEndIdx = url.indexOf('/', domainStartIdx);
         domainEndIdx = (domainEndIdx > domainStartIdx) ? domainEndIdx : url.length();
+
+        if (schemeEndsIdx == 0) {
+            scheme = "http";
+        } else {
+            scheme = url.substring(0, schemeEndsIdx - 1);
+        }
+
         domain = url.substring(domainStartIdx, domainEndIdx);
         subDomain = "";
         String[] parts = domain.split("\\.");
@@ -208,6 +225,16 @@ public class WebURL implements Serializable {
             return "";
         }
         return attributes.getOrDefault(name, "");
+    }
+
+    public String getScheme() {
+        return scheme;
+    }
+
+    public void setScheme(String scheme) {
+        String schemelessUrl = url.substring(url.indexOf("//") + 2);
+        url = scheme + "://" + schemelessUrl;
+        this.scheme = scheme;
     }
 
     @Override

@@ -24,6 +24,7 @@ import java.util.List;
 
 import org.apache.http.Header;
 import org.apache.http.client.config.CookieSpecs;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.message.BasicHeader;
 
 import edu.uci.ics.crawler4j.crawler.authentication.AuthInfo;
@@ -75,6 +76,11 @@ public class CrawlConfig {
      * Should we also crawl https pages?
      */
     private boolean includeHttpsPages = true;
+
+    /**
+     * Should we enforce https?
+     */
+    private boolean enforceHttps = false;
 
     /**
      * Should we fetch binary content such as images, audio, ...?
@@ -194,6 +200,11 @@ public class CrawlConfig {
      * Whether to honor "noindex" flag
      */
     private boolean respectNoIndex = true;
+
+    /**
+     * HTTP client RequestConfig
+     */
+    private RequestConfig requestConfig;
 
     /**
      * Validates the configs specified by this instance.
@@ -581,6 +592,32 @@ public class CrawlConfig {
         this.respectNoIndex = respectNoIndex;
     }
 
+    public boolean isEnforceHttps() {
+        return enforceHttps;
+    }
+
+    public void setEnforceHttps(boolean enforceHttps) {
+        this.enforceHttps = enforceHttps;
+    }
+
+    public RequestConfig getRequestConfig() {
+        if (requestConfig == null) {
+            return RequestConfig.custom()
+            .setExpectContinueEnabled(false)
+            .setCookieSpec(getCookiePolicy())
+            .setRedirectsEnabled(false)
+            .setSocketTimeout(getSocketTimeout())
+            .setConnectTimeout(getConnectionTimeout())
+            .build();
+        }
+
+        return requestConfig;
+    }
+
+    public void overrideRequestConfig(RequestConfig config) {
+        this.requestConfig = config;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -608,6 +645,7 @@ public class CrawlConfig {
         sb.append("Cookie policy: " + getCookiePolicy() + "\n");
         sb.append("Respect nofollow: " + isRespectNoFollow() + "\n");
         sb.append("Respect noindex: " + isRespectNoIndex() + "\n");
+        sb.append("Enforce https: " + isEnforceHttps() + "\n");
         return sb.toString();
     }
 }
