@@ -192,6 +192,11 @@ public class CrawlConfig {
     private String cookiePolicy = CookieSpecs.STANDARD;
 
     /**
+     * Max redirects to follow
+     */
+    private int maxRedirects = 1;
+
+    /**
      * Whether to honor "nofollow" flag
      */
     private boolean respectNoFollow = true;
@@ -576,6 +581,14 @@ public class CrawlConfig {
         this.cookiePolicy = cookiePolicy;
     }
 
+    public int getMaxRedirects() {
+        return maxRedirects;
+    }
+
+    public void setMaxRedirects(int maxRedirects) {
+        this.maxRedirects = maxRedirects;
+    }
+
     public boolean isRespectNoFollow() {
         return respectNoFollow;
     }
@@ -608,6 +621,7 @@ public class CrawlConfig {
             .setRedirectsEnabled(false)
             .setSocketTimeout(getSocketTimeout())
             .setConnectTimeout(getConnectionTimeout())
+            .setMaxRedirects(getMaxRedirects())
             .build();
         }
 
