@@ -207,6 +207,17 @@ public class CrawlConfig {
     private boolean respectNoIndex = true;
 
     /**
+     * The number of times to retry requests which result in 5XX errors
+     */
+    private int requestRetryCount = 0;
+
+    /**
+     * Use this interval to calculate the amount of time to wait in between
+     * retried requests in seconds.
+     */
+    private int requestRetryBackoff = 2;
+
+    /**
      * HTTP client RequestConfig
      */
     private RequestConfig requestConfig;
@@ -611,6 +622,22 @@ public class CrawlConfig {
 
     public void setEnforceHttps(boolean enforceHttps) {
         this.enforceHttps = enforceHttps;
+    }
+
+    public int getRequestRetryCount() {
+        return requestRetryCount;
+    }
+
+    public void setRequestRetryCount(int requestRetryCount) {
+        this.requestRetryCount = requestRetryCount;
+    }
+
+    public int getRequestRetryBackoff() {
+        return requestRetryBackoff;
+    }
+
+    public void setRequestRetryBackoff(int requestRetryBackoff) {
+        this.requestRetryBackoff = requestRetryBackoff;
     }
 
     public RequestConfig getRequestConfig() {
