@@ -249,22 +249,25 @@ public class PageFetcher extends Configurable {
             CloseableHttpResponse response = null;
             int statusCode = -1;
 
-            //Retry 5XX responses
+            //Retry 5XX responses w/ exponential back off
             int retriesRemaining = config.getRequestRetryCount();
             int retryBackoff = config.getRequestRetryBackoff();
-            do {
+            while (true) {
                 response = httpClient.execute(request);
                 fetchResult.setEntity(response.getEntity());
                 fetchResult.setResponseHeaders(response.getAllHeaders());
                 statusCode = response.getStatusLine().getStatusCode();
 
-                retriesRemaining--;
-                if (retriesRemaining > 0) {
+                if (statusCode >= 500 && statusCode < 600 && retriesRemaining > 0) {
+                    response.close();
                     logger.info("Retrying request " + toFetchURL + " in " + retryBackoff);
                     Thread.sleep(1000 * retryBackoff);
+                    retriesRemaining--;
                     retryBackoff *= retryBackoff;
+                } else {
+                    break;
                 }
-            } while (statusCode >= 500 && statusCode < 600 && retriesRemaining > 0);
+            }
 
             if (statusCode == HttpStatus.SC_MOVED_PERMANENTLY ||
                 statusCode == HttpStatus.SC_MOVED_TEMPORARILY ||
