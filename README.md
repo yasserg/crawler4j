@@ -70,7 +70,7 @@ implementation:
 public class MyCrawler extends WebCrawler {
 
     private final static Pattern FILTERS = Pattern.compile(".*(\\.(css|js|gif|jpg"
-                                                           + "|png|mp3|mp3|zip|gz))$");
+                                                           + "|png|mp3|mp4|zip|gz))$");
 
     /**
      * This method receives two parameters. The first parameter is the page
