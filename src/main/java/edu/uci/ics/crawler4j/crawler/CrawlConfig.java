@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import org.apache.http.Header;
+import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.message.BasicHeader;
 
 import edu.uci.ics.crawler4j.crawler.authentication.AuthInfo;
@@ -178,6 +179,21 @@ public class CrawlConfig {
      * List of possible authentications needed by crawler
      */
     private List<AuthInfo> authInfos;
+
+    /**
+     * Cookie policy
+     */
+    private String cookiePolicy = CookieSpecs.STANDARD;
+
+    /**
+     * Whether to honor "nofollow" flag
+     */
+    private boolean respectNoFollow = true;
+
+    /**
+     * Whether to honor "noindex" flag
+     */
+    private boolean respectNoIndex = true;
 
     /**
      * Validates the configs specified by this instance.
@@ -541,6 +557,30 @@ public class CrawlConfig {
         this.cleanupDelaySeconds = delay;
     }
 
+    public String getCookiePolicy() {
+        return cookiePolicy;
+    }
+
+    public void setCookiePolicy(String cookiePolicy) {
+        this.cookiePolicy = cookiePolicy;
+    }
+
+    public boolean isRespectNoFollow() {
+        return respectNoFollow;
+    }
+
+    public void setRespectNoFollow(boolean respectNoFollow) {
+        this.respectNoFollow = respectNoFollow;
+    }
+
+    public boolean isRespectNoIndex() {
+        return respectNoIndex;
+    }
+
+    public void setRespectNoIndex(boolean respectNoIndex) {
+        this.respectNoIndex = respectNoIndex;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -565,6 +605,9 @@ public class CrawlConfig {
         sb.append("Thread monitoring delay: " + getThreadMonitoringDelaySeconds() + "\n");
         sb.append("Thread shutdown delay: " + getThreadShutdownDelaySeconds() + "\n");
         sb.append("Cleanup delay: " + getCleanupDelaySeconds() + "\n");
+        sb.append("Cookie policy: " + getCookiePolicy() + "\n");
+        sb.append("Respect nofollow: " + isRespectNoFollow() + "\n");
+        sb.append("Respect noindex: " + isRespectNoIndex() + "\n");
         return sb.toString();
     }
 }

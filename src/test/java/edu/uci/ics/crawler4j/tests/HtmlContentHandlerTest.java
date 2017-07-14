@@ -65,4 +65,15 @@ public class HtmlContentHandlerTest {
         assertEquals("/js/app.js", script.getHref());
     }
 
+    @Test
+    public void testLinkAttributes() throws Exception {
+
+        HtmlContentHandler parse = parseHtml("<html><body>" +
+            "<a href=\"www.example.com\" rel=\"nofollow\">Example</a>" +
+            "</body></html>");
+
+        ExtractedUrlAnchorPair link = parse.getOutgoingUrls().get(0);
+        assertEquals("nofollow", link.getAttribute("rel"));
+    }
+
 }
