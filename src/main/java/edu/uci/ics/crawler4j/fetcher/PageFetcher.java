@@ -119,7 +119,7 @@ public class PageFetcher extends Configurable {
         connectionManager.setDefaultMaxPerRoute(config.getMaxConnectionsPerHost());
 
         HttpClientBuilder clientBuilder = HttpClientBuilder.create();
-        if(config.getCookieStore() != null) {
+        if (config.getCookieStore() != null) {
             clientBuilder.setDefaultCookieStore(config.getCookieStore());
         }
         clientBuilder.setDefaultRequestConfig(requestConfig);
@@ -268,9 +268,9 @@ public class PageFetcher extends Configurable {
                 statusCode == HttpStatus.SC_MOVED_TEMPORARILY ||
                 statusCode == HttpStatus.SC_MULTIPLE_CHOICES ||
                 statusCode == HttpStatus.SC_SEE_OTHER ||
-                statusCode == HttpStatus.SC_TEMPORARY_REDIRECT || statusCode ==
-                                                                  308) { // todo follow
-              // https://issues.apache.org/jira/browse/HTTPCORE-389
+                statusCode == HttpStatus.SC_TEMPORARY_REDIRECT ||
+                statusCode == 308) { // todo follow
+                // https://issues.apache.org/jira/browse/HTTPCORE-389
 
                 Header header = response.getFirstHeader("Location");
                 if (header != null) {
