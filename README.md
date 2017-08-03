@@ -162,7 +162,7 @@ Using a factory can be convenient to integrate crawler4j in a IoC environement (
 or to pass information or a collaborator to each `WebCrawler` instance.
 
 ```java
-public class MyCrawlerFactory implements CrawlController.WebCrawlerFactory {
+public class CsiCrawlerCrawlerControllerFactory implements CrawlController.WebCrawlerFactory {
 
     Map<String, String> metadata;
     SqlRepository repository;
