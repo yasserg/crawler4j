@@ -572,6 +572,11 @@ public class CrawlConfig {
         this.cookiePolicy = cookiePolicy;
     }
 
+    /**
+     * Gets the configured {@link CookieStore} or null if none is set
+     * @return the {@link CookieStore}
+     */
+
     public CookieStore getCookieStore() {
         return cookieStore;
     }
