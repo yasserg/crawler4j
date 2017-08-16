@@ -349,6 +349,10 @@ public class WebCrawler implements Runnable {
         return true;
     }
 
+    protected boolean shouldParse(Page page) {
+        return true;
+    }
+
     /**
      * Classes that extends WebCrawler should overwrite this function to process
      * the content of the fetched and parsed page.
@@ -373,11 +377,15 @@ public class WebCrawler implements Runnable {
             handlePageStatusCode(curURL, statusCode,
                                  EnglishReasonPhraseCatalog.INSTANCE.getReason(statusCode,
                                                                                Locale.ENGLISH));
-            // Finds the status reason for all known statuses
 
             Page page = new Page(curURL);
             page.setFetchResponseHeaders(fetchResult.getResponseHeaders());
             page.setStatusCode(statusCode);
+
+            if (!shouldParse(page)) {
+                return;
+            }
+
             if (statusCode < 200 ||
                 statusCode > 299) { // Not 2XX: 2XX status codes indicate success
                 if (statusCode == HttpStatus.SC_MOVED_PERMANENTLY ||
