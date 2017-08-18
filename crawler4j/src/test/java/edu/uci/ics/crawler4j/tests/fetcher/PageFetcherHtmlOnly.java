@@ -1,15 +1,14 @@
-package edu.uci.ics.crawler4j.examples.fetcher;
+package edu.uci.ics.crawler4j.tests.fetcher;
 
+import java.io.IOException;
+import java.util.Date;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpHead;
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.crawler.exceptions.PageBiggerThanMaxSizeException;
 import edu.uci.ics.crawler4j.fetcher.PageFetchResult;
 import edu.uci.ics.crawler4j.fetcher.PageFetcher;
 import edu.uci.ics.crawler4j.url.WebURL;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpHead;
-
-import java.io.IOException;
-import java.util.Date;
 
 public class PageFetcherHtmlOnly extends PageFetcher {
 

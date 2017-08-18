@@ -10,6 +10,7 @@
 
     <modules>
         <module>crawler4j</module>
+        <module>crawler4j-examples</module>
     </modules>
 
     <build>
