@@ -97,9 +97,9 @@ public class ImageCrawler extends WebCrawler {
         String filename = storageFolder.getAbsolutePath() + "/" + hashedName;
         try {
             Files.write(page.getContentData(), new File(filename));
-            logger.info("Stored: {}", url);
+            WebCrawler.logger.info("Stored: {}", url);
         } catch (IOException iox) {
-            logger.error("Failed to write file: " + filename, iox);
+            WebCrawler.logger.error("Failed to write file: " + filename, iox);
         }
     }
 }
