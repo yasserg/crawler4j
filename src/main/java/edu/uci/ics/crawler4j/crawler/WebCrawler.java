@@ -272,18 +272,19 @@ public class WebCrawler implements Runnable {
 
     @Override
     public void run() {
+        CrawlConfig config = myController.getConfig();
         onStart();
         while (true) {
-            List<WebURL> assignedURLs = new ArrayList<>(50);
+            List<WebURL> assignedURLs = new ArrayList<>(config.getWorkerUrlDequeueCount());
             isWaitingForNewURLs = true;
-            frontier.getNextURLs(50, assignedURLs);
+            frontier.getNextURLs(config.getWorkerUrlDequeueCount(), assignedURLs);
             isWaitingForNewURLs = false;
             if (assignedURLs.isEmpty()) {
                 if (frontier.isFinished()) {
                     return;
                 }
                 try {
-                    Thread.sleep(3000);
+                    Thread.sleep(1000);
                 } catch (InterruptedException e) {
                     logger.error("Error occurred", e);
                 }

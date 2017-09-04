@@ -156,6 +156,11 @@ public class CrawlConfig {
     private int cleanupDelaySeconds = 10;
 
     /**
+     * The number of URLs to dequeue in a batch for processing
+     */
+    private int workerUrlDequeueCount = 10;
+
+    /**
      * If crawler should run behind a proxy, this parameter can be used for
      * specifying the proxy host.
      */
@@ -427,6 +432,14 @@ public class CrawlConfig {
      */
     public void setConnectionTimeout(int connectionTimeout) {
         this.connectionTimeout = connectionTimeout;
+    }
+
+    public int getWorkerUrlDequeueCount() {
+        return workerUrlDequeueCount;
+    }
+
+    public void setWorkerUrlDequeueCount(int workerUrlDequeueCount) {
+        this.workerUrlDequeueCount = workerUrlDequeueCount;
     }
 
     public int getMaxOutgoingLinksToFollow() {
