@@ -62,6 +62,19 @@ run:
 
 you will find in `target/` folder a jar named like `crawler4j-X.Y-with-dependencies.jar`.
 
+
+### Using Gradle
+
+Please include the following dependency in the build.gradle file to use crawler4j
+
+    compile group: 'edu.uci.ics', name: 'crawler4j', version: '4.3'
+    
+Also, add the following repository url in build.gradle, for the dependency [sleepycat](https://mvnrepository.com/artifact/com.sleepycat/je/5.0.840)
+
+        maven {
+                url "https://repo.boundlessgeo.com/main/"
+            }
+
 ## Quickstart
 You need to create a crawler class that extends WebCrawler. This class decides which URLs
 should be crawled and handles the downloaded page. The following is a sample
