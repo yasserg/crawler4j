@@ -69,7 +69,7 @@ Please include the following dependency in the build.gradle file to use crawler4
 
     compile group: 'edu.uci.ics', name: 'crawler4j', version: '4.3'
     
-Also, add the following repository url in build.gradle, for the dependency [sleepycat](https://mvnrepository.com/artifact/com.sleepycat/je/5.0.840)
+Also, add the following repository url in build.gradle, for the dependency [sleepycat](https://mvnrepository.com/artifact/com.sleepycat/je/5.0.84)
 
         maven {
                 url "https://repo.boundlessgeo.com/main/"
