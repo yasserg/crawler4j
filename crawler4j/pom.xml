@@ -156,6 +156,7 @@
 	</profiles>
 
 	<build>
+	  <pluginManagement>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -257,9 +258,17 @@
 				</executions>
 			</plugin>
 		</plugins>
+	  </pluginManagement>
 	</build>
 
 	<dependencies>
+	
+	<!-- Added to use the latest release of crawler4j -->
+	<dependency>
+        <groupId>edu.uci.ics</groupId>
+        <artifactId>crawler4j</artifactId>
+        <version>4.3</version>
+    </dependency>
 
     <!-- Compile time Dependencies -->
 
@@ -502,6 +511,12 @@
 			<version>${groovy.version}</version>
 			<scope>test</scope>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.codehaus.gmavenplus/gmavenplus-plugin -->
+		<dependency>
+		    <groupId>org.codehaus.gmavenplus</groupId>
+		    <artifactId>gmavenplus-plugin</artifactId>
+		    <version>1.5</version>
+		</dependency>		
 		<dependency>
 			<groupId>org.spockframework</groupId>
 			<artifactId>spock-core</artifactId>
