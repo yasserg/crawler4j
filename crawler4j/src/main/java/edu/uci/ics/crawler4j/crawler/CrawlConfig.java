@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import org.apache.http.Header;
+import org.apache.http.client.CookieStore;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.conn.DnsResolver;
 import org.apache.http.impl.conn.SystemDefaultDnsResolver;
@@ -209,6 +210,8 @@ public class CrawlConfig {
     }
 
     private DnsResolver dnsResolver = new SystemDefaultDnsResolver();
+
+    private CookieStore cookieStore;
 
     /**
      * Validates the configs specified by this instance.
@@ -595,6 +598,18 @@ public class CrawlConfig {
     public void setRespectNoIndex(boolean respectNoIndex) {
         this.respectNoIndex = respectNoIndex;
     }
+
+    public CookieStore getCookieStore() {
+                return cookieStore;
+            }
+
+            /**
+      * Sets the {@link CookieStore to be used}
+      * @param cookieStore the {@link CookieStore}
+      */
+            public void setCookieStore(CookieStore cookieStore) {
+                this.cookieStore = cookieStore;
+            }
 
     @Override
     public String toString() {

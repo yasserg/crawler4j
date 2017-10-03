@@ -120,6 +120,9 @@ public class PageFetcher extends Configurable {
         connectionManager.setDefaultMaxPerRoute(config.getMaxConnectionsPerHost());
 
         HttpClientBuilder clientBuilder = HttpClientBuilder.create();
+        if (config.getCookieStore() != null) {
+            clientBuilder.setDefaultCookieStore(config.getCookieStore());
+        }
         clientBuilder.setDefaultRequestConfig(requestConfig);
         clientBuilder.setConnectionManager(connectionManager);
         clientBuilder.setUserAgent(config.getUserAgentString());
