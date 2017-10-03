@@ -1,162 +1,50 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<groupId>edu.uci.ics</groupId>
-	<artifactId>crawler4j</artifactId>
-	<packaging>jar</packaging>
-	<name>crawler4j</name>
-	<version>4.3-SNAPSHOT</version>
-	<description>Open Source Web Crawler for Java</description>
-	<url>https://github.com/yasserg/crawler4j</url>
-	<licenses>
-		<license>
-			<name>The Apache Software License, Version 2.0</name>
-			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-			<distribution>repo</distribution>
-		</license>
-	</licenses>
-	<scm>
-		<url>https://github.com/yasserg/crawler4j</url>
-		<connection>scm:git:git@github.com:yasserg/crawler4j.git</connection>
-		<developerConnection>scm:git:git@github.com:yasserg/crawler4j.git</developerConnection>
-	</scm>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>edu.uci.ics</groupId>
+    <artifactId>crawler4j-parent</artifactId>
+    <packaging>pom</packaging>
+    <version>4.4.0-SNAPSHOT</version>
+    <description>Open Source Web Crawler for Java</description>
+    <url>https://github.com/yasserg/crawler4j</url>
 
-	<parent>
-		<groupId>org.sonatype.oss</groupId>
-		<artifactId>oss-parent</artifactId>
-		<version>7</version>
-	</parent>
+    <modules>
+        <module>crawler4j</module>
+    </modules>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.2</version>
-				<configuration>
-					<source>1.7</source>
-					<target>1.7</target>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<version>2.5</version>
-				<configuration>
-					<excludes>
-						<exclude>**/*.properties</exclude>
-					</excludes>
-				</configuration>
-			</plugin>
-			<!-- generate a source jar -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
-				<version>2.4</version>
-				<executions>
-					<execution>
-						<id>attach-sources</id>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<!-- generate a javadoc jar -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.10.1</version>
-				<executions>
-					<execution>
-						<id>attach-javadocs</id>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<artifactId>maven-assembly-plugin</artifactId>
-				<version>2.5.3</version>
-				<configuration>
-				  <descriptorRefs>
-					<descriptorRef>jar-with-dependencies</descriptorRef>
-				  </descriptorRefs>
-				</configuration>
-				<executions>
-				  <execution>
-					<id>make-fat-jar</id>
-					<phase>package</phase>
-					<goals>
-					  <goal>single</goal>
-					</goals>
-					<configuration>
-					  <finalName>crawler4j-${project.version}</finalName>
-					</configuration>
-				  </execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
-
-	<dependencies>
-
-    <!-- Compile time Dependencies -->
-    <dependency>
-		<groupId>org.slf4j</groupId>
-		<artifactId>slf4j-api</artifactId>
-		<version>1.7.10</version>
-		<scope>compile</scope>
-    </dependency>
-
-	<dependency>
-		<groupId>uk.org.lidalia</groupId>
-		<artifactId>lidalia-slf4j-ext</artifactId>
-		<version>1.0.0</version>
-	</dependency>
-
-    <dependency>
-		<groupId>ch.qos.logback</groupId>
-		<artifactId>logback-classic</artifactId>
-		<version>1.1.2</version>
-		<scope>test</scope>
-    </dependency>
-
-	<dependency>
-		<groupId>org.apache.httpcomponents</groupId>
-		<artifactId>httpclient</artifactId>
-		<version>4.4</version>
-		<scope>compile</scope>
-	</dependency>
-
-	<dependency>
-		<groupId>com.sleepycat</groupId>
-		<artifactId>je</artifactId>
-		<version>5.0.73</version>
-	</dependency>
-
-	<dependency>
-		<groupId>org.apache.tika</groupId>
-		<artifactId>tika-parsers</artifactId>
-		<version>1.5</version>
-	</dependency>
-
-    <!-- Test Dependencies -->
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.11</version>
-			<scope>test</scope>
-		</dependency>
-	</dependencies>
-
-	<repositories>
-		<repository>
-			<id>oracleReleases</id>
-			<name>Oracle Released Java Packages</name>
-			<url>http://download.oracle.com/maven</url>
-			<layout>default</layout>
-		</repository>
-	</repositories>
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-checkstyle-plugin</artifactId>
+                    <version>2.17</version>
+                    <executions>
+                        <execution>
+                            <id>compile</id>
+                            <phase>compile</phase>
+                            <configuration>
+                                <configLocation>checkstyle.xml</configLocation>
+                                <encoding>UTF-8</encoding>
+                                <consoleOutput>true</consoleOutput>
+                                <failsOnError>true</failsOnError>
+                                <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                            </configuration>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <dependencies>
+                        <dependency>
+                            <groupId>com.puppycrawl.tools</groupId>
+                            <artifactId>checkstyle</artifactId>
+                            <version>7.1</version>
+                        </dependency>
+                    </dependencies>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
 
 </project>

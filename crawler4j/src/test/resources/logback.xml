@@ -1,0 +1,26 @@
+<configuration>
+
+    <property name="LOG_HOME" value="logs" />
+    <property name="LOG_FILE_NAME" value="/crawler4j.log" />
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%date{HH:mm:ss} %-5level [%thread] - [%logger{0}]- %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+        <file>${LOG_HOME}/${LOG_FILE_NAME}</file>
+        <encoder>
+            <pattern>%date %-5level [%thread] - [%logger] - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="com.github.tomakehurst" level="ERROR"/>
+    <logger name="org.eclipse.jetty" level="ERROR" />
+
+    <root level="DEBUG">
+        <appender-ref ref="STDOUT" />
+        <!--<appender-ref ref="FILE" />-->
+    </root>
+</configuration>

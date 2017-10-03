@@ -1,9 +1,19 @@
 # crawler4j
 [![Build Status](https://travis-ci.org/yasserg/crawler4j.svg?branch=master)](https://travis-ci.org/yasserg/crawler4j)
 ![Maven Central](https://img.shields.io/maven-central/v/edu.uci.ics/crawler4j.svg?style=flat-square)
+[![Gitter Chat](http://img.shields.io/badge/chat-online-brightgreen.svg)](https://gitter.im/crawler4j/Lobby)
 
 crawler4j is an open source web crawler for Java which provides a simple interface for
 crawling the Web. Using it, you can setup a multi-threaded web crawler in few minutes.
+
+## Table of content
+
+- [Installation](#installation)
+- [Quickstart](#quickstart)   
+- [Using a factory](#using-factory)
+- [More Examples](#more-examples)
+- [Configuration Details](#configuration-details)
+- [License](#license)
 
 ## Installation
 
@@ -15,18 +25,55 @@ To use the latest release of crawler4j, please use the following snippet in your
     <dependency>
         <groupId>edu.uci.ics</groupId>
         <artifactId>crawler4j</artifactId>
-        <version>4.2</version>
+        <version>4.3</version>
     </dependency>
+```
+
+#### Snapshot
+
+You can add the following to use the next SNAPSHOT release
+
+```xml
+    <repositories>
+        <repository>
+            <id>onebeartoe</id>
+            <name>onebeartoe</name>
+            <url>https://repository-onebeartoe.forge.cloudbees.com/snapshot/</url>
+        </repository>
+    </repositories>
+    
+    <dependencies>
+        <dependency>
+            <groupId>edu.uci.ics</groupId>
+            <artifactId>crawler4j</artifactId>
+            <version>4.4-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
 ```
 
 ### Without Maven
 
-crawler4j JARs are available on the [releases page](https://github.com/yasserg/crawler4j/releases)
-and at [Maven Central](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22edu.uci.ics%22%20AND%20a%3A%22crawler4j%22).
+From 4.3 if you need a jar that includes all dependencies (aka fatjar) you have to build it yourself. Clone the repo and
+run:
 
-If you use crawler4j without Maven, be aware that crawler4j jar file has a couple of
-external dependencies. In [releases page](https://github.com/yasserg/crawler4j/releases), you can find a file named crawler4j-X.Y-with-dependencies.jar that includes crawler4j and all of its dependencies as a bundle.
-You can add download it and add it to your classpath to get all the dependencies covered.
+```bash
+    $ mvn package -Pfatjar
+```
+
+you will find in `target/` folder a jar named like `crawler4j-X.Y-with-dependencies.jar`.
+
+
+### Using Gradle
+
+Please include the following dependency in the build.gradle file to use crawler4j
+
+    compile group: 'edu.uci.ics', name: 'crawler4j', version: '4.3'
+    
+Also, add the following repository url in build.gradle, for the dependency [sleepycat](https://mvnrepository.com/artifact/com.sleepycat/je/5.0.84)
+
+        maven {
+                url "https://repo.boundlessgeo.com/main/"
+            }
 
 ## Quickstart
 You need to create a crawler class that extends WebCrawler. This class decides which URLs
@@ -36,7 +83,7 @@ implementation:
 public class MyCrawler extends WebCrawler {
 
     private final static Pattern FILTERS = Pattern.compile(".*(\\.(css|js|gif|jpg"
-                                                           + "|png|mp3|mp3|zip|gz))$");
+                                                           + "|png|mp3|mp4|zip|gz))$");
 
     /**
      * This method receives two parameters. The first parameter is the page
@@ -123,16 +170,42 @@ public class Controller {
     }
 }
 ```
+## Using a factory
+Using a factory can be convenient to integrate crawler4j in a IoC environement (like Spring, Guice) 
+or to pass information or a collaborator to each `WebCrawler` instance.
 
+```java
+public class CsiCrawlerCrawlerControllerFactory implements CrawlController.WebCrawlerFactory {
+
+    Map<String, String> metadata;
+    SqlRepository repository;
+
+    public CsiCrawlerCrawlerControllerFactory(Map<String, String> metadata, SqlRepository repository) {
+        this.metadata = metadata;
+        this.repository = repository;
+    }
+
+    @Override
+    public WebCrawler newInstance() {
+        return new MyCrawler(metadata, repository);
+    }
+}
+```
+To use a factory just call the right method in the `CrawlController` (probably you will want to use the `startNonBlocking` if you are in Spring or Guice):
+```java
+            MyCrawlerFactory factory = new MyCrawlerFactory(metadata, repository);
+            controller.startNonBlocking(factory, numberOfCrawlers);
+```
 ## More Examples
-- [Basic crawler](https://github.com/yasserg/crawler4j/tree/master/src/test/java/edu/uci/ics/crawler4j/examples/basic): the full source code of the above example with more details.
-- [Image crawler](https://github.com/yasserg/crawler4j/tree/master/src/test/java/edu/uci/ics/crawler4j/examples/imagecrawler): a simple image crawler that downloads image content from the crawling domain and stores them in a folder. This example demonstrates how binary content can be fetched using crawler4j.
-- [Collecting data from threads](https://github.com/yasserg/crawler4j/tree/master/src/test/java/edu/uci/ics/crawler4j/examples/localdata): this example demonstrates how the controller can collect data/statistics from crawling threads.
-- [Multiple crawlers](https://github.com/yasserg/crawler4j/tree/master/src/test/java/edu/uci/ics/crawler4j/examples/multiple): this is a sample that shows how two distinct crawlers can run concurrently. For example, you might want to split your crawling into different domains and then take different crawling policies for each group. Each crawling controller can have its own configurations.
-- [Shutdown crawling](https://github.com/yasserg/crawler4j/tree/master/src/test/java/edu/uci/ics/crawler4j/examples/shutdown): this example shows have crawling can be terminated gracefully by sending the 'shutdown' command to the controller.
+- [Basic crawler](crawler4j/src/test/java/edu/uci/ics/crawler4j/examples/basic/): the full source code of the above example with more details.
+- [Image crawler](crawler4j/src/test/java/edu/uci/ics/crawler4j/examples/imagecrawler/): a simple image crawler that downloads image content from the crawling domain and stores them in a folder. This example demonstrates how binary content can be fetched using crawler4j.
+- [Collecting data from threads](crawler4j/src/test/java/edu/uci/ics/crawler4j/examples/localdata/): this example demonstrates how the controller can collect data/statistics from crawling threads.
+- [Multiple crawlers](crawler4j/src/test/java/edu/uci/ics/crawler4j/examples/multiple/): this is a sample that shows how two distinct crawlers can run concurrently. For example, you might want to split your crawling into different domains and then take different crawling policies for each group. Each crawling controller can have its own configurations.
+- [Shutdown crawling](crawler4j/src/test/java/edu/uci/ics/crawler4j/examples/shutdown/): this example shows have crawling can be terminated gracefully by sending the 'shutdown' command to the controller.
+- [Postgres/JDBC integration](https://github.com/rzo1/crawler4j-postgres-sample): this shows how to save the crawled content into a Postgres database (or any other JDBC repository).
 
 ## Configuration Details
-The controller class has a mandatory parameter of type [CrawlConfig](https://github.com/yasserg/crawler4j/blob/master/src/main/java/edu/uci/ics/crawler4j/crawler/CrawlConfig.java).
+The controller class has a mandatory parameter of type [CrawlConfig](crawler4j/src/main/java/edu/uci/ics/crawler4j/crawler/CrawlConfig.java).
  Instances of this class can be used for configuring crawler4j. The following sections
 describe some details of configurations.
 
@@ -144,6 +217,14 @@ A -> B -> C -> D
 Since, "A" is a seed page, it will have a depth of 0. "B" will have depth of 1 and so on. You can set a limit on the depth of pages that crawler4j crawls. For example, if you set this limit to 2, it won't crawl page "D". To set the maximum depth you can use:
 ```java
 crawlConfig.setMaxDepthOfCrawling(maxDepthOfCrawling);
+```
+### Enable SSL
+To enable SSL simply:
+
+```java
+CrawlConfig config = new CrawlConfig();
+
+config.setIncludeHttpsPages(true);
 ```
 
 ### Maximum number of pages to crawl
@@ -175,7 +256,7 @@ crawlConfig.setProxyPort(8080);
 If your proxy also needs authentication:
 ```java
 crawlConfig.setProxyUsername(username);
-crawlConfig.getProxyPassword(password);
+crawlConfig.setProxyPassword(password);
 ```
 
 ### Resumable Crawling
@@ -202,6 +283,6 @@ crawlConfig.setUserAgentString(userAgentString);
 
 ## License
 
-Copyright (c) 2010-2015 Yasser Ganjisaffar
+Copyright (c) 2010-2017 Yasser Ganjisaffar
 
 Published under [Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0), see LICENSE
