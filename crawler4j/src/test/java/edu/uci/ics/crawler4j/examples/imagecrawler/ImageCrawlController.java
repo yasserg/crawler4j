@@ -36,7 +36,7 @@ public class ImageCrawlController {
         if (args.length < 3) {
             logger.info("Needed parameters: ");
             logger.info("\t rootFolder (it will contain intermediate crawl data)");
-            logger.info("\t numberOfCralwers (number of concurrent threads)");
+            logger.info("\t numberOfCrawlers (number of concurrent threads)");
             logger.info("\t storageFolder (a folder for storing downloaded images)");
             return;
         }
