@@ -39,7 +39,7 @@
 		<logback.version>1.1.7</logback.version>
 		<guava.version>21.0</guava.version>
 		<apache.http.components.version>4.5.3</apache.http.components.version>
-		<je.version>5.0.84</je.version>
+		<je.version>5.0.73</je.version>
 		<apache.tika.version>1.16</apache.tika.version>
 		<!--test dependency versions -->
 		<junit.version>4.12</junit.version>
@@ -98,17 +98,6 @@
 								</goals>
 							</execution>
 						</executions>
-					</plugin>
-					<plugin>
-						<groupId>org.sonatype.plugins</groupId>
-						<artifactId>nexus-staging-maven-plugin</artifactId>
-						<version>1.6.7</version>
-						<extensions>true</extensions>
-						<configuration>
-							<serverId>ossrh</serverId>
-							<nexusUrl>https://oss.sonatype.org/</nexusUrl>
-							<autoReleaseAfterClose>true</autoReleaseAfterClose>
-						</configuration>
 					</plugin>
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
