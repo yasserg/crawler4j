@@ -235,6 +235,15 @@ on this:
 crawlConfig.setMaxPagesToFetch(maxPagesToFetch);
 ```
 
+### Enable Binary Content Crawling
+By default crawling binary content (i.e. images, audio etc.) is turned off. To enable crawling these files:
+
+```java
+crawlConfig.setIncludeBinaryContentInCrawling(true);
+```
+
+See an example [here](crawler4j/src/test/java/edu/uci/ics/crawler4j/examples/imagecrawler/) for more details.
+
 ### Politeness
 crawler4j is designed very efficiently and has the ability to crawl domains very fast
 (e.g., it has been able to crawl 200 Wikipedia pages per second). However, since this
