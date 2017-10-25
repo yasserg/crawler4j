@@ -116,11 +116,7 @@ local.properties
 
 Eclipse_Console_Output
 PracticeJava/src/RegexTestHarness.java
-crawler4j/MyRootFolder/frontier/00000000.jdb
-crawler4j/MyRootFolder/frontier/je.config.csv
-crawler4j/MyRootFolder/frontier/je.info.0
-crawler4j/MyRootFolder/frontier/je.lck
-crawler4j/MyRootFolder/frontier/je.stat.csv
+**/frontier/
 output.txt
 PracticeJava/*
 
