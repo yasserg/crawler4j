@@ -142,6 +142,8 @@ public class Parser extends Configurable {
                         outgoingUrls.add(webURL);
                         urlCount++;
                         if (urlCount > config.getMaxOutgoingLinksToFollow()) {
+                            logger.info("Number of links found in {} exceeds the maximum.",
+                                        page.getWebURL());
                             break;
                         }
                     }

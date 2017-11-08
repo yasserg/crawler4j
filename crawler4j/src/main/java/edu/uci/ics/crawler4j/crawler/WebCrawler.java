@@ -274,8 +274,13 @@ public class WebCrawler implements Runnable {
             frontier.getNextURLs(50, assignedURLs);
             isWaitingForNewURLs = false;
             if (assignedURLs.isEmpty()) {
+                logger.debug("No URLs were assigned.");
                 if (frontier.isFinished()) {
+                    logger.info("Frontier finished, exiting.");
                     return;
+                }
+                if (frontier.visitedEnoughPages()) {
+                    logger.debug("Have visited enough pages, sleeping.");
                 }
                 try {
                     Thread.sleep(3000);
@@ -290,8 +295,9 @@ public class WebCrawler implements Runnable {
                     }
                     if (curURL != null) {
                         curURL = handleUrlBeforeProcess(curURL);
-                        processPage(curURL);
-                        frontier.setProcessed(curURL);
+                        // logger.info("Processing URL: {}", curURL);
+                        boolean visited = processPage(curURL);
+                        frontier.setProcessed(curURL, visited);
                     }
                 }
             }
@@ -356,11 +362,11 @@ public class WebCrawler implements Runnable {
         // Sub-classed should override this to add their custom functionality
     }
 
-    private void processPage(WebURL curURL) {
+    private boolean processPage(WebURL curURL) {
         PageFetchResult fetchResult = null;
         try {
             if (curURL == null) {
-                return;
+                return false;
             }
 
             fetchResult = pageFetcher.fetchPage(curURL);
@@ -383,13 +389,14 @@ public class WebCrawler implements Runnable {
                     statusCode == 308) { // is 3xx  todo
                     // follow https://issues.apache.org/jira/browse/HTTPCORE-389
 
+                    logger.debug("The page is redirecting.");
                     page.setRedirect(true);
 
                     String movedToUrl = fetchResult.getMovedToUrl();
                     if (movedToUrl == null) {
                         logger.warn("Unexpected error, URL: {} is redirected to NOTHING",
                                     curURL);
-                        return;
+                        return false;
                     }
                     page.setRedirectedToUrl(movedToUrl);
                     onRedirectedStatusCode(page);
@@ -398,7 +405,7 @@ public class WebCrawler implements Runnable {
                         int newDocId = docIdServer.getDocId(movedToUrl);
                         if (newDocId > 0) {
                             logger.debug("Redirect page: {} is already seen", curURL);
-                            return;
+                            return false;
                         }
 
                         WebURL webURL = new WebURL();
@@ -409,6 +416,7 @@ public class WebCrawler implements Runnable {
                         webURL.setDocid(-1);
                         webURL.setAnchor(curURL.getAnchor());
                         if (shouldVisit(page, webURL)) {
+                            logger.debug("Visiting redirect page: {}", movedToUrl);
                             if (!shouldFollowLinksIn(webURL) || robotstxtServer.allows(webURL)) {
                                 webURL.setDocid(docIdServer.getNewDocID(movedToUrl));
                                 frontier.schedule(webURL);
@@ -438,7 +446,7 @@ public class WebCrawler implements Runnable {
                 if (!curURL.getURL().equals(fetchResult.getFetchedUrl())) {
                     if (docIdServer.isSeenBefore(fetchResult.getFetchedUrl())) {
                         logger.debug("Redirect page: {} has already been seen", curURL);
-                        return;
+                        return false;
                     }
                     curURL.setURL(fetchResult.getFetchedUrl());
                     curURL.setDocid(docIdServer.getNewDocID(fetchResult.getFetchedUrl()));
@@ -456,6 +464,7 @@ public class WebCrawler implements Runnable {
                         myController.getConfig().getMaxDownloadSize(), curURL.getURL());
                 }
 
+                logger.debug("Parsing page: {}", page.getWebURL());
                 parser.parse(page, curURL.getURL());
 
                 if (shouldFollowLinksIn(page.getWebURL())) {
@@ -507,7 +516,16 @@ public class WebCrawler implements Runnable {
                         contains("noindex");
 
                 if (!noIndex) {
-                    visit(page);
+                    if (frontier.visitedEnoughPages()) {
+                        logger.debug("Have visited enough pages.");
+                        return false;
+                    } else {
+                        logger.debug("Visiting page: {}", page.getWebURL());
+                        visit(page);
+                        return true;
+                    }
+                } else {
+                    logger.info("Not visiting page {} because of noIndex.", page.getWebURL());
                 }
             }
         } catch (PageBiggerThanMaxSizeException e) {
@@ -527,6 +545,7 @@ public class WebCrawler implements Runnable {
                 fetchResult.discardContentIfNotConsumed();
             }
         }
+        return false;
     }
 
     public Thread getThread() {
@@ -538,6 +557,6 @@ public class WebCrawler implements Runnable {
     }
 
     public boolean isNotWaitingForNewURLs() {
-        return !isWaitingForNewURLs;
+        return !isWaitingForNewURLs && !frontier.visitedEnoughPages();
     }
 }
