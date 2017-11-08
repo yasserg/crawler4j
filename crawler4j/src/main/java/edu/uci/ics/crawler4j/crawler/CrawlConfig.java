@@ -57,6 +57,22 @@ public class CrawlConfig {
     private int maxPagesToFetch = -1;
 
     /**
+     * Maximum number of pages to visit For unlimited number of pages, this
+     * parameter should be set to -1
+     */
+    private int maxPagesToVisit = -1;
+
+    /**
+     * Links are followed in a random manner, or in the order they were discovered?
+     */
+    private boolean randomized = false;
+
+    /**
+     * Number of maximum random links to follow
+     */
+    private int maxRandomLinksToFollowPerPage = -1;
+
+    /**
      * user-agent string that is used for representing your crawler to web
      * servers. See http://en.wikipedia.org/wiki/User_agent for more details
      */
@@ -277,6 +293,18 @@ public class CrawlConfig {
         return maxPagesToFetch;
     }
 
+    public int getMaxPagesToVisit() {
+        return maxPagesToVisit;
+    }
+
+    public boolean isRandomized() {
+        return randomized;
+    }
+
+    public int getMaxRandomLinksToFollowPerPage() {
+        return maxRandomLinksToFollowPerPage;
+    }
+
     /**
      * Maximum number of pages to fetch For unlimited number of pages, this parameter should be
      * set to -1
@@ -285,6 +313,18 @@ public class CrawlConfig {
      */
     public void setMaxPagesToFetch(int maxPagesToFetch) {
         this.maxPagesToFetch = maxPagesToFetch;
+    }
+
+    public void setMaxPagesToVisit(int maxPagesToVisit) {
+        this.maxPagesToVisit = maxPagesToVisit;
+    }
+
+    public void setRandomized(boolean randomized) {
+        this.randomized = randomized;
+    }
+
+    public void setMaxRandomLinksToFollowPerPage(int maxRandomLinksToFollowPerPage) {
+        this.maxRandomLinksToFollowPerPage = maxRandomLinksToFollowPerPage;
     }
 
     /**

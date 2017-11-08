@@ -45,6 +45,7 @@ public class Counters extends Configurable {
     public static class ReservedCounterNames {
         public static final String SCHEDULED_PAGES = "Scheduled-Pages";
         public static final String PROCESSED_PAGES = "Processed-Pages";
+        public static final String VISITED_PAGES = "Visited-Pages";
     }
 
     private static final String DATABASE_NAME = "Statistics";

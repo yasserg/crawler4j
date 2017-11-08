@@ -17,6 +17,8 @@
 
 package edu.uci.ics.crawler4j.frontier;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -83,10 +85,24 @@ public class Frontier extends Configurable {
     }
 
     public void scheduleAll(List<WebURL> urls) {
+        logger.debug("Scheduling {} URLs to visit.", urls.size());
         int maxPagesToFetch = config.getMaxPagesToFetch();
+        boolean randomized = config.isRandomized();
+        if (visitedEnoughPages()) {
+            logger.debug("Visited enough pages, not scheduling anything.");
+            return;
+        }
         synchronized (mutex) {
             int newScheduledPage = 0;
-            for (WebURL url : urls) {
+            List<WebURL> urlsToFollow = new ArrayList<>(urls);
+            if (randomized) {
+                Collections.shuffle(urlsToFollow);
+                int maxLinks = config.getMaxRandomLinksToFollowPerPage();
+                if (maxLinks > 0) {
+                    urlsToFollow = urlsToFollow.subList(0, Math.min(maxLinks, urlsToFollow.size()));
+                }
+            }
+            for (WebURL url : urlsToFollow) {
                 if ((maxPagesToFetch > 0) &&
                     ((scheduledPages + newScheduledPage) >= maxPagesToFetch)) {
                     break;
@@ -100,6 +116,7 @@ public class Frontier extends Configurable {
                 }
             }
             if (newScheduledPage > 0) {
+                logger.debug("Scheduled {} pages.", newScheduledPage);
                 scheduledPages += newScheduledPage;
                 counters.increment(Counters.ReservedCounterNames.SCHEDULED_PAGES, newScheduledPage);
             }
@@ -128,10 +145,16 @@ public class Frontier extends Configurable {
         while (true) {
             synchronized (mutex) {
                 if (isFinished) {
+                    logger.info("Finished, not getting next URLs.");
+                    return;
+                }
+                if (visitedEnoughPages()) {
+                    logger.debug("Visited enough pages, not getting next URLs.");
                     return;
                 }
                 try {
                     List<WebURL> curResults = workQueues.get(max);
+                    logger.debug("Got {} URLs.", curResults.size());
                     workQueues.delete(curResults.size());
                     if (inProcessPages != null) {
                         for (WebURL curPage : curResults) {
@@ -161,8 +184,13 @@ public class Frontier extends Configurable {
         }
     }
 
-    public void setProcessed(WebURL webURL) {
+    public void setProcessed(WebURL webURL, boolean visited) {
+        // logger.info("This page is now processed: {}", webURL);
         counters.increment(Counters.ReservedCounterNames.PROCESSED_PAGES);
+        if (visited) {
+            // logger.info("This page is now visited: {}", webURL);
+            counters.increment(Counters.ReservedCounterNames.VISITED_PAGES);
+        }
         if (inProcessPages != null) {
             if (!inProcessPages.removeURL(webURL)) {
                 logger.warn("Could not remove: {} from list of processed pages.", webURL.getURL());
@@ -180,6 +208,10 @@ public class Frontier extends Configurable {
 
     public long getNumberOfProcessedPages() {
         return counters.getValue(Counters.ReservedCounterNames.PROCESSED_PAGES);
+    }
+
+    public long getNumberOfVisitedPages() {
+        return counters.getValue(Counters.ReservedCounterNames.VISITED_PAGES);
     }
 
     public long getNumberOfScheduledPages() {
@@ -203,5 +235,11 @@ public class Frontier extends Configurable {
         synchronized (waitingList) {
             waitingList.notifyAll();
         }
+    }
+
+    public boolean visitedEnoughPages() {
+        int maxPagesToVisit = config.getMaxPagesToVisit();
+        long visitedPages = counters.getValue(Counters.ReservedCounterNames.VISITED_PAGES);
+        return visitedPages >= maxPagesToVisit;
     }
 }
