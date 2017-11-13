@@ -55,7 +55,7 @@ public abstract class AuthInfo {
         URL url = new URL(loginUrl);
         this.protocol = url.getProtocol();
         this.host = url.getHost();
-        this.port = url.getDefaultPort();
+        this.port = url.getPort();
         this.loginTarget = url.getFile();
 
         this.username = username;
