@@ -391,14 +391,14 @@ public class CrawlController extends Configurable {
             logger.error("Invalid seed URL: {}", pageUrl);
         } else {
             if (docId < 0) {
-                if (pageHarvests.isAlreadySeen(canonicalUrl)) {
+                if (pageHarvests.containsKey(canonicalUrl)) {
                     logger.trace("This URL is already seen.");
                     return;
                 }
                 pageHarvests.add(canonicalUrl);
             } else {
                 try {
-                    pageHarvests.add(docId, canonicalUrl);
+                    pageHarvests.put(canonicalUrl, docId);
                 } catch (Exception e) {
                     logger.error("Could not add seed: {}", e.getMessage());
                 }
@@ -406,7 +406,7 @@ public class CrawlController extends Configurable {
 
             WebURL webUrl = new WebURL();
             webUrl.setURL(canonicalUrl);
-            webUrl.setDocid(pageHarvests.getId(canonicalUrl));
+            webUrl.setDocid(pageHarvests.get(canonicalUrl));
             webUrl.setDepth((short) 0);
             if (robotstxtServer.allows(webUrl)) {
                 frontier.schedule(webUrl);
@@ -439,7 +439,7 @@ public class CrawlController extends Configurable {
             logger.error("Invalid Url: {} (can't cannonicalize it!)", url);
         } else {
             try {
-                pageHarvests.add(docId, canonicalUrl);
+                pageHarvests.put(canonicalUrl, docId);
             } catch (Exception e) {
                 logger.error("Could not add seen url: {}", e.getMessage());
             }

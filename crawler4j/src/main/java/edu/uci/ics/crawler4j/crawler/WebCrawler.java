@@ -389,8 +389,8 @@ public class WebCrawler implements Runnable {
                     onRedirectedStatusCode(page);
 
                     if (myController.getConfig().isFollowRedirects()) {
-                        int newDocId = pageHarvests.getId(movedToUrl);
-                        if (newDocId > 0) {
+                        Integer newDocId = pageHarvests.get(movedToUrl);
+                        if (null != newDocId && 0 < newDocId) {
                             logger.debug("Redirect page: {} is already seen", curURL);
                             return;
                         }
@@ -428,7 +428,7 @@ public class WebCrawler implements Runnable {
 
             } else { // if status code is 200
                 if (!curURL.getURL().equals(fetchResult.getFetchedUrl())) {
-                    if (pageHarvests.isAlreadySeen(fetchResult.getFetchedUrl())) {
+                    if (pageHarvests.containsKey(fetchResult.getFetchedUrl())) {
                         logger.debug("Redirect page: {} has already been seen", curURL);
                         return;
                     }
@@ -457,8 +457,8 @@ public class WebCrawler implements Runnable {
                     for (WebURL webURL : parseData.getOutgoingUrls()) {
                         webURL.setParentDocid(curURL.getDocid());
                         webURL.setParentUrl(curURL.getURL());
-                        int newdocid = pageHarvests.getId(webURL.getURL());
-                        if (newdocid > 0) {
+                        Integer newdocid = pageHarvests.get(webURL.getURL());
+                        if (null != newdocid && 0 < newdocid) {
                             // This is not the first time that this Url is visited. So, we set the
                             // depth to a negative number.
                             webURL.setDepth((short) -1);

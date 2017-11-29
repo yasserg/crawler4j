@@ -1,16 +1,9 @@
 package edu.uci.ics.crawler4j.frontier.pageharvests;
 
-public interface PageHarvests {
+import edu.uci.ics.crawler4j.dao.Dao;
 
-    int getId(String url);
+public interface PageHarvests extends Dao<String, Integer> {
 
     int add(String url);
 
-    void add(int id, String url);
-
-    boolean isAlreadySeen(String url);
-
-    int count();
-
-    void close();
 }
