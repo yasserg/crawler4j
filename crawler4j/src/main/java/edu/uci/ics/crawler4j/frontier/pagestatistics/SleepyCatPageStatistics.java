@@ -1,55 +1,80 @@
 package edu.uci.ics.crawler4j.frontier.pagestatistics;
 
-import com.sleepycat.je.*;
+import java.util.*;
 
-import edu.uci.ics.crawler4j.util.Util;
+import com.sleepycat.je.Environment;
 
-public class SleepyCatPageStatistics extends AbstractPageStatistics {
+import edu.uci.ics.crawler4j.dao.SleepyCatDao;
+import edu.uci.ics.crawler4j.dao.tuplebinding.*;
+
+public class SleepyCatPageStatistics extends SleepyCatDao<PageStatisticsType, Long> implements
+        PageStatistics {
 
     private static final String DATABASE_NAME = "PageStatistics";
 
-    private final Environment environment;
+    private final Map<PageStatisticsType, Long> data = new HashMap<>();
 
-    private final Database database;
+    private Object mutex = new Object();
 
     public SleepyCatPageStatistics(Environment environment) {
-        super();
-        this.environment = environment;
-        this.database = environment.openDatabase(null, DATABASE_NAME, config());
-
-        Transaction transaction = environment.beginTransaction(null, null);
-        try (Cursor cursor = database.openCursor(transaction, null);) {
-            DatabaseEntry key = new DatabaseEntry();
-            DatabaseEntry value = new DatabaseEntry();
-            OperationStatus result = cursor.getFirst(key, value, null);
-            while (OperationStatus.SUCCESS == result) {
-                if (0 < value.getData().length) {
-                    super.setValue(PageStatisticsType.valueOf(new String(key.getData())), Util
-                            .byteArray2Long(value.getData()));
-                }
-                result = cursor.getNext(key, value, null);
-            }
-        }
-        transaction.commit();
-    }
-
-    private static DatabaseConfig config() {
-        DatabaseConfig config = new DatabaseConfig();
-        config.setAllowCreate(true);
-        config.setTransactional(true);
-        config.setDeferredWrite(false);
-        return config;
+        super(environment, new EnumTupleBinding<>(PageStatisticsType.class), new LongTupleBinding(),
+                DATABASE_NAME, true);
+        load(data);
     }
 
     @Override
-    public void setValue(PageStatisticsType type, long value) {
+    public Long get(PageStatisticsType type) {
         synchronized (mutex) {
-            super.setValue(type, value);
-            Transaction transaction = environment.beginTransaction(null, null);
-            database.put(transaction, new DatabaseEntry(type.name().getBytes()), new DatabaseEntry(
-                    Util.long2ByteArray(value)));
-            transaction.commit();
+            if (!data.containsKey(type)) {
+                return 0L;
+            }
+            return data.get(type);
         }
+    }
+
+    @Override
+    public void put(PageStatisticsType type, Long value) {
+        synchronized (mutex) {
+            data.put(type, value);
+            super.put(type, value);
+        }
+    }
+
+    @Override
+    public void increment(PageStatisticsType type) {
+        increment(type, 1);
+    }
+
+    @Override
+    public void increment(PageStatisticsType type, long addition) {
+        synchronized (mutex) {
+            put(type, get(type) + addition);
+        }
+    }
+
+    @Override
+    public void close() {
+        // empty
+    }
+
+    @Override
+    public boolean containsKey(PageStatisticsType keyObject) {
+        return data.containsKey(keyObject);
+    }
+
+    @Override
+    public int size() {
+        return data.size();
+    }
+
+    @Override
+    public Collection<Long> nextRecords(int max) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void deleteNextRecords(int count) {
+        throw new UnsupportedOperationException();
     }
 
 }

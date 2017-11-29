@@ -79,6 +79,23 @@ public class SleepyCatDao<K extends Object, V extends Object> implements Dao<K, 
     }
 
     @Override
+    public void load(Map<K, V> data) {
+        Transaction transaction = environment.beginTransaction(null, null);
+        try (Cursor cursor = database.openCursor(transaction, null);) {
+            DatabaseEntry key = new DatabaseEntry();
+            DatabaseEntry value = new DatabaseEntry();
+            OperationStatus result = cursor.getFirst(key, value, null);
+            while (OperationStatus.SUCCESS == result) {
+                if (0 < value.getData().length) {
+                    data.put(keyBinding.entryToObject(key), valueBinding.entryToObject(value));
+                }
+                result = cursor.getNext(key, value, null);
+            }
+        }
+        transaction.commit();
+    }
+
+    @Override
     public boolean containsKey(K keyObject) {
         return null != get(keyObject);
     }

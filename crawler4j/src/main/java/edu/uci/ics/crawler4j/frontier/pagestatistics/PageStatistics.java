@@ -1,15 +1,11 @@
 package edu.uci.ics.crawler4j.frontier.pagestatistics;
 
-public interface PageStatistics {
+import edu.uci.ics.crawler4j.dao.Dao;
 
-    long getValue(PageStatisticsType type);
-
-    void setValue(PageStatisticsType type, long value);
+public interface PageStatistics extends Dao<PageStatisticsType, Long> {
 
     void increment(PageStatisticsType type);
 
     void increment(PageStatisticsType type, long addition);
-
-    void close();
 
 }

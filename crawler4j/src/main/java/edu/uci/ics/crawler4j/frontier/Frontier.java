@@ -58,7 +58,7 @@ public class Frontier extends Configurable {
         try {
             workQueues = new WorkQueues(env, DATABASE_NAME, config.isResumableCrawling());
             if (config.isResumableCrawling()) {
-                scheduledPages = pageStatistics.getValue(PageStatisticsType.SCHEDULED_PAGES);
+                scheduledPages = pageStatistics.get(PageStatisticsType.SCHEDULED_PAGES);
                 inProcessPages = new InProcessPagesDB(env);
                 long numPreviouslyInProcessPages = inProcessPages.getLength();
                 if (numPreviouslyInProcessPages > 0) {
@@ -180,11 +180,11 @@ public class Frontier extends Configurable {
     }
 
     public long getNumberOfProcessedPages() {
-        return pageStatistics.getValue(PageStatisticsType.PROCESSED_PAGES);
+        return pageStatistics.get(PageStatisticsType.PROCESSED_PAGES);
     }
 
     public long getNumberOfScheduledPages() {
-        return pageStatistics.getValue(PageStatisticsType.SCHEDULED_PAGES);
+        return pageStatistics.get(PageStatisticsType.SCHEDULED_PAGES);
     }
 
     public boolean isFinished() {
