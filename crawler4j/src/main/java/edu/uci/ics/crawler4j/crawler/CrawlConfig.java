@@ -29,6 +29,7 @@ import org.apache.http.message.BasicHeader;
 import com.sleepycat.je.*;
 
 import edu.uci.ics.crawler4j.crawler.authentication.AuthInfo;
+import edu.uci.ics.crawler4j.frontier.pageharvests.*;
 import edu.uci.ics.crawler4j.frontier.pagestatistics.*;
 import edu.uci.ics.crawler4j.util.IO;
 
@@ -637,6 +638,10 @@ public class CrawlConfig {
             environment = new Environment(envHome, configuration);
         }
         return environment;
+    }
+
+    public PageHarvests getPageHarvests() {
+        return new SleepyCatPageHarvests(environment(), resumableCrawling);
     }
 
     @Override

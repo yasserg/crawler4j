@@ -25,13 +25,14 @@ import org.slf4j.*;
 import com.sleepycat.je.Environment;
 
 import edu.uci.ics.crawler4j.fetcher.PageFetcher;
-import edu.uci.ics.crawler4j.frontier.*;
+import edu.uci.ics.crawler4j.frontier.Frontier;
+import edu.uci.ics.crawler4j.frontier.pageharvests.PageHarvests;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
 import edu.uci.ics.crawler4j.url.*;
 
 /**
- * The controller that manages a crawling session. This class creates the
- * crawler threads and monitors their progress.
+ * The controller that manages a crawling session. This class creates the crawler threads and
+ * monitors their progress.
  *
  * @author Yasser Ganjisaffar
  */
@@ -40,14 +41,14 @@ public class CrawlController extends Configurable {
     static final Logger logger = LoggerFactory.getLogger(CrawlController.class);
 
     /**
-     * The 'customData' object can be used for passing custom crawl-related
-     * configurations to different components of the crawler.
+     * The 'customData' object can be used for passing custom crawl-related configurations to
+     * different components of the crawler.
      */
     protected Object customData;
 
     /**
-     * Once the crawling session finishes the controller collects the local data
-     * of the crawler threads and stores them in this List.
+     * Once the crawling session finishes the controller collects the local data of the crawler
+     * threads and stores them in this List.
      */
     protected List<Object> crawlersLocalData = new ArrayList<>();
 
@@ -57,21 +58,25 @@ public class CrawlController extends Configurable {
     protected boolean finished;
 
     /**
-     * Is the crawling session set to 'shutdown'. Crawler threads monitor this
-     * flag and when it is set they will no longer process new pages.
+     * Is the crawling session set to 'shutdown'. Crawler threads monitor this flag and when it is
+     * set they will no longer process new pages.
      */
     protected boolean shuttingDown;
 
     protected PageFetcher pageFetcher;
+
     protected RobotstxtServer robotstxtServer;
+
     protected Frontier frontier;
-    protected DocIDServer docIdServer;
+
+    protected PageHarvests pageHarvests;
 
     protected final Object waitingLock = new Object();
+
     protected final Environment env;
 
     public CrawlController(CrawlConfig config, PageFetcher pageFetcher,
-                           RobotstxtServer robotstxtServer) throws Exception {
+            RobotstxtServer robotstxtServer) throws Exception {
         super(config);
 
         config.validate();
@@ -80,16 +85,15 @@ public class CrawlController extends Configurable {
             if (folder.mkdirs()) {
                 logger.debug("Created folder: " + folder.getAbsolutePath());
             } else {
-                throw new Exception(
-                    "couldn't create the storage folder: " + folder.getAbsolutePath() +
-                    " does it already exist ?");
+                throw new Exception("couldn't create the storage folder: " + folder
+                        .getAbsolutePath() + " does it already exist ?");
             }
         }
 
         TLDList.setUseOnline(config.isOnlineTldListUpdate());
 
         env = config.environment();
-        docIdServer = new DocIDServer(env, config);
+        pageHarvests = config.getPageHarvests();
         frontier = new Frontier(env, config);
 
         this.pageFetcher = pageFetcher;
@@ -103,8 +107,8 @@ public class CrawlController extends Configurable {
         T newInstance() throws Exception;
     }
 
-    private static class DefaultWebCrawlerFactory<T extends WebCrawler>
-        implements WebCrawlerFactory<T> {
+    private static class DefaultWebCrawlerFactory<T extends WebCrawler> implements
+            WebCrawlerFactory<T> {
         final Class<T> clazz;
 
         DefaultWebCrawlerFactory(Class<T> clazz) {
@@ -122,15 +126,16 @@ public class CrawlController extends Configurable {
     }
 
     /**
-     * Start the crawling session and wait for it to finish.
-     * This method utilizes default crawler factory that creates new crawler using Java reflection
+     * Start the crawling session and wait for it to finish. This method utilizes default crawler
+     * factory that creates new crawler using Java reflection
      *
      * @param clazz
      *            the class that implements the logic for crawler threads
      * @param numberOfCrawlers
-     *            the number of concurrent threads that will be contributing in
-     *            this crawling session.
-     * @param <T> Your class extending WebCrawler
+     *            the number of concurrent threads that will be contributing in this crawling
+     *            session.
+     * @param <T>
+     *            Your class extending WebCrawler
      */
     public <T extends WebCrawler> void start(Class<T> clazz, int numberOfCrawlers) {
         this.start(new DefaultWebCrawlerFactory<>(clazz), numberOfCrawlers, true);
@@ -142,12 +147,13 @@ public class CrawlController extends Configurable {
      * @param crawlerFactory
      *            factory to create crawlers on demand for each thread
      * @param numberOfCrawlers
-     *            the number of concurrent threads that will be contributing in
-     *            this crawling session.
-     * @param <T> Your class extending WebCrawler
+     *            the number of concurrent threads that will be contributing in this crawling
+     *            session.
+     * @param <T>
+     *            Your class extending WebCrawler
      */
     public <T extends WebCrawler> void start(WebCrawlerFactory<T> crawlerFactory,
-                                             int numberOfCrawlers) {
+            int numberOfCrawlers) {
         this.start(crawlerFactory, numberOfCrawlers, true);
     }
 
@@ -157,32 +163,34 @@ public class CrawlController extends Configurable {
      * @param crawlerFactory
      *            factory to create crawlers on demand for each thread
      * @param numberOfCrawlers
-     *            the number of concurrent threads that will be contributing in
-     *            this crawling session.
-     * @param <T> Your class extending WebCrawler
+     *            the number of concurrent threads that will be contributing in this crawling
+     *            session.
+     * @param <T>
+     *            Your class extending WebCrawler
      */
     public <T extends WebCrawler> void startNonBlocking(WebCrawlerFactory<T> crawlerFactory,
-                                                        final int numberOfCrawlers) {
+            final int numberOfCrawlers) {
         this.start(crawlerFactory, numberOfCrawlers, false);
     }
 
     /**
-     * Start the crawling session and return immediately.
-     * This method utilizes default crawler factory that creates new crawler using Java reflection
+     * Start the crawling session and return immediately. This method utilizes default crawler
+     * factory that creates new crawler using Java reflection
      *
      * @param clazz
      *            the class that implements the logic for crawler threads
      * @param numberOfCrawlers
-     *            the number of concurrent threads that will be contributing in
-     *            this crawling session.
-     * @param <T> Your class extending WebCrawler
+     *            the number of concurrent threads that will be contributing in this crawling
+     *            session.
+     * @param <T>
+     *            Your class extending WebCrawler
      */
     public <T extends WebCrawler> void startNonBlocking(Class<T> clazz, int numberOfCrawlers) {
         start(new DefaultWebCrawlerFactory<>(clazz), numberOfCrawlers, false);
     }
 
     protected <T extends WebCrawler> void start(final WebCrawlerFactory<T> crawlerFactory,
-                                                final int numberOfCrawlers, boolean isBlocking) {
+            final int numberOfCrawlers, boolean isBlocking) {
         try {
             finished = false;
             crawlersLocalData.clear();
@@ -236,17 +244,16 @@ public class CrawlController extends Configurable {
                                     // Make sure again that none of the threads
                                     // are
                                     // alive.
-                                    logger.info(
-                                        "It looks like no thread is working, waiting for " +
-                                         config.getThreadShutdownDelaySeconds() +
-                                         " seconds to make sure...");
+                                    logger.info("It looks like no thread is working, waiting for "
+                                            + config.getThreadShutdownDelaySeconds()
+                                            + " seconds to make sure...");
                                     sleep(config.getThreadShutdownDelaySeconds());
 
                                     someoneIsWorking = false;
                                     for (int i = 0; i < threads.size(); i++) {
                                         Thread thread = threads.get(i);
-                                        if (thread.isAlive() &&
-                                            crawlers.get(i).isNotWaitingForNewURLs()) {
+                                        if (thread.isAlive() && crawlers.get(i)
+                                                .isNotWaitingForNewURLs()) {
                                             someoneIsWorking = true;
                                         }
                                     }
@@ -257,10 +264,10 @@ public class CrawlController extends Configurable {
                                                 continue;
                                             }
                                             logger.info(
-                                                "No thread is working and no more URLs are in " +
-                                                "queue waiting for another " +
-                                                config.getThreadShutdownDelaySeconds() +
-                                                " seconds to make sure...");
+                                                    "No thread is working and no more URLs are in "
+                                                            + "queue waiting for another " + config
+                                                                    .getThreadShutdownDelaySeconds()
+                                                            + " seconds to make sure...");
                                             sleep(config.getThreadShutdownDelaySeconds());
                                             queueLength = frontier.getQueueLength();
                                             if (queueLength > 0) {
@@ -269,8 +276,8 @@ public class CrawlController extends Configurable {
                                         }
 
                                         logger.info(
-                                            "All of the crawlers are stopped. Finishing the " +
-                                            "process...");
+                                                "All of the crawlers are stopped. Finishing the "
+                                                        + "process...");
                                         // At this step, frontier notifies the threads that were
                                         // waiting for new URLs and they should stop
                                         frontier.finish();
@@ -279,13 +286,12 @@ public class CrawlController extends Configurable {
                                             crawlersLocalData.add(crawler.getMyLocalData());
                                         }
 
-                                        logger.info(
-                                            "Waiting for " + config.getCleanupDelaySeconds() +
-                                            " seconds before final clean up...");
+                                        logger.info("Waiting for " + config.getCleanupDelaySeconds()
+                                                + " seconds before final clean up...");
                                         sleep(config.getCleanupDelaySeconds());
 
                                         frontier.close();
-                                        docIdServer.close();
+                                        pageHarvests.close();
                                         pageFetcher.shutDown();
 
                                         finished = true;
@@ -334,9 +340,7 @@ public class CrawlController extends Configurable {
 
     /**
      * Once the crawling session finishes the controller collects the local data of the crawler
-     * threads and stores them
-     * in a List.
-     * This function returns the reference to this list.
+     * threads and stores them in a List. This function returns the reference to this list.
      *
      * @return List of Objects which are your local data
      */
@@ -353,8 +357,8 @@ public class CrawlController extends Configurable {
     }
 
     /**
-     * Adds a new seed URL. A seed URL is a URL that is fetched by the crawler
-     * to extract new URLs in it and follow them for crawling.
+     * Adds a new seed URL. A seed URL is a URL that is fetched by the crawler to extract new URLs
+     * in it and follow them for crawling.
      *
      * @param pageUrl
      *            the URL of the seed
@@ -364,17 +368,16 @@ public class CrawlController extends Configurable {
     }
 
     /**
-     * Adds a new seed URL. A seed URL is a URL that is fetched by the crawler
-     * to extract new URLs in it and follow them for crawling. You can also
-     * specify a specific document id to be assigned to this seed URL. This
-     * document id needs to be unique. Also, note that if you add three seeds
-     * with document ids 1,2, and 7. Then the next URL that is found during the
-     * crawl will get a doc id of 8. Also you need to ensure to add seeds in
-     * increasing order of document ids.
+     * Adds a new seed URL. A seed URL is a URL that is fetched by the crawler to extract new URLs
+     * in it and follow them for crawling. You can also specify a specific document id to be
+     * assigned to this seed URL. This document id needs to be unique. Also, note that if you add
+     * three seeds with document ids 1,2, and 7. Then the next URL that is found during the crawl
+     * will get a doc id of 8. Also you need to ensure to add seeds in increasing order of document
+     * ids.
      *
-     * Specifying doc ids is mainly useful when you have had a previous crawl
-     * and have stored the results and want to start a new crawl with seeds
-     * which get the same document ids as the previous crawl.
+     * Specifying doc ids is mainly useful when you have had a previous crawl and have stored the
+     * results and want to start a new crawl with seeds which get the same document ids as the
+     * previous crawl.
      *
      * @param pageUrl
      *            the URL of the seed
@@ -388,14 +391,14 @@ public class CrawlController extends Configurable {
             logger.error("Invalid seed URL: {}", pageUrl);
         } else {
             if (docId < 0) {
-                if (0 < docIdServer.getDocId(canonicalUrl)) {
+                if (pageHarvests.isAlreadySeen(canonicalUrl)) {
                     logger.trace("This URL is already seen.");
                     return;
                 }
-                docIdServer.getNewDocID(canonicalUrl);
+                pageHarvests.add(canonicalUrl);
             } else {
                 try {
-                    docIdServer.addUrlAndDocId(canonicalUrl, docId);
+                    pageHarvests.add(docId, canonicalUrl);
                 } catch (Exception e) {
                     logger.error("Could not add seed: {}", e.getMessage());
                 }
@@ -403,7 +406,7 @@ public class CrawlController extends Configurable {
 
             WebURL webUrl = new WebURL();
             webUrl.setURL(canonicalUrl);
-            webUrl.setDocid(docIdServer.getDocId(canonicalUrl));
+            webUrl.setDocid(pageHarvests.getId(canonicalUrl));
             webUrl.setDepth((short) 0);
             if (robotstxtServer.allows(webUrl)) {
                 frontier.schedule(webUrl);
@@ -415,14 +418,14 @@ public class CrawlController extends Configurable {
     }
 
     /**
-     * This function can called to assign a specific document id to a url. This
-     * feature is useful when you have had a previous crawl and have stored the
-     * Urls and their associated document ids and want to have a new crawl which
-     * is aware of the previously seen Urls and won't re-crawl them.
+     * This function can called to assign a specific document id to a url. This feature is useful
+     * when you have had a previous crawl and have stored the Urls and their associated document ids
+     * and want to have a new crawl which is aware of the previously seen Urls and won't re-crawl
+     * them.
      *
-     * Note that if you add three seen Urls with document ids 1,2, and 7. Then
-     * the next URL that is found during the crawl will get a doc id of 8. Also
-     * you need to ensure to add seen Urls in increasing order of document ids.
+     * Note that if you add three seen Urls with document ids 1,2, and 7. Then the next URL that is
+     * found during the crawl will get a doc id of 8. Also you need to ensure to add seen Urls in
+     * increasing order of document ids.
      *
      * @param url
      *            the URL of the page
@@ -432,11 +435,11 @@ public class CrawlController extends Configurable {
      */
     public void addSeenUrl(String url, int docId) {
         String canonicalUrl = URLCanonicalizer.getCanonicalURL(url);
-        if (canonicalUrl == null) {
+        if (null == canonicalUrl) {
             logger.error("Invalid Url: {} (can't cannonicalize it!)", url);
         } else {
             try {
-                docIdServer.addUrlAndDocId(canonicalUrl, docId);
+                pageHarvests.add(docId, canonicalUrl);
             } catch (Exception e) {
                 logger.error("Could not add seen url: {}", e.getMessage());
             }
@@ -467,17 +470,13 @@ public class CrawlController extends Configurable {
         this.frontier = frontier;
     }
 
-    public DocIDServer getDocIdServer() {
-        return docIdServer;
-    }
-
-    public void setDocIdServer(DocIDServer docIdServer) {
-        this.docIdServer = docIdServer;
+    public PageHarvests getPageHarvests() {
+        return pageHarvests;
     }
 
     /**
      * @deprecated implements a factory {@link WebCrawlerFactory} and inject your cutom data as
-     * shown <a href="https://github.com/yasserg/crawler4j#using-a-factory">here</a> .
+     *             shown <a href="https://github.com/yasserg/crawler4j#using-a-factory">here</a> .
      */
     @Deprecated
     public Object getCustomData() {
@@ -486,7 +485,7 @@ public class CrawlController extends Configurable {
 
     /**
      * @deprecated implements a factory {@link WebCrawlerFactory} and inject your cutom data as
-     * shown <a href="https://github.com/yasserg/crawler4j#using-a-factory">here</a> .
+     *             shown <a href="https://github.com/yasserg/crawler4j#using-a-factory">here</a> .
      */
 
     @Deprecated
@@ -503,9 +502,8 @@ public class CrawlController extends Configurable {
     }
 
     /**
-     * Set the current crawling session set to 'shutdown'. Crawler threads
-     * monitor the shutdown flag and when it is set to true, they will no longer
-     * process new pages.
+     * Set the current crawling session set to 'shutdown'. Crawler threads monitor the shutdown flag
+     * and when it is set to true, they will no longer process new pages.
      */
     public void shutdown() {
         logger.info("Shutting down...");
