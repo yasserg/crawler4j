@@ -89,10 +89,10 @@ public class UserAgentDirectives {
      * @return The maximum length of a matching user agent in this set of directives
      */
     public int match(String userAgent) {
-        userAgent = userAgent.toLowerCase();
+        String myUserAgent = userAgent.toLowerCase();
         int maxLength = 0;
         for (String ua : userAgents) {
-            if (ua.equals("*") || userAgent.contains(ua)) {
+            if (ua.equals("*") || myUserAgent.contains(ua)) {
                 maxLength = Math.max(maxLength, ua.length());
             }
         }

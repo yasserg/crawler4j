@@ -17,19 +17,12 @@
 
 package edu.uci.ics.crawler4j.url;
 
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.net.*;
+import java.util.*;
 
 /**
- * See http://en.wikipedia.org/wiki/URL_normalization for a reference Note: some
- * parts of the code are adapted from: http://stackoverflow.com/a/4057470/405418
+ * See http://en.wikipedia.org/wiki/URL_normalization for a reference Note: some parts of the code
+ * are adapted from: http://stackoverflow.com/a/4057470/405418
  *
  * @author Yasser Ganjisaffar
  */
@@ -42,8 +35,8 @@ public class URLCanonicalizer {
     public static String getCanonicalURL(String href, String context) {
 
         try {
-            URL canonicalURL =
-                new URL(UrlResolver.resolveUrl((context == null) ? "" : context, href));
+            URL canonicalURL = new URL(UrlResolver.resolveUrl((context == null) ? "" : context,
+                    href));
 
             String host = canonicalURL.getHost().toLowerCase();
             if (Objects.equals(host, "")) {
@@ -53,11 +46,10 @@ public class URLCanonicalizer {
 
             String path = canonicalURL.getPath();
 
-      /*
-       * Normalize: no empty segments (i.e., "//"), no segments equal to
-       * ".", and no segments equal to ".." that are preceded by a segment
-       * not equal to "..".
-       */
+            /*
+             * Normalize: no empty segments (i.e., "//"), no segments equal to ".", and no segments
+             * equal to ".." that are preceded by a segment not equal to "..".
+             */
             path = new URI(path.replace("\\", "/")).normalize().toString();
 
             int idx = path.indexOf("//");
@@ -85,7 +77,7 @@ public class URLCanonicalizer {
                 path = "/";
             }
 
-            //Drop default port: example.com:80 -> example.com
+            // Drop default port: example.com:80 -> example.com
             int port = canonicalURL.getPort();
             if (port == canonicalURL.getDefaultPort()) {
                 port = -1;
@@ -103,8 +95,8 @@ public class URLCanonicalizer {
     }
 
     /**
-     * Takes a query string, separates the constituent name-value pairs, and
-     * stores them in a LinkedHashMap ordered by their original order.
+     * Takes a query string, separates the constituent name-value pairs, and stores them in a
+     * LinkedHashMap ordered by their original order.
      *
      * @return Null if there is no query string.
      */
@@ -169,9 +161,8 @@ public class URLCanonicalizer {
     }
 
     /**
-     * Percent-encode values according the RFC 3986. The built-in Java
-     * URLEncoder does not encode according to the RFC, so we make the extra
-     * replacements.
+     * Percent-encode values according the RFC 3986. The built-in Java URLEncoder does not encode
+     * according to the RFC, so we make the extra replacements.
      *
      * @param string
      *            Decoded string.
@@ -179,10 +170,10 @@ public class URLCanonicalizer {
      */
     private static String percentEncodeRfc3986(String string) {
         try {
-            string = string.replace("+", "%2B");
-            string = URLDecoder.decode(string, "UTF-8");
-            string = URLEncoder.encode(string, "UTF-8");
-            return string.replace("+", "%20").replace("*", "%2A").replace("%7E", "~");
+            String myString = string.replace("+", "%2B");
+            myString = URLDecoder.decode(myString, "UTF-8");
+            myString = URLEncoder.encode(myString, "UTF-8");
+            return myString.replace("+", "%20").replace("*", "%2A").replace("%7E", "~");
         } catch (Exception e) {
             return string;
         }

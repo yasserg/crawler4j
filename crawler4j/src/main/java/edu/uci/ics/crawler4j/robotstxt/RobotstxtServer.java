@@ -15,23 +15,15 @@
 
 package edu.uci.ics.crawler4j.robotstxt;
 
-import java.net.MalformedURLException;
-import java.net.SocketException;
-import java.net.SocketTimeoutException;
-import java.net.URL;
-import java.net.UnknownHostException;
-import java.util.HashMap;
-import java.util.Map;
+import java.net.*;
+import java.util.*;
 
-import org.apache.http.HttpStatus;
-import org.apache.http.NoHttpResponseException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.http.*;
+import org.slf4j.*;
 
 import edu.uci.ics.crawler4j.crawler.Page;
 import edu.uci.ics.crawler4j.crawler.exceptions.PageBiggerThanMaxSizeException;
-import edu.uci.ics.crawler4j.fetcher.PageFetchResult;
-import edu.uci.ics.crawler4j.fetcher.PageFetcher;
+import edu.uci.ics.crawler4j.fetcher.*;
 import edu.uci.ics.crawler4j.url.WebURL;
 import edu.uci.ics.crawler4j.util.Util;
 
@@ -48,16 +40,9 @@ public class RobotstxtServer {
 
     protected PageFetcher pageFetcher;
 
-    private final int maxBytes;
-
     public RobotstxtServer(RobotstxtConfig config, PageFetcher pageFetcher) {
-        this(config, pageFetcher, 16384);
-    }
-
-    public RobotstxtServer(RobotstxtConfig config, PageFetcher pageFetcher, int maxBytes) {
         this.config = config;
         this.pageFetcher = pageFetcher;
-        this.maxBytes = maxBytes;
     }
 
     private static String getHost(URL url) {
@@ -97,8 +82,8 @@ public class RobotstxtServer {
     private HostDirectives fetchDirectives(URL url) {
         WebURL robotsTxtUrl = new WebURL();
         String host = getHost(url);
-        String port = ((url.getPort() == url.getDefaultPort()) || (url.getPort() == -1)) ? "" :
-                      (":" + url.getPort());
+        String port = ((url.getPort() == url.getDefaultPort()) || (url.getPort() == -1)) ? "" : (":"
+                + url.getPort());
         String proto = url.getProtocol();
         robotsTxtUrl.setURL(proto + "://" + host + port + "/robots.txt");
         HostDirectives directives = null;
@@ -108,13 +93,13 @@ public class RobotstxtServer {
                 fetchResult = pageFetcher.fetchPage(robotsTxtUrl);
                 int status = fetchResult.getStatusCode();
                 // Follow redirects up to 3 levels
-                if ((status == HttpStatus.SC_MULTIPLE_CHOICES ||
-                     status == HttpStatus.SC_MOVED_PERMANENTLY ||
-                     status == HttpStatus.SC_MOVED_TEMPORARILY ||
-                     status == HttpStatus.SC_SEE_OTHER ||
-                     status == HttpStatus.SC_TEMPORARY_REDIRECT || status == 308) &&
-                    // SC_PERMANENT_REDIRECT RFC7538
-                    fetchResult.getMovedToUrl() != null) {
+                if ((status == HttpStatus.SC_MULTIPLE_CHOICES
+                        || status == HttpStatus.SC_MOVED_PERMANENTLY
+                        || status == HttpStatus.SC_MOVED_TEMPORARILY
+                        || status == HttpStatus.SC_SEE_OTHER
+                        || status == HttpStatus.SC_TEMPORARY_REDIRECT || status == 308) &&
+                // SC_PERMANENT_REDIRECT RFC7538
+                        fetchResult.getMovedToUrl() != null) {
                     robotsTxtUrl.setURL(fetchResult.getMovedToUrl());
                     fetchResult.discardContentIfNotConsumed();
                 } else {
@@ -136,29 +121,29 @@ public class RobotstxtServer {
                         content = new String(page.getContentData(), page.getContentCharset());
                     }
                     directives = RobotstxtParser.parse(content, config);
-                } else if (page.getContentType()
-                               .contains(
-                                   "html")) { // TODO This one should be upgraded to remove all
+                } else if (page.getContentType().contains("html")) { // TODO This one should be
+                                                                     // upgraded to remove all
                     // html tags
                     String content = new String(page.getContentData());
                     directives = RobotstxtParser.parse(content, config);
                 } else {
                     logger.warn(
-                        "Can't read this robots.txt: {}  as it is not written in plain text, " +
-                        "contentType: {}", robotsTxtUrl.getURL(), page.getContentType());
+                            "Can't read this robots.txt: {}  as it is not written in plain text, "
+                                    + "contentType: {}", robotsTxtUrl.getURL(), page
+                                            .getContentType());
                 }
             } else {
                 logger.debug("Can't read this robots.txt: {}  as it's status code is {}",
-                             robotsTxtUrl.getURL(), fetchResult.getStatusCode());
+                        robotsTxtUrl.getURL(), fetchResult.getStatusCode());
             }
-        } catch (SocketException | UnknownHostException | SocketTimeoutException |
-            NoHttpResponseException se) {
+        } catch (SocketException | UnknownHostException | SocketTimeoutException
+                | NoHttpResponseException se) {
             // No logging here, as it just means that robots.txt doesn't exist on this server
             // which is perfectly ok
             logger.trace("robots.txt probably does not exist.", se);
         } catch (PageBiggerThanMaxSizeException pbtms) {
-            logger.error("Error occurred while fetching (robots) url: {}, {}",
-                         robotsTxtUrl.getURL(), pbtms.getMessage());
+            logger.error("Error occurred while fetching (robots) url: {}, {}", robotsTxtUrl
+                    .getURL(), pbtms.getMessage());
         } catch (Exception e) {
             logger.error("Error occurred while fetching (robots) url: " + robotsTxtUrl.getURL(), e);
         } finally {

@@ -21,20 +21,15 @@ import java.io.UnsupportedEncodingException;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import edu.uci.ics.crawler4j.crawler.Page;
-import edu.uci.ics.crawler4j.crawler.WebCrawler;
+import edu.uci.ics.crawler4j.crawler.*;
 import edu.uci.ics.crawler4j.parser.HtmlParseData;
 import edu.uci.ics.crawler4j.url.WebURL;
 
 public class LocalDataCollectorCrawler extends WebCrawler {
-    private static final Logger logger = LoggerFactory.getLogger(LocalDataCollectorCrawler.class);
 
     private static final Pattern FILTERS = Pattern.compile(
-        ".*(\\.(css|js|bmp|gif|jpe?g|png|tiff?|mid|mp2|mp3|mp4|wav|avi|mov|mpeg|ram|m4v|pdf" +
-        "|rm|smil|wmv|swf|wma|zip|rar|gz))$");
+            ".*(\\.(css|js|bmp|gif|jpe?g|png|tiff?|mid|mp2|mp3|mp4|wav|avi|mov|mpeg|ram|m4v|pdf"
+                    + "|rm|smil|wmv|swf|wma|zip|rar|gz))$");
 
     CrawlStat myCrawlStat;
 
@@ -79,8 +74,8 @@ public class LocalDataCollectorCrawler extends WebCrawler {
     }
 
     /**
-     * This function is called by controller before finishing the job.
-     * You can put whatever stuff you need here.
+     * This function is called by controller before finishing the job. You can put whatever stuff
+     * you need here.
      */
     @Override
     public void onBeforeExit() {

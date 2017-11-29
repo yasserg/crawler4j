@@ -29,7 +29,6 @@
         <module name="LocalFinalVariableName"/>
         <module name="StaticVariableName"/>
         <module name="MemberName"/>
-        <module name="AvoidStarImport"/>
         <module name="AvoidStaticImport">
             <property name="excludes" value="org.junit.Assert.*"/>
         </module>

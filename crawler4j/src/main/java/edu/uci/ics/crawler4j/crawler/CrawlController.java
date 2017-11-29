@@ -231,7 +231,6 @@ public class CrawlController extends Configurable {
             }
 
             final CrawlController controller = this;
-            final CrawlConfig config = this.getConfig();
 
             Thread monitorThread = new Thread(new Runnable() {
 
@@ -419,12 +418,11 @@ public class CrawlController extends Configurable {
             logger.error("Invalid seed URL: {}", pageUrl);
         } else {
             if (docId < 0) {
-                docId = docIdServer.getDocId(canonicalUrl);
-                if (docId > 0) {
+                if (0 < docIdServer.getDocId(canonicalUrl)) {
                     logger.trace("This URL is already seen.");
                     return;
                 }
-                docId = docIdServer.getNewDocID(canonicalUrl);
+                docIdServer.getNewDocID(canonicalUrl);
             } else {
                 try {
                     docIdServer.addUrlAndDocId(canonicalUrl, docId);
@@ -435,7 +433,7 @@ public class CrawlController extends Configurable {
 
             WebURL webUrl = new WebURL();
             webUrl.setURL(canonicalUrl);
-            webUrl.setDocid(docId);
+            webUrl.setDocid(docIdServer.getDocId(canonicalUrl));
             webUrl.setDepth((short) 0);
             if (robotstxtServer.allows(webUrl)) {
                 frontier.schedule(webUrl);

@@ -5,6 +5,9 @@ package edu.uci.ics.crawler4j.crawler.exceptions;
  *
  * Thrown when there is a problem with the content fetching - this is a tagging exception
  */
+@SuppressWarnings("serial")
 public class ContentFetchException extends Exception {
+
+    // marker interface
 
 }

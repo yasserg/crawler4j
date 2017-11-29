@@ -65,7 +65,7 @@ public class CrawlConfig {
     /**
      * Default request header values.
      */
-    private Collection<BasicHeader> defaultHeaders = new HashSet<BasicHeader>();
+    private Collection<BasicHeader> defaultHeaders = new HashSet<>();
 
     /**
      * Politeness delay in milliseconds (delay between sending two requests to
@@ -142,7 +142,7 @@ public class CrawlConfig {
     private int threadMonitoringDelaySeconds = 10;
 
     /**
-     * Wait this long to verify the craweler threads are finished working.
+     * Wait this long to verify the crawler threads are finished working.
      */
     private int threadShutdownDelaySeconds = 10;
 
@@ -535,7 +535,7 @@ public class CrawlConfig {
 
     public void addAuthInfo(AuthInfo authInfo) {
         if (this.authInfos == null) {
-            this.authInfos = new ArrayList<AuthInfo>();
+            this.authInfos = new ArrayList<>();
         }
 
         this.authInfos.add(authInfo);
