@@ -16,6 +16,8 @@ public interface Dao<K extends Object, V extends Object> {
 
     Collection<V> nextRecords(int max);
 
+    boolean deleteRecord(K keyObject);
+
     void deleteNextRecords(int count);
 
     void close();

@@ -67,4 +67,9 @@ public class InMemoryPageStatistics implements PageStatistics {
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public boolean deleteRecord(PageStatisticsType keyObject) {
+        throw new UnsupportedOperationException();
+    }
+
 }

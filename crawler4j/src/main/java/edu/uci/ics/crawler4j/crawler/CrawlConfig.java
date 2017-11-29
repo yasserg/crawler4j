@@ -30,6 +30,7 @@ import com.sleepycat.je.*;
 
 import edu.uci.ics.crawler4j.crawler.authentication.AuthInfo;
 import edu.uci.ics.crawler4j.frontier.pageharvests.*;
+import edu.uci.ics.crawler4j.frontier.pagequeue.*;
 import edu.uci.ics.crawler4j.frontier.pagestatistics.*;
 import edu.uci.ics.crawler4j.util.IO;
 
@@ -644,6 +645,14 @@ public class CrawlConfig {
         return new SleepyCatPageHarvests(environment(), resumableCrawling);
     }
 
+    public PageQueue getPendingPageQueue() {
+        return new SleepyCatPageQueue(environment(), "PendingPages", resumableCrawling);
+    }
+
+    public PageQueue getInprocessPageQueue() {
+        return new SleepyCatPageQueue(environment(), "InprocessPages", resumableCrawling);
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -673,4 +682,5 @@ public class CrawlConfig {
         sb.append("Respect noindex: " + isRespectNoIndex() + "\n");
         return sb.toString();
     }
+
 }

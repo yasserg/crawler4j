@@ -22,8 +22,6 @@ import java.util.*;
 
 import org.slf4j.*;
 
-import com.sleepycat.je.Environment;
-
 import edu.uci.ics.crawler4j.fetcher.PageFetcher;
 import edu.uci.ics.crawler4j.frontier.Frontier;
 import edu.uci.ics.crawler4j.frontier.pageharvests.PageHarvests;
@@ -73,8 +71,6 @@ public class CrawlController extends Configurable {
 
     protected final Object waitingLock = new Object();
 
-    protected final Environment env;
-
     public CrawlController(CrawlConfig config, PageFetcher pageFetcher,
             RobotstxtServer robotstxtServer) throws Exception {
         super(config);
@@ -92,9 +88,8 @@ public class CrawlController extends Configurable {
 
         TLDList.setUseOnline(config.isOnlineTldListUpdate());
 
-        env = config.environment();
         pageHarvests = config.getPageHarvests();
-        frontier = new Frontier(env, config);
+        frontier = new Frontier(config);
 
         this.pageFetcher = pageFetcher;
         this.robotstxtServer = robotstxtServer;
@@ -296,7 +291,7 @@ public class CrawlController extends Configurable {
 
                                         finished = true;
                                         waitingLock.notifyAll();
-                                        env.close();
+                                        config.environment().close();
 
                                         return;
                                     }

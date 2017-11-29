@@ -151,6 +151,26 @@ public class SleepyCatDao<K extends Object, V extends Object> implements Dao<K, 
     }
 
     @Override
+    public boolean deleteRecord(K keyObject) {
+        synchronized (mutex) {
+            logger.debug("Deleting from {} record for key {}", database.getDatabaseName(),
+                    keyObject);
+            DatabaseEntry key = new DatabaseEntry();
+            keyBinding.objectToEntry(keyObject, key);
+            DatabaseEntry value = new DatabaseEntry();
+            Transaction txn = beginTransaction();
+            try (Cursor cursor = openCursor(txn)) {
+                if (OperationStatus.SUCCESS == cursor.getSearchKey(key, value, null)) {
+                    return OperationStatus.SUCCESS == cursor.delete();
+                }
+            } finally {
+                commit(txn);
+            }
+        }
+        return false;
+    }
+
+    @Override
     public void deleteNextRecords(int count) {
         synchronized (mutex) {
             logger.debug("Deleting from {} next {} records", database.getDatabaseName(), count);
