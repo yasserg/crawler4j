@@ -19,14 +19,12 @@ package edu.uci.ics.crawler4j.frontier;
 
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.slf4j.*;
 
-import com.sleepycat.je.DatabaseException;
-import com.sleepycat.je.Environment;
+import com.sleepycat.je.*;
 
-import edu.uci.ics.crawler4j.crawler.Configurable;
-import edu.uci.ics.crawler4j.crawler.CrawlConfig;
+import edu.uci.ics.crawler4j.crawler.*;
+import edu.uci.ics.crawler4j.frontier.pagestatistics.*;
 import edu.uci.ics.crawler4j.url.WebURL;
 
 /**
@@ -37,32 +35,35 @@ public class Frontier extends Configurable {
     protected static final Logger logger = LoggerFactory.getLogger(Frontier.class);
 
     private static final String DATABASE_NAME = "PendingURLsDB";
+
     private static final int IN_PROCESS_RESCHEDULE_BATCH_SIZE = 100;
+
     protected WorkQueues workQueues;
 
     protected InProcessPagesDB inProcessPages;
 
     protected final Object mutex = new Object();
+
     protected final Object waitingList = new Object();
 
     protected boolean isFinished = false;
 
     protected long scheduledPages;
 
-    protected Counters counters;
+    protected PageStatistics pageStatistics;
 
     public Frontier(Environment env, CrawlConfig config) {
         super(config);
-        this.counters = new Counters(env, config);
+        this.pageStatistics = config.getPageStatistics();
         try {
             workQueues = new WorkQueues(env, DATABASE_NAME, config.isResumableCrawling());
             if (config.isResumableCrawling()) {
-                scheduledPages = counters.getValue(Counters.ReservedCounterNames.SCHEDULED_PAGES);
+                scheduledPages = pageStatistics.getValue(PageStatisticsType.SCHEDULED_PAGES);
                 inProcessPages = new InProcessPagesDB(env);
                 long numPreviouslyInProcessPages = inProcessPages.getLength();
                 if (numPreviouslyInProcessPages > 0) {
                     logger.info("Rescheduling {} URLs from previous crawl.",
-                                numPreviouslyInProcessPages);
+                            numPreviouslyInProcessPages);
                     scheduledPages -= numPreviouslyInProcessPages;
 
                     List<WebURL> urls = inProcessPages.get(IN_PROCESS_RESCHEDULE_BATCH_SIZE);
@@ -87,8 +88,8 @@ public class Frontier extends Configurable {
         synchronized (mutex) {
             int newScheduledPage = 0;
             for (WebURL url : urls) {
-                if ((maxPagesToFetch > 0) &&
-                    ((scheduledPages + newScheduledPage) >= maxPagesToFetch)) {
+                if ((maxPagesToFetch > 0) && ((scheduledPages
+                        + newScheduledPage) >= maxPagesToFetch)) {
                     break;
                 }
 
@@ -101,7 +102,7 @@ public class Frontier extends Configurable {
             }
             if (newScheduledPage > 0) {
                 scheduledPages += newScheduledPage;
-                counters.increment(Counters.ReservedCounterNames.SCHEDULED_PAGES, newScheduledPage);
+                pageStatistics.increment(PageStatisticsType.SCHEDULED_PAGES, newScheduledPage);
             }
             synchronized (waitingList) {
                 waitingList.notifyAll();
@@ -116,7 +117,7 @@ public class Frontier extends Configurable {
                 if (maxPagesToFetch < 0 || scheduledPages < maxPagesToFetch) {
                     workQueues.put(url);
                     scheduledPages++;
-                    counters.increment(Counters.ReservedCounterNames.SCHEDULED_PAGES);
+                    pageStatistics.increment(PageStatisticsType.SCHEDULED_PAGES);
                 }
             } catch (DatabaseException e) {
                 logger.error("Error while putting the url in the work queue", e);
@@ -162,7 +163,7 @@ public class Frontier extends Configurable {
     }
 
     public void setProcessed(WebURL webURL) {
-        counters.increment(Counters.ReservedCounterNames.PROCESSED_PAGES);
+        pageStatistics.increment(PageStatisticsType.PROCESSED_PAGES);
         if (inProcessPages != null) {
             if (!inProcessPages.removeURL(webURL)) {
                 logger.warn("Could not remove: {} from list of processed pages.", webURL.getURL());
@@ -179,11 +180,11 @@ public class Frontier extends Configurable {
     }
 
     public long getNumberOfProcessedPages() {
-        return counters.getValue(Counters.ReservedCounterNames.PROCESSED_PAGES);
+        return pageStatistics.getValue(PageStatisticsType.PROCESSED_PAGES);
     }
 
     public long getNumberOfScheduledPages() {
-        return counters.getValue(Counters.ReservedCounterNames.SCHEDULED_PAGES);
+        return pageStatistics.getValue(PageStatisticsType.SCHEDULED_PAGES);
     }
 
     public boolean isFinished() {
@@ -192,7 +193,7 @@ public class Frontier extends Configurable {
 
     public void close() {
         workQueues.close();
-        counters.close();
+        pageStatistics.close();
         if (inProcessPages != null) {
             inProcessPages.close();
         }

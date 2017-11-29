@@ -17,10 +17,8 @@
 
 package edu.uci.ics.crawler4j.crawler;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
+import java.io.File;
+import java.util.*;
 
 import org.apache.http.Header;
 import org.apache.http.client.config.CookieSpecs;
@@ -28,37 +26,40 @@ import org.apache.http.conn.DnsResolver;
 import org.apache.http.impl.conn.SystemDefaultDnsResolver;
 import org.apache.http.message.BasicHeader;
 
+import com.sleepycat.je.*;
+
 import edu.uci.ics.crawler4j.crawler.authentication.AuthInfo;
+import edu.uci.ics.crawler4j.frontier.pagestatistics.*;
+import edu.uci.ics.crawler4j.util.IO;
 
 public class CrawlConfig {
 
     /**
-     * The folder which will be used by crawler for storing the intermediate
-     * crawl data. The content of this folder should not be modified manually.
+     * The folder which will be used by crawler for storing the intermediate crawl data. The content
+     * of this folder should not be modified manually.
      */
     private String crawlStorageFolder;
 
     /**
-     * If this feature is enabled, you would be able to resume a previously
-     * stopped/crashed crawl. However, it makes crawling slightly slower
+     * If this feature is enabled, you would be able to resume a previously stopped/crashed crawl.
+     * However, it makes crawling slightly slower
      */
     private boolean resumableCrawling = false;
 
     /**
-     * Maximum depth of crawling For unlimited depth this parameter should be
-     * set to -1
+     * Maximum depth of crawling For unlimited depth this parameter should be set to -1
      */
     private int maxDepthOfCrawling = -1;
 
     /**
-     * Maximum number of pages to fetch For unlimited number of pages, this
-     * parameter should be set to -1
+     * Maximum number of pages to fetch For unlimited number of pages, this parameter should be set
+     * to -1
      */
     private int maxPagesToFetch = -1;
 
     /**
-     * user-agent string that is used for representing your crawler to web
-     * servers. See http://en.wikipedia.org/wiki/User_agent for more details
+     * user-agent string that is used for representing your crawler to web servers. See
+     * http://en.wikipedia.org/wiki/User_agent for more details
      */
     private String userAgentString = "crawler4j (https://github.com/yasserg/crawler4j/)";
 
@@ -68,8 +69,7 @@ public class CrawlConfig {
     private Collection<BasicHeader> defaultHeaders = new HashSet<>();
 
     /**
-     * Politeness delay in milliseconds (delay between sending two requests to
-     * the same host).
+     * Politeness delay in milliseconds (delay between sending two requests to the same host).
      */
     private int politenessDelay = 200;
 
@@ -114,8 +114,7 @@ public class CrawlConfig {
     private int maxOutgoingLinksToFollow = 5000;
 
     /**
-     * Max allowed size of a page. Pages larger than this size will not be
-     * fetched.
+     * Max allowed size of a page. Pages larger than this size will not be fetched.
      */
     private int maxDownloadSize = 1048576;
 
@@ -125,8 +124,8 @@ public class CrawlConfig {
     private boolean followRedirects = true;
 
     /**
-     * Should the TLD list be updated automatically on each run? Alternatively,
-     * it can be loaded from the embedded tld-names.zip file that was obtained from
+     * Should the TLD list be updated automatically on each run? Alternatively, it can be loaded
+     * from the embedded tld-names.zip file that was obtained from
      * https://publicsuffix.org/list/effective_tld_names.dat
      */
     private boolean onlineTldListUpdate = false;
@@ -152,28 +151,26 @@ public class CrawlConfig {
     private int cleanupDelaySeconds = 10;
 
     /**
-     * If crawler should run behind a proxy, this parameter can be used for
-     * specifying the proxy host.
+     * If crawler should run behind a proxy, this parameter can be used for specifying the proxy
+     * host.
      */
     private String proxyHost = null;
 
     /**
-     * If crawler should run behind a proxy, this parameter can be used for
-     * specifying the proxy port.
+     * If crawler should run behind a proxy, this parameter can be used for specifying the proxy
+     * port.
      */
     private int proxyPort = 80;
 
     /**
-     * If crawler should run behind a proxy and user/pass is needed for
-     * authentication in proxy, this parameter can be used for specifying the
-     * username.
+     * If crawler should run behind a proxy and user/pass is needed for authentication in proxy,
+     * this parameter can be used for specifying the username.
      */
     private String proxyUsername = null;
 
     /**
-     * If crawler should run behind a proxy and user/pass is needed for
-     * authentication in proxy, this parameter can be used for specifying the
-     * password.
+     * If crawler should run behind a proxy and user/pass is needed for authentication in proxy,
+     * this parameter can be used for specifying the password.
      */
     private String proxyPassword = null;
 
@@ -197,6 +194,10 @@ public class CrawlConfig {
      */
     private boolean respectNoIndex = true;
 
+    private DnsResolver dnsResolver = new SystemDefaultDnsResolver();
+
+    private Environment environment;
+
     /**
      * DNS resolver to use, #{@link SystemDefaultDnsResolver()} is default.
      */
@@ -208,26 +209,24 @@ public class CrawlConfig {
         return dnsResolver;
     }
 
-    private DnsResolver dnsResolver = new SystemDefaultDnsResolver();
-
     /**
      * Validates the configs specified by this instance.
      *
-     * @throws Exception on Validation fail
+     * @throws Exception
+     *             on Validation fail
      */
     public void validate() throws Exception {
-        if (crawlStorageFolder == null) {
+        if (null == crawlStorageFolder) {
             throw new Exception("Crawl storage folder is not set in the CrawlConfig.");
         }
         if (politenessDelay < 0) {
             throw new Exception("Invalid value for politeness delay: " + politenessDelay);
         }
         if (maxDepthOfCrawling < -1) {
-            throw new Exception(
-                "Maximum crawl depth should be either a positive number or -1 for unlimited depth" +
-                ".");
+            throw new Exception("Maximum crawl depth should be either a positive number "
+                    + "or -1 for unlimited depth.");
         }
-        if (maxDepthOfCrawling > Short.MAX_VALUE) {
+        if (Short.MAX_VALUE < maxDepthOfCrawling) {
             throw new Exception("Maximum value for crawl depth is " + Short.MAX_VALUE);
         }
     }
@@ -237,10 +236,11 @@ public class CrawlConfig {
     }
 
     /**
-     * The folder which will be used by crawler for storing the intermediate
-     * crawl data. The content of this folder should not be modified manually.
+     * The folder which will be used by crawler for storing the intermediate crawl data. The content
+     * of this folder should not be modified manually.
      *
-     * @param crawlStorageFolder The folder for the crawler's storage
+     * @param crawlStorageFolder
+     *            The folder for the crawler's storage
      */
     public void setCrawlStorageFolder(String crawlStorageFolder) {
         this.crawlStorageFolder = crawlStorageFolder;
@@ -251,10 +251,11 @@ public class CrawlConfig {
     }
 
     /**
-     * If this feature is enabled, you would be able to resume a previously
-     * stopped/crashed crawl. However, it makes crawling slightly slower
+     * If this feature is enabled, you would be able to resume a previously stopped/crashed crawl.
+     * However, it makes crawling slightly slower
      *
-     * @param resumableCrawling Should crawling be resumable between runs ?
+     * @param resumableCrawling
+     *            Should crawling be resumable between runs ?
      */
     public void setResumableCrawling(boolean resumableCrawling) {
         this.resumableCrawling = resumableCrawling;
@@ -267,7 +268,8 @@ public class CrawlConfig {
     /**
      * Maximum depth of crawling For unlimited depth this parameter should be set to -1
      *
-     * @param maxDepthOfCrawling Depth of crawling (all links on current page = depth of 1)
+     * @param maxDepthOfCrawling
+     *            Depth of crawling (all links on current page = depth of 1)
      */
     public void setMaxDepthOfCrawling(int maxDepthOfCrawling) {
         this.maxDepthOfCrawling = maxDepthOfCrawling;
@@ -278,10 +280,11 @@ public class CrawlConfig {
     }
 
     /**
-     * Maximum number of pages to fetch For unlimited number of pages, this parameter should be
-     * set to -1
+     * Maximum number of pages to fetch For unlimited number of pages, this parameter should be set
+     * to -1
      *
-     * @param maxPagesToFetch How many pages to fetch from all threads together ?
+     * @param maxPagesToFetch
+     *            How many pages to fetch from all threads together ?
      */
     public void setMaxPagesToFetch(int maxPagesToFetch) {
         this.maxPagesToFetch = maxPagesToFetch;
@@ -296,10 +299,11 @@ public class CrawlConfig {
     }
 
     /**
-     * user-agent string that is used for representing your crawler to web
-     * servers. See http://en.wikipedia.org/wiki/User_agent for more details
+     * user-agent string that is used for representing your crawler to web servers. See
+     * http://en.wikipedia.org/wiki/User_agent for more details
      *
-     * @param userAgentString Custom userAgent string to use as your crawler's identifier
+     * @param userAgentString
+     *            Custom userAgent string to use as your crawler's identifier
      */
     public void setUserAgentString(String userAgentString) {
         this.userAgentString = userAgentString;
@@ -328,8 +332,7 @@ public class CrawlConfig {
     }
 
     /**
-     * Politeness delay in milliseconds (delay between sending two requests to
-     * the same host).
+     * Politeness delay in milliseconds (delay between sending two requests to the same host).
      *
      * @param politenessDelay
      *            the delay in milliseconds.
@@ -343,7 +346,8 @@ public class CrawlConfig {
     }
 
     /**
-     * @param includeHttpsPages Should we crawl https pages?
+     * @param includeHttpsPages
+     *            Should we crawl https pages?
      */
     public void setIncludeHttpsPages(boolean includeHttpsPages) {
         this.includeHttpsPages = includeHttpsPages;
@@ -355,8 +359,8 @@ public class CrawlConfig {
 
     /**
      *
-     * @param includeBinaryContentInCrawling Should we fetch binary content such as images,
-     * audio, ...?
+     * @param includeBinaryContentInCrawling
+     *            Should we fetch binary content such as images, audio, ...?
      */
     public void setIncludeBinaryContentInCrawling(boolean includeBinaryContentInCrawling) {
         this.includeBinaryContentInCrawling = includeBinaryContentInCrawling;
@@ -378,7 +382,8 @@ public class CrawlConfig {
     }
 
     /**
-     * @param maxConnectionsPerHost Maximum Connections per host
+     * @param maxConnectionsPerHost
+     *            Maximum Connections per host
      */
     public void setMaxConnectionsPerHost(int maxConnectionsPerHost) {
         this.maxConnectionsPerHost = maxConnectionsPerHost;
@@ -389,7 +394,8 @@ public class CrawlConfig {
     }
 
     /**
-     * @param maxTotalConnections Maximum total connections
+     * @param maxTotalConnections
+     *            Maximum total connections
      */
     public void setMaxTotalConnections(int maxTotalConnections) {
         this.maxTotalConnections = maxTotalConnections;
@@ -400,7 +406,8 @@ public class CrawlConfig {
     }
 
     /**
-     * @param socketTimeout Socket timeout in milliseconds
+     * @param socketTimeout
+     *            Socket timeout in milliseconds
      */
     public void setSocketTimeout(int socketTimeout) {
         this.socketTimeout = socketTimeout;
@@ -411,7 +418,8 @@ public class CrawlConfig {
     }
 
     /**
-     * @param connectionTimeout Connection timeout in milliseconds
+     * @param connectionTimeout
+     *            Connection timeout in milliseconds
      */
     public void setConnectionTimeout(int connectionTimeout) {
         this.connectionTimeout = connectionTimeout;
@@ -422,7 +430,8 @@ public class CrawlConfig {
     }
 
     /**
-     * @param maxOutgoingLinksToFollow Max number of outgoing links which are processed from a page
+     * @param maxOutgoingLinksToFollow
+     *            Max number of outgoing links which are processed from a page
      */
     public void setMaxOutgoingLinksToFollow(int maxOutgoingLinksToFollow) {
         this.maxOutgoingLinksToFollow = maxOutgoingLinksToFollow;
@@ -433,8 +442,8 @@ public class CrawlConfig {
     }
 
     /**
-     * @param maxDownloadSize Max allowed size of a page. Pages larger than this size will not be
-     * fetched.
+     * @param maxDownloadSize
+     *            Max allowed size of a page. Pages larger than this size will not be fetched.
      */
     public void setMaxDownloadSize(int maxDownloadSize) {
         this.maxDownloadSize = maxDownloadSize;
@@ -445,7 +454,8 @@ public class CrawlConfig {
     }
 
     /**
-     * @param followRedirects Should we follow redirects?
+     * @param followRedirects
+     *            Should we follow redirects?
      */
     public void setFollowRedirects(boolean followRedirects) {
         this.followRedirects = followRedirects;
@@ -467,9 +477,9 @@ public class CrawlConfig {
     }
 
     /**
-     * Should the TLD list be updated automatically on each run? Alternatively,
-     * it can be loaded from the embedded tld-names.txt resource file that was
-     * obtained from https://publicsuffix.org/list/effective_tld_names.dat
+     * Should the TLD list be updated automatically on each run? Alternatively, it can be loaded
+     * from the embedded tld-names.txt resource file that was obtained from
+     * https://publicsuffix.org/list/effective_tld_names.dat
      */
     public void setOnlineTldListUpdate(boolean online) {
         onlineTldListUpdate = online;
@@ -480,8 +490,9 @@ public class CrawlConfig {
     }
 
     /**
-     * @param proxyHost If crawler should run behind a proxy, this parameter can be used for
-     * specifying the proxy host.
+     * @param proxyHost
+     *            If crawler should run behind a proxy, this parameter can be used for specifying
+     *            the proxy host.
      */
     public void setProxyHost(String proxyHost) {
         this.proxyHost = proxyHost;
@@ -492,8 +503,9 @@ public class CrawlConfig {
     }
 
     /**
-     * @param proxyPort If crawler should run behind a proxy, this parameter can be used for
-     * specifying the proxy port.
+     * @param proxyPort
+     *            If crawler should run behind a proxy, this parameter can be used for specifying
+     *            the proxy port.
      */
     public void setProxyPort(int proxyPort) {
         this.proxyPort = proxyPort;
@@ -505,8 +517,8 @@ public class CrawlConfig {
 
     /**
      * @param proxyUsername
-     *        If crawler should run behind a proxy and user/pass is needed for
-     *        authentication in proxy, this parameter can be used for specifying the username.
+     *            If crawler should run behind a proxy and user/pass is needed for authentication in
+     *            proxy, this parameter can be used for specifying the username.
      */
     public void setProxyUsername(String proxyUsername) {
         this.proxyUsername = proxyUsername;
@@ -517,10 +529,11 @@ public class CrawlConfig {
     }
 
     /**
-     * If crawler should run behind a proxy and user/pass is needed for
-     * authentication in proxy, this parameter can be used for specifying the password.
+     * If crawler should run behind a proxy and user/pass is needed for authentication in proxy,
+     * this parameter can be used for specifying the password.
      *
-     * @param proxyPassword String Password
+     * @param proxyPassword
+     *            String Password
      */
     public void setProxyPassword(String proxyPassword) {
         this.proxyPassword = proxyPassword;
@@ -542,7 +555,8 @@ public class CrawlConfig {
     }
 
     /**
-     * @param authInfos authenticationInformations to set
+     * @param authInfos
+     *            authenticationInformations to set
      */
     public void setAuthInfos(List<AuthInfo> authInfos) {
         this.authInfos = authInfos;
@@ -594,6 +608,35 @@ public class CrawlConfig {
 
     public void setRespectNoIndex(boolean respectNoIndex) {
         this.respectNoIndex = respectNoIndex;
+    }
+
+    public PageStatistics getPageStatistics() {
+        if (resumableCrawling) {
+            return new SleepyCatPageStatistics(environment());
+        }
+        return new InMemoryPageStatistics();
+    }
+
+    public Environment environment() {
+        if (null == environment) {
+            EnvironmentConfig configuration = new EnvironmentConfig();
+            configuration.setAllowCreate(true);
+            configuration.setTransactional(resumableCrawling);
+            configuration.setLocking(resumableCrawling);
+
+            File envHome = new File(crawlStorageFolder + "/frontier");
+            if (!envHome.exists()) {
+                if (!envHome.mkdir()) {
+                    throw new RuntimeException("Failed creating the frontier folder: " + envHome
+                            .getAbsolutePath());
+                }
+            }
+            if (!resumableCrawling) {
+                IO.deleteFolderContents(envHome);
+            }
+            environment = new Environment(envHome, configuration);
+        }
+        return environment;
     }
 
     @Override
