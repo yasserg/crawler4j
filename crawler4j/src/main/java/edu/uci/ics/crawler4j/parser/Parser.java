@@ -26,6 +26,7 @@ import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.html.*;
 import org.slf4j.*;
 
+import edu.uci.ics.crawler4j.CrawlerConfiguration;
 import edu.uci.ics.crawler4j.crawler.*;
 import edu.uci.ics.crawler4j.crawler.exceptions.ParseException;
 import edu.uci.ics.crawler4j.url.*;
@@ -42,7 +43,8 @@ public class Parser extends Configurable {
 
     private final ParseContext parseContext;
 
-    public Parser(CrawlConfig config) throws InstantiationException, IllegalAccessException {
+    public Parser(CrawlerConfiguration config) throws InstantiationException,
+            IllegalAccessException {
         super(config);
         htmlParser = new HtmlParser();
         parseContext = new ParseContext();

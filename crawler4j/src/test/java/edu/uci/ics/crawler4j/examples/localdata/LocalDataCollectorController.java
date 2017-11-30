@@ -22,15 +22,15 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.uci.ics.crawler4j.crawler.CrawlConfig;
+import edu.uci.ics.crawler4j.*;
 import edu.uci.ics.crawler4j.crawler.CrawlController;
 import edu.uci.ics.crawler4j.fetcher.PageFetcher;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtConfig;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
 
 public class LocalDataCollectorController {
-    private static final Logger logger =
-        LoggerFactory.getLogger(LocalDataCollectorController.class);
+    private static final Logger logger = LoggerFactory.getLogger(
+            LocalDataCollectorController.class);
 
     public static void main(String[] args) throws Exception {
         if (args.length != 2) {
@@ -43,8 +43,9 @@ public class LocalDataCollectorController {
         String rootFolder = args[0];
         int numberOfCrawlers = Integer.parseInt(args[1]);
 
-        CrawlConfig config = new CrawlConfig();
-        config.setCrawlStorageFolder(rootFolder);
+        CrawlerConfiguration config = new CrawlerConfiguration(
+                new SleepyCatCrawlPersistentConfiguration());
+        config.getCrawlPersistentConfiguration().setStorageFolder(rootFolder);
         config.setMaxPagesToFetch(10);
         config.setPolitenessDelay(1000);
 

@@ -15,15 +15,18 @@
 
 package edu.uci.ics.crawler4j.crawler
 
-import com.github.tomakehurst.wiremock.junit.WireMockRule
-import edu.uci.ics.crawler4j.fetcher.PageFetcher
-import edu.uci.ics.crawler4j.robotstxt.RobotstxtConfig
-import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer
+import static com.github.tomakehurst.wiremock.client.WireMock.*
+
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
-import spock.lang.Specification
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*
+import com.github.tomakehurst.wiremock.junit.WireMockRule
+
+import edu.uci.ics.crawler4j.*
+import edu.uci.ics.crawler4j.fetcher.PageFetcher
+import edu.uci.ics.crawler4j.robotstxt.*
+import edu.uci.ics.crawler4j.tests.TestCrawlerConfiguration
+import spock.lang.Specification
 
 class CrawlerWithJSTest extends Specification {
     @Rule
@@ -48,7 +51,7 @@ class CrawlerWithJSTest extends Specification {
                         <a href="/some/page2.html">a link</a>
                     </body>
                    </html>/$
-        )))
+                )))
 
         and: "a page with js in the head tag"
         stubFor(get(urlPathMatching("/some/page1.html"))
@@ -112,14 +115,7 @@ class CrawlerWithJSTest extends Specification {
                 /$)))
 
         when:
-        CrawlConfig config = new CrawlConfig(
-                crawlStorageFolder: temp.getRoot().getAbsolutePath()
-                , politenessDelay: 100
-                , maxConnectionsPerHost: 1
-                , threadShutdownDelaySeconds: 1
-                , threadMonitoringDelaySeconds: 1
-                , cleanupDelaySeconds: 1
-        )
+        CrawlerConfiguration config = new TestCrawlerConfiguration(temp)
 
         PageFetcher pageFetcher = new PageFetcher(config)
         RobotstxtServer robotstxtServer = new RobotstxtServer(new RobotstxtConfig(), pageFetcher)
@@ -136,5 +132,4 @@ class CrawlerWithJSTest extends Specification {
 }
 
 class ShouldWebCrawler extends WebCrawler {
-
 }

@@ -17,15 +17,18 @@
 
 package edu.uci.ics.crawler4j.crawler
 
-import com.github.tomakehurst.wiremock.junit.WireMockRule
-import edu.uci.ics.crawler4j.fetcher.PageFetcher
-import edu.uci.ics.crawler4j.robotstxt.RobotstxtConfig
-import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer
+import static com.github.tomakehurst.wiremock.client.WireMock.*
+
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
-import spock.lang.Specification
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*
+import com.github.tomakehurst.wiremock.junit.WireMockRule
+
+import edu.uci.ics.crawler4j.CrawlerConfiguration
+import edu.uci.ics.crawler4j.fetcher.PageFetcher
+import edu.uci.ics.crawler4j.robotstxt.*
+import edu.uci.ics.crawler4j.tests.TestCrawlerConfiguration
+import spock.lang.Specification
 
 class RedirectHandlerTest extends Specification {
 
@@ -54,14 +57,7 @@ class RedirectHandlerTest extends Specification {
                   </html>/$)))
 
         when:
-        CrawlConfig config = new CrawlConfig(
-                crawlStorageFolder: temp.getRoot().getAbsolutePath()
-                , politenessDelay: 100
-                , maxConnectionsPerHost: 1
-                , threadShutdownDelaySeconds: 1
-                , threadMonitoringDelaySeconds: 1
-                , cleanupDelaySeconds: 1
-        )
+        CrawlerConfiguration config = new TestCrawlerConfiguration(temp)
 
         and: "and allow everything robots.txt"
         stubFor(get(urlPathMatching("/robots.txt"))

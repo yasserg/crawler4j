@@ -23,7 +23,7 @@ import org.slf4j.*;
 
 import com.sleepycat.je.DatabaseException;
 
-import edu.uci.ics.crawler4j.crawler.*;
+import edu.uci.ics.crawler4j.CrawlerConfiguration;
 import edu.uci.ics.crawler4j.frontier.pagequeue.PageQueue;
 import edu.uci.ics.crawler4j.frontier.pagestatistics.*;
 import edu.uci.ics.crawler4j.url.WebURL;
@@ -38,7 +38,7 @@ public class Frontier {
 
     private static final int IN_PROCESS_RESCHEDULE_BATCH_SIZE = 100;
 
-    private final CrawlConfig config;
+    private final CrawlerConfiguration config;
 
     private final PageStatistics pageStatistics;
 
@@ -54,30 +54,26 @@ public class Frontier {
 
     private boolean isFinished = false;
 
-    public Frontier(CrawlConfig config) {
+    public Frontier(CrawlerConfiguration config) {
         super();
         this.config = config;
-        this.pageStatistics = config.getPageStatistics();
-        this.pendingPageQueue = config.getPendingPageQueue();
+        this.pageStatistics = config.getCrawlPersistentConfiguration().getPageStatistics();
+        this.pendingPageQueue = config.getCrawlPersistentConfiguration().getPendingPageQueue();
+        this.inprocessPageQueue = config.getCrawlPersistentConfiguration().getInprocessPageQueue();
 
-        if (config.isResumableCrawling()) {
-            scheduledPages = pageStatistics.get(PageStatisticsType.SCHEDULED_PAGES);
-            inprocessPageQueue = config.getInprocessPageQueue();
-            if (0 < inprocessPageQueue.size()) {
-                logger.info("Rescheduling {} URLs from previous crawl.", inprocessPageQueue.size());
-                scheduledPages -= inprocessPageQueue.size();
+        this.scheduledPages = pageStatistics.get(PageStatisticsType.SCHEDULED_PAGES);
 
-                Collection<WebURL> urls = inprocessPageQueue.nextRecords(
-                        IN_PROCESS_RESCHEDULE_BATCH_SIZE);
-                while (!urls.isEmpty()) {
-                    scheduleAll(urls);
-                    inprocessPageQueue.deleteNextRecords(urls.size());
-                    urls = inprocessPageQueue.nextRecords(IN_PROCESS_RESCHEDULE_BATCH_SIZE);
-                }
+        if (0 < inprocessPageQueue.size()) {
+            logger.info("Rescheduling {} URLs from previous crawl.", inprocessPageQueue.size());
+            scheduledPages -= inprocessPageQueue.size();
+
+            Collection<WebURL> urls = inprocessPageQueue.nextRecords(
+                    IN_PROCESS_RESCHEDULE_BATCH_SIZE);
+            while (!urls.isEmpty()) {
+                scheduleAll(urls);
+                inprocessPageQueue.deleteNextRecords(urls.size());
+                urls = inprocessPageQueue.nextRecords(IN_PROCESS_RESCHEDULE_BATCH_SIZE);
             }
-        } else {
-            scheduledPages = 0;
-            inprocessPageQueue = null;
         }
     }
 

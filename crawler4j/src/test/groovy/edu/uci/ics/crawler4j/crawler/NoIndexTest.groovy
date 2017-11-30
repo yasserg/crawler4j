@@ -1,15 +1,17 @@
 package edu.uci.ics.crawler4j.crawler
 
-import com.github.tomakehurst.wiremock.junit.WireMockRule
-import edu.uci.ics.crawler4j.fetcher.PageFetcher
-import edu.uci.ics.crawler4j.robotstxt.RobotstxtConfig
-import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer
-import edu.uci.ics.crawler4j.url.WebURL
+import static com.github.tomakehurst.wiremock.client.WireMock.*
+
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
-import spock.lang.Specification
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*
+import com.github.tomakehurst.wiremock.junit.WireMockRule
+
+import edu.uci.ics.crawler4j.CrawlerConfiguration
+import edu.uci.ics.crawler4j.fetcher.PageFetcher
+import edu.uci.ics.crawler4j.robotstxt.*
+import edu.uci.ics.crawler4j.tests.TestCrawlerConfiguration
+import spock.lang.Specification
 
 class NoIndexTest extends Specification {
 
@@ -32,7 +34,7 @@ class NoIndexTest extends Specification {
                         <a href="/some/page2.html">link to noindex page</a>
                     </body>
                    </html>/$
-        )))
+                )))
         stubFor(get(urlPathMatching("/some/page1.html"))
                 .willReturn(aResponse()
                 .withStatus(200)
@@ -68,14 +70,7 @@ class NoIndexTest extends Specification {
                 /$)))
 
         when:
-        CrawlConfig config = new CrawlConfig(
-                crawlStorageFolder: temp.getRoot().getAbsolutePath()
-                , politenessDelay: 100
-                , maxConnectionsPerHost: 1
-                , threadShutdownDelaySeconds: 1
-                , threadMonitoringDelaySeconds: 1
-                , cleanupDelaySeconds: 1
-        )
+        CrawlerConfiguration config = new TestCrawlerConfiguration(temp)
 
         PageFetcher pageFetcher = new PageFetcher(config)
         RobotstxtServer robotstxtServer = new RobotstxtServer(new RobotstxtConfig(), pageFetcher)
@@ -90,22 +85,22 @@ class NoIndexTest extends Specification {
         visitedPages.containsKey("http://localhost:8080/some/page1.html")
         !visitedPages.containsKey("http://localhost:8080/some/page2.html")
     }
- }
-    
+}
+
 class NoIndexWebCrawler extends WebCrawler {
 
-	private Map<String, Page> visitedPages;
-	
-	public void init(int id, CrawlController crawlController) {
-		super.init(id, crawlController);
-		visitedPages = new HashMap<String, Page>();
-	}
+    private Map<String, Page> visitedPages;
 
-	public void visit(Page page) {
-		visitedPages.put(page.getWebURL().toString(), page);
-	}
-	
-	public Object getMyLocalData() {
-		return visitedPages;
-	}
+    public void init(int id, CrawlController crawlController) {
+        super.init(id, crawlController);
+        visitedPages = new HashMap<String, Page>();
+    }
+
+    public void visit(Page page) {
+        visitedPages.put(page.getWebURL().toString(), page);
+    }
+
+    public Object getMyLocalData() {
+        return visitedPages;
+    }
 }

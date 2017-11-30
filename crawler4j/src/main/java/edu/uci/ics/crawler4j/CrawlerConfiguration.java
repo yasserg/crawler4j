@@ -15,9 +15,8 @@
  * limitations under the License.
  */
 
-package edu.uci.ics.crawler4j.crawler;
+package edu.uci.ics.crawler4j;
 
-import java.io.File;
 import java.util.*;
 
 import org.apache.http.Header;
@@ -26,27 +25,11 @@ import org.apache.http.conn.DnsResolver;
 import org.apache.http.impl.conn.SystemDefaultDnsResolver;
 import org.apache.http.message.BasicHeader;
 
-import com.sleepycat.je.*;
-
 import edu.uci.ics.crawler4j.crawler.authentication.AuthInfo;
-import edu.uci.ics.crawler4j.frontier.pageharvests.*;
-import edu.uci.ics.crawler4j.frontier.pagequeue.*;
-import edu.uci.ics.crawler4j.frontier.pagestatistics.*;
-import edu.uci.ics.crawler4j.util.IO;
 
-public class CrawlConfig {
+public class CrawlerConfiguration {
 
-    /**
-     * The folder which will be used by crawler for storing the intermediate crawl data. The content
-     * of this folder should not be modified manually.
-     */
-    private String crawlStorageFolder;
-
-    /**
-     * If this feature is enabled, you would be able to resume a previously stopped/crashed crawl.
-     * However, it makes crawling slightly slower
-     */
-    private boolean resumableCrawling = false;
+    private CrawlPersistentConfiguration crawlPersistentConfiguration;
 
     /**
      * Maximum depth of crawling For unlimited depth this parameter should be set to -1
@@ -198,7 +181,19 @@ public class CrawlConfig {
 
     private DnsResolver dnsResolver = new SystemDefaultDnsResolver();
 
-    private Environment environment;
+    public CrawlerConfiguration(CrawlPersistentConfiguration crawlPersistentConfiguration) {
+        super();
+        this.crawlPersistentConfiguration = crawlPersistentConfiguration;
+    }
+
+    public CrawlPersistentConfiguration getCrawlPersistentConfiguration() {
+        return crawlPersistentConfiguration;
+    }
+
+    public void setCrawlPersistentConfiguration(
+            CrawlPersistentConfiguration crawlPersistentConfiguration) {
+        this.crawlPersistentConfiguration = crawlPersistentConfiguration;
+    }
 
     /**
      * DNS resolver to use, #{@link SystemDefaultDnsResolver()} is default.
@@ -212,15 +207,14 @@ public class CrawlConfig {
     }
 
     /**
-     * Validates the configs specified by this instance.
+     * Validates and initialize data in the configs specified by this instance.
      *
      * @throws Exception
      *             on Validation fail
      */
-    public void validate() throws Exception {
-        if (null == crawlStorageFolder) {
-            throw new Exception("Crawl storage folder is not set in the CrawlConfig.");
-        }
+    public void initialize() throws Exception {
+        crawlPersistentConfiguration.initialize();
+
         if (politenessDelay < 0) {
             throw new Exception("Invalid value for politeness delay: " + politenessDelay);
         }
@@ -231,36 +225,6 @@ public class CrawlConfig {
         if (Short.MAX_VALUE < maxDepthOfCrawling) {
             throw new Exception("Maximum value for crawl depth is " + Short.MAX_VALUE);
         }
-    }
-
-    public String getCrawlStorageFolder() {
-        return crawlStorageFolder;
-    }
-
-    /**
-     * The folder which will be used by crawler for storing the intermediate crawl data. The content
-     * of this folder should not be modified manually.
-     *
-     * @param crawlStorageFolder
-     *            The folder for the crawler's storage
-     */
-    public void setCrawlStorageFolder(String crawlStorageFolder) {
-        this.crawlStorageFolder = crawlStorageFolder;
-    }
-
-    public boolean isResumableCrawling() {
-        return resumableCrawling;
-    }
-
-    /**
-     * If this feature is enabled, you would be able to resume a previously stopped/crashed crawl.
-     * However, it makes crawling slightly slower
-     *
-     * @param resumableCrawling
-     *            Should crawling be resumable between runs ?
-     */
-    public void setResumableCrawling(boolean resumableCrawling) {
-        this.resumableCrawling = resumableCrawling;
     }
 
     public int getMaxDepthOfCrawling() {
@@ -612,52 +576,9 @@ public class CrawlConfig {
         this.respectNoIndex = respectNoIndex;
     }
 
-    public PageStatistics getPageStatistics() {
-        if (resumableCrawling) {
-            return new SleepyCatPageStatistics(environment());
-        }
-        return new InMemoryPageStatistics();
-    }
-
-    public Environment environment() {
-        if (null == environment) {
-            EnvironmentConfig configuration = new EnvironmentConfig();
-            configuration.setAllowCreate(true);
-            configuration.setTransactional(resumableCrawling);
-            configuration.setLocking(resumableCrawling);
-
-            File envHome = new File(crawlStorageFolder + "/frontier");
-            if (!envHome.exists()) {
-                if (!envHome.mkdir()) {
-                    throw new RuntimeException("Failed creating the frontier folder: " + envHome
-                            .getAbsolutePath());
-                }
-            }
-            if (!resumableCrawling) {
-                IO.deleteFolderContents(envHome);
-            }
-            environment = new Environment(envHome, configuration);
-        }
-        return environment;
-    }
-
-    public PageHarvests getPageHarvests() {
-        return new SleepyCatPageHarvests(environment(), resumableCrawling);
-    }
-
-    public PageQueue getPendingPageQueue() {
-        return new SleepyCatPageQueue(environment(), "PendingPages", resumableCrawling);
-    }
-
-    public PageQueue getInprocessPageQueue() {
-        return new SleepyCatPageQueue(environment(), "InprocessPages", resumableCrawling);
-    }
-
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("Crawl storage folder: " + getCrawlStorageFolder() + "\n");
-        sb.append("Resumable crawling: " + isResumableCrawling() + "\n");
         sb.append("Max depth of crawl: " + getMaxDepthOfCrawling() + "\n");
         sb.append("Max pages to fetch: " + getMaxPagesToFetch() + "\n");
         sb.append("User agent string: " + getUserAgentString() + "\n");

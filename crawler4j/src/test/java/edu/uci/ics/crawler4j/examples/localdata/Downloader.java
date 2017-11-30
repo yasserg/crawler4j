@@ -21,7 +21,7 @@ import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.uci.ics.crawler4j.crawler.CrawlConfig;
+import edu.uci.ics.crawler4j.*;
 import edu.uci.ics.crawler4j.crawler.Page;
 import edu.uci.ics.crawler4j.fetcher.PageFetchResult;
 import edu.uci.ics.crawler4j.fetcher.PageFetcher;
@@ -31,17 +31,19 @@ import edu.uci.ics.crawler4j.parser.Parser;
 import edu.uci.ics.crawler4j.url.WebURL;
 
 /**
- * This class is a demonstration of how crawler4j can be used to download a
- * single page and extract its title and text.
+ * This class is a demonstration of how crawler4j can be used to download a single page and extract
+ * its title and text.
  */
 public class Downloader {
     private static final Logger logger = LoggerFactory.getLogger(Downloader.class);
 
     private final Parser parser;
+
     private final PageFetcher pageFetcher;
 
     public Downloader() throws InstantiationException, IllegalAccessException {
-        CrawlConfig config = new CrawlConfig();
+        CrawlerConfiguration config = new CrawlerConfiguration(
+                new SleepyCatCrawlPersistentConfiguration());
         parser = new Parser(config);
         pageFetcher = new PageFetcher(config);
     }

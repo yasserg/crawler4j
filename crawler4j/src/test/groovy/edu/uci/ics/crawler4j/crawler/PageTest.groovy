@@ -1,10 +1,11 @@
 package edu.uci.ics.crawler4j.crawler
 
-import edu.uci.ics.crawler4j.url.WebURL
 import org.apache.commons.io.IOUtils
 import org.apache.http.HttpEntity
 import org.apache.http.entity.BasicHttpEntity
 import org.apache.http.message.BasicHeader
+
+import edu.uci.ics.crawler4j.url.WebURL
 import spock.lang.Specification
 
 class PageTest extends Specification {

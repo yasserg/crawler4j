@@ -1,15 +1,17 @@
 package edu.uci.ics.crawler4j.crawler
 
-import com.github.tomakehurst.wiremock.junit.WireMockRule
-import edu.uci.ics.crawler4j.fetcher.PageFetcher
-import edu.uci.ics.crawler4j.robotstxt.RobotstxtConfig
-import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer
-import edu.uci.ics.crawler4j.url.WebURL
+import static com.github.tomakehurst.wiremock.client.WireMock.*
+
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
-import spock.lang.Specification
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*
+import com.github.tomakehurst.wiremock.junit.WireMockRule
+
+import edu.uci.ics.crawler4j.CrawlerConfiguration
+import edu.uci.ics.crawler4j.fetcher.PageFetcher
+import edu.uci.ics.crawler4j.robotstxt.*
+import edu.uci.ics.crawler4j.tests.TestCrawlerConfiguration
+import spock.lang.Specification
 
 class NoFollowTest extends Specification {
 
@@ -32,7 +34,7 @@ class NoFollowTest extends Specification {
                         <a href="/some/page2.html">link to a nofollow page</a>
                     </body>
                    </html>/$
-        )))
+                )))
         stubFor(get(urlPathMatching("/some/page(1|3).html"))
                 .willReturn(aResponse()
                 .withStatus(200)
@@ -68,14 +70,7 @@ class NoFollowTest extends Specification {
                 /$)))
 
         when:
-        CrawlConfig config = new CrawlConfig(
-                crawlStorageFolder: temp.getRoot().getAbsolutePath()
-                , politenessDelay: 100
-                , maxConnectionsPerHost: 1
-                , threadShutdownDelaySeconds: 1
-                , threadMonitoringDelaySeconds: 1
-                , cleanupDelaySeconds: 1
-        )
+        CrawlerConfiguration config = new TestCrawlerConfiguration(temp)
 
         PageFetcher pageFetcher = new PageFetcher(config)
         RobotstxtServer robotstxtServer = new RobotstxtServer(new RobotstxtConfig(), pageFetcher)

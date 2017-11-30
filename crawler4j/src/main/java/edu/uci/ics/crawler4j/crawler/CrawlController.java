@@ -17,11 +17,11 @@
 
 package edu.uci.ics.crawler4j.crawler;
 
-import java.io.File;
 import java.util.*;
 
 import org.slf4j.*;
 
+import edu.uci.ics.crawler4j.CrawlerConfiguration;
 import edu.uci.ics.crawler4j.fetcher.PageFetcher;
 import edu.uci.ics.crawler4j.frontier.Frontier;
 import edu.uci.ics.crawler4j.frontier.pageharvests.PageHarvests;
@@ -71,25 +71,14 @@ public class CrawlController extends Configurable {
 
     protected final Object waitingLock = new Object();
 
-    public CrawlController(CrawlConfig config, PageFetcher pageFetcher,
+    public CrawlController(CrawlerConfiguration configuration, PageFetcher pageFetcher,
             RobotstxtServer robotstxtServer) throws Exception {
-        super(config);
+        super(configuration);
+        configuration.initialize();
+        TLDList.setUseOnline(configuration.isOnlineTldListUpdate());
 
-        config.validate();
-        File folder = new File(config.getCrawlStorageFolder());
-        if (!folder.exists()) {
-            if (folder.mkdirs()) {
-                logger.debug("Created folder: " + folder.getAbsolutePath());
-            } else {
-                throw new Exception("couldn't create the storage folder: " + folder
-                        .getAbsolutePath() + " does it already exist ?");
-            }
-        }
-
-        TLDList.setUseOnline(config.isOnlineTldListUpdate());
-
-        pageHarvests = config.getPageHarvests();
-        frontier = new Frontier(config);
+        pageHarvests = configuration.getCrawlPersistentConfiguration().getPageHarvests();
+        frontier = new Frontier(configuration);
 
         this.pageFetcher = pageFetcher;
         this.robotstxtServer = robotstxtServer;
@@ -291,7 +280,7 @@ public class CrawlController extends Configurable {
 
                                         finished = true;
                                         waitingLock.notifyAll();
-                                        config.environment().close();
+                                        config.getCrawlPersistentConfiguration().close();
 
                                         return;
                                     }

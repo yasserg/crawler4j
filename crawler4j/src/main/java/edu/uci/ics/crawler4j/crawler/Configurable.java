@@ -17,6 +17,8 @@
 
 package edu.uci.ics.crawler4j.crawler;
 
+import edu.uci.ics.crawler4j.CrawlerConfiguration;
+
 /**
  * Several core components of crawler4j extend this class
  * to make them configurable.
@@ -25,13 +27,13 @@ package edu.uci.ics.crawler4j.crawler;
  */
 public abstract class Configurable {
 
-    protected final CrawlConfig config;
+    protected final CrawlerConfiguration config;
 
-    protected Configurable(CrawlConfig config) {
+    protected Configurable(CrawlerConfiguration config) {
         this.config = config;
     }
 
-    public CrawlConfig getConfig() {
+    public CrawlerConfiguration getConfig() {
         return config;
     }
 }

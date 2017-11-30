@@ -20,7 +20,7 @@ package edu.uci.ics.crawler4j.examples.shutdown;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.uci.ics.crawler4j.crawler.CrawlConfig;
+import edu.uci.ics.crawler4j.*;
 import edu.uci.ics.crawler4j.crawler.CrawlController;
 import edu.uci.ics.crawler4j.fetcher.PageFetcher;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtConfig;
@@ -41,48 +41,47 @@ public class ControllerWithShutdown {
             return;
         }
 
-    /*
-     * crawlStorageFolder is a folder where intermediate crawl data is
-     * stored.
-     */
+        /*
+         * crawlStorageFolder is a folder where intermediate crawl data is stored.
+         */
         String crawlStorageFolder = args[0];
 
-    /*
-     * numberOfCrawlers shows the number of concurrent threads that should
-     * be initiated for crawling.
-     */
+        /*
+         * numberOfCrawlers shows the number of concurrent threads that should be initiated for
+         * crawling.
+         */
         int numberOfCrawlers = Integer.parseInt(args[1]);
 
-        CrawlConfig config = new CrawlConfig();
+        CrawlerConfiguration config = new CrawlerConfiguration(
+                new SleepyCatCrawlPersistentConfiguration());
 
-        config.setCrawlStorageFolder(crawlStorageFolder);
+        config.getCrawlPersistentConfiguration().setStorageFolder(crawlStorageFolder);
 
         config.setPolitenessDelay(1000);
 
         // Unlimited number of pages can be crawled.
         config.setMaxPagesToFetch(-1);
 
-    /*
-     * Instantiate the controller for this crawl.
-     */
+        /*
+         * Instantiate the controller for this crawl.
+         */
         PageFetcher pageFetcher = new PageFetcher(config);
         RobotstxtConfig robotstxtConfig = new RobotstxtConfig();
         RobotstxtServer robotstxtServer = new RobotstxtServer(robotstxtConfig, pageFetcher);
         CrawlController controller = new CrawlController(config, pageFetcher, robotstxtServer);
 
-    /*
-     * For each crawl, you need to add some seed urls. These are the first
-     * URLs that are fetched and then the crawler starts following links
-     * which are found in these pages
-     */
+        /*
+         * For each crawl, you need to add some seed urls. These are the first URLs that are fetched
+         * and then the crawler starts following links which are found in these pages
+         */
         controller.addSeed("http://www.ics.uci.edu/~welling/");
         controller.addSeed("http://www.ics.uci.edu/~lopes/");
         controller.addSeed("http://www.ics.uci.edu/");
 
-    /*
-     * Start the crawl. This is a blocking operation, meaning that your code
-     * will reach the line after this only when crawling is finished.
-     */
+        /*
+         * Start the crawl. This is a blocking operation, meaning that your code will reach the line
+         * after this only when crawling is finished.
+         */
         controller.startNonBlocking(BasicCrawler.class, numberOfCrawlers);
 
         // Wait for 30 seconds

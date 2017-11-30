@@ -1,18 +1,18 @@
 package edu.uci.ics.crawler4j.config
 
-import com.github.tomakehurst.wiremock.junit.WireMockRule
-import edu.uci.ics.crawler4j.crawler.CrawlConfig
-import edu.uci.ics.crawler4j.crawler.CrawlController
-import edu.uci.ics.crawler4j.crawler.WebCrawler
-import edu.uci.ics.crawler4j.fetcher.PageFetcher
-import edu.uci.ics.crawler4j.robotstxt.RobotstxtConfig
-import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer
+import static com.github.tomakehurst.wiremock.client.WireMock.*
+
 import org.apache.http.impl.conn.InMemoryDnsResolver
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
-import spock.lang.Specification
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*
+import com.github.tomakehurst.wiremock.junit.WireMockRule
+
+import edu.uci.ics.crawler4j.*
+import edu.uci.ics.crawler4j.crawler.*
+import edu.uci.ics.crawler4j.fetcher.PageFetcher
+import edu.uci.ics.crawler4j.robotstxt.*
+import spock.lang.Specification
 
 class CustomDnsResolverTest extends Specification {
 
@@ -38,18 +38,18 @@ class CustomDnsResolverTest extends Specification {
                         <h1>Title</h1>
                     </body>
                    </html>/$
-        )))
+                )))
 
         when:
         final InMemoryDnsResolver inMemDnsResolver = new InMemoryDnsResolver()
         inMemDnsResolver.add("googhle.com"
                 , InetAddress.getByName("127.0.0.1"))
 
-        CrawlConfig config = new CrawlConfig()
-        config.setCrawlStorageFolder(temp.newFolder().getAbsolutePath())
-        config.setMaxPagesToFetch(10)
-        config.setPolitenessDelay(1000)
-        config.setDnsResolver(inMemDnsResolver)
+        CrawlerConfiguration config = new CrawlerConfiguration(new SleepyCatCrawlPersistentConfiguration())
+        config.crawlPersistentConfiguration.storageFolder = temp.newFolder().getAbsolutePath()
+        config.maxPagesToFetch = 10
+        config.politenessDelay = 1000
+        config.dnsResolver = inMemDnsResolver
 
         PageFetcher pageFetcher = new PageFetcher(config)
         RobotstxtConfig robotstxtConfig = new RobotstxtConfig()
@@ -64,5 +64,4 @@ class CustomDnsResolverTest extends Specification {
         then:
         verify(exactly(1), getRequestedFor(urlEqualTo("/some/index.html")))
     }
-
 }
