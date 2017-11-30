@@ -27,7 +27,7 @@ import org.apache.tika.parser.html.*;
 import org.slf4j.*;
 
 import edu.uci.ics.crawler4j.CrawlerConfiguration;
-import edu.uci.ics.crawler4j.crawler.*;
+import edu.uci.ics.crawler4j.crawler.Page;
 import edu.uci.ics.crawler4j.crawler.exceptions.ParseException;
 import edu.uci.ics.crawler4j.url.*;
 import edu.uci.ics.crawler4j.util.*;
@@ -35,9 +35,11 @@ import edu.uci.ics.crawler4j.util.*;
 /**
  * @author Yasser Ganjisaffar
  */
-public class Parser extends Configurable {
+public class Parser {
 
     protected static final Logger logger = LoggerFactory.getLogger(Parser.class);
+
+    private final CrawlerConfiguration config;
 
     private final HtmlParser htmlParser;
 
@@ -45,7 +47,8 @@ public class Parser extends Configurable {
 
     public Parser(CrawlerConfiguration config) throws InstantiationException,
             IllegalAccessException {
-        super(config);
+        super();
+        this.config = config;
         htmlParser = new HtmlParser();
         parseContext = new ParseContext();
         parseContext.set(HtmlMapper.class, AllTagMapper.class.newInstance());

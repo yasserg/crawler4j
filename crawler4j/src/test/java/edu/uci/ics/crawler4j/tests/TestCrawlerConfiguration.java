@@ -10,6 +10,7 @@ public class TestCrawlerConfiguration extends CrawlerConfiguration {
         super(new SleepyCatCrawlPersistentConfiguration());
         getCrawlPersistentConfiguration().setStorageFolder(temp.getRoot().getAbsolutePath());
 
+        setNumberOfCrawlers(1);
         setPolitenessDelay(100);
         setMaxConnectionsPerHost(1);
         setThreadShutdownDelaySeconds(1);

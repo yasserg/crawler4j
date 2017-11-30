@@ -27,17 +27,17 @@ import edu.uci.ics.crawler4j.url.WebURL;
 /**
  * @author Yasser Ganjisaffar
  */
-public class BasicCrawler extends WebCrawler {
+public class SpecificDomainCrawler extends WebCrawler {
 
     private static final Pattern FILTERS = Pattern.compile(".*(\\.(css|js|bmp|gif|jpe?g"
             + "|png|tiff?|mid|mp2|mp3|mp4" + "|wav|avi|mov|mpeg|ram|m4v|pdf"
             + "|rm|smil|wmv|swf|wma|zip|rar|gz))$");
 
-    private String[] myCrawlDomains;
+    private final String[] myCrawlDomains;
 
-    @Override
-    public void onStart() {
-        myCrawlDomains = (String[]) myController.getCustomData();
+    public SpecificDomainCrawler(String[] myCrawlDomains) {
+        super();
+        this.myCrawlDomains = myCrawlDomains;
     }
 
     @Override
@@ -79,4 +79,5 @@ public class BasicCrawler extends WebCrawler {
 
         logger.debug("=============");
     }
+
 }

@@ -8,7 +8,7 @@ import org.junit.rules.TemporaryFolder
 import com.github.tomakehurst.wiremock.junit.WireMockRule
 
 import edu.uci.ics.crawler4j.CrawlerConfiguration
-import edu.uci.ics.crawler4j.fetcher.PageFetcher
+import edu.uci.ics.crawler4j.crawler.controller.*
 import edu.uci.ics.crawler4j.robotstxt.*
 import edu.uci.ics.crawler4j.tests.TestCrawlerConfiguration
 import spock.lang.Specification
@@ -71,16 +71,12 @@ class NoIndexTest extends Specification {
 
         when:
         CrawlerConfiguration config = new TestCrawlerConfiguration(temp)
-
-        PageFetcher pageFetcher = new PageFetcher(config)
-        RobotstxtServer robotstxtServer = new RobotstxtServer(new RobotstxtConfig(), pageFetcher)
-        CrawlController controller = new CrawlController(config, pageFetcher, robotstxtServer)
+        CrawlController controller = new DefaultCrawlController(config, NoIndexWebCrawler.class)
         controller.addSeed "http://localhost:8080/some/index.html"
-
-        controller.start(NoIndexWebCrawler.class, 1)
+        controller.start()
 
         then: "noindex pages should be ignored"
-        Map<String, Page> visitedPages = (Map<String, Page>)controller.getCrawlersLocalData().get(0);
+        Map<String, Page> visitedPages = (Map<String, Page>)controller.crawlerData.get(0);
         visitedPages.containsKey("http://localhost:8080/some/index.html")
         visitedPages.containsKey("http://localhost:8080/some/page1.html")
         !visitedPages.containsKey("http://localhost:8080/some/page2.html")
@@ -89,15 +85,10 @@ class NoIndexTest extends Specification {
 
 class NoIndexWebCrawler extends WebCrawler {
 
-    private Map<String, Page> visitedPages;
-
-    public void init(int id, CrawlController crawlController) {
-        super.init(id, crawlController);
-        visitedPages = new HashMap<String, Page>();
-    }
+    private Map<String, Page> visitedPages = new HashMap<>()
 
     public void visit(Page page) {
-        visitedPages.put(page.getWebURL().toString(), page);
+        visitedPages.put(page.getWebURL().toString(), page)
     }
 
     public Object getMyLocalData() {

@@ -25,7 +25,7 @@ import org.junit.rules.TemporaryFolder
 import com.github.tomakehurst.wiremock.junit.WireMockRule
 
 import edu.uci.ics.crawler4j.CrawlerConfiguration
-import edu.uci.ics.crawler4j.fetcher.PageFetcher
+import edu.uci.ics.crawler4j.crawler.controller.*
 import edu.uci.ics.crawler4j.robotstxt.*
 import edu.uci.ics.crawler4j.tests.TestCrawlerConfiguration
 import spock.lang.Specification
@@ -69,15 +69,12 @@ class RedirectHandlerTest extends Specification {
                   Allow: /
                 /$)))
 
-        PageFetcher pageFetcher = new PageFetcher(config)
-        RobotstxtServer robotstxtServer = new RobotstxtServer(new RobotstxtConfig(), pageFetcher)
-        CrawlController controller = new CrawlController(config, pageFetcher, robotstxtServer)
+        CrawlController controller = new DefaultCrawlController(config, HandleRedirectWebCrawler.class)
         controller.addSeed "http://localhost:8080/some/index.html"
-
-        controller.start(HandleRedirectWebCrawler.class, 1)
+        controller.start()
 
         then: "envent in WebCrawler will trigger"
-        List<Object> crawlerData = controller.getCrawlersLocalData().get(0)
+        List<Object> crawlerData = controller.crawlerData.get(0)
         assert crawlerData.get(0) == 1
         assert crawlerData.get(1) == "http://localhost:8080/another/index.html"
 

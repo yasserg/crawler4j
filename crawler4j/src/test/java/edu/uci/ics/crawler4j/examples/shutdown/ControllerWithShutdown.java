@@ -17,14 +17,10 @@
 
 package edu.uci.ics.crawler4j.examples.shutdown;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.slf4j.*;
 
 import edu.uci.ics.crawler4j.*;
-import edu.uci.ics.crawler4j.crawler.CrawlController;
-import edu.uci.ics.crawler4j.fetcher.PageFetcher;
-import edu.uci.ics.crawler4j.robotstxt.RobotstxtConfig;
-import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
+import edu.uci.ics.crawler4j.crawler.controller.*;
 
 /**
  * @author Yasser Ganjisaffar
@@ -56,6 +52,7 @@ public class ControllerWithShutdown {
                 new SleepyCatCrawlPersistentConfiguration());
 
         config.getCrawlPersistentConfiguration().setStorageFolder(crawlStorageFolder);
+        config.setNumberOfCrawlers(numberOfCrawlers);
 
         config.setPolitenessDelay(1000);
 
@@ -65,10 +62,7 @@ public class ControllerWithShutdown {
         /*
          * Instantiate the controller for this crawl.
          */
-        PageFetcher pageFetcher = new PageFetcher(config);
-        RobotstxtConfig robotstxtConfig = new RobotstxtConfig();
-        RobotstxtServer robotstxtServer = new RobotstxtServer(robotstxtConfig, pageFetcher);
-        CrawlController controller = new CrawlController(config, pageFetcher, robotstxtServer);
+        CrawlController controller = new DefaultCrawlController(config, BasicCrawler.class);
 
         /*
          * For each crawl, you need to add some seed urls. These are the first URLs that are fetched
@@ -82,7 +76,7 @@ public class ControllerWithShutdown {
          * Start the crawl. This is a blocking operation, meaning that your code will reach the line
          * after this only when crawling is finished.
          */
-        controller.startNonBlocking(BasicCrawler.class, numberOfCrawlers);
+        controller.startNonBlocking();
 
         // Wait for 30 seconds
         Thread.sleep(30 * 1000);

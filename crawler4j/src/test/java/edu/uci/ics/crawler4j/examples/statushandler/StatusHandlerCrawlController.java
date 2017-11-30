@@ -17,14 +17,10 @@
 
 package edu.uci.ics.crawler4j.examples.statushandler;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.slf4j.*;
 
 import edu.uci.ics.crawler4j.*;
-import edu.uci.ics.crawler4j.crawler.CrawlController;
-import edu.uci.ics.crawler4j.fetcher.PageFetcher;
-import edu.uci.ics.crawler4j.robotstxt.RobotstxtConfig;
-import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
+import edu.uci.ics.crawler4j.crawler.controller.*;
 
 /**
  * @author Yasser Ganjisaffar
@@ -56,6 +52,7 @@ public class StatusHandlerCrawlController {
                 new SleepyCatCrawlPersistentConfiguration());
 
         config.getCrawlPersistentConfiguration().setStorageFolder(crawlStorageFolder);
+        config.setNumberOfCrawlers(numberOfCrawlers);
 
         /*
          * Be polite: Make sure that we don't send more than 1 request per second (1000 milliseconds
@@ -93,10 +90,7 @@ public class StatusHandlerCrawlController {
         /*
          * Instantiate the controller for this crawl.
          */
-        PageFetcher pageFetcher = new PageFetcher(config);
-        RobotstxtConfig robotstxtConfig = new RobotstxtConfig();
-        RobotstxtServer robotstxtServer = new RobotstxtServer(robotstxtConfig, pageFetcher);
-        CrawlController controller = new CrawlController(config, pageFetcher, robotstxtServer);
+        CrawlController controller = new DefaultCrawlController(config, StatusHandlerCrawler.class);
 
         /*
          * For each crawl, you need to add some seed urls. These are the first URLs that are fetched
@@ -110,6 +104,6 @@ public class StatusHandlerCrawlController {
          * Start the crawl. This is a blocking operation, meaning that your code will reach the line
          * after this only when crawling is finished.
          */
-        controller.start(StatusHandlerCrawler.class, numberOfCrawlers);
+        controller.start();
     }
 }

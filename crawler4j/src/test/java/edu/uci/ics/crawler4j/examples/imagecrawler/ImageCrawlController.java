@@ -17,14 +17,10 @@
 
 package edu.uci.ics.crawler4j.examples.imagecrawler;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.slf4j.*;
 
 import edu.uci.ics.crawler4j.*;
-import edu.uci.ics.crawler4j.crawler.CrawlController;
-import edu.uci.ics.crawler4j.fetcher.PageFetcher;
-import edu.uci.ics.crawler4j.robotstxt.RobotstxtConfig;
-import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
+import edu.uci.ics.crawler4j.crawler.controller.*;
 
 /**
  * @author Yasser Ganjisaffar
@@ -49,6 +45,7 @@ public class ImageCrawlController {
                 new SleepyCatCrawlPersistentConfiguration());
 
         config.getCrawlPersistentConfiguration().setStorageFolder(rootFolder);
+        config.setNumberOfCrawlers(numberOfCrawlers);
 
         /*
          * Since images are binary content, we need to set this parameter to true to make sure they
@@ -56,18 +53,14 @@ public class ImageCrawlController {
          */
         config.setIncludeBinaryContentInCrawling(true);
 
-        String[] crawlDomains = {"http://uci.edu/" };
+        String[] crawlDomains = new String[] {"http://uci.edu/" };
 
-        PageFetcher pageFetcher = new PageFetcher(config);
-        RobotstxtConfig robotstxtConfig = new RobotstxtConfig();
-        RobotstxtServer robotstxtServer = new RobotstxtServer(robotstxtConfig, pageFetcher);
-        CrawlController controller = new CrawlController(config, pageFetcher, robotstxtServer);
+        CrawlController controller = new DefaultCrawlController(config, ImageCrawler.class);
         for (String domain : crawlDomains) {
             controller.addSeed(domain);
         }
 
         ImageCrawler.configure(crawlDomains, storageFolder);
-
-        controller.start(ImageCrawler.class, numberOfCrawlers);
+        controller.start();
     }
 }

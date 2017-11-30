@@ -17,16 +17,12 @@
 
 package edu.uci.ics.crawler4j.examples.localdata;
 
-import java.util.List;
+import java.util.Collection;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.slf4j.*;
 
 import edu.uci.ics.crawler4j.*;
-import edu.uci.ics.crawler4j.crawler.CrawlController;
-import edu.uci.ics.crawler4j.fetcher.PageFetcher;
-import edu.uci.ics.crawler4j.robotstxt.RobotstxtConfig;
-import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
+import edu.uci.ics.crawler4j.crawler.controller.*;
 
 public class LocalDataCollectorController {
     private static final Logger logger = LoggerFactory.getLogger(
@@ -48,16 +44,13 @@ public class LocalDataCollectorController {
         config.getCrawlPersistentConfiguration().setStorageFolder(rootFolder);
         config.setMaxPagesToFetch(10);
         config.setPolitenessDelay(1000);
+        config.setNumberOfCrawlers(numberOfCrawlers);
 
-        PageFetcher pageFetcher = new PageFetcher(config);
-        RobotstxtConfig robotstxtConfig = new RobotstxtConfig();
-        RobotstxtServer robotstxtServer = new RobotstxtServer(robotstxtConfig, pageFetcher);
-        CrawlController controller = new CrawlController(config, pageFetcher, robotstxtServer);
-
+        CrawlController controller = new DefaultCrawlController(config,
+                LocalDataCollectorCrawler.class);
         controller.addSeed("http://www.ics.uci.edu/");
-        controller.start(LocalDataCollectorCrawler.class, numberOfCrawlers);
 
-        List<Object> crawlersLocalData = controller.getCrawlersLocalData();
+        Collection<Object> crawlersLocalData = controller.getCrawlerData();
         long totalLinks = 0;
         long totalTextSize = 0;
         int totalProcessedPages = 0;

@@ -10,8 +10,9 @@ import com.github.tomakehurst.wiremock.junit.WireMockRule
 
 import edu.uci.ics.crawler4j.*
 import edu.uci.ics.crawler4j.crawler.*
-import edu.uci.ics.crawler4j.fetcher.PageFetcher
+import edu.uci.ics.crawler4j.crawler.controller.*
 import edu.uci.ics.crawler4j.robotstxt.*
+import edu.uci.ics.crawler4j.tests.NoObeyRobotsCrawlController
 import spock.lang.Specification
 
 class CustomDnsResolverTest extends Specification {
@@ -41,25 +42,23 @@ class CustomDnsResolverTest extends Specification {
                 )))
 
         when:
-        final InMemoryDnsResolver inMemDnsResolver = new InMemoryDnsResolver()
-        inMemDnsResolver.add("googhle.com"
-                , InetAddress.getByName("127.0.0.1"))
+        InMemoryDnsResolver inMemDnsResolver = new InMemoryDnsResolver()
+        inMemDnsResolver.add("googhle.com", InetAddress.getByName("127.0.0.1"))
 
         CrawlerConfiguration config = new CrawlerConfiguration(new SleepyCatCrawlPersistentConfiguration())
         config.crawlPersistentConfiguration.storageFolder = temp.newFolder().getAbsolutePath()
+        config.numberOfCrawlers = 1
         config.maxPagesToFetch = 10
         config.politenessDelay = 1000
         config.dnsResolver = inMemDnsResolver
 
-        PageFetcher pageFetcher = new PageFetcher(config)
-        RobotstxtConfig robotstxtConfig = new RobotstxtConfig()
-        robotstxtConfig.setEnabled false
-        RobotstxtServer robotstxtServer = new RobotstxtServer(robotstxtConfig, pageFetcher)
-        CrawlController controller = new CrawlController(config, pageFetcher, robotstxtServer)
-
-        controller.addSeed("http://googhle.com:8080/some/index.html")
-        controller.start(WebCrawler.class, 1)
-
+        try {
+            CrawlController controller = new NoObeyRobotsCrawlController(config)
+            controller.addSeed("http://googhle.com:8080/some/index.html")
+            controller.start()
+        } catch (Exception e) {
+            throw new RuntimeException(e)
+        }
 
         then:
         verify(exactly(1), getRequestedFor(urlEqualTo("/some/index.html")))

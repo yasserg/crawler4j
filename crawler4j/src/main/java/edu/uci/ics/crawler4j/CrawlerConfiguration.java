@@ -32,6 +32,11 @@ public class CrawlerConfiguration {
     private CrawlPersistentConfiguration crawlPersistentConfiguration;
 
     /**
+     * Number of crawlers to startup
+     */
+    private int numberOfCrawlers;
+
+    /**
      * Maximum depth of crawling For unlimited depth this parameter should be set to -1
      */
     private int maxDepthOfCrawling = -1;
@@ -215,6 +220,10 @@ public class CrawlerConfiguration {
     public void initialize() throws Exception {
         crawlPersistentConfiguration.initialize();
 
+        if (numberOfCrawlers <= 0) {
+            throw new Exception("Number of crawlers must be greater than 0: " + numberOfCrawlers);
+        }
+
         if (politenessDelay < 0) {
             throw new Exception("Invalid value for politeness delay: " + politenessDelay);
         }
@@ -225,6 +234,14 @@ public class CrawlerConfiguration {
         if (Short.MAX_VALUE < maxDepthOfCrawling) {
             throw new Exception("Maximum value for crawl depth is " + Short.MAX_VALUE);
         }
+    }
+
+    public int getNumberOfCrawlers() {
+        return numberOfCrawlers;
+    }
+
+    public void setNumberOfCrawlers(int numberOfCrawlers) {
+        this.numberOfCrawlers = numberOfCrawlers;
     }
 
     public int getMaxDepthOfCrawling() {

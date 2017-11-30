@@ -24,7 +24,9 @@ import edu.uci.ics.crawler4j.CrawlerConfiguration;
  * to make them configurable.
  *
  * @author Yasser Ganjisaffar
+ * @deprecated
  */
+@Deprecated
 public abstract class Configurable {
 
     protected final CrawlerConfiguration config;

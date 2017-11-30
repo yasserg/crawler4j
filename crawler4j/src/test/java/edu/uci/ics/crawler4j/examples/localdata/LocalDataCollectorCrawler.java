@@ -83,10 +83,9 @@ public class LocalDataCollectorCrawler extends WebCrawler {
     }
 
     public void dumpMyData() {
-        int id = getMyId();
-        // You can configure the log to output to file
-        logger.info("Crawler {} > Processed Pages: {}", id, myCrawlStat.getTotalProcessedPages());
-        logger.info("Crawler {} > Total Links Found: {}", id, myCrawlStat.getTotalLinks());
-        logger.info("Crawler {} > Total Text Size: {}", id, myCrawlStat.getTotalTextSize());
+        logger.info("Crawler {} > Processed Pages: {}", getId(), myCrawlStat
+                .getTotalProcessedPages());
+        logger.info("Crawler {} > Total Links Found: {}", getId(), myCrawlStat.getTotalLinks());
+        logger.info("Crawler {} > Total Text Size: {}", getId(), myCrawlStat.getTotalTextSize());
     }
 }
