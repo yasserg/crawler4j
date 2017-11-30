@@ -17,95 +17,74 @@
 
 package edu.uci.ics.crawler4j.fetcher;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.io.*;
+import java.net.*;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import javax.net.ssl.SSLContext;
 
-import org.apache.http.Header;
-import org.apache.http.HttpHost;
-import org.apache.http.HttpStatus;
-import org.apache.http.NameValuePair;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.NTCredentials;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.CredentialsProvider;
+import org.apache.http.*;
+import org.apache.http.auth.*;
+import org.apache.http.client.*;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.config.Registry;
-import org.apache.http.config.RegistryBuilder;
-import org.apache.http.conn.socket.ConnectionSocketFactory;
-import org.apache.http.conn.socket.PlainConnectionSocketFactory;
-import org.apache.http.conn.ssl.NoopHostnameVerifier;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.conn.ssl.TrustStrategy;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.HttpClients;
+import org.apache.http.client.methods.*;
+import org.apache.http.config.*;
+import org.apache.http.conn.socket.*;
+import org.apache.http.conn.ssl.*;
+import org.apache.http.impl.client.*;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.ssl.SSLContexts;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.slf4j.*;
 
 import edu.uci.ics.crawler4j.CrawlerConfiguration;
-import edu.uci.ics.crawler4j.crawler.Configurable;
-import edu.uci.ics.crawler4j.crawler.authentication.AuthInfo;
-import edu.uci.ics.crawler4j.crawler.authentication.BasicAuthInfo;
-import edu.uci.ics.crawler4j.crawler.authentication.FormAuthInfo;
-import edu.uci.ics.crawler4j.crawler.authentication.NtAuthInfo;
+import edu.uci.ics.crawler4j.crawler.authentication.*;
 import edu.uci.ics.crawler4j.crawler.exceptions.PageBiggerThanMaxSizeException;
-import edu.uci.ics.crawler4j.url.URLCanonicalizer;
-import edu.uci.ics.crawler4j.url.WebURL;
+import edu.uci.ics.crawler4j.url.*;
 
 /**
  * @author Yasser Ganjisaffar
  */
-public class PageFetcher extends Configurable {
+public class PageFetcher {
     protected static final Logger logger = LoggerFactory.getLogger(PageFetcher.class);
+
+    protected final CrawlerConfiguration configuration;
+
     protected final Object mutex = new Object();
+
     protected PoolingHttpClientConnectionManager connectionManager;
+
     protected CloseableHttpClient httpClient;
+
     protected long lastFetchTime = 0;
+
     protected IdleConnectionMonitorThread connectionMonitorThread = null;
 
-    public PageFetcher(CrawlerConfiguration config) {
-        super(config);
-
-        RequestConfig requestConfig = RequestConfig.custom()
-                                                   .setExpectContinueEnabled(false)
-                                                   .setCookieSpec(config.getCookiePolicy())
-                                                   .setRedirectsEnabled(false)
-                                                   .setSocketTimeout(config.getSocketTimeout())
-                                                   .setConnectTimeout(config.getConnectionTimeout())
-                                                   .build();
+    public PageFetcher(CrawlerConfiguration configuration) {
+        super();
+        this.configuration = configuration;
+        RequestConfig requestConfig = RequestConfig.custom().setExpectContinueEnabled(false)
+                .setCookieSpec(configuration.getCookiePolicy()).setRedirectsEnabled(false)
+                .setSocketTimeout(configuration.getSocketTimeout()).setConnectTimeout(configuration
+                        .getConnectionTimeout()).build();
 
         RegistryBuilder<ConnectionSocketFactory> connRegistryBuilder = RegistryBuilder.create();
         connRegistryBuilder.register("http", PlainConnectionSocketFactory.INSTANCE);
-        if (config.isIncludeHttpsPages()) {
+        if (configuration.isIncludeHttpsPages()) {
             try { // Fixing: https://code.google.com/p/crawler4j/issues/detail?id=174
-                // By always trusting the ssl certificate
-                SSLContext sslContext =
-                    SSLContexts.custom().loadTrustMaterial(null, new TrustStrategy() {
-                        @Override
-                        public boolean isTrusted(final X509Certificate[] chain, String authType) {
-                            return true;
-                        }
-                    }).build();
-                SSLConnectionSocketFactory sslsf =
-                    new SniSSLConnectionSocketFactory(sslContext, NoopHostnameVerifier.INSTANCE);
+                  // By always trusting the ssl certificate
+                SSLContext sslContext = SSLContexts.custom().loadTrustMaterial(null,
+                        new TrustStrategy() {
+                            @Override
+                            public boolean isTrusted(final X509Certificate[] chain,
+                                    String authType) {
+                                return true;
+                            }
+                        }).build();
+                SSLConnectionSocketFactory sslsf = new SniSSLConnectionSocketFactory(sslContext,
+                        NoopHostnameVerifier.INSTANCE);
                 connRegistryBuilder.register("https", sslsf);
             } catch (Exception e) {
                 logger.warn("Exception thrown while trying to register https");
@@ -114,35 +93,35 @@ public class PageFetcher extends Configurable {
         }
 
         Registry<ConnectionSocketFactory> connRegistry = connRegistryBuilder.build();
-        connectionManager =
-                new SniPoolingHttpClientConnectionManager(connRegistry, config.getDnsResolver());
-        connectionManager.setMaxTotal(config.getMaxTotalConnections());
-        connectionManager.setDefaultMaxPerRoute(config.getMaxConnectionsPerHost());
+        connectionManager = new SniPoolingHttpClientConnectionManager(connRegistry, configuration
+                .getDnsResolver());
+        connectionManager.setMaxTotal(configuration.getMaxTotalConnections());
+        connectionManager.setDefaultMaxPerRoute(configuration.getMaxConnectionsPerHost());
 
         HttpClientBuilder clientBuilder = HttpClientBuilder.create();
         clientBuilder.setDefaultRequestConfig(requestConfig);
         clientBuilder.setConnectionManager(connectionManager);
-        clientBuilder.setUserAgent(config.getUserAgentString());
-        clientBuilder.setDefaultHeaders(config.getDefaultHeaders());
+        clientBuilder.setUserAgent(configuration.getUserAgentString());
+        clientBuilder.setDefaultHeaders(configuration.getDefaultHeaders());
 
-        if (config.getProxyHost() != null) {
-            if (config.getProxyUsername() != null) {
+        if (configuration.getProxyHost() != null) {
+            if (configuration.getProxyUsername() != null) {
                 BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-                credentialsProvider.setCredentials(
-                    new AuthScope(config.getProxyHost(), config.getProxyPort()),
-                    new UsernamePasswordCredentials(config.getProxyUsername(),
-                                                    config.getProxyPassword()));
+                credentialsProvider.setCredentials(new AuthScope(configuration.getProxyHost(),
+                        configuration.getProxyPort()), new UsernamePasswordCredentials(configuration
+                                .getProxyUsername(), configuration.getProxyPassword()));
                 clientBuilder.setDefaultCredentialsProvider(credentialsProvider);
             }
 
-            HttpHost proxy = new HttpHost(config.getProxyHost(), config.getProxyPort());
+            HttpHost proxy = new HttpHost(configuration.getProxyHost(), configuration
+                    .getProxyPort());
             clientBuilder.setProxy(proxy);
             logger.debug("Working through Proxy: {}", proxy.getHostName());
         }
 
         httpClient = clientBuilder.build();
-        if ((config.getAuthInfos() != null) && !config.getAuthInfos().isEmpty()) {
-            doAuthetication(config.getAuthInfos());
+        if ((configuration.getAuthInfos() != null) && !configuration.getAuthInfos().isEmpty()) {
+            doAuthetication(configuration.getAuthInfos());
         }
 
         if (connectionMonitorThread == null) {
@@ -153,11 +132,11 @@ public class PageFetcher extends Configurable {
 
     private void doAuthetication(List<AuthInfo> authInfos) {
         for (AuthInfo authInfo : authInfos) {
-            if (authInfo.getAuthenticationType() ==
-                AuthInfo.AuthenticationType.BASIC_AUTHENTICATION) {
+            if (authInfo
+                    .getAuthenticationType() == AuthInfo.AuthenticationType.BASIC_AUTHENTICATION) {
                 doBasicLogin((BasicAuthInfo) authInfo);
-            } else if (authInfo.getAuthenticationType() ==
-                       AuthInfo.AuthenticationType.NT_AUTHENTICATION) {
+            } else if (authInfo
+                    .getAuthenticationType() == AuthInfo.AuthenticationType.NT_AUTHENTICATION) {
                 doNtLogin((NtAuthInfo) authInfo);
             } else {
                 doFormLogin((FormAuthInfo) authInfo);
@@ -170,15 +149,14 @@ public class PageFetcher extends Configurable {
      * Official Example: https://hc.apache
      * .org/httpcomponents-client-ga/httpclient/examples/org/apache/http/examples
      * /client/ClientAuthentication.java
-     * */
+     */
     private void doBasicLogin(BasicAuthInfo authInfo) {
         logger.info("BASIC authentication for: " + authInfo.getLoginTarget());
-        HttpHost targetHost =
-            new HttpHost(authInfo.getHost(), authInfo.getPort(), authInfo.getProtocol());
+        HttpHost targetHost = new HttpHost(authInfo.getHost(), authInfo.getPort(), authInfo
+                .getProtocol());
         CredentialsProvider credsProvider = new BasicCredentialsProvider();
         credsProvider.setCredentials(new AuthScope(targetHost.getHostName(), targetHost.getPort()),
-                                     new UsernamePasswordCredentials(authInfo.getUsername(),
-                                                                     authInfo.getPassword()));
+                new UsernamePasswordCredentials(authInfo.getUsername(), authInfo.getPassword()));
         httpClient = HttpClients.custom().setDefaultCredentialsProvider(credsProvider).build();
     }
 
@@ -187,14 +165,13 @@ public class PageFetcher extends Configurable {
      */
     private void doNtLogin(NtAuthInfo authInfo) {
         logger.info("NT authentication for: " + authInfo.getLoginTarget());
-        HttpHost targetHost =
-            new HttpHost(authInfo.getHost(), authInfo.getPort(), authInfo.getProtocol());
+        HttpHost targetHost = new HttpHost(authInfo.getHost(), authInfo.getPort(), authInfo
+                .getProtocol());
         CredentialsProvider credsProvider = new BasicCredentialsProvider();
         try {
-            credsProvider.setCredentials(
-                new AuthScope(targetHost.getHostName(), targetHost.getPort()),
-                new NTCredentials(authInfo.getUsername(), authInfo.getPassword(),
-                                  InetAddress.getLocalHost().getHostName(), authInfo.getDomain()));
+            credsProvider.setCredentials(new AuthScope(targetHost.getHostName(), targetHost
+                    .getPort()), new NTCredentials(authInfo.getUsername(), authInfo.getPassword(),
+                            InetAddress.getLocalHost().getHostName(), authInfo.getDomain()));
         } catch (UnknownHostException e) {
             logger.error("Error creating NT credentials", e);
         }
@@ -204,41 +181,40 @@ public class PageFetcher extends Configurable {
     /**
      * FORM authentication<br/>
      * Official Example:
-     *  https://hc.apache.org/httpcomponents-client-ga/httpclient/examples/org/apache/http
-     *  /examples/client/ClientFormLogin.java
+     * https://hc.apache.org/httpcomponents-client-ga/httpclient/examples/org/apache/http
+     * /examples/client/ClientFormLogin.java
      */
     private void doFormLogin(FormAuthInfo authInfo) {
         logger.info("FORM authentication for: " + authInfo.getLoginTarget());
-        String fullUri =
-            authInfo.getProtocol() + "://" + authInfo.getHost() + ":" + authInfo.getPort() +
-            authInfo.getLoginTarget();
+        String fullUri = authInfo.getProtocol() + "://" + authInfo.getHost() + ":" + authInfo
+                .getPort() + authInfo.getLoginTarget();
         HttpPost httpPost = new HttpPost(fullUri);
         List<NameValuePair> formParams = new ArrayList<>();
-        formParams.add(
-            new BasicNameValuePair(authInfo.getUsernameFormStr(), authInfo.getUsername()));
-        formParams.add(
-            new BasicNameValuePair(authInfo.getPasswordFormStr(), authInfo.getPassword()));
+        formParams.add(new BasicNameValuePair(authInfo.getUsernameFormStr(), authInfo
+                .getUsername()));
+        formParams.add(new BasicNameValuePair(authInfo.getPasswordFormStr(), authInfo
+                .getPassword()));
 
         try {
             UrlEncodedFormEntity entity = new UrlEncodedFormEntity(formParams, "UTF-8");
             httpPost.setEntity(entity);
             httpClient.execute(httpPost);
-            logger.debug("Successfully Logged in with user: " + authInfo.getUsername() + " to: " +
-                         authInfo.getHost());
+            logger.debug("Successfully Logged in with user: " + authInfo.getUsername() + " to: "
+                    + authInfo.getHost());
         } catch (UnsupportedEncodingException e) {
-            logger.error("Encountered a non supported encoding while trying to login to: " +
-                         authInfo.getHost(), e);
+            logger.error("Encountered a non supported encoding while trying to login to: "
+                    + authInfo.getHost(), e);
         } catch (ClientProtocolException e) {
-            logger.error("While trying to login to: " + authInfo.getHost() +
-                         " - Client protocol not supported", e);
+            logger.error("While trying to login to: " + authInfo.getHost()
+                    + " - Client protocol not supported", e);
         } catch (IOException e) {
-            logger.error(
-                "While trying to login to: " + authInfo.getHost() + " - Error making request", e);
+            logger.error("While trying to login to: " + authInfo.getHost()
+                    + " - Error making request", e);
         }
     }
 
-    public PageFetchResult fetchPage(WebURL webUrl)
-        throws InterruptedException, IOException, PageBiggerThanMaxSizeException {
+    public PageFetchResult fetchPage(WebURL webUrl) throws InterruptedException, IOException,
+            PageBiggerThanMaxSizeException {
         // Getting URL, setting headers & content
         PageFetchResult fetchResult = new PageFetchResult();
         String toFetchURL = webUrl.getURL();
@@ -248,8 +224,8 @@ public class PageFetcher extends Configurable {
             // Applying Politeness delay
             synchronized (mutex) {
                 long now = (new Date()).getTime();
-                if ((now - lastFetchTime) < config.getPolitenessDelay()) {
-                    Thread.sleep(config.getPolitenessDelay() - (now - lastFetchTime));
+                if ((now - lastFetchTime) < configuration.getPolitenessDelay()) {
+                    Thread.sleep(configuration.getPolitenessDelay() - (now - lastFetchTime));
                 }
                 lastFetchTime = (new Date()).getTime();
             }
@@ -262,18 +238,17 @@ public class PageFetcher extends Configurable {
             int statusCode = response.getStatusLine().getStatusCode();
 
             // If Redirect ( 3xx )
-            if (statusCode == HttpStatus.SC_MOVED_PERMANENTLY ||
-                statusCode == HttpStatus.SC_MOVED_TEMPORARILY ||
-                statusCode == HttpStatus.SC_MULTIPLE_CHOICES ||
-                statusCode == HttpStatus.SC_SEE_OTHER ||
-                statusCode == HttpStatus.SC_TEMPORARY_REDIRECT || statusCode ==
-                                                                  308) { // todo follow
-              // https://issues.apache.org/jira/browse/HTTPCORE-389
+            if (statusCode == HttpStatus.SC_MOVED_PERMANENTLY
+                    || statusCode == HttpStatus.SC_MOVED_TEMPORARILY
+                    || statusCode == HttpStatus.SC_MULTIPLE_CHOICES
+                    || statusCode == HttpStatus.SC_SEE_OTHER
+                    || statusCode == HttpStatus.SC_TEMPORARY_REDIRECT || statusCode == 308) {
+                // https://issues.apache.org/jira/browse/HTTPCORE-389
 
                 Header header = response.getFirstHeader("Location");
                 if (header != null) {
-                    String movedToUrl =
-                        URLCanonicalizer.getCanonicalURL(header.getValue(), toFetchURL);
+                    String movedToUrl = URLCanonicalizer.getCanonicalURL(header.getValue(),
+                            toFetchURL);
                     fetchResult.setMovedToUrl(movedToUrl);
                 }
             } else if (statusCode >= 200 && statusCode <= 299) { // is 2XX, everything looks ok
@@ -297,8 +272,8 @@ public class PageFetcher extends Configurable {
                             size = Integer.parseInt(length.getValue());
                         }
                     }
-                    if (size > config.getMaxDownloadSize()) {
-                        //fix issue #52 - consume entity
+                    if (size > configuration.getMaxDownloadSize()) {
+                        // fix issue #52 - consume entity
                         response.close();
                         throw new PageBiggerThanMaxSizeException(size);
                     }
@@ -326,7 +301,8 @@ public class PageFetcher extends Configurable {
      * Creates a new HttpUriRequest for the given url. The default is to create a HttpGet without
      * any further configuration. Subclasses may override this method and provide their own logic.
      *
-     * @param url the url to be fetched
+     * @param url
+     *            the url to be fetched
      * @return the HttpUriRequest for the given url
      */
     protected HttpUriRequest newHttpUriRequest(String url) {
