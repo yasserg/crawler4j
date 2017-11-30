@@ -32,29 +32,33 @@ import edu.uci.ics.crawler4j.url.WebURL;
  * @author Yasser Ganjisaffar
  */
 
-public class Frontier extends Configurable {
-    protected static final Logger logger = LoggerFactory.getLogger(Frontier.class);
+public class Frontier {
+
+    private static final Logger logger = LoggerFactory.getLogger(Frontier.class);
 
     private static final int IN_PROCESS_RESCHEDULE_BATCH_SIZE = 100;
 
-    protected PageQueue pendingPageQueue;
+    private final CrawlConfig config;
 
-    protected PageQueue inprocessPageQueue;
+    private final PageStatistics pageStatistics;
 
-    protected final Object mutex = new Object();
+    private final PageQueue pendingPageQueue;
 
-    protected final Object waitingList = new Object();
+    private final PageQueue inprocessPageQueue;
 
-    protected boolean isFinished = false;
+    private final Object mutex = new Object();
 
-    protected long scheduledPages;
+    private final Object waitingList = new Object();
 
-    protected PageStatistics pageStatistics;
+    private long scheduledPages;
+
+    private boolean isFinished = false;
 
     public Frontier(CrawlConfig config) {
-        super(config);
+        super();
+        this.config = config;
         this.pageStatistics = config.getPageStatistics();
-        pendingPageQueue = config.getPendingPageQueue();
+        this.pendingPageQueue = config.getPendingPageQueue();
 
         if (config.isResumableCrawling()) {
             scheduledPages = pageStatistics.get(PageStatisticsType.SCHEDULED_PAGES);
@@ -72,8 +76,8 @@ public class Frontier extends Configurable {
                 }
             }
         } else {
-            inprocessPageQueue = null;
             scheduledPages = 0;
+            inprocessPageQueue = null;
         }
     }
 
@@ -158,7 +162,7 @@ public class Frontier extends Configurable {
         pageStatistics.increment(PageStatisticsType.PROCESSED_PAGES);
         if (null != inprocessPageQueue) {
             if (!inprocessPageQueue.deleteRecord(webURL)) {
-                logger.warn("Could not remove: {} from list of processed pages.", webURL.getURL());
+                logger.warn("Could not remove: {} from list of in process pages.", webURL.getURL());
             }
         }
     }
@@ -184,8 +188,8 @@ public class Frontier extends Configurable {
     }
 
     public void close() {
-        pendingPageQueue.close();
         pageStatistics.close();
+        pendingPageQueue.close();
         if (null != inprocessPageQueue) {
             inprocessPageQueue.close();
         }
