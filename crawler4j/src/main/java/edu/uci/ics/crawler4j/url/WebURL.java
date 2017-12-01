@@ -17,160 +17,170 @@
 
 package edu.uci.ics.crawler4j.url;
 
-import java.io.Serializable;
-
 import java.util.Map;
-
-import com.sleepycat.persist.model.Entity;
-import com.sleepycat.persist.model.PrimaryKey;
 
 /**
  * @author Yasser Ganjisaffar
  */
 
-@Entity
-public class WebURL implements Serializable {
+public class WebURL {
 
-    private static final long serialVersionUID = 1L;
-
-    @PrimaryKey
-    private String url;
-
-    private int docid;
-    private int parentDocid;
-    private String parentUrl;
-    private short depth;
-    private String domain;
-    private String subDomain;
-    private String path;
-    private String anchor;
     private byte priority;
+
+    private short depth;
+
+    private int id;
+
+    private int parentId;
+
+    private String uRL;
+
+    private String subDomain;
+
+    private String domain;
+
+    private String path;
+
+    private String parentURL;
+
+    private String anchor;
+
     private String tag;
+
     private Map<String, String> attributes;
-
-    /**
-     * @return unique document id assigned to this Url.
-     */
-    public int getDocid() {
-        return docid;
-    }
-
-    public void setDocid(int docid) {
-        this.docid = docid;
-    }
-
-    /**
-     * @return Url string
-     */
-    public String getURL() {
-        return url;
-    }
-
-    public void setURL(String url) {
-        this.url = url;
-
-        int domainStartIdx = url.indexOf("//") + 2;
-        int domainEndIdx = url.indexOf('/', domainStartIdx);
-        domainEndIdx = (domainEndIdx > domainStartIdx) ? domainEndIdx : url.length();
-        domain = url.substring(domainStartIdx, domainEndIdx);
-        subDomain = "";
-        String[] parts = domain.split("\\.");
-        if (parts.length > 2) {
-            domain = parts[parts.length - 2] + "." + parts[parts.length - 1];
-            int limit = 2;
-            if (TLDList.getInstance().contains(domain)) {
-                domain = parts[parts.length - 3] + "." + domain;
-                limit = 3;
-            }
-            for (int i = 0; i < (parts.length - limit); i++) {
-                if (!subDomain.isEmpty()) {
-                    subDomain += ".";
-                }
-                subDomain += parts[i];
-            }
-        }
-        path = url.substring(domainEndIdx);
-        int pathEndIdx = path.indexOf('?');
-        if (pathEndIdx >= 0) {
-            path = path.substring(0, pathEndIdx);
-        }
-    }
-
-    /**
-     * @return
-     *      unique document id of the parent page. The parent page is the
-     *      page in which the Url of this page is first observed.
-     */
-    public int getParentDocid() {
-        return parentDocid;
-    }
-
-    public void setParentDocid(int parentDocid) {
-        this.parentDocid = parentDocid;
-    }
-
-    /**
-     * @return
-     *      url of the parent page. The parent page is the page in which
-     *      the Url of this page is first observed.
-     */
-    public String getParentUrl() {
-        return parentUrl;
-    }
-
-    public void setParentUrl(String parentUrl) {
-        this.parentUrl = parentUrl;
-    }
-
-    /**
-     * @return
-     *      crawl depth at which this Url is first observed. Seed Urls
-     *      are at depth 0. Urls that are extracted from seed Urls are at depth 1, etc.
-     */
-    public short getDepth() {
-        return depth;
-    }
-
-    public void setDepth(short depth) {
-        this.depth = depth;
-    }
-
-    /**
-     * @return
-     *      domain of this Url. For 'http://www.example.com/sample.htm', domain will be 'example
-     *      .com'
-     */
-    public String getDomain() {
-        return domain;
-    }
 
     public String getSubDomain() {
         return subDomain;
     }
 
     /**
-     * @return
-     *      path of this Url. For 'http://www.example.com/sample.htm', domain will be 'sample.htm'
+     * @return domain of this Url. For 'http://www.example.com/sample.htm', domain will be 'example
+     *         .com'
+     */
+    public String getDomain() {
+        return domain;
+    }
+
+    /**
+     * @return path of this Url. For 'http://www.example.com/sample.htm', domain will be
+     *         'sample.htm'
      */
     public String getPath() {
         return path;
     }
 
-    public void setPath(String path) {
-        this.path = path;
+    public String getAttribute(String key) {
+        if (null == attributes || !attributes.containsKey(key)) {
+            return "";
+        }
+        return attributes.get(key);
     }
 
-    /**
-     * @return
-     *      anchor string. For example, in <a href="example.com">A sample anchor</a>
-     *      the anchor string is 'A sample anchor'
-     */
-    public String getAnchor() {
-        return anchor;
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((anchor == null) ? 0 : anchor.hashCode());
+        result = prime * result + ((attributes == null) ? 0 : attributes.hashCode());
+        result = prime * result + depth;
+        result = prime * result + ((domain == null) ? 0 : domain.hashCode());
+        result = prime * result + id;
+        result = prime * result + parentId;
+        result = prime * result + ((parentURL == null) ? 0 : parentURL.hashCode());
+        result = prime * result + ((path == null) ? 0 : path.hashCode());
+        result = prime * result + priority;
+        result = prime * result + ((subDomain == null) ? 0 : subDomain.hashCode());
+        result = prime * result + ((tag == null) ? 0 : tag.hashCode());
+        result = prime * result + ((uRL == null) ? 0 : uRL.hashCode());
+        return result;
     }
 
-    public void setAnchor(String anchor) {
-        this.anchor = anchor;
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        WebURL other = (WebURL) obj;
+        if (anchor == null) {
+            if (other.anchor != null) {
+                return false;
+            }
+        } else if (!anchor.equals(other.anchor)) {
+            return false;
+        }
+        if (attributes == null) {
+            if (other.attributes != null) {
+                return false;
+            }
+        } else if (!attributes.equals(other.attributes)) {
+            return false;
+        }
+        if (depth != other.depth) {
+            return false;
+        }
+        if (domain == null) {
+            if (other.domain != null) {
+                return false;
+            }
+        } else if (!domain.equals(other.domain)) {
+            return false;
+        }
+        if (id != other.id) {
+            return false;
+        }
+        if (parentId != other.parentId) {
+            return false;
+        }
+        if (parentURL == null) {
+            if (other.parentURL != null) {
+                return false;
+            }
+        } else if (!parentURL.equals(other.parentURL)) {
+            return false;
+        }
+        if (path == null) {
+            if (other.path != null) {
+                return false;
+            }
+        } else if (!path.equals(other.path)) {
+            return false;
+        }
+        if (priority != other.priority) {
+            return false;
+        }
+        if (subDomain == null) {
+            if (other.subDomain != null) {
+                return false;
+            }
+        } else if (!subDomain.equals(other.subDomain)) {
+            return false;
+        }
+        if (tag == null) {
+            if (other.tag != null) {
+                return false;
+            }
+        } else if (!tag.equals(other.tag)) {
+            return false;
+        }
+        if (uRL == null) {
+            if (other.uRL != null) {
+                return false;
+            }
+        } else if (!uRL.equals(other.uRL)) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return uRL;
     }
 
     /**
@@ -184,9 +194,87 @@ public class WebURL implements Serializable {
         this.priority = priority;
     }
 
+    public short getDepth() {
+        return depth;
+    }
+
+    public void setDepth(short depth) {
+        this.depth = depth;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getParentId() {
+        return parentId;
+    }
+
+    public void setParentId(int parentId) {
+        this.parentId = parentId;
+    }
+
+    public String getURL() {
+        return uRL;
+    }
+
+    public void setURL(String uRL) {
+        this.uRL = uRL;
+
+        int domainStartIdx = uRL.indexOf("//") + 2;
+        int domainEndIdx = uRL.indexOf('/', domainStartIdx);
+        domainEndIdx = (domainStartIdx < domainEndIdx) ? domainEndIdx : uRL.length();
+        domain = uRL.substring(domainStartIdx, domainEndIdx);
+        subDomain = "";
+        String[] parts = domain.split("\\.");
+        if (2 < parts.length) {
+            domain = parts[parts.length - 2] + "." + parts[parts.length - 1];
+            int limit = 2;
+            if (TLDList.getInstance().contains(domain)) {
+                domain = parts[parts.length - 3] + "." + domain;
+                limit = 3;
+            }
+            for (int i = 0; i < (parts.length - limit); i++) {
+                if (!subDomain.isEmpty()) {
+                    subDomain += ".";
+                }
+                subDomain += parts[i];
+            }
+        }
+        path = uRL.substring(domainEndIdx);
+        int pathEndIdx = path.indexOf('?');
+        if (0 <= pathEndIdx) {
+            path = path.substring(0, pathEndIdx);
+        }
+    }
+
+    public String getParentURL() {
+        return parentURL;
+    }
+
+    public void setParentURL(String parentURL) {
+        this.parentURL = parentURL;
+    }
+
+    /**
+     * @return anchor string. For example, in <a href="example.com">A sample anchor</a> the anchor
+     *         string is 'A sample anchor'
+     */
+    public String getAnchor() {
+        return anchor;
+    }
+
+    public void setAnchor(String anchor) {
+        this.anchor = anchor;
+    }
+
     /**
      * @return tag in which this URL is found
-     * */
+     */
     public String getTag() {
         return tag;
     }
@@ -195,42 +283,8 @@ public class WebURL implements Serializable {
         this.tag = tag;
     }
 
-    public Map<String, String> getAttributes() {
-        return attributes;
-    }
-
     public void setAttributes(Map<String, String> attributes) {
         this.attributes = attributes;
     }
 
-    public String getAttribute(String name) {
-        if (attributes == null) {
-            return "";
-        }
-        return attributes.getOrDefault(name, "");
-    }
-
-    @Override
-    public int hashCode() {
-        return url.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if ((o == null) || (getClass() != o.getClass())) {
-            return false;
-        }
-
-        WebURL otherUrl = (WebURL) o;
-        return (url != null) && url.equals(otherUrl.getURL());
-
-    }
-
-    @Override
-    public String toString() {
-        return url;
-    }
 }

@@ -70,7 +70,7 @@ public class StatusHandlerCrawler extends DefaultWebCrawler {
         if (statusCode != HttpStatus.SC_OK) {
             if (statusCode == HttpStatus.SC_NOT_FOUND) {
                 logger.warn("Broken link: {}, this link was found in page: {}", webUrl.getURL(),
-                        webUrl.getParentUrl());
+                        webUrl.getParentURL());
             } else {
                 logger.warn("Non success status for link: {} status code: {}, description: ", webUrl
                         .getURL(), statusCode, statusDescription);

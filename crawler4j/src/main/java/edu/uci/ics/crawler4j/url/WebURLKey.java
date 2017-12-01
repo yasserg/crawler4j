@@ -16,7 +16,7 @@ public class WebURLKey {
         super();
         this.priority = webURL.getPriority();
         this.depth = Byte.MAX_VALUE < webURL.getDepth() ? Byte.MAX_VALUE : (byte) webURL.getDepth();
-        this.id = webURL.getDocid();
+        this.id = webURL.getId();
     }
 
     public byte getPriority() {

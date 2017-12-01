@@ -284,14 +284,14 @@ public class DefaultWebCrawler implements WebCrawler {
 
             WebURL webURL = new WebURL();
             webURL.setURL(movedToUrl);
-            webURL.setParentDocid(url.getParentDocid());
-            webURL.setParentUrl(url.getParentUrl());
+            webURL.setParentId(url.getParentId());
+            webURL.setParentURL(url.getParentURL());
             webURL.setDepth(url.getDepth());
-            webURL.setDocid(-1);
+            webURL.setId(-1);
             webURL.setAnchor(url.getAnchor());
             if (shouldVisit(page, webURL)) {
                 if (!shouldFollowLinksIn(webURL) || robotstxtServer.allows(webURL)) {
-                    webURL.setDocid(pageHarvests.add(movedToUrl));
+                    webURL.setId(pageHarvests.add(movedToUrl));
                     frontier.schedule(webURL);
                 } else {
                     logger.debug("Not visiting: {} as per the server's " + "\"robots.txt\" policy",
@@ -313,7 +313,7 @@ public class DefaultWebCrawler implements WebCrawler {
                 return;
             }
             url.setURL(fetchResult.getFetchedUrl());
-            url.setDocid(pageHarvests.add(fetchResult.getFetchedUrl()));
+            url.setId(pageHarvests.add(fetchResult.getFetchedUrl()));
         }
 
         if (!fetchResult.fetchContent(page, configuration.getMaxDownloadSize())) {
@@ -331,16 +331,16 @@ public class DefaultWebCrawler implements WebCrawler {
             ParseData parseData = page.getParseData();
             List<WebURL> toSchedule = new ArrayList<>();
             for (WebURL webURL : parseData.getOutgoingUrls()) {
-                webURL.setParentDocid(url.getDocid());
-                webURL.setParentUrl(url.getURL());
-                Integer newdocid = pageHarvests.get(webURL.getURL());
-                if (null != newdocid && 0 < newdocid) {
+                webURL.setParentId(url.getId());
+                webURL.setParentURL(url.getURL());
+                Integer newId = pageHarvests.get(webURL.getURL());
+                if (null != newId && 0 < newId) {
                     // This is not the first time that this Url is visited. So, we set the
                     // depth to a negative number.
                     webURL.setDepth((short) -1);
-                    webURL.setDocid(newdocid);
+                    webURL.setId(newId);
                 } else {
-                    webURL.setDocid(-1);
+                    webURL.setId(-1);
                     webURL.setDepth((short) (url.getDepth() + 1));
                     if (-1 != configuration.getMaxDepthOfCrawling() && configuration
                             .getMaxDepthOfCrawling() <= url.getDepth()) {
@@ -355,7 +355,7 @@ public class DefaultWebCrawler implements WebCrawler {
                                 logger.debug("Not visiting: {} as per the server's "
                                         + "\"robots.txt\" policy", webURL.getURL());
                             } else {
-                                webURL.setDocid(pageHarvests.add(webURL.getURL()));
+                                webURL.setId(pageHarvests.add(webURL.getURL()));
                                 toSchedule.add(webURL);
                             }
                         }

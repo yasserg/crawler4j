@@ -57,9 +57,9 @@ public class BasicCrawler extends DefaultWebCrawler {
 
     @Override
     public void visit(Page page) {
-        int docid = page.getWebURL().getDocid();
+        int docid = page.getWebURL().getId();
         String url = page.getWebURL().getURL();
-        int parentDocid = page.getWebURL().getParentDocid();
+        int parentDocid = page.getWebURL().getParentId();
 
         logger.debug("Docid: {}", docid);
         logger.info("URL: {}", url);

@@ -81,7 +81,7 @@ public abstract class AbstractCrawlController<T extends WebCrawler> implements C
 
             WebURL webUrl = new WebURL();
             webUrl.setURL(canonicalUrl);
-            webUrl.setDocid(pageHarvests.get(canonicalUrl));
+            webUrl.setId(pageHarvests.get(canonicalUrl));
             webUrl.setDepth((short) 0);
             if (robotstxtServer.allows(webUrl)) {
                 frontier.schedule(webUrl);
