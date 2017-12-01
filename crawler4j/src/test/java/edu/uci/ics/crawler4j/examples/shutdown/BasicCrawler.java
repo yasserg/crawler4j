@@ -20,21 +20,34 @@ package edu.uci.ics.crawler4j.examples.shutdown;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import edu.uci.ics.crawler4j.CrawlerConfiguration;
 import edu.uci.ics.crawler4j.crawler.*;
-import edu.uci.ics.crawler4j.parser.HtmlParseData;
+import edu.uci.ics.crawler4j.crawler.controller.CrawlController;
+import edu.uci.ics.crawler4j.fetcher.PageFetcher;
+import edu.uci.ics.crawler4j.frontier.Frontier;
+import edu.uci.ics.crawler4j.frontier.pageharvests.PageHarvests;
+import edu.uci.ics.crawler4j.parser.*;
+import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
 import edu.uci.ics.crawler4j.url.WebURL;
 
 /**
  * @author Yasser Ganjisaffar
  */
 
-public class BasicCrawler extends WebCrawler {
+public class BasicCrawler extends DefaultWebCrawler {
 
     private static final Pattern FILTERS = Pattern.compile(
             ".*(\\.(css|js|bmp|gif|jpe?g|png|tiff?|mid|mp2|mp3|mp4|wav|avi|mov|mpeg|ram|m4v|pdf"
                     + "|rm|smil|wmv|swf|wma|zip|rar|gz))$");
 
     private static final String DOMAIN = "http://www.ics.uci.edu/";
+
+    public BasicCrawler(Integer id, CrawlerConfiguration configuration, CrawlController controller,
+            PageFetcher pageFetcher, RobotstxtServer robotstxtServer, PageHarvests pageHarvests,
+            Frontier frontier, Parser parser) {
+        super(id, configuration, controller, pageFetcher, robotstxtServer, pageHarvests, frontier,
+                parser);
+    }
 
     @Override
     public boolean shouldVisit(Page referringPage, WebURL url) {

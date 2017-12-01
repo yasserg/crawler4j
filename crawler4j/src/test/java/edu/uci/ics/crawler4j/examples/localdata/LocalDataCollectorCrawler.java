@@ -21,11 +21,17 @@ import java.io.UnsupportedEncodingException;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import edu.uci.ics.crawler4j.CrawlerConfiguration;
 import edu.uci.ics.crawler4j.crawler.*;
-import edu.uci.ics.crawler4j.parser.HtmlParseData;
+import edu.uci.ics.crawler4j.crawler.controller.CrawlController;
+import edu.uci.ics.crawler4j.fetcher.PageFetcher;
+import edu.uci.ics.crawler4j.frontier.Frontier;
+import edu.uci.ics.crawler4j.frontier.pageharvests.PageHarvests;
+import edu.uci.ics.crawler4j.parser.*;
+import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
 import edu.uci.ics.crawler4j.url.WebURL;
 
-public class LocalDataCollectorCrawler extends WebCrawler {
+public class LocalDataCollectorCrawler extends DefaultWebCrawler {
 
     private static final Pattern FILTERS = Pattern.compile(
             ".*(\\.(css|js|bmp|gif|jpe?g|png|tiff?|mid|mp2|mp3|mp4|wav|avi|mov|mpeg|ram|m4v|pdf"
@@ -33,7 +39,11 @@ public class LocalDataCollectorCrawler extends WebCrawler {
 
     CrawlStat myCrawlStat;
 
-    public LocalDataCollectorCrawler() {
+    public LocalDataCollectorCrawler(Integer id, CrawlerConfiguration configuration,
+            CrawlController controller, PageFetcher pageFetcher, RobotstxtServer robotstxtServer,
+            PageHarvests pageHarvests, Frontier frontier, Parser parser) {
+        super(id, configuration, controller, pageFetcher, robotstxtServer, pageHarvests, frontier,
+                parser);
         myCrawlStat = new CrawlStat();
     }
 
@@ -69,7 +79,7 @@ public class LocalDataCollectorCrawler extends WebCrawler {
      * finished
      */
     @Override
-    public Object getMyLocalData() {
+    public Object getData() {
         return myCrawlStat;
     }
 
@@ -78,7 +88,7 @@ public class LocalDataCollectorCrawler extends WebCrawler {
      * you need here.
      */
     @Override
-    public void onBeforeExit() {
+    public void onStop() {
         dumpMyData();
     }
 

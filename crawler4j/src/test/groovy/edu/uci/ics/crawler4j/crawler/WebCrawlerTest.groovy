@@ -9,6 +9,10 @@ import com.github.tomakehurst.wiremock.junit.WireMockRule
 
 import edu.uci.ics.crawler4j.CrawlerConfiguration
 import edu.uci.ics.crawler4j.crawler.controller.*
+import edu.uci.ics.crawler4j.fetcher.PageFetcher
+import edu.uci.ics.crawler4j.frontier.Frontier
+import edu.uci.ics.crawler4j.frontier.pageharvests.PageHarvests
+import edu.uci.ics.crawler4j.parser.Parser
 import edu.uci.ics.crawler4j.robotstxt.*
 import edu.uci.ics.crawler4j.tests.TestCrawlerConfiguration
 import edu.uci.ics.crawler4j.url.WebURL
@@ -87,7 +91,14 @@ class WebCrawlerTest extends Specification {
     }
 }
 
-class ShouldNotVisitPageWebCrawler extends WebCrawler {
+class ShouldNotVisitPageWebCrawler extends DefaultWebCrawler {
+
+    ShouldNotVisitPageWebCrawler(Integer id, CrawlerConfiguration configuration,
+    CrawlController controller, PageFetcher pageFetcher, RobotstxtServer robotstxtServer,
+    PageHarvests pageHarvests, Frontier frontier, Parser parser){
+        super(id, configuration,controller, pageFetcher, robotstxtServer,
+        pageHarvests, frontier, parser);
+    }
 
     @Override
     boolean shouldFollowLinksIn(WebURL url) {

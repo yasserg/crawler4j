@@ -1,8 +1,12 @@
 package edu.uci.ics.crawler4j.crawler.controller;
 
-import java.util.*;
+import java.util.Collection;
 
 import edu.uci.ics.crawler4j.crawler.WebCrawler;
+import edu.uci.ics.crawler4j.fetcher.PageFetcher;
+import edu.uci.ics.crawler4j.frontier.Frontier;
+import edu.uci.ics.crawler4j.frontier.pageharvests.PageHarvests;
+import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
 
 public interface CrawlController {
 
@@ -90,5 +94,13 @@ public interface CrawlController {
     void shutdown();
 
     boolean isShuttingDown();
+
+    PageFetcher getPageFetcher();
+
+    RobotstxtServer getRobotstxtServer();
+
+    PageHarvests getPageHarvests();
+
+    Frontier getFrontier();
 
 }

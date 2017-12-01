@@ -18,16 +18,12 @@
 package edu.uci.ics.crawler4j.examples.localdata;
 
 import org.apache.http.HttpStatus;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.slf4j.*;
 
 import edu.uci.ics.crawler4j.*;
 import edu.uci.ics.crawler4j.crawler.Page;
-import edu.uci.ics.crawler4j.fetcher.PageFetchResult;
-import edu.uci.ics.crawler4j.fetcher.PageFetcher;
-import edu.uci.ics.crawler4j.parser.HtmlParseData;
-import edu.uci.ics.crawler4j.parser.ParseData;
-import edu.uci.ics.crawler4j.parser.Parser;
+import edu.uci.ics.crawler4j.fetcher.*;
+import edu.uci.ics.crawler4j.parser.*;
 import edu.uci.ics.crawler4j.url.WebURL;
 
 /**
@@ -35,17 +31,19 @@ import edu.uci.ics.crawler4j.url.WebURL;
  * its title and text.
  */
 public class Downloader {
+
     private static final Logger logger = LoggerFactory.getLogger(Downloader.class);
+
+    private final CrawlerConfiguration configuration;
 
     private final Parser parser;
 
     private final PageFetcher pageFetcher;
 
     public Downloader() throws InstantiationException, IllegalAccessException {
-        CrawlerConfiguration config = new CrawlerConfiguration(
-                new SleepyCatCrawlPersistentConfiguration());
-        parser = new Parser(config);
-        pageFetcher = new PageFetcher(config);
+        configuration = new CrawlerConfiguration(new SleepyCatCrawlPersistentConfiguration());
+        parser = new Parser(configuration);
+        pageFetcher = new PageFetcher(configuration);
     }
 
     public static void main(String[] args) throws InstantiationException, IllegalAccessException {
@@ -83,7 +81,7 @@ public class Downloader {
             fetchResult = pageFetcher.fetchPage(curURL);
             if (fetchResult.getStatusCode() == HttpStatus.SC_OK) {
                 Page page = new Page(curURL);
-                fetchResult.fetchContent(page, pageFetcher.getConfig().getMaxDownloadSize());
+                fetchResult.fetchContent(page, configuration.getMaxDownloadSize());
                 parser.parse(page, curURL.getURL());
                 return page;
             }

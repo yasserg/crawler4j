@@ -27,8 +27,6 @@ public class CrawlControllerMonitor<T extends WebCrawler> implements Runnable {
 
     private final CrawlerConfiguration configuration;
 
-    private final CrawlController controller;
-
     private final List<Thread> threads;
 
     private final List<T> crawlers;
@@ -45,13 +43,12 @@ public class CrawlControllerMonitor<T extends WebCrawler> implements Runnable {
 
     private final Object waitingLock;
 
-    public CrawlControllerMonitor(CrawlerConfiguration configuration, CrawlController controller,
-            List<Thread> threads, List<T> crawlers, WebCrawlerFactory<T> crawlerFactory,
-            Frontier frontier, List<Object> crawlerData, PageFetcher pageFetcher,
-            PageHarvests pageHarvests, Object waitingLock) {
+    public CrawlControllerMonitor(CrawlerConfiguration configuration, List<Thread> threads,
+            List<T> crawlers, WebCrawlerFactory<T> crawlerFactory, Frontier frontier,
+            List<Object> crawlerData, PageFetcher pageFetcher, PageHarvests pageHarvests,
+            Object waitingLock) {
         super();
         this.configuration = configuration;
-        this.controller = controller;
         this.threads = threads;
         this.crawlers = crawlers;
         this.crawlerFactory = crawlerFactory;
@@ -73,10 +70,10 @@ public class CrawlControllerMonitor<T extends WebCrawler> implements Runnable {
                         Thread thread = threads.get(i);
                         if (!thread.isAlive()) {
                             if (!shuttingDown) {
-                                crawlerFactory.replaceInstance(crawlers.get(i), thread, controller,
-                                        threads, crawlers);
+                                crawlerFactory.replaceInstance(crawlers.get(i), thread, threads,
+                                        crawlers);
                             }
-                        } else if (crawlers.get(i).isNotWaitingForNewURLs()) {
+                        } else if (!crawlers.get(i).isWaitingForNewURLs()) {
                             working = true;
                         }
                     }
@@ -89,7 +86,7 @@ public class CrawlControllerMonitor<T extends WebCrawler> implements Runnable {
                         working = false;
                         for (int i = 0; i < threads.size(); i++) {
                             Thread thread = threads.get(i);
-                            if (thread.isAlive() && crawlers.get(i).isNotWaitingForNewURLs()) {
+                            if (thread.isAlive() && !crawlers.get(i).isWaitingForNewURLs()) {
                                 working = true;
                             }
                         }
@@ -111,8 +108,8 @@ public class CrawlControllerMonitor<T extends WebCrawler> implements Runnable {
                                     "All of the crawlers are stopped. Finishing the process...");
                             frontier.finish();
                             for (T crawler : crawlers) {
-                                crawler.onBeforeExit();
-                                crawlerData.add(crawler.getMyLocalData());
+                                crawler.onStop();
+                                crawlerData.add(crawler.getData());
                             }
 
                             logger.info("Waiting for {} seconds before final clean up...",

@@ -20,14 +20,20 @@ package edu.uci.ics.crawler4j.examples.multiple;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import edu.uci.ics.crawler4j.CrawlerConfiguration;
 import edu.uci.ics.crawler4j.crawler.*;
-import edu.uci.ics.crawler4j.parser.HtmlParseData;
+import edu.uci.ics.crawler4j.crawler.controller.CrawlController;
+import edu.uci.ics.crawler4j.fetcher.PageFetcher;
+import edu.uci.ics.crawler4j.frontier.Frontier;
+import edu.uci.ics.crawler4j.frontier.pageharvests.PageHarvests;
+import edu.uci.ics.crawler4j.parser.*;
+import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
 import edu.uci.ics.crawler4j.url.WebURL;
 
 /**
  * @author Yasser Ganjisaffar
  */
-public class SpecificDomainCrawler extends WebCrawler {
+public class SpecificDomainCrawler extends DefaultWebCrawler {
 
     private static final Pattern FILTERS = Pattern.compile(".*(\\.(css|js|bmp|gif|jpe?g"
             + "|png|tiff?|mid|mp2|mp3|mp4" + "|wav|avi|mov|mpeg|ram|m4v|pdf"
@@ -35,8 +41,11 @@ public class SpecificDomainCrawler extends WebCrawler {
 
     private final String[] myCrawlDomains;
 
-    public SpecificDomainCrawler(String[] myCrawlDomains) {
-        super();
+    public SpecificDomainCrawler(Integer id, CrawlerConfiguration configuration,
+            CrawlController controller, PageFetcher pageFetcher, RobotstxtServer robotstxtServer,
+            PageHarvests pageHarvests, Frontier frontier, Parser parser, String[] myCrawlDomains) {
+        super(id, configuration, controller, pageFetcher, robotstxtServer, pageHarvests, frontier,
+                parser);
         this.myCrawlDomains = myCrawlDomains;
     }
 

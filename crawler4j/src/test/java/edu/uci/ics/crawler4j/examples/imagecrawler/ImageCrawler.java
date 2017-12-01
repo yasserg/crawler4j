@@ -17,16 +17,20 @@
 
 package edu.uci.ics.crawler4j.examples.imagecrawler;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
 import com.google.common.io.Files;
 
-import edu.uci.ics.crawler4j.crawler.Page;
-import edu.uci.ics.crawler4j.crawler.WebCrawler;
-import edu.uci.ics.crawler4j.parser.BinaryParseData;
+import edu.uci.ics.crawler4j.CrawlerConfiguration;
+import edu.uci.ics.crawler4j.crawler.*;
+import edu.uci.ics.crawler4j.crawler.controller.CrawlController;
+import edu.uci.ics.crawler4j.fetcher.PageFetcher;
+import edu.uci.ics.crawler4j.frontier.Frontier;
+import edu.uci.ics.crawler4j.frontier.pageharvests.PageHarvests;
+import edu.uci.ics.crawler4j.parser.*;
+import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
 import edu.uci.ics.crawler4j.url.WebURL;
 
 /**
@@ -34,21 +38,28 @@ import edu.uci.ics.crawler4j.url.WebURL;
  */
 
 /*
- * This class shows how you can crawl images on the web and store them in a
- * folder. This is just for demonstration purposes and doesn't scale for large
- * number of images. For crawling millions of images you would need to store
- * downloaded images in a hierarchy of folders
+ * This class shows how you can crawl images on the web and store them in a folder. This is just for
+ * demonstration purposes and doesn't scale for large number of images. For crawling millions of
+ * images you would need to store downloaded images in a hierarchy of folders
  */
-public class ImageCrawler extends WebCrawler {
+public class ImageCrawler extends DefaultWebCrawler {
 
     private static final Pattern filters = Pattern.compile(
-        ".*(\\.(css|js|mid|mp2|mp3|mp4|wav|avi|mov|mpeg|ram|m4v|pdf" +
-        "|rm|smil|wmv|swf|wma|zip|rar|gz))$");
+            ".*(\\.(css|js|mid|mp2|mp3|mp4|wav|avi|mov|mpeg|ram|m4v|pdf"
+                    + "|rm|smil|wmv|swf|wma|zip|rar|gz))$");
 
     private static final Pattern imgPatterns = Pattern.compile(".*(\\.(bmp|gif|jpe?g|png|tiff?))$");
 
     private static File storageFolder;
+
     private static String[] crawlDomains;
+
+    public ImageCrawler(Integer id, CrawlerConfiguration configuration, CrawlController controller,
+            PageFetcher pageFetcher, RobotstxtServer robotstxtServer, PageHarvests pageHarvests,
+            Frontier frontier, Parser parser) {
+        super(id, configuration, controller, pageFetcher, robotstxtServer, pageHarvests, frontier,
+                parser);
+    }
 
     public static void configure(String[] domain, String storageFolderName) {
         crawlDomains = domain;
@@ -83,9 +94,9 @@ public class ImageCrawler extends WebCrawler {
         String url = page.getWebURL().getURL();
 
         // We are only interested in processing images which are bigger than 10k
-        if (!imgPatterns.matcher(url).matches() ||
-            !((page.getParseData() instanceof BinaryParseData) ||
-              (page.getContentData().length < (10 * 1024)))) {
+        if (!imgPatterns.matcher(url).matches() || !((page
+                .getParseData() instanceof BinaryParseData) || (page.getContentData().length < (10
+                        * 1024)))) {
             return;
         }
 

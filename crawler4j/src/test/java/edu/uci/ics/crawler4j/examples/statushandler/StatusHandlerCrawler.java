@@ -21,17 +21,31 @@ import java.util.regex.Pattern;
 
 import org.apache.http.HttpStatus;
 
+import edu.uci.ics.crawler4j.CrawlerConfiguration;
 import edu.uci.ics.crawler4j.crawler.*;
+import edu.uci.ics.crawler4j.crawler.controller.CrawlController;
+import edu.uci.ics.crawler4j.fetcher.PageFetcher;
+import edu.uci.ics.crawler4j.frontier.Frontier;
+import edu.uci.ics.crawler4j.frontier.pageharvests.PageHarvests;
+import edu.uci.ics.crawler4j.parser.Parser;
+import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
 import edu.uci.ics.crawler4j.url.WebURL;
 
 /**
  * @author Yasser Ganjisaffar
  */
-public class StatusHandlerCrawler extends WebCrawler {
+public class StatusHandlerCrawler extends DefaultWebCrawler {
 
     private static final Pattern FILTERS = Pattern.compile(
             ".*(\\.(css|js|bmp|gif|jpe?g|png|tiff?|mid|mp2|mp3|mp4|wav|avi|mov|mpeg|ram|m4v|pdf"
                     + "|rm|smil|wmv|swf|wma|zip|rar|gz))$");
+
+    public StatusHandlerCrawler(Integer id, CrawlerConfiguration configuration,
+            CrawlController controller, PageFetcher pageFetcher, RobotstxtServer robotstxtServer,
+            PageHarvests pageHarvests, Frontier frontier, Parser parser) {
+        super(id, configuration, controller, pageFetcher, robotstxtServer, pageHarvests, frontier,
+                parser);
+    }
 
     /**
      * You should implement this function to specify whether the given url should be crawled or not
@@ -52,10 +66,8 @@ public class StatusHandlerCrawler extends WebCrawler {
     }
 
     @Override
-    protected void handlePageStatusCode(WebURL webUrl, int statusCode, String statusDescription) {
-
+    public void pageFetched(WebURL webUrl, int statusCode, String statusDescription) {
         if (statusCode != HttpStatus.SC_OK) {
-
             if (statusCode == HttpStatus.SC_NOT_FOUND) {
                 logger.warn("Broken link: {}, this link was found in page: {}", webUrl.getURL(),
                         webUrl.getParentUrl());

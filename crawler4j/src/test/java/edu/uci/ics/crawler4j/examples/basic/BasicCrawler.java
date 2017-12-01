@@ -22,20 +22,33 @@ import java.util.regex.Pattern;
 
 import org.apache.http.Header;
 
+import edu.uci.ics.crawler4j.CrawlerConfiguration;
 import edu.uci.ics.crawler4j.crawler.*;
-import edu.uci.ics.crawler4j.parser.HtmlParseData;
+import edu.uci.ics.crawler4j.crawler.controller.CrawlController;
+import edu.uci.ics.crawler4j.fetcher.PageFetcher;
+import edu.uci.ics.crawler4j.frontier.Frontier;
+import edu.uci.ics.crawler4j.frontier.pageharvests.PageHarvests;
+import edu.uci.ics.crawler4j.parser.*;
+import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
 import edu.uci.ics.crawler4j.url.WebURL;
 
 /**
  * @author Yasser Ganjisaffar
  */
-public class BasicCrawler extends WebCrawler {
+public class BasicCrawler extends DefaultWebCrawler {
 
     private static final Pattern IMAGE_EXTENSIONS = Pattern.compile(".*\\.(bmp|gif|jpg|png)$");
 
+    public BasicCrawler(Integer id, CrawlerConfiguration configuration, CrawlController controller,
+            PageFetcher pageFetcher, RobotstxtServer robotstxtServer, PageHarvests pageHarvests,
+            Frontier frontier, Parser parser) {
+        super(id, configuration, controller, pageFetcher, robotstxtServer, pageHarvests, frontier,
+                parser);
+    }
+
     /**
-     * You should implement this function to specify whether the given url
-     * should be crawled or not (based on your crawling logic).
+     * You should implement this function to specify whether the given url should be crawled or not
+     * (based on your crawling logic).
      */
     @Override
     public boolean shouldVisit(Page referringPage, WebURL url) {
@@ -50,8 +63,7 @@ public class BasicCrawler extends WebCrawler {
     }
 
     /**
-     * This function is called when a page is fetched and ready to be processed
-     * by your program.
+     * This function is called when a page is fetched and ready to be processed by your program.
      */
     @Override
     public void visit(Page page) {

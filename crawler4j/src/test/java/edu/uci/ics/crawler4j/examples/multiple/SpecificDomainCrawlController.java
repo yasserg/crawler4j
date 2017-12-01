@@ -10,8 +10,7 @@ public class SpecificDomainCrawlController extends AbstractCrawlController<Speci
     public SpecificDomainCrawlController(String[] specificDomains,
             CrawlerConfiguration configuration) throws Exception {
         super(configuration);
-        this.factory = new SpecificDomainWebCrawlerFactory(specificDomains, configuration,
-                pageFetcher, robotstxtServer, pageHarvests, frontier);
+        this.factory = new SpecificDomainWebCrawlerFactory(specificDomains, configuration, this);
     }
 
     @Override

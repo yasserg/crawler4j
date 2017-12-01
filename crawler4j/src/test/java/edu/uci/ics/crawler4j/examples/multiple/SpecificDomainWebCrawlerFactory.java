@@ -2,10 +2,8 @@ package edu.uci.ics.crawler4j.examples.multiple;
 
 import edu.uci.ics.crawler4j.CrawlerConfiguration;
 import edu.uci.ics.crawler4j.crawler.DefaultWebCrawlerFactory;
-import edu.uci.ics.crawler4j.fetcher.PageFetcher;
-import edu.uci.ics.crawler4j.frontier.Frontier;
-import edu.uci.ics.crawler4j.frontier.pageharvests.PageHarvests;
-import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
+import edu.uci.ics.crawler4j.crawler.controller.CrawlController;
+import edu.uci.ics.crawler4j.parser.Parser;
 
 public class SpecificDomainWebCrawlerFactory extends
         DefaultWebCrawlerFactory<SpecificDomainCrawler> {
@@ -13,16 +11,18 @@ public class SpecificDomainWebCrawlerFactory extends
     private final String[] myCrawlDomains;
 
     public SpecificDomainWebCrawlerFactory(String[] myCrawlDomains,
-            CrawlerConfiguration crawlerConfiguration, PageFetcher pageFetcher,
-            RobotstxtServer robotstxtServer, PageHarvests pageHarvests, Frontier frontier) {
-        super(SpecificDomainCrawler.class, crawlerConfiguration, pageFetcher, robotstxtServer,
-                pageHarvests, frontier);
+            CrawlerConfiguration crawlerConfiguration, CrawlController crawlController) {
+        super(SpecificDomainCrawler.class, crawlerConfiguration, crawlController);
         this.myCrawlDomains = myCrawlDomains;
     }
 
     @Override
-    protected SpecificDomainCrawler newInstance() {
-        return new SpecificDomainCrawler(myCrawlDomains);
+    protected SpecificDomainCrawler newInstance(Integer id) throws InstantiationException,
+            IllegalAccessException {
+        return new SpecificDomainCrawler(id, crawlerConfiguration, crawlController, crawlController
+                .getPageFetcher(), crawlController.getRobotstxtServer(), crawlController
+                        .getPageHarvests(), crawlController.getFrontier(), new Parser(
+                                crawlerConfiguration), myCrawlDomains);
     }
 
 }

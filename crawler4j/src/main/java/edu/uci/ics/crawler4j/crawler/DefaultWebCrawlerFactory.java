@@ -1,5 +1,6 @@
 package edu.uci.ics.crawler4j.crawler;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 
 import org.slf4j.*;
@@ -18,49 +19,28 @@ public class DefaultWebCrawlerFactory<T extends WebCrawler> implements WebCrawle
 
     private final Class<T> clazz;
 
-    private final CrawlerConfiguration crawlerConfiguration;
+    protected final CrawlerConfiguration crawlerConfiguration;
 
-    private final PageFetcher pageFetcher;
-
-    private final RobotstxtServer robotstxtServer;
-
-    private final PageHarvests pageHarvests;
-
-    private final Frontier frontier;
+    protected final CrawlController crawlController;
 
     private int threadId;
 
     private final Object mutex = new Object();
 
     public DefaultWebCrawlerFactory(Class<T> clazz, CrawlerConfiguration crawlerConfiguration,
-            PageFetcher pageFetcher, RobotstxtServer robotstxtServer, PageHarvests pageHarvests,
-            Frontier frontier) {
+            CrawlController crawlController) {
         this.clazz = clazz;
         this.crawlerConfiguration = crawlerConfiguration;
-        this.pageFetcher = pageFetcher;
-        this.robotstxtServer = robotstxtServer;
-        this.pageHarvests = pageHarvests;
-        this.frontier = frontier;
+        this.crawlController = crawlController;
     }
 
     @Override
-    public T newInstance(CrawlController crawlController, Collection<Thread> threads,
-            Collection<T> crawlers) throws Exception {
+    public T newInstance(Collection<Thread> threads, Collection<T> crawlers) throws Exception {
         synchronized (mutex) {
             int id = ++threadId;
-            T crawler = newInstance();
-            crawler.setId(id);
-            crawler.setConfiguration(crawlerConfiguration);
-            crawler.setController(crawlController);
-            crawler.setParser(new Parser(crawlerConfiguration));
-
-            crawler.setPageFetcher(pageFetcher);
-            crawler.setRobotstxtServer(robotstxtServer);
-            crawler.setPageHarvests(pageHarvests);
-            crawler.setFrontier(frontier);
+            T crawler = newInstance(id);
 
             Thread thread = new Thread(crawler, "Crawler-" + id);
-            crawler.setThread(thread);
             crawlers.add(crawler);
             threads.add(thread);
 
@@ -71,20 +51,26 @@ public class DefaultWebCrawlerFactory<T extends WebCrawler> implements WebCrawle
         }
     }
 
-    protected T newInstance() throws InstantiationException, IllegalAccessException {
-        return clazz.newInstance();
+    protected T newInstance(Integer id) throws InstantiationException, IllegalAccessException,
+            IllegalArgumentException, InvocationTargetException, NoSuchMethodException,
+            SecurityException {
+        return clazz.getConstructor(Integer.class, CrawlerConfiguration.class,
+                CrawlController.class, PageFetcher.class, RobotstxtServer.class, PageHarvests.class,
+                Frontier.class, Parser.class).newInstance(id, crawlerConfiguration, crawlController,
+                        crawlController.getPageFetcher(), crawlController.getRobotstxtServer(),
+                        crawlController.getPageHarvests(), crawlController.getFrontier(),
+                        new Parser(crawlerConfiguration));
     }
 
     @Override
-    public T replaceInstance(T existingCrawler, Thread existingThread,
-            CrawlController crawlController, Collection<Thread> threads, Collection<T> crawlers)
-            throws Exception {
+    public T replaceInstance(T existingCrawler, Thread existingThread, Collection<Thread> threads,
+            Collection<T> crawlers) throws Exception {
         synchronized (mutex) {
             logger.info("Thread {} was dead, I'll recreate it", existingCrawler.getId());
             crawlers.remove(existingCrawler);
             threads.remove(existingThread);
 
-            return newInstance(crawlController, threads, crawlers);
+            return newInstance(threads, crawlers);
         }
     }
 }

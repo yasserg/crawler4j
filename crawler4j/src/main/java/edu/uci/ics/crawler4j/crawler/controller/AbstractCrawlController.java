@@ -117,10 +117,10 @@ public abstract class AbstractCrawlController<T extends WebCrawler> implements C
             List<T> crawlers = new ArrayList<>();
 
             for (int i = 1; i <= configuration.getNumberOfCrawlers(); i++) {
-                crawlerFactory().newInstance(this, threads, crawlers);
+                crawlerFactory().newInstance(threads, crawlers);
             }
 
-            monitor = new CrawlControllerMonitor<>(configuration, this, threads, crawlers,
+            monitor = new CrawlControllerMonitor<>(configuration, threads, crawlers,
                     crawlerFactory(), frontier, crawlerData, pageFetcher, pageHarvests,
                     waitingLock);
             Thread monitorThread = new Thread(monitor);
@@ -175,6 +175,26 @@ public abstract class AbstractCrawlController<T extends WebCrawler> implements C
     @Override
     public boolean isShuttingDown() {
         return shuttingDown;
+    }
+
+    @Override
+    public PageFetcher getPageFetcher() {
+        return this.pageFetcher;
+    }
+
+    @Override
+    public RobotstxtServer getRobotstxtServer() {
+        return this.robotstxtServer;
+    }
+
+    @Override
+    public PageHarvests getPageHarvests() {
+        return this.pageHarvests;
+    }
+
+    @Override
+    public Frontier getFrontier() {
+        return this.frontier;
     }
 
 }

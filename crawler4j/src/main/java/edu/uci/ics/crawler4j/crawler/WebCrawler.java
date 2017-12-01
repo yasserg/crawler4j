@@ -17,20 +17,10 @@
 
 package edu.uci.ics.crawler4j.crawler;
 
-import java.util.*;
-
-import org.apache.http.HttpStatus;
-import org.apache.http.impl.EnglishReasonPhraseCatalog;
-import org.slf4j.*;
-
-import edu.uci.ics.crawler4j.CrawlerConfiguration;
 import edu.uci.ics.crawler4j.crawler.controller.CrawlController;
 import edu.uci.ics.crawler4j.crawler.exceptions.*;
-import edu.uci.ics.crawler4j.fetcher.*;
-import edu.uci.ics.crawler4j.frontier.Frontier;
-import edu.uci.ics.crawler4j.frontier.pageharvests.PageHarvests;
-import edu.uci.ics.crawler4j.parser.*;
-import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
+import edu.uci.ics.crawler4j.fetcher.PageFetchResult;
+import edu.uci.ics.crawler4j.parser.NotAllowedContentException;
 import edu.uci.ics.crawler4j.url.WebURL;
 
 /**
@@ -38,100 +28,17 @@ import edu.uci.ics.crawler4j.url.WebURL;
  *
  * @author Yasser Ganjisaffar
  */
-public class WebCrawler implements Runnable {
+public interface WebCrawler extends Runnable {
 
-    protected static final Logger logger = LoggerFactory.getLogger(WebCrawler.class);
+    int getId();
 
-    /**
-     * The id associated to the crawler thread running this instance
-     */
-    protected int id;
-
-    private CrawlerConfiguration configuration;
-
-    /**
-     * The controller instance that has created this crawler thread. This reference to the
-     * controller can be used for getting configurations of the current crawl or adding new seeds
-     * during runtime.
-     */
-    protected CrawlController controller;
-
-    /**
-     * The thread within which this crawler instance is running.
-     */
-    private Thread thread;
-
-    /**
-     * The parser that is used by this crawler instance to parse the content of the fetched pages.
-     */
-    private Parser parser;
-
-    /**
-     * The fetcher that is used by this crawler instance to fetch the content of pages from the web.
-     */
-    private PageFetcher pageFetcher;
-
-    /**
-     * The RobotstxtServer instance that is used by this crawler instance to determine whether the
-     * crawler is allowed to crawl the content of each page.
-     */
-    private RobotstxtServer robotstxtServer;
-
-    /**
-     * The PageHarvests that is used by this crawler instance to map each URL to a unique id.
-     */
-    private PageHarvests pageHarvests;
-
-    /**
-     * The Frontier object that manages the crawl queue.
-     */
-    private Frontier frontier;
-
-    /**
-     * Is the current crawler instance waiting for new URLs? This field is mainly used by the
-     * controller to detect whether all of the crawler instances are waiting for new URLs and
-     * therefore there is no more work and crawling can be stopped.
-     */
-    private boolean isWaitingForNewURLs = false;
-
-    /**
-     * Get the id of the current crawler instance
-     *
-     * @return the id of the current crawler instance
-     */
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public CrawlController getController() {
-        return controller;
-    }
-
-    public void setController(CrawlController controller) {
-        this.controller = controller;
-    }
+    CrawlController getController();
 
     /**
      * This function is called just before starting the crawl by this crawler instance. It can be
      * used for setting up the data structures or initializations needed by this crawler instance.
      */
-    public void onStart() {
-        // Do nothing by default
-        // Sub-classed can override this to add their custom functionality
-    }
-
-    /**
-     * This function is called just before the termination of the current crawler instance. It can
-     * be used for persisting in-memory data or other finalization tasks.
-     */
-    public void onBeforeExit() {
-        // Do nothing by default
-        // Sub-classed can override this to add their custom functionality
-    }
+    void onStart();
 
     /**
      * This function is called once the header of a page is fetched. It can be overridden by
@@ -145,10 +52,7 @@ public class WebCrawler implements Runnable {
      * @param statusDescription
      *            Html Status COde description
      */
-    protected void handlePageStatusCode(WebURL webUrl, int statusCode, String statusDescription) {
-        // Do nothing by default
-        // Sub-classed can override this to add their custom functionality
-    }
+    void pageFetched(WebURL webUrl, int statusCode, String statusDescription);
 
     /**
      * This function is called before processing of the page's URL It can be overridden by
@@ -159,22 +63,7 @@ public class WebCrawler implements Runnable {
      *            current URL which can be tweaked before processing
      * @return tweaked WebURL
      */
-    @SuppressWarnings("static-method")
-    protected WebURL handleUrlBeforeProcess(WebURL curURL) {
-        return curURL;
-    }
-
-    /**
-     * This function is called if the content of a url is bigger than allowed size.
-     *
-     * @param urlStr
-     *            - The URL which it's content is bigger than allowed size
-     */
-    @SuppressWarnings("static-method")
-    protected void onPageBiggerThanMaxSize(String urlStr, long pageSize) {
-        logger.warn("Skipping a URL: {} which was bigger ( {} ) than max allowed size", urlStr,
-                pageSize);
-    }
+    WebURL onProcessPage(WebURL curURL);
 
     /**
      * This function is called if the crawler encounters a page with a 3xx status code
@@ -182,9 +71,7 @@ public class WebCrawler implements Runnable {
      * @param page
      *            Partial page object
      */
-    protected void onRedirectedStatusCode(Page page) {
-        // Subclasses can override this to add their custom functionality
-    }
+    void onRedirectedStatusCode(Page page);
 
     /**
      * This function is called if the crawler encountered an unexpected http status code ( a status
@@ -199,101 +86,8 @@ public class WebCrawler implements Runnable {
      * @param description
      *            Error Description
      */
-    @SuppressWarnings("static-method")
-    protected void onUnexpectedStatusCode(String urlStr, int statusCode, String contentType,
-            String description) {
-        logger.warn("Skipping URL: {}, StatusCode: {}, {}, {}", urlStr, statusCode, contentType,
-                description);
-        // Do nothing by default (except basic logging)
-        // Sub-classed can override this to add their custom functionality
-    }
-
-    /**
-     * This function is called if the content of a url could not be fetched.
-     *
-     * @param webUrl
-     *            URL which content failed to be fetched
-     */
-    @SuppressWarnings("static-method")
-    protected void onContentFetchError(WebURL webUrl) {
-        logger.warn("Can't fetch content of: {}", webUrl.getURL());
-        // Do nothing by default (except basic logging)
-        // Sub-classed can override this to add their custom functionality
-    }
-
-    /**
-     * This function is called when a unhandled exception was encountered during fetching
-     *
-     * @param webUrl
-     *            URL where a unhandled exception occured
-     */
-    @SuppressWarnings("static-method")
-    protected void onUnhandledException(WebURL webUrl, Throwable e) {
-        String urlStr = (webUrl == null ? "NULL" : webUrl.getURL());
-        logger.warn("Unhandled exception while fetching {}: {}", urlStr, e.getMessage());
-        logger.info("Stacktrace: ", e);
-        // Do nothing by default (except basic logging)
-        // Sub-classed can override this to add their custom functionality
-    }
-
-    /**
-     * This function is called if there has been an error in parsing the content.
-     *
-     * @param webUrl
-     *            URL which failed on parsing
-     */
-    @SuppressWarnings("static-method")
-    protected void onParseError(WebURL webUrl) {
-        logger.warn("Parsing error of: {}", webUrl.getURL());
-        // Do nothing by default (Except logging)
-        // Sub-classed can override this to add their custom functionality
-    }
-
-    /**
-     * The CrawlController instance that has created this crawler instance will call this function
-     * just before terminating this crawler thread. Classes that extend WebCrawler can override this
-     * function to pass their local data to their controller. The controller then puts these local
-     * data in a List that can then be used for processing the local data of crawlers (if needed).
-     *
-     * @return currently NULL
-     */
-    @SuppressWarnings("static-method")
-    public Object getMyLocalData() {
-        return null;
-    }
-
-    @Override
-    public void run() {
-        onStart();
-        while (true) {
-            List<WebURL> assignedURLs = new ArrayList<>(50);
-            isWaitingForNewURLs = true;
-            frontier.getNextURLs(50, assignedURLs);
-            isWaitingForNewURLs = false;
-            if (assignedURLs.isEmpty()) {
-                if (frontier.isFinished()) {
-                    return;
-                }
-                try {
-                    Thread.sleep(3000);
-                } catch (InterruptedException e) {
-                    logger.error("Error occurred", e);
-                }
-            } else {
-                for (WebURL curURL : assignedURLs) {
-                    if (controller.isShuttingDown()) {
-                        logger.info("Exiting because of controller shutdown.");
-                        return;
-                    }
-                    if (curURL != null) {
-                        curURL = handleUrlBeforeProcess(curURL);
-                        processPage(curURL);
-                        frontier.setProcessed(curURL);
-                    }
-                }
-            }
-        }
-    }
+    void handleUnexpectedStatusCode(String urlStr, int statusCode, String contentType,
+            String description);
 
     /**
      * Classes that extends WebCrawler should overwrite this function to tell the crawler whether
@@ -308,16 +102,7 @@ public class WebCrawler implements Runnable {
      * @return if the url should be included in the crawl it returns true, otherwise false is
      *         returned.
      */
-    public boolean shouldVisit(Page referringPage, WebURL url) {
-        if (configuration.isRespectNoFollow()) {
-            return !((referringPage != null && referringPage.getContentType() != null
-                    && referringPage.getContentType().contains("html")
-                    && ((HtmlParseData) referringPage.getParseData()).getMetaTagValue("robots")
-                            .contains("nofollow")) || url.getAttribute("rel").contains("nofollow"));
-        }
-
-        return true;
-    }
+    boolean shouldVisit(Page referringPage, WebURL url);
 
     /**
      * Determine whether links found at the given URL should be added to the queue for crawling. By
@@ -334,10 +119,7 @@ public class WebCrawler implements Runnable {
      *            the URL of the page under consideration
      * @return true if outgoing links from this page should be added to the queue.
      */
-    @SuppressWarnings("static-method")
-    protected boolean shouldFollowLinksIn(WebURL url) {
-        return true;
-    }
+    boolean shouldFollowLinksIn(WebURL url);
 
     /**
      * Classes that extends WebCrawler should overwrite this function to process the content of the
@@ -346,208 +128,61 @@ public class WebCrawler implements Runnable {
      * @param page
      *            the page object that is just fetched and parsed.
      */
-    public void visit(Page page) {
-        // Do nothing by default
-        // Sub-classed should override this to add their custom functionality
-    }
+    void visit(Page page);
 
-    private void processPage(WebURL curURL) {
-        PageFetchResult fetchResult = null;
-        try {
-            if (curURL == null) {
-                return;
-            }
+    void handleRedirect(WebURL url, PageFetchResult fetchResult, Page page);
 
-            fetchResult = pageFetcher.fetchPage(curURL);
-            int statusCode = fetchResult.getStatusCode();
-            handlePageStatusCode(curURL, statusCode, EnglishReasonPhraseCatalog.INSTANCE.getReason(
-                    statusCode, Locale.ENGLISH));
-            // Finds the status reason for all known statuses
+    void handleSuccess(WebURL url, PageFetchResult fetchResult, Page page)
+            throws ContentFetchException, NotAllowedContentException, ParseException;
 
-            Page page = new Page(curURL);
-            page.setFetchResponseHeaders(fetchResult.getResponseHeaders());
-            page.setStatusCode(statusCode);
-            if (statusCode < 200 || statusCode > 299) { // Not 2XX: 2XX status codes indicate
-                                                        // success
-                if (statusCode == HttpStatus.SC_MOVED_PERMANENTLY
-                        || statusCode == HttpStatus.SC_MOVED_TEMPORARILY
-                        || statusCode == HttpStatus.SC_MULTIPLE_CHOICES
-                        || statusCode == HttpStatus.SC_SEE_OTHER
-                        || statusCode == HttpStatus.SC_TEMPORARY_REDIRECT || statusCode == 308) {
-                    // follow https://issues.apache.org/jira/browse/HTTPCORE-389
+    /**
+     * This function is called if the content of a url is bigger than allowed size.
+     *
+     * @param url
+     *            - The URL which it's content is bigger than allowed size
+     */
+    void handlePageSizeBiggerThanMaxSize(String url, long pageSize);
 
-                    page.setRedirect(true);
+    /**
+     * This function is called if there has been an error in parsing the content.
+     *
+     * @param webUrl
+     *            URL which failed on parsing
+     */
+    void handleParseError(WebURL webUrl);
 
-                    String movedToUrl = fetchResult.getMovedToUrl();
-                    if (movedToUrl == null) {
-                        logger.warn("Unexpected error, URL: {} is redirected to NOTHING", curURL);
-                        return;
-                    }
-                    page.setRedirectedToUrl(movedToUrl);
-                    onRedirectedStatusCode(page);
+    /**
+     * This function is called if the content of a url could not be fetched.
+     *
+     * @param webUrl
+     *            URL which content failed to be fetched
+     */
+    void handleContentFetchError(WebURL webUrl);
 
-                    if (configuration.isFollowRedirects()) {
-                        Integer newDocId = pageHarvests.get(movedToUrl);
-                        if (null != newDocId && 0 < newDocId) {
-                            logger.debug("Redirect page: {} is already seen", curURL);
-                            return;
-                        }
+    /**
+     * This function is called when a unhandled exception was encountered during fetching
+     *
+     * @param webUrl
+     *            URL where a unhandled exception occured
+     */
+    void handleUnhandledException(WebURL webUrl, Throwable e);
 
-                        WebURL webURL = new WebURL();
-                        webURL.setURL(movedToUrl);
-                        webURL.setParentDocid(curURL.getParentDocid());
-                        webURL.setParentUrl(curURL.getParentUrl());
-                        webURL.setDepth(curURL.getDepth());
-                        webURL.setDocid(-1);
-                        webURL.setAnchor(curURL.getAnchor());
-                        if (shouldVisit(page, webURL)) {
-                            if (!shouldFollowLinksIn(webURL) || robotstxtServer.allows(webURL)) {
-                                webURL.setDocid(pageHarvests.add(movedToUrl));
-                                frontier.schedule(webURL);
-                            } else {
-                                logger.debug("Not visiting: {} as per the server's "
-                                        + "\"robots.txt\" policy", webURL.getURL());
-                            }
-                        } else {
-                            logger.debug("Not visiting: {} as per your \"shouldVisit\" policy",
-                                    webURL.getURL());
-                        }
-                    }
-                } else { // All other http codes other than 3xx & 200
-                    String description = EnglishReasonPhraseCatalog.INSTANCE.getReason(fetchResult
-                            .getStatusCode(), Locale.ENGLISH); // Finds
-                    // the status reason for all known statuses
-                    String contentType = fetchResult.getEntity() == null ? "" : fetchResult
-                            .getEntity().getContentType() == null ? "" : fetchResult.getEntity()
-                                    .getContentType().getValue();
-                    onUnexpectedStatusCode(curURL.getURL(), fetchResult.getStatusCode(),
-                            contentType, description);
-                }
+    boolean isWaitingForNewURLs();
 
-            } else { // if status code is 200
-                if (!curURL.getURL().equals(fetchResult.getFetchedUrl())) {
-                    if (pageHarvests.containsKey(fetchResult.getFetchedUrl())) {
-                        logger.debug("Redirect page: {} has already been seen", curURL);
-                        return;
-                    }
-                    curURL.setURL(fetchResult.getFetchedUrl());
-                    curURL.setDocid(pageHarvests.add(fetchResult.getFetchedUrl()));
-                }
+    /**
+     * This function is called just before the termination of the current crawler instance. It can
+     * be used for persisting in-memory data or other finalization tasks.
+     */
+    void onStop();
 
-                if (!fetchResult.fetchContent(page, configuration.getMaxDownloadSize())) {
-                    throw new ContentFetchException();
-                }
-
-                if (page.isTruncated()) {
-                    logger.warn(
-                            "Warning: unknown page size exceeded max-download-size, truncated to: "
-                                    + "({}), at URL: {}", configuration.getMaxDownloadSize(), curURL
-                                            .getURL());
-                }
-
-                parser.parse(page, curURL.getURL());
-
-                if (shouldFollowLinksIn(page.getWebURL())) {
-                    ParseData parseData = page.getParseData();
-                    List<WebURL> toSchedule = new ArrayList<>();
-                    int maxCrawlDepth = configuration.getMaxDepthOfCrawling();
-                    for (WebURL webURL : parseData.getOutgoingUrls()) {
-                        webURL.setParentDocid(curURL.getDocid());
-                        webURL.setParentUrl(curURL.getURL());
-                        Integer newdocid = pageHarvests.get(webURL.getURL());
-                        if (null != newdocid && 0 < newdocid) {
-                            // This is not the first time that this Url is visited. So, we set the
-                            // depth to a negative number.
-                            webURL.setDepth((short) -1);
-                            webURL.setDocid(newdocid);
-                        } else {
-                            webURL.setDocid(-1);
-                            webURL.setDepth((short) (curURL.getDepth() + 1));
-                            if ((maxCrawlDepth == -1) || (curURL.getDepth() < maxCrawlDepth)) {
-                                if (shouldVisit(page, webURL)) {
-                                    if (robotstxtServer.allows(webURL)) {
-                                        webURL.setDocid(pageHarvests.add(webURL.getURL()));
-                                        toSchedule.add(webURL);
-                                    } else {
-                                        logger.debug("Not visiting: {} as per the server's "
-                                                + "\"robots.txt\" policy", webURL.getURL());
-                                    }
-                                } else {
-                                    logger.debug(
-                                            "Not visiting: {} as per your \"shouldVisit\" policy",
-                                            webURL.getURL());
-                                }
-                            }
-                        }
-                    }
-                    frontier.scheduleAll(toSchedule);
-                } else {
-                    logger.debug("Not looking for links in page {}, "
-                            + "as per your \"shouldFollowLinksInPage\" policy", page.getWebURL()
-                                    .getURL());
-                }
-
-                boolean noIndex = configuration.isRespectNoIndex() && page.getContentType() != null
-                        && page.getContentType().contains("html") && ((HtmlParseData) page
-                                .getParseData()).getMetaTagValue("robots").contains("noindex");
-
-                if (!noIndex) {
-                    visit(page);
-                }
-            }
-        } catch (PageBiggerThanMaxSizeException e) {
-            onPageBiggerThanMaxSize(curURL.getURL(), e.getPageSize());
-        } catch (ParseException pe) {
-            onParseError(curURL);
-        } catch (ContentFetchException cfe) {
-            onContentFetchError(curURL);
-        } catch (NotAllowedContentException nace) {
-            logger.debug(
-                    "Skipping: {} as it contains binary content which you configured not to crawl",
-                    curURL.getURL());
-        } catch (Exception e) {
-            onUnhandledException(curURL, e);
-        } finally {
-            if (fetchResult != null) {
-                fetchResult.discardContentIfNotConsumed();
-            }
-        }
-    }
-
-    public Thread getThread() {
-        return thread;
-    }
-
-    public void setThread(Thread myThread) {
-        this.thread = myThread;
-    }
-
-    public boolean isNotWaitingForNewURLs() {
-        return !isWaitingForNewURLs;
-    }
-
-    public void setPageFetcher(PageFetcher pageFetcher) {
-        this.pageFetcher = pageFetcher;
-    }
-
-    public void setRobotstxtServer(RobotstxtServer robotstxtServer) {
-        this.robotstxtServer = robotstxtServer;
-    }
-
-    public void setPageHarvests(PageHarvests pageHarvests) {
-        this.pageHarvests = pageHarvests;
-    }
-
-    public void setFrontier(Frontier frontier) {
-        this.frontier = frontier;
-    }
-
-    public void setParser(Parser parser) {
-        this.parser = parser;
-    }
-
-    public void setConfiguration(CrawlerConfiguration configuration) {
-        this.configuration = configuration;
-    }
+    /**
+     * The CrawlController instance that has created this crawler instance will call this function
+     * just before terminating this crawler thread. Classes that extend WebCrawler can override this
+     * function to pass their local data to their controller. The controller then puts these local
+     * data in a List that can then be used for processing the local data of crawlers (if needed).
+     *
+     * @return currently NULL
+     */
+    Object getData();
 
 }

@@ -26,6 +26,10 @@ import com.github.tomakehurst.wiremock.junit.WireMockRule
 
 import edu.uci.ics.crawler4j.CrawlerConfiguration
 import edu.uci.ics.crawler4j.crawler.controller.*
+import edu.uci.ics.crawler4j.fetcher.PageFetcher
+import edu.uci.ics.crawler4j.frontier.Frontier
+import edu.uci.ics.crawler4j.frontier.pageharvests.PageHarvests
+import edu.uci.ics.crawler4j.parser.Parser
 import edu.uci.ics.crawler4j.robotstxt.*
 import edu.uci.ics.crawler4j.tests.TestCrawlerConfiguration
 import spock.lang.Specification
@@ -89,10 +93,17 @@ class RedirectHandlerTest extends Specification {
 }
 
 
-class HandleRedirectWebCrawler extends WebCrawler {
+class HandleRedirectWebCrawler extends DefaultWebCrawler {
 
     int onRedirectedCounter = 0
     List<Object> data = []
+
+    HandleRedirectWebCrawler(Integer id, CrawlerConfiguration configuration,
+    CrawlController controller, PageFetcher pageFetcher, RobotstxtServer robotstxtServer,
+    PageHarvests pageHarvests, Frontier frontier, Parser parser){
+        super(id, configuration,controller, pageFetcher, robotstxtServer,
+        pageHarvests, frontier, parser);
+    }
 
     @Override
     void onRedirectedStatusCode(Page page) {
@@ -101,7 +112,7 @@ class HandleRedirectWebCrawler extends WebCrawler {
     }
 
     @Override
-    Object getMyLocalData() {
+    Object getData() {
         return data
     }
 }

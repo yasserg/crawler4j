@@ -9,6 +9,10 @@ import com.github.tomakehurst.wiremock.junit.WireMockRule
 
 import edu.uci.ics.crawler4j.CrawlerConfiguration
 import edu.uci.ics.crawler4j.crawler.controller.*
+import edu.uci.ics.crawler4j.fetcher.PageFetcher
+import edu.uci.ics.crawler4j.frontier.Frontier
+import edu.uci.ics.crawler4j.frontier.pageharvests.PageHarvests
+import edu.uci.ics.crawler4j.parser.Parser
 import edu.uci.ics.crawler4j.robotstxt.*
 import edu.uci.ics.crawler4j.tests.TestCrawlerConfiguration
 import spock.lang.Specification
@@ -83,15 +87,24 @@ class NoIndexTest extends Specification {
     }
 }
 
-class NoIndexWebCrawler extends WebCrawler {
+class NoIndexWebCrawler extends DefaultWebCrawler {
 
     private Map<String, Page> visitedPages = new HashMap<>()
 
-    public void visit(Page page) {
+    NoIndexWebCrawler(Integer id, CrawlerConfiguration configuration,
+    CrawlController controller, PageFetcher pageFetcher, RobotstxtServer robotstxtServer,
+    PageHarvests pageHarvests, Frontier frontier, Parser parser){
+        super(id, configuration,controller, pageFetcher, robotstxtServer,
+        pageHarvests, frontier, parser);
+    }
+
+    @Override
+    void visit(Page page) {
         visitedPages.put(page.getWebURL().toString(), page)
     }
 
-    public Object getMyLocalData() {
+    @Override
+    Object getData() {
         return visitedPages;
     }
 }
