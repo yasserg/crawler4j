@@ -2,6 +2,8 @@ package edu.uci.ics.crawler4j.tests;
 
 import static org.junit.Assert.assertEquals;
 
+import java.nio.charset.Charset;
+
 import org.junit.Test;
 
 import edu.uci.ics.crawler4j.url.URLCanonicalizer;
@@ -79,6 +81,9 @@ public class URLCanonicalizerTest {
 
         assertEquals("http://foo.bar/mydir/myfile?page=2",
                      URLCanonicalizer.getCanonicalURL("?page=2", "http://foo.bar/mydir/myfile"));
-
+        // test href with charset
+        assertEquals("http://www.example.com/3.asp?DengJh=%BA%E91700718",
+                URLCanonicalizer.getCanonicalURL("3.asp?DengJh=洪1700718", "http://www.example.com",
+                        Charset.forName("gb2312")));
     }
 }
