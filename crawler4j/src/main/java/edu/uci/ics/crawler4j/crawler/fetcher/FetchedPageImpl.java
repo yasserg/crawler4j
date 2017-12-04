@@ -19,59 +19,30 @@ package edu.uci.ics.crawler4j.crawler.fetcher;
 
 import java.io.IOException;
 
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
+import org.apache.http.*;
 import org.apache.http.util.EntityUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.slf4j.*;
 
 import edu.uci.ics.crawler4j.crawler.Page;
 
 /**
  * @author Yasser Ganjisaffar
  */
-public class PageFetchResult {
+public class FetchedPageImpl implements FetchedPage {
 
-    protected static final Logger logger = LoggerFactory.getLogger(PageFetchResult.class);
+    protected static final Logger logger = LoggerFactory.getLogger(FetchedPageImpl.class);
 
-    protected int statusCode;
-    protected HttpEntity entity = null;
-    protected Header[] responseHeaders = null;
-    protected String fetchedUrl = null;
-    protected String movedToUrl = null;
+    private int statusCode;
 
-    public int getStatusCode() {
-        return statusCode;
-    }
+    private String fetchedUrl;
 
-    public void setStatusCode(int statusCode) {
-        this.statusCode = statusCode;
-    }
+    private String movedToUrl;
 
-    public HttpEntity getEntity() {
-        return entity;
-    }
+    private Header[] responseHeaders;
 
-    public void setEntity(HttpEntity entity) {
-        this.entity = entity;
-    }
+    private HttpEntity entity;
 
-    public Header[] getResponseHeaders() {
-        return responseHeaders;
-    }
-
-    public void setResponseHeaders(Header[] responseHeaders) {
-        this.responseHeaders = responseHeaders;
-    }
-
-    public String getFetchedUrl() {
-        return fetchedUrl;
-    }
-
-    public void setFetchedUrl(String fetchedUrl) {
-        this.fetchedUrl = fetchedUrl;
-    }
-
+    @Override
     public boolean fetchContent(Page page, int maxBytes) {
         try {
             page.load(entity, maxBytes);
@@ -79,11 +50,12 @@ public class PageFetchResult {
             return true;
         } catch (Exception e) {
             logger.info("Exception while fetching content for: {} [{}]", page.getWebURL().getURL(),
-                        e.getMessage());
+                    e.getMessage());
         }
         return false;
     }
 
+    @Override
     public void discardContentIfNotConsumed() {
         try {
             if (entity != null) {
@@ -99,11 +71,54 @@ public class PageFetchResult {
         }
     }
 
+    @Override
+    public int getStatusCode() {
+        return statusCode;
+    }
+
+    @Override
+    public void setStatusCode(int statusCode) {
+        this.statusCode = statusCode;
+    }
+
+    @Override
+    public String getFetchedUrl() {
+        return fetchedUrl;
+    }
+
+    @Override
+    public void setFetchedUrl(String fetchedUrl) {
+        this.fetchedUrl = fetchedUrl;
+    }
+
+    @Override
     public String getMovedToUrl() {
         return movedToUrl;
     }
 
+    @Override
     public void setMovedToUrl(String movedToUrl) {
         this.movedToUrl = movedToUrl;
     }
+
+    @Override
+    public Header[] getResponseHeaders() {
+        return responseHeaders;
+    }
+
+    @Override
+    public void setResponseHeaders(Header[] responseHeaders) {
+        this.responseHeaders = responseHeaders;
+    }
+
+    @Override
+    public HttpEntity getEntity() {
+        return entity;
+    }
+
+    @Override
+    public void setEntity(HttpEntity entity) {
+        this.entity = entity;
+    }
+
 }

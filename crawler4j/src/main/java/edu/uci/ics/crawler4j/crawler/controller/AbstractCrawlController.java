@@ -6,7 +6,7 @@ import org.slf4j.*;
 
 import edu.uci.ics.crawler4j.CrawlerConfiguration;
 import edu.uci.ics.crawler4j.crawler.*;
-import edu.uci.ics.crawler4j.crawler.fetcher.PageFetcher;
+import edu.uci.ics.crawler4j.crawler.fetcher.*;
 import edu.uci.ics.crawler4j.frontier.Frontier;
 import edu.uci.ics.crawler4j.frontier.pageharvests.PageHarvests;
 import edu.uci.ics.crawler4j.robotstxt.*;
@@ -45,7 +45,7 @@ public abstract class AbstractCrawlController<T extends WebCrawler> implements C
         configuration.initialize();
         this.pageHarvests = configuration.getCrawlPersistentConfiguration().getPageHarvests();
         this.frontier = new Frontier(configuration);
-        this.pageFetcher = new PageFetcher(configuration);
+        this.pageFetcher = new DefaultPageFetcher(configuration);
         this.robotstxtServer = robotstxtServer();
         this.crawlerData = new ArrayList<>();
     }

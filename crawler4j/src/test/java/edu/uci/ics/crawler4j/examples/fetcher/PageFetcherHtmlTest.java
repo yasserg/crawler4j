@@ -43,14 +43,14 @@ public class PageFetcherHtmlTest {
 
         url.setURL("http://localhost:8080/some/index.html");
         PageFetcher pf = new PageFetcherHtmlOnly(cfg);
-        pf.fetchPage(url).fetchContent(new Page(url), 47);
+        pf.fetch(url).fetchContent(new Page(url), 47);
 
         WireMock.verify(1, WireMock.headRequestedFor(WireMock.urlEqualTo("/some/index.html")));
         WireMock.verify(1, WireMock.getRequestedFor(WireMock.urlEqualTo("/some/index.html")));
 
         url.setURL("http://localhost:8080/some/invoice.pdf");
         pf = new PageFetcherHtmlOnly(cfg);
-        pf.fetchPage(url).fetchContent(new Page(url), 4);
+        pf.fetch(url).fetchContent(new Page(url), 4);
 
         WireMock.verify(1, WireMock.headRequestedFor(WireMock.urlEqualTo("/some/invoice.pdf")));
         WireMock.verify(0, WireMock.getRequestedFor(WireMock.urlEqualTo("/some/invoice.pdf")));

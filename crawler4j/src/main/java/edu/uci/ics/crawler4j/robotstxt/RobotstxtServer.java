@@ -87,10 +87,10 @@ public class RobotstxtServer {
         String proto = url.getProtocol();
         robotsTxtUrl.setURL(proto + "://" + host + port + "/robots.txt");
         HostDirectives directives = null;
-        PageFetchResult fetchResult = null;
+        FetchedPage fetchResult = null;
         try {
             for (int redir = 0; redir < 3; ++redir) {
-                fetchResult = pageFetcher.fetchPage(robotsTxtUrl);
+                fetchResult = pageFetcher.fetch(robotsTxtUrl);
                 int status = fetchResult.getStatusCode();
                 // Follow redirects up to 3 levels
                 if ((status == HttpStatus.SC_MULTIPLE_CHOICES

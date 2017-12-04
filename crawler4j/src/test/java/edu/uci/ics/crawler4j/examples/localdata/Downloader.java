@@ -43,7 +43,7 @@ public class Downloader {
     public Downloader() throws InstantiationException, IllegalAccessException {
         configuration = new CrawlerConfiguration(new SleepyCatCrawlPersistentConfiguration());
         parser = new Parser(configuration);
-        pageFetcher = new PageFetcher(configuration);
+        pageFetcher = new DefaultPageFetcher(configuration);
     }
 
     public static void main(String[] args) throws InstantiationException, IllegalAccessException {
@@ -76,9 +76,9 @@ public class Downloader {
     private Page download(String url) {
         WebURL curURL = new WebURL();
         curURL.setURL(url);
-        PageFetchResult fetchResult = null;
+        FetchedPage fetchResult = null;
         try {
-            fetchResult = pageFetcher.fetchPage(curURL);
+            fetchResult = pageFetcher.fetch(curURL);
             if (fetchResult.getStatusCode() == HttpStatus.SC_OK) {
                 Page page = new Page(curURL);
                 fetchResult.fetchContent(page, configuration.getMaxDownloadSize());

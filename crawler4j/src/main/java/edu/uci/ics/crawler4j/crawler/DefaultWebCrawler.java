@@ -211,12 +211,12 @@ public class DefaultWebCrawler implements WebCrawler {
     }
 
     private void processPage(WebURL url) {
-        PageFetchResult fetchResult = null;
+        FetchedPage fetchResult = null;
         try {
             if (null == url) {
                 return;
             }
-            fetchResult = pageFetcher.fetchPage(url);
+            fetchResult = pageFetcher.fetch(url);
             int statusCode = fetchResult.getStatusCode();
             pageFetched(url, statusCode, EnglishReasonPhraseCatalog.INSTANCE.getReason(statusCode,
                     Locale.ENGLISH));
@@ -258,7 +258,7 @@ public class DefaultWebCrawler implements WebCrawler {
         }
     }
 
-    private static String contentType(PageFetchResult fetchResult) {
+    private static String contentType(FetchedPage fetchResult) {
         if (null == fetchResult.getEntity() || null == fetchResult.getEntity().getContentType()) {
             return "";
         }
@@ -266,7 +266,7 @@ public class DefaultWebCrawler implements WebCrawler {
     }
 
     @Override
-    public void handleRedirect(WebURL url, PageFetchResult fetchResult, Page page) {
+    public void handleRedirect(WebURL url, FetchedPage fetchResult, Page page) {
         page.setRedirect(true);
         String movedToUrl = fetchResult.getMovedToUrl();
         if (null == movedToUrl) {
@@ -306,7 +306,7 @@ public class DefaultWebCrawler implements WebCrawler {
     }
 
     @Override
-    public void handleSuccess(WebURL url, PageFetchResult fetchResult, Page page)
+    public void handleSuccess(WebURL url, FetchedPage fetchResult, Page page)
             throws ContentFetchException, NotAllowedContentException, ParseException {
         logger.debug("Crawling {}", page.getWebURL().getURL());
 
