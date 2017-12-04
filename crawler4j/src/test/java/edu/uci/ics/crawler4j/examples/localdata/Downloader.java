@@ -22,7 +22,7 @@ import org.slf4j.*;
 
 import edu.uci.ics.crawler4j.*;
 import edu.uci.ics.crawler4j.crawler.Page;
-import edu.uci.ics.crawler4j.fetcher.*;
+import edu.uci.ics.crawler4j.crawler.fetcher.*;
 import edu.uci.ics.crawler4j.parser.*;
 import edu.uci.ics.crawler4j.url.WebURL;
 

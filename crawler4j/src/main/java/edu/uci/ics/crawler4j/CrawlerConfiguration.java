@@ -25,7 +25,7 @@ import org.apache.http.conn.DnsResolver;
 import org.apache.http.impl.conn.SystemDefaultDnsResolver;
 import org.apache.http.message.BasicHeader;
 
-import edu.uci.ics.crawler4j.crawler.authentication.AuthInfo;
+import edu.uci.ics.crawler4j.crawler.authentication.*;
 
 public class CrawlerConfiguration {
 
@@ -167,7 +167,7 @@ public class CrawlerConfiguration {
     /**
      * List of possible authentications needed by crawler
      */
-    private List<AuthInfo> authInfos;
+    private CrawlerAuthentication authentication = new DefaultCrawlerAuthentication();
 
     /**
      * Cookie policy
@@ -189,26 +189,6 @@ public class CrawlerConfiguration {
     public CrawlerConfiguration(CrawlPersistentConfiguration crawlPersistentConfiguration) {
         super();
         this.crawlPersistentConfiguration = crawlPersistentConfiguration;
-    }
-
-    public CrawlPersistentConfiguration getCrawlPersistentConfiguration() {
-        return crawlPersistentConfiguration;
-    }
-
-    public void setCrawlPersistentConfiguration(
-            CrawlPersistentConfiguration crawlPersistentConfiguration) {
-        this.crawlPersistentConfiguration = crawlPersistentConfiguration;
-    }
-
-    /**
-     * DNS resolver to use, #{@link SystemDefaultDnsResolver()} is default.
-     */
-    public void setDnsResolver(final DnsResolver dnsResolver) {
-        this.dnsResolver = dnsResolver;
-    }
-
-    public DnsResolver getDnsResolver() {
-        return dnsResolver;
     }
 
     /**
@@ -234,6 +214,30 @@ public class CrawlerConfiguration {
         if (Short.MAX_VALUE < maxDepthOfCrawling) {
             throw new Exception("Maximum value for crawl depth is " + Short.MAX_VALUE);
         }
+    }
+
+    public boolean hasAuthentication() {
+        return null != authentication;
+    }
+
+    public CrawlPersistentConfiguration getCrawlPersistentConfiguration() {
+        return crawlPersistentConfiguration;
+    }
+
+    public void setCrawlPersistentConfiguration(
+            CrawlPersistentConfiguration crawlPersistentConfiguration) {
+        this.crawlPersistentConfiguration = crawlPersistentConfiguration;
+    }
+
+    /**
+     * DNS resolver to use, #{@link SystemDefaultDnsResolver()} is default.
+     */
+    public void setDnsResolver(final DnsResolver dnsResolver) {
+        this.dnsResolver = dnsResolver;
+    }
+
+    public DnsResolver getDnsResolver() {
+        return dnsResolver;
     }
 
     public int getNumberOfCrawlers() {
@@ -522,27 +526,12 @@ public class CrawlerConfiguration {
         this.proxyPassword = proxyPassword;
     }
 
-    /**
-     * @return the authentications Information
-     */
-    public List<AuthInfo> getAuthInfos() {
-        return authInfos;
+    public CrawlerAuthentication getAuthentication() {
+        return authentication;
     }
 
-    public void addAuthInfo(AuthInfo authInfo) {
-        if (this.authInfos == null) {
-            this.authInfos = new ArrayList<>();
-        }
-
-        this.authInfos.add(authInfo);
-    }
-
-    /**
-     * @param authInfos
-     *            authenticationInformations to set
-     */
-    public void setAuthInfos(List<AuthInfo> authInfos) {
-        this.authInfos = authInfos;
+    public void setAuthentication(CrawlerAuthentication authentication) {
+        this.authentication = authentication;
     }
 
     public int getThreadMonitoringDelaySeconds() {

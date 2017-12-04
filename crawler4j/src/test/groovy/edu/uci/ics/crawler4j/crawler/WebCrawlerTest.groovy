@@ -9,7 +9,7 @@ import com.github.tomakehurst.wiremock.junit.WireMockRule
 
 import edu.uci.ics.crawler4j.CrawlerConfiguration
 import edu.uci.ics.crawler4j.crawler.controller.*
-import edu.uci.ics.crawler4j.fetcher.PageFetcher
+import edu.uci.ics.crawler4j.crawler.fetcher.PageFetcher
 import edu.uci.ics.crawler4j.frontier.Frontier
 import edu.uci.ics.crawler4j.frontier.pageharvests.PageHarvests
 import edu.uci.ics.crawler4j.parser.Parser

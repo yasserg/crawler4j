@@ -19,7 +19,7 @@ package edu.uci.ics.crawler4j.crawler;
 
 import edu.uci.ics.crawler4j.crawler.controller.CrawlController;
 import edu.uci.ics.crawler4j.crawler.exceptions.*;
-import edu.uci.ics.crawler4j.fetcher.PageFetchResult;
+import edu.uci.ics.crawler4j.crawler.fetcher.PageFetchResult;
 import edu.uci.ics.crawler4j.parser.NotAllowedContentException;
 import edu.uci.ics.crawler4j.url.WebURL;
 

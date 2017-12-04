@@ -9,7 +9,7 @@ import org.slf4j.*;
 import edu.uci.ics.crawler4j.CrawlerConfiguration;
 import edu.uci.ics.crawler4j.crawler.controller.CrawlController;
 import edu.uci.ics.crawler4j.crawler.exceptions.*;
-import edu.uci.ics.crawler4j.fetcher.*;
+import edu.uci.ics.crawler4j.crawler.fetcher.*;
 import edu.uci.ics.crawler4j.frontier.Frontier;
 import edu.uci.ics.crawler4j.frontier.pageharvests.PageHarvests;
 import edu.uci.ics.crawler4j.parser.*;

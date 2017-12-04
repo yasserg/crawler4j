@@ -10,7 +10,7 @@ import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import edu.uci.ics.crawler4j.*;
 import edu.uci.ics.crawler4j.crawler.Page;
 import edu.uci.ics.crawler4j.crawler.exceptions.PageBiggerThanMaxSizeException;
-import edu.uci.ics.crawler4j.fetcher.PageFetcher;
+import edu.uci.ics.crawler4j.crawler.fetcher.PageFetcher;
 import edu.uci.ics.crawler4j.url.WebURL;
 
 public class PageFetcherHtmlTest {

@@ -7,7 +7,7 @@ import org.apache.http.client.methods.*;
 
 import edu.uci.ics.crawler4j.CrawlerConfiguration;
 import edu.uci.ics.crawler4j.crawler.exceptions.PageBiggerThanMaxSizeException;
-import edu.uci.ics.crawler4j.fetcher.*;
+import edu.uci.ics.crawler4j.crawler.fetcher.*;
 import edu.uci.ics.crawler4j.url.WebURL;
 
 public class PageFetcherHtmlOnly extends PageFetcher {

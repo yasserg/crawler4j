@@ -23,7 +23,7 @@ import org.slf4j.*;
 
 import edu.uci.ics.crawler4j.crawler.Page;
 import edu.uci.ics.crawler4j.crawler.exceptions.PageBiggerThanMaxSizeException;
-import edu.uci.ics.crawler4j.fetcher.*;
+import edu.uci.ics.crawler4j.crawler.fetcher.*;
 import edu.uci.ics.crawler4j.url.WebURL;
 import edu.uci.ics.crawler4j.util.Util;
 

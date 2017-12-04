@@ -25,7 +25,7 @@ import org.apache.http.Header;
 import edu.uci.ics.crawler4j.CrawlerConfiguration;
 import edu.uci.ics.crawler4j.crawler.*;
 import edu.uci.ics.crawler4j.crawler.controller.CrawlController;
-import edu.uci.ics.crawler4j.fetcher.PageFetcher;
+import edu.uci.ics.crawler4j.crawler.fetcher.PageFetcher;
 import edu.uci.ics.crawler4j.frontier.Frontier;
 import edu.uci.ics.crawler4j.frontier.pageharvests.PageHarvests;
 import edu.uci.ics.crawler4j.parser.*;

@@ -15,32 +15,27 @@
  * limitations under the License.
  */
 
-package edu.uci.ics.crawler4j.fetcher;
+package edu.uci.ics.crawler4j.crawler.fetcher;
 
-import java.io.*;
-import java.net.*;
+import java.io.IOException;
 import java.security.cert.X509Certificate;
-import java.util.*;
+import java.util.Date;
 
 import javax.net.ssl.SSLContext;
 
 import org.apache.http.*;
 import org.apache.http.auth.*;
-import org.apache.http.client.*;
 import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.*;
 import org.apache.http.config.*;
 import org.apache.http.conn.socket.*;
 import org.apache.http.conn.ssl.*;
 import org.apache.http.impl.client.*;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.ssl.SSLContexts;
 import org.slf4j.*;
 
 import edu.uci.ics.crawler4j.CrawlerConfiguration;
-import edu.uci.ics.crawler4j.crawler.authentication.*;
 import edu.uci.ics.crawler4j.crawler.exceptions.PageBiggerThanMaxSizeException;
 import edu.uci.ics.crawler4j.url.*;
 
@@ -119,98 +114,11 @@ public class PageFetcher {
             logger.debug("Working through Proxy: {}", proxy.getHostName());
         }
 
-        httpClient = clientBuilder.build();
-        if ((configuration.getAuthInfos() != null) && !configuration.getAuthInfos().isEmpty()) {
-            doAuthetication(configuration.getAuthInfos());
-        }
-
+        httpClient = configuration.getAuthentication().login(clientBuilder);
         if (connectionMonitorThread == null) {
             connectionMonitorThread = new IdleConnectionMonitorThread(connectionManager);
         }
         connectionMonitorThread.start();
-    }
-
-    private void doAuthetication(List<AuthInfo> authInfos) {
-        for (AuthInfo authInfo : authInfos) {
-            if (authInfo
-                    .getAuthenticationType() == AuthInfo.AuthenticationType.BASIC_AUTHENTICATION) {
-                doBasicLogin((BasicAuthInfo) authInfo);
-            } else if (authInfo
-                    .getAuthenticationType() == AuthInfo.AuthenticationType.NT_AUTHENTICATION) {
-                doNtLogin((NtAuthInfo) authInfo);
-            } else {
-                doFormLogin((FormAuthInfo) authInfo);
-            }
-        }
-    }
-
-    /**
-     * BASIC authentication<br/>
-     * Official Example: https://hc.apache
-     * .org/httpcomponents-client-ga/httpclient/examples/org/apache/http/examples
-     * /client/ClientAuthentication.java
-     */
-    private void doBasicLogin(BasicAuthInfo authInfo) {
-        logger.info("BASIC authentication for: " + authInfo.getLoginTarget());
-        HttpHost targetHost = new HttpHost(authInfo.getHost(), authInfo.getPort(), authInfo
-                .getProtocol());
-        CredentialsProvider credsProvider = new BasicCredentialsProvider();
-        credsProvider.setCredentials(new AuthScope(targetHost.getHostName(), targetHost.getPort()),
-                new UsernamePasswordCredentials(authInfo.getUsername(), authInfo.getPassword()));
-        httpClient = HttpClients.custom().setDefaultCredentialsProvider(credsProvider).build();
-    }
-
-    /**
-     * Do NT auth for Microsoft AD sites.
-     */
-    private void doNtLogin(NtAuthInfo authInfo) {
-        logger.info("NT authentication for: " + authInfo.getLoginTarget());
-        HttpHost targetHost = new HttpHost(authInfo.getHost(), authInfo.getPort(), authInfo
-                .getProtocol());
-        CredentialsProvider credsProvider = new BasicCredentialsProvider();
-        try {
-            credsProvider.setCredentials(new AuthScope(targetHost.getHostName(), targetHost
-                    .getPort()), new NTCredentials(authInfo.getUsername(), authInfo.getPassword(),
-                            InetAddress.getLocalHost().getHostName(), authInfo.getDomain()));
-        } catch (UnknownHostException e) {
-            logger.error("Error creating NT credentials", e);
-        }
-        httpClient = HttpClients.custom().setDefaultCredentialsProvider(credsProvider).build();
-    }
-
-    /**
-     * FORM authentication<br/>
-     * Official Example:
-     * https://hc.apache.org/httpcomponents-client-ga/httpclient/examples/org/apache/http
-     * /examples/client/ClientFormLogin.java
-     */
-    private void doFormLogin(FormAuthInfo authInfo) {
-        logger.info("FORM authentication for: " + authInfo.getLoginTarget());
-        String fullUri = authInfo.getProtocol() + "://" + authInfo.getHost() + ":" + authInfo
-                .getPort() + authInfo.getLoginTarget();
-        HttpPost httpPost = new HttpPost(fullUri);
-        List<NameValuePair> formParams = new ArrayList<>();
-        formParams.add(new BasicNameValuePair(authInfo.getUsernameFormStr(), authInfo
-                .getUsername()));
-        formParams.add(new BasicNameValuePair(authInfo.getPasswordFormStr(), authInfo
-                .getPassword()));
-
-        try {
-            UrlEncodedFormEntity entity = new UrlEncodedFormEntity(formParams, "UTF-8");
-            httpPost.setEntity(entity);
-            httpClient.execute(httpPost);
-            logger.debug("Successfully Logged in with user: " + authInfo.getUsername() + " to: "
-                    + authInfo.getHost());
-        } catch (UnsupportedEncodingException e) {
-            logger.error("Encountered a non supported encoding while trying to login to: "
-                    + authInfo.getHost(), e);
-        } catch (ClientProtocolException e) {
-            logger.error("While trying to login to: " + authInfo.getHost()
-                    + " - Client protocol not supported", e);
-        } catch (IOException e) {
-            logger.error("While trying to login to: " + authInfo.getHost()
-                    + " - Error making request", e);
-        }
     }
 
     public PageFetchResult fetchPage(WebURL webUrl) throws InterruptedException, IOException,
@@ -225,7 +133,9 @@ public class PageFetcher {
             synchronized (mutex) {
                 long now = (new Date()).getTime();
                 if ((now - lastFetchTime) < configuration.getPolitenessDelay()) {
-                    Thread.sleep(configuration.getPolitenessDelay() - (now - lastFetchTime));
+                    long sleepDelay = (configuration.getPolitenessDelay() - (now - lastFetchTime));
+                    logger.debug("Sleeping for politeness delay {}", sleepDelay);
+                    Thread.sleep(sleepDelay);
                 }
                 lastFetchTime = (new Date()).getTime();
             }
