@@ -18,10 +18,7 @@
 package edu.uci.ics.crawler4j.crawler.fetcher;
 
 import java.io.IOException;
-import java.security.cert.X509Certificate;
 import java.util.Date;
-
-import javax.net.ssl.SSLContext;
 
 import org.apache.http.*;
 import org.apache.http.auth.*;
@@ -29,10 +26,9 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.*;
 import org.apache.http.config.*;
 import org.apache.http.conn.socket.*;
-import org.apache.http.conn.ssl.*;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.impl.client.*;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.apache.http.ssl.SSLContexts;
 import org.slf4j.*;
 
 import edu.uci.ics.crawler4j.CrawlerConfiguration;
@@ -43,6 +39,7 @@ import edu.uci.ics.crawler4j.url.*;
  * @author Yasser Ganjisaffar
  */
 public class PageFetcher {
+
     protected static final Logger logger = LoggerFactory.getLogger(PageFetcher.class);
 
     protected final CrawlerConfiguration configuration;
@@ -55,97 +52,83 @@ public class PageFetcher {
 
     protected long lastFetchTime = 0;
 
-    protected IdleConnectionMonitorThread connectionMonitorThread = null;
+    private final IdleHttpClientConnectionMonitor connectionMonitorThread;
 
     public PageFetcher(CrawlerConfiguration configuration) {
         super();
         this.configuration = configuration;
-        RequestConfig requestConfig = RequestConfig.custom().setExpectContinueEnabled(false)
-                .setCookieSpec(configuration.getCookiePolicy()).setRedirectsEnabled(false)
-                .setSocketTimeout(configuration.getSocketTimeout()).setConnectTimeout(configuration
-                        .getConnectionTimeout()).build();
-
-        RegistryBuilder<ConnectionSocketFactory> connRegistryBuilder = RegistryBuilder.create();
-        connRegistryBuilder.register("http", PlainConnectionSocketFactory.INSTANCE);
-        if (configuration.isIncludeHttpsPages()) {
-            try { // Fixing: https://code.google.com/p/crawler4j/issues/detail?id=174
-                  // By always trusting the ssl certificate
-                SSLContext sslContext = SSLContexts.custom().loadTrustMaterial(null,
-                        new TrustStrategy() {
-                            @Override
-                            public boolean isTrusted(final X509Certificate[] chain,
-                                    String authType) {
-                                return true;
-                            }
-                        }).build();
-                SSLConnectionSocketFactory sslsf = new SniSSLConnectionSocketFactory(sslContext,
-                        NoopHostnameVerifier.INSTANCE);
-                connRegistryBuilder.register("https", sslsf);
-            } catch (Exception e) {
-                logger.warn("Exception thrown while trying to register https");
-                logger.debug("Stacktrace", e);
-            }
-        }
-
-        Registry<ConnectionSocketFactory> connRegistry = connRegistryBuilder.build();
-        connectionManager = new SniPoolingHttpClientConnectionManager(connRegistry, configuration
-                .getDnsResolver());
+        connectionManager = new ServerNamingIndicationPoolingHttpClientConnectionManager(
+                connectionRegistry(), configuration.getDnsResolver());
         connectionManager.setMaxTotal(configuration.getMaxTotalConnections());
         connectionManager.setDefaultMaxPerRoute(configuration.getMaxConnectionsPerHost());
 
         HttpClientBuilder clientBuilder = HttpClientBuilder.create();
-        clientBuilder.setDefaultRequestConfig(requestConfig);
+        clientBuilder.setDefaultRequestConfig(requestConfig());
         clientBuilder.setConnectionManager(connectionManager);
         clientBuilder.setUserAgent(configuration.getUserAgentString());
         clientBuilder.setDefaultHeaders(configuration.getDefaultHeaders());
 
-        if (configuration.getProxyHost() != null) {
-            if (configuration.getProxyUsername() != null) {
+        configureProxy(clientBuilder);
+
+        httpClient = configuration.getAuthentication().login(clientBuilder);
+        connectionMonitorThread = new IdleHttpClientConnectionMonitor(connectionManager);
+        connectionMonitorThread.start();
+    }
+
+    private void configureProxy(HttpClientBuilder clientBuilder) {
+        if (null != configuration.getProxyHost()) {
+            logger.debug("Working through Proxy: {}", configuration.getProxyHost());
+            clientBuilder.setProxy(new HttpHost(configuration.getProxyHost(), configuration
+                    .getProxyPort()));
+
+            if (null != configuration.getProxyUsername()) {
                 BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
                 credentialsProvider.setCredentials(new AuthScope(configuration.getProxyHost(),
                         configuration.getProxyPort()), new UsernamePasswordCredentials(configuration
                                 .getProxyUsername(), configuration.getProxyPassword()));
                 clientBuilder.setDefaultCredentialsProvider(credentialsProvider);
             }
-
-            HttpHost proxy = new HttpHost(configuration.getProxyHost(), configuration
-                    .getProxyPort());
-            clientBuilder.setProxy(proxy);
-            logger.debug("Working through Proxy: {}", proxy.getHostName());
         }
+    }
 
-        httpClient = configuration.getAuthentication().login(clientBuilder);
-        if (connectionMonitorThread == null) {
-            connectionMonitorThread = new IdleConnectionMonitorThread(connectionManager);
+    private Registry<ConnectionSocketFactory> connectionRegistry() {
+        RegistryBuilder<ConnectionSocketFactory> connectionRegistryBuilder = RegistryBuilder
+                .create();
+        connectionRegistryBuilder.register("http", PlainConnectionSocketFactory.INSTANCE);
+        if (configuration.isIncludeHttpsPages()) {
+            try {
+                connectionRegistryBuilder.register("https",
+                        new ServerNameIndicationSSLConnectionSocketFactory(
+                                NoopHostnameVerifier.INSTANCE));
+            } catch (Exception e) {
+                logger.warn("Exception thrown while trying to register https");
+                logger.debug("Stacktrace", e);
+            }
         }
-        connectionMonitorThread.start();
+        return connectionRegistryBuilder.build();
+    }
+
+    private RequestConfig requestConfig() {
+        return RequestConfig.custom().setExpectContinueEnabled(false).setCookieSpec(configuration
+                .getCookiePolicy()).setRedirectsEnabled(false).setSocketTimeout(configuration
+                        .getSocketTimeout()).setConnectTimeout(configuration.getConnectionTimeout())
+                .build();
     }
 
     public PageFetchResult fetchPage(WebURL webUrl) throws InterruptedException, IOException,
             PageBiggerThanMaxSizeException {
-        // Getting URL, setting headers & content
         PageFetchResult fetchResult = new PageFetchResult();
-        String toFetchURL = webUrl.getURL();
         HttpUriRequest request = null;
         try {
-            request = newHttpUriRequest(toFetchURL);
-            // Applying Politeness delay
-            synchronized (mutex) {
-                long now = (new Date()).getTime();
-                if ((now - lastFetchTime) < configuration.getPolitenessDelay()) {
-                    long sleepDelay = (configuration.getPolitenessDelay() - (now - lastFetchTime));
-                    logger.debug("Sleeping for politeness delay {}", sleepDelay);
-                    Thread.sleep(sleepDelay);
-                }
-                lastFetchTime = (new Date()).getTime();
-            }
+            request = newHttpUriRequest(webUrl.getURL());
+            politenessDelay();
 
             CloseableHttpResponse response = httpClient.execute(request);
             fetchResult.setEntity(response.getEntity());
             fetchResult.setResponseHeaders(response.getAllHeaders());
 
-            // Setting HttpStatus
             int statusCode = response.getStatusLine().getStatusCode();
+            fetchResult.setStatusCode(statusCode);
 
             // If Redirect ( 3xx )
             if (statusCode == HttpStatus.SC_MOVED_PERMANENTLY
@@ -156,52 +139,74 @@ public class PageFetcher {
                 // https://issues.apache.org/jira/browse/HTTPCORE-389
 
                 Header header = response.getFirstHeader("Location");
-                if (header != null) {
-                    String movedToUrl = URLCanonicalizer.getCanonicalURL(header.getValue(),
-                            toFetchURL);
+                if (null != header) {
+                    String movedToUrl = URLCanonicalizer.getCanonicalURL(header.getValue(), webUrl
+                            .getURL());
                     fetchResult.setMovedToUrl(movedToUrl);
                 }
-            } else if (statusCode >= 200 && statusCode <= 299) { // is 2XX, everything looks ok
-                fetchResult.setFetchedUrl(toFetchURL);
+            } else if (200 <= statusCode && statusCode <= 299) { // is 2XX, everything looks ok
+                fetchResult.setFetchedUrl(webUrl.getURL());
                 String uri = request.getURI().toString();
-                if (!uri.equals(toFetchURL)) {
-                    if (!URLCanonicalizer.getCanonicalURL(uri).equals(toFetchURL)) {
+                if (!uri.equals(webUrl.getURL())) {
+                    if (!URLCanonicalizer.getCanonicalURL(uri).equals(webUrl.getURL())) {
                         fetchResult.setFetchedUrl(uri);
                     }
                 }
-
-                // Checking maximum size
-                if (fetchResult.getEntity() != null) {
-                    long size = fetchResult.getEntity().getContentLength();
-                    if (size == -1) {
-                        Header length = response.getLastHeader("Content-Length");
-                        if (length == null) {
-                            length = response.getLastHeader("Content-length");
-                        }
-                        if (length != null) {
-                            size = Integer.parseInt(length.getValue());
-                        }
-                    }
-                    if (size > configuration.getMaxDownloadSize()) {
-                        // fix issue #52 - consume entity
-                        response.close();
-                        throw new PageBiggerThanMaxSizeException(size);
-                    }
-                }
+                validatePageSize(fetchResult, response);
             }
-
-            fetchResult.setStatusCode(statusCode);
             return fetchResult;
 
         } finally { // occurs also with thrown exceptions
-            if ((fetchResult.getEntity() == null) && (request != null)) {
+            if (null == fetchResult.getEntity() && null != request) {
                 request.abort();
             }
         }
     }
 
+    private void politenessDelay() throws InterruptedException {
+        synchronized (mutex) {
+            long now = (new Date()).getTime();
+            if ((now - lastFetchTime) < configuration.getPolitenessDelay()) {
+                long sleepDelay = (configuration.getPolitenessDelay() - (now - lastFetchTime));
+                logger.debug("Sleeping for politeness delay {}", sleepDelay);
+                Thread.sleep(sleepDelay);
+            }
+            lastFetchTime = (new Date()).getTime();
+        }
+    }
+
+    private void validatePageSize(PageFetchResult fetchResult, CloseableHttpResponse response)
+            throws IOException, PageBiggerThanMaxSizeException {
+        if (null != fetchResult.getEntity()) {
+            if (configuration.getMaxDownloadSize() < pageSize(fetchResult, response)) {
+                // fix issue #52 - consume entity
+                response.close();
+                throw new PageBiggerThanMaxSizeException(pageSize(fetchResult, response));
+            }
+        }
+    }
+
+    private static long pageSize(PageFetchResult fetchResult, CloseableHttpResponse response) {
+        long size = fetchResult.getEntity().getContentLength();
+        if (-1 == size) {
+            Header length = contentLengthHeader(response);
+            if (null != length) {
+                size = Integer.parseInt(length.getValue());
+            }
+        }
+        return size;
+    }
+
+    private static Header contentLengthHeader(CloseableHttpResponse response) {
+        Header length = response.getLastHeader("Content-Length");
+        if (null == length) {
+            return response.getLastHeader("Content-length");
+        }
+        return length;
+    }
+
     public synchronized void shutDown() {
-        if (connectionMonitorThread != null) {
+        if (null != connectionMonitorThread) {
             connectionManager.shutdown();
             connectionMonitorThread.shutdown();
         }
@@ -215,6 +220,7 @@ public class PageFetcher {
      *            the url to be fetched
      * @return the HttpUriRequest for the given url
      */
+    @SuppressWarnings("static-method")
     protected HttpUriRequest newHttpUriRequest(String url) {
         return new HttpGet(url);
     }
