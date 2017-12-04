@@ -83,6 +83,8 @@ public class Frontier {
             int newScheduledPage = 0;
             for (WebURL url : urls) {
                 if (0 < maxPagesToFetch && maxPagesToFetch <= (scheduledPages + newScheduledPage)) {
+                    logger.debug("Max pages to fetch ({}) reached ({})", maxPagesToFetch,
+                            (scheduledPages + newScheduledPage));
                     break;
                 }
                 try {
@@ -106,7 +108,10 @@ public class Frontier {
         int maxPagesToFetch = config.getMaxPagesToFetch();
         synchronized (mutex) {
             try {
-                if (maxPagesToFetch < 0 || scheduledPages < maxPagesToFetch) {
+                if (0 < maxPagesToFetch && maxPagesToFetch < scheduledPages) {
+                    logger.debug("Max pages to fetch ({}) reached ({})", maxPagesToFetch,
+                            scheduledPages);
+                } else {
                     pendingPageQueue.put(url);
                     scheduledPages++;
                     pageStatistics.increment(PageStatisticsType.SCHEDULED_PAGES);

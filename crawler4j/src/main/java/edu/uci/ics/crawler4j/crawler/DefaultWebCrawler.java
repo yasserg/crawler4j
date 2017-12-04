@@ -278,7 +278,8 @@ public class DefaultWebCrawler implements WebCrawler {
 
         if (configuration.isFollowRedirects()) {
             if (pageHarvests.containsKey(movedToUrl)) {
-                logger.debug("Redirect page: {} is already seen", url);
+                logger.debug("URL {} redirects ({}) to {} which has already been seen", url,
+                        fetchResult.getStatusCode(), movedToUrl);
                 return;
             }
 
@@ -294,7 +295,7 @@ public class DefaultWebCrawler implements WebCrawler {
                     webURL.setId(pageHarvests.add(movedToUrl));
                     frontier.schedule(webURL);
                 } else {
-                    logger.debug("Not visiting: {} as per the server's " + "\"robots.txt\" policy",
+                    logger.debug("Not visiting: {} as per the server's \"robots.txt\" policy",
                             webURL.getURL());
                 }
             } else {
@@ -307,6 +308,8 @@ public class DefaultWebCrawler implements WebCrawler {
     @Override
     public void handleSuccess(WebURL url, PageFetchResult fetchResult, Page page)
             throws ContentFetchException, NotAllowedContentException, ParseException {
+        logger.debug("Crawling {}", page.getWebURL().getURL());
+
         if (!url.getURL().equals(fetchResult.getFetchedUrl())) {
             if (pageHarvests.containsKey(fetchResult.getFetchedUrl())) {
                 logger.debug("Redirect page: {} has already been seen", url);
@@ -362,6 +365,9 @@ public class DefaultWebCrawler implements WebCrawler {
                     }
                 }
             }
+
+            logger.debug("Harvested {} urls to crawl from {}", toSchedule.size(), page.getWebURL()
+                    .getURL());
             frontier.scheduleAll(toSchedule);
         } else {
             logger.debug("Not looking for links in page {}, "
