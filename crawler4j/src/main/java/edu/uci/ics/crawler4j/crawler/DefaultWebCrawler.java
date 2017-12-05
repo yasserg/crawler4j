@@ -121,12 +121,22 @@ public class DefaultWebCrawler implements WebCrawler {
     @Override
     public boolean shouldVisit(Page referringPage, WebURL url) {
         if (configuration.isRespectNoFollow()) {
-            return !((referringPage != null && referringPage.getContentType() != null
-                    && referringPage.getContentType().contains("html")
-                    && ((HtmlParseData) referringPage.getParseData()).getMetaTagValue("robots")
-                            .contains("nofollow")) || url.getAttribute("rel").contains("nofollow"));
+            if (referringPageRobotMetaTagContainsNoFollow(referringPage)) {
+                logger.debug("Should Visit policy referringPageRobotMetaTagContainsNoFollow {}",
+                        url);
+                return false;
+            } else if (url.getAttribute("rel").contains("nofollow")) {
+                logger.debug("Should Visit policy url attibute rel contains nofollow {}", url);
+                return false;
+            }
         }
         return true;
+    }
+
+    private static boolean referringPageRobotMetaTagContainsNoFollow(Page referringPage) {
+        return null != referringPage && null != referringPage.getContentType() && referringPage
+                .getContentType().contains("html") && ((HtmlParseData) referringPage.getParseData())
+                        .getMetaTagValue("robots").contains("nofollow");
     }
 
     @Override
@@ -307,7 +317,7 @@ public class DefaultWebCrawler implements WebCrawler {
 
     @Override
     public void handleSuccess(WebURL url, FetchedPage fetchResult, Page page)
-            throws ContentFetchException, NotAllowedContentException, ParseException {
+            throws CrawlerException {
         logger.debug("Crawling {}", page.getWebURL().getURL());
 
         if (!url.getURL().equals(fetchResult.getFetchedUrl())) {

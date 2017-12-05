@@ -5,10 +5,10 @@ import java.net.MalformedURLException;
 import java.util.*;
 
 import org.apache.http.NameValuePair;
-import org.apache.http.client.*;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.*;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 
 /**
@@ -49,8 +49,8 @@ public class FormCrawlerAuthentication extends AbstractCrawlerAuthentication {
     }
 
     @Override
-    public CloseableHttpClient login(HttpClientBuilder clientBuilder) {
-        CloseableHttpClient httpClient = clientBuilder.build();
+    public void login(CloseableHttpClient httpClient) {
+        logger.info("Logging into: {} as {}", targetHost, username);
         HttpPost httpPost = new HttpPost(loginUri());
         List<NameValuePair> formParams = new ArrayList<>();
         formParams.add(new BasicNameValuePair(usernameFormName, username));
@@ -69,15 +69,10 @@ public class FormCrawlerAuthentication extends AbstractCrawlerAuthentication {
         } catch (IOException e) {
             logger.error("While trying to login to: " + targetHost + " - Error making request", e);
         }
-        return httpClient;
     }
 
     private String loginUri() {
         return protocol + "://" + host + ":" + port + file;
     }
 
-    @Override
-    protected CredentialsProvider credentialsProvider() {
-        return null;
-    }
 }

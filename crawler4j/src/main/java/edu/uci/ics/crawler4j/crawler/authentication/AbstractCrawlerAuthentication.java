@@ -12,6 +12,8 @@ public abstract class AbstractCrawlerAuthentication implements CrawlerAuthentica
     protected static final Logger logger = LoggerFactory.getLogger(
             AbstractCrawlerAuthentication.class);
 
+    protected final URL uRL;
+
     protected final HttpHost targetHost;
 
     protected final String protocol;
@@ -29,7 +31,7 @@ public abstract class AbstractCrawlerAuthentication implements CrawlerAuthentica
     public AbstractCrawlerAuthentication(String url, String username, String password)
             throws MalformedURLException {
         super();
-        URL uRL = new URL(url);
+        this.uRL = new URL(url);
         this.targetHost = new HttpHost(uRL.getHost(), uRL.getPort(), uRL.getProtocol());
         this.protocol = uRL.getProtocol();
         this.host = uRL.getHost();
@@ -40,11 +42,19 @@ public abstract class AbstractCrawlerAuthentication implements CrawlerAuthentica
     }
 
     @Override
-    public CloseableHttpClient login(HttpClientBuilder clientBuilder) {
-        logger.info("Logging in to: " + targetHost);
-        return clientBuilder.setDefaultCredentialsProvider(credentialsProvider()).build();
+    public void configure(HttpClientBuilder clientBuilder) {
+        logger.info("Configuring http client for: " + targetHost);
+        clientBuilder.setDefaultCredentialsProvider(credentialsProvider());
     }
 
-    protected abstract CredentialsProvider credentialsProvider();
+    @SuppressWarnings("static-method")
+    protected CredentialsProvider credentialsProvider() {
+        return new BasicCredentialsProvider();
+    }
+
+    @Override
+    public void login(CloseableHttpClient httpClient) {
+        // empty
+    }
 
 }

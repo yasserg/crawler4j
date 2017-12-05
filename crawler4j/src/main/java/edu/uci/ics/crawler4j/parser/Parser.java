@@ -28,7 +28,7 @@ import org.slf4j.*;
 
 import edu.uci.ics.crawler4j.CrawlerConfiguration;
 import edu.uci.ics.crawler4j.crawler.Page;
-import edu.uci.ics.crawler4j.crawler.exceptions.ParseException;
+import edu.uci.ics.crawler4j.crawler.exceptions.*;
 import edu.uci.ics.crawler4j.url.*;
 import edu.uci.ics.crawler4j.util.*;
 

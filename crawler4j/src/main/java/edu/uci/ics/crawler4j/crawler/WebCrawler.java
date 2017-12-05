@@ -18,9 +18,8 @@
 package edu.uci.ics.crawler4j.crawler;
 
 import edu.uci.ics.crawler4j.crawler.controller.CrawlController;
-import edu.uci.ics.crawler4j.crawler.exceptions.*;
+import edu.uci.ics.crawler4j.crawler.exceptions.CrawlerException;
 import edu.uci.ics.crawler4j.crawler.fetcher.FetchedPage;
-import edu.uci.ics.crawler4j.parser.NotAllowedContentException;
 import edu.uci.ics.crawler4j.url.WebURL;
 
 /**
@@ -130,10 +129,9 @@ public interface WebCrawler extends Runnable {
      */
     void visit(Page page);
 
-    void handleRedirect(WebURL url, FetchedPage fetchResult, Page page);
+    void handleRedirect(WebURL url, FetchedPage fetchResult, Page page) throws CrawlerException;
 
-    void handleSuccess(WebURL url, FetchedPage fetchResult, Page page) throws ContentFetchException,
-            NotAllowedContentException, ParseException;
+    void handleSuccess(WebURL url, FetchedPage fetchResult, Page page) throws CrawlerException;
 
     /**
      * This function is called if the content of a url is bigger than allowed size.

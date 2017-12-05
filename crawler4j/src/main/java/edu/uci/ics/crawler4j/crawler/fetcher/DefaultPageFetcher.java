@@ -32,7 +32,7 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.slf4j.*;
 
 import edu.uci.ics.crawler4j.CrawlerConfiguration;
-import edu.uci.ics.crawler4j.crawler.exceptions.PageBiggerThanMaxSizeException;
+import edu.uci.ics.crawler4j.crawler.exceptions.*;
 import edu.uci.ics.crawler4j.url.*;
 
 /**
@@ -70,7 +70,9 @@ public class DefaultPageFetcher implements PageFetcher {
 
         configureProxy(clientBuilder);
 
-        httpClient = configuration.getAuthentication().login(clientBuilder);
+        configuration.getAuthentication().configure(clientBuilder);
+        httpClient = clientBuilder.build();
+        configuration.getAuthentication().login(httpClient);
         connectionMonitorThread = new IdleHttpClientConnectionMonitor(connectionManager);
         connectionMonitorThread.start();
     }
@@ -117,7 +119,7 @@ public class DefaultPageFetcher implements PageFetcher {
 
     @Override
     public FetchedPage fetch(WebURL webUrl) throws InterruptedException, IOException,
-            PageBiggerThanMaxSizeException {
+            CrawlerException {
         FetchedPage fetchedPage = new FetchedPageImpl();
         HttpUriRequest request = null;
         try {

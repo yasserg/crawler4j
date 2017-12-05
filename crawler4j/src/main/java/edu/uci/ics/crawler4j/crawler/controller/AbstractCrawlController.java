@@ -123,7 +123,7 @@ public abstract class AbstractCrawlController<T extends WebCrawler> implements C
             monitor = new CrawlControllerMonitor<>(configuration, threads, crawlers,
                     crawlerFactory(), frontier, crawlerData, pageFetcher, pageHarvests,
                     waitingLock);
-            Thread monitorThread = new Thread(monitor);
+            Thread monitorThread = new Thread(monitor, "CrawlControllerMonitor");
             monitorThread.start();
 
             if (isBlocking) {

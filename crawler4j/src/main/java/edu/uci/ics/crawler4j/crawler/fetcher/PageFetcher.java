@@ -4,18 +4,17 @@ import java.io.IOException;
 
 import org.apache.http.client.methods.*;
 
-import edu.uci.ics.crawler4j.crawler.exceptions.PageBiggerThanMaxSizeException;
+import edu.uci.ics.crawler4j.crawler.exceptions.CrawlerException;
 import edu.uci.ics.crawler4j.url.WebURL;
 
 public interface PageFetcher {
 
-    FetchedPage fetch(WebURL webUrl) throws InterruptedException, IOException,
-            PageBiggerThanMaxSizeException;
+    FetchedPage fetch(WebURL webUrl) throws InterruptedException, IOException, CrawlerException;
 
     void handleRedirect(WebURL webUrl, FetchedPage fetchedPage, CloseableHttpResponse response);
 
     void handleSuccess(WebURL webUrl, FetchedPage fetchedPage, HttpUriRequest request,
-            CloseableHttpResponse response) throws IOException, PageBiggerThanMaxSizeException;
+            CloseableHttpResponse response) throws IOException, CrawlerException;
 
     void shutDown();
 

@@ -5,8 +5,13 @@ import org.apache.http.impl.client.*;
 public class DefaultCrawlerAuthentication implements CrawlerAuthentication {
 
     @Override
-    public CloseableHttpClient login(HttpClientBuilder clientBuilder) {
-        return clientBuilder.build();
+    public void configure(HttpClientBuilder clientBuilder) {
+        // empty
+    }
+
+    @Override
+    public void login(CloseableHttpClient httpClient) {
+        // empty
     }
 
 }
