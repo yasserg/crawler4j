@@ -9,7 +9,7 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 /**
  * Authentication information for Microsoft Active Directory
  */
-public class NtCrawlerAuthentication extends AbstractCrawlerAuthentication {
+public class NtCrawlerAuthentication extends BasicCrawlerAuthentication {
 
     private String domain;
 
@@ -27,7 +27,6 @@ public class NtCrawlerAuthentication extends AbstractCrawlerAuthentication {
         this.domain = domain;
     }
 
-    @Override
     protected CredentialsProvider credentialsProvider() {
         CredentialsProvider credsProvider = new BasicCredentialsProvider();
         try {

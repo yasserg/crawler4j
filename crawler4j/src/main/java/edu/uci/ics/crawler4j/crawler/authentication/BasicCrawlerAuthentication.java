@@ -4,7 +4,7 @@ import java.net.MalformedURLException;
 
 import org.apache.http.auth.*;
 import org.apache.http.client.CredentialsProvider;
-import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.*;
 
 /**
  * Created by Avi Hayun on 11/25/2014.
@@ -40,11 +40,20 @@ public class BasicCrawlerAuthentication extends AbstractCrawlerAuthentication {
     }
 
     @Override
-    protected CredentialsProvider credentialsProvider() {
+    public void configure(HttpClientBuilder clientBuilder) {
+        clientBuilder.setDefaultCredentialsProvider(credentialsProvider());
+    }
+
+    private CredentialsProvider credentialsProvider() {
         CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
         credentialsProvider.setCredentials(new AuthScope(targetHost.getHostName(), targetHost
                 .getPort()), new UsernamePasswordCredentials(username, password));
         return credentialsProvider;
+    }
+
+    @Override
+    public void login(CloseableHttpClient httpClient) {
+        // empty
     }
 
 }

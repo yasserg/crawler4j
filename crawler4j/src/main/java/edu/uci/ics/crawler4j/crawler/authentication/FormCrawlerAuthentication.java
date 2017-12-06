@@ -8,7 +8,7 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.*;
 import org.apache.http.message.BasicNameValuePair;
 
 /**
@@ -46,6 +46,11 @@ public class FormCrawlerAuthentication extends AbstractCrawlerAuthentication {
         super(url, username, password);
         this.usernameFormName = usernameFormName;
         this.passwordFormName = passwordFormName;
+    }
+
+    @Override
+    public void configure(HttpClientBuilder clientBuilder) {
+        // empty
     }
 
     @Override

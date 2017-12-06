@@ -3,8 +3,6 @@ package edu.uci.ics.crawler4j.crawler.authentication;
 import java.net.*;
 
 import org.apache.http.HttpHost;
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.impl.client.*;
 import org.slf4j.*;
 
 public abstract class AbstractCrawlerAuthentication implements CrawlerAuthentication {
@@ -39,22 +37,6 @@ public abstract class AbstractCrawlerAuthentication implements CrawlerAuthentica
         this.file = uRL.getFile();
         this.username = username;
         this.password = password;
-    }
-
-    @Override
-    public void configure(HttpClientBuilder clientBuilder) {
-        logger.info("Configuring http client for: " + targetHost);
-        clientBuilder.setDefaultCredentialsProvider(credentialsProvider());
-    }
-
-    @SuppressWarnings("static-method")
-    protected CredentialsProvider credentialsProvider() {
-        return new BasicCredentialsProvider();
-    }
-
-    @Override
-    public void login(CloseableHttpClient httpClient) {
-        // empty
     }
 
 }
