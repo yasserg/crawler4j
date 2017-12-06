@@ -9,6 +9,8 @@ import edu.uci.ics.crawler4j.url.WebURL;
 
 public interface PageFetcher {
 
+    void login();
+
     FetchedPage fetch(WebURL webUrl) throws InterruptedException, IOException, CrawlerException;
 
     void handleRedirect(WebURL webUrl, FetchedPage fetchedPage, CloseableHttpResponse response);

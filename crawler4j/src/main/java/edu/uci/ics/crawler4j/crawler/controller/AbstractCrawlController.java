@@ -106,12 +106,18 @@ public abstract class AbstractCrawlController<T extends WebCrawler> implements C
     }
 
     @Override
+    public void login() {
+        pageFetcher.login();
+    }
+
+    @Override
     public void start() {
         this.start(true);
     }
 
     private void start(boolean isBlocking) {
         try {
+            pageFetcher.login();
             crawlerData.clear();
             List<Thread> threads = new ArrayList<>();
             List<T> crawlers = new ArrayList<>();

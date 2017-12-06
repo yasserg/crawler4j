@@ -58,6 +58,11 @@ public interface CrawlController {
     void addSeen(String pageUrl, int docId);
 
     /**
+     * Using the configured authentication methods login to the seeded sites as required
+     */
+    void login();
+
+    /**
      * Start the crawling session and wait for it to finish. This method utilizes default crawler
      * factory that creates new crawler using Java reflection
      *

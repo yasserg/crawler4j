@@ -72,7 +72,6 @@ public class DefaultPageFetcher implements PageFetcher {
 
         configuration.getAuthentication().configure(clientBuilder);
         httpClient = clientBuilder.build();
-        configuration.getAuthentication().login(httpClient);
         connectionMonitorThread = new IdleHttpClientConnectionMonitor(connectionManager);
         connectionMonitorThread.start();
     }
@@ -115,6 +114,11 @@ public class DefaultPageFetcher implements PageFetcher {
                 .getCookiePolicy()).setRedirectsEnabled(false).setSocketTimeout(configuration
                         .getSocketTimeout()).setConnectTimeout(configuration.getConnectionTimeout())
                 .build();
+    }
+
+    @Override
+    public void login() {
+        configuration.getAuthentication().login(httpClient);
     }
 
     @Override
