@@ -11,17 +11,7 @@ import edu.uci.ics.crawler4j.util.IO;
 
 public class SleepyCatCrawlPersistentConfiguration implements CrawlPersistentConfiguration {
 
-    /**
-     * The folder which will be used by crawler for storing the intermediate crawl data. The content
-     * of this folder should not be modified manually.
-     */
-    private String storageFolder = "/frontier";
-
-    /**
-     * If this feature is enabled, you would be able to resume a previously stopped/crashed crawl.
-     * However, it makes crawling slightly slower
-     */
-    private boolean resumableCrawling = false;
+    private final CrawlerConfiguration configuration;
 
     private Environment environment;
 
@@ -33,23 +23,27 @@ public class SleepyCatCrawlPersistentConfiguration implements CrawlPersistentCon
 
     private PageQueue inprocessPageQueue;
 
+    public SleepyCatCrawlPersistentConfiguration(CrawlerConfiguration configuration) {
+        super();
+        this.configuration = configuration;
+    }
+
     @Override
     public void initialize() throws Exception {
-        if (null == storageFolder) {
-            throw new Exception("Crawl storage folder is not set in the CrawlerConfiguration.");
-        }
-        environment = environment(storageFolder, resumableCrawling);
+        environment = environment(configuration.getStorageFolder(), configuration
+                .isResumableCrawling());
 
-        if (resumableCrawling) {
+        if (configuration.isResumableCrawling()) {
             pageStatistics = new SleepyCatPageStatistics(environment);
         } else {
             pageStatistics = new InMemoryPageStatistics();
         }
-        pageHarvests = new SleepyCatPageHarvests(environment, resumableCrawling);
-        pendingPageQueue = new SleepyCatPageQueue(environment, "PendingPages", resumableCrawling);
-        if (resumableCrawling) {
-            inprocessPageQueue = new SleepyCatPageQueue(environment, "InprocessPages",
-                    resumableCrawling);
+        pageHarvests = new SleepyCatPageHarvests(environment, configuration.isResumableCrawling());
+        pendingPageQueue = new SleepyCatPageQueue(environment, "PendingPages", configuration
+                .isResumableCrawling());
+        if (configuration.isResumableCrawling()) {
+            inprocessPageQueue = new SleepyCatPageQueue(environment, "InprocessPages", configuration
+                    .isResumableCrawling());
         } else {
             inprocessPageQueue = new DefaultPageQueue();
         }
@@ -80,21 +74,6 @@ public class SleepyCatCrawlPersistentConfiguration implements CrawlPersistentCon
         if (null != environment) {
             environment.close();
         }
-    }
-
-    @Override
-    public String getStorageFolder() {
-        return this.storageFolder;
-    }
-
-    @Override
-    public void setStorageFolder(String storageFolder) {
-        this.storageFolder = storageFolder;
-    }
-
-    @Override
-    public void setResumableCrawling(boolean resumableCrawling) {
-        this.resumableCrawling = resumableCrawling;
     }
 
     @Override

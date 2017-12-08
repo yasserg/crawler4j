@@ -45,8 +45,9 @@ class CustomDnsResolverTest extends Specification {
         InMemoryDnsResolver inMemDnsResolver = new InMemoryDnsResolver()
         inMemDnsResolver.add("googhle.com", InetAddress.getByName("127.0.0.1"))
 
-        CrawlerConfiguration config = new CrawlerConfiguration(new SleepyCatCrawlPersistentConfiguration())
-        config.crawlPersistentConfiguration.storageFolder = temp.newFolder().getAbsolutePath()
+        CrawlerConfiguration config = new CrawlerConfiguration()
+        config.crawlPersistentConfiguration = new SleepyCatCrawlPersistentConfiguration(config);
+        config.storageFolder = temp.newFolder().getAbsolutePath()
         config.numberOfCrawlers = 1
         config.maxPagesToFetch = 10
         config.politenessDelay = 1000

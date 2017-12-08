@@ -48,10 +48,10 @@ public class ControllerWithShutdown {
          */
         int numberOfCrawlers = Integer.parseInt(args[1]);
 
-        CrawlerConfiguration config = new CrawlerConfiguration(
-                new SleepyCatCrawlPersistentConfiguration());
+        CrawlerConfiguration config = new CrawlerConfiguration();
+        config.setCrawlPersistentConfiguration(new SleepyCatCrawlPersistentConfiguration(config));
 
-        config.getCrawlPersistentConfiguration().setStorageFolder(crawlStorageFolder);
+        config.setStorageFolder(crawlStorageFolder);
         config.setNumberOfCrawlers(numberOfCrawlers);
 
         config.setPolitenessDelay(1000);

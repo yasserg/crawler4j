@@ -48,10 +48,10 @@ public class StatusHandlerCrawlController {
          */
         int numberOfCrawlers = Integer.parseInt(args[1]);
 
-        CrawlerConfiguration config = new CrawlerConfiguration(
-                new SleepyCatCrawlPersistentConfiguration());
+        CrawlerConfiguration config = new CrawlerConfiguration();
+        config.setCrawlPersistentConfiguration(new SleepyCatCrawlPersistentConfiguration(config));
 
-        config.getCrawlPersistentConfiguration().setStorageFolder(crawlStorageFolder);
+        config.setStorageFolder(crawlStorageFolder);
         config.setNumberOfCrawlers(numberOfCrawlers);
 
         /*
@@ -85,7 +85,7 @@ public class StatusHandlerCrawlController {
          * resuming feature and want to start a fresh crawl, you need to delete the contents of
          * rootFolder manually.
          */
-        config.getCrawlPersistentConfiguration().setResumableCrawling(false);
+        config.setResumableCrawling(false);
 
         /*
          * Instantiate the controller for this crawl.

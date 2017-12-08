@@ -41,18 +41,16 @@ public class MultipleCrawlerController {
          */
         String crawlStorageFolder = args[0];
 
-        CrawlerConfiguration config1 = new CrawlerConfiguration(
-                new SleepyCatCrawlPersistentConfiguration());
-        CrawlerConfiguration config2 = new CrawlerConfiguration(
-                new SleepyCatCrawlPersistentConfiguration());
+        CrawlerConfiguration config1 = new CrawlerConfiguration();
+        config1.setCrawlPersistentConfiguration(new SleepyCatCrawlPersistentConfiguration(config1));
+        CrawlerConfiguration config2 = new CrawlerConfiguration();
+        config2.setCrawlPersistentConfiguration(new SleepyCatCrawlPersistentConfiguration(config2));
 
         /*
          * The two crawlers should have different storage folders for their intermediate data
          */
-        config1.getCrawlPersistentConfiguration().setStorageFolder(crawlStorageFolder
-                + "/crawler1");
-        config2.getCrawlPersistentConfiguration().setStorageFolder(crawlStorageFolder
-                + "/crawler2");
+        config1.setStorageFolder(crawlStorageFolder + "/crawler1");
+        config2.setStorageFolder(crawlStorageFolder + "/crawler2");
 
         config1.setPolitenessDelay(1000);
         config2.setPolitenessDelay(2000);

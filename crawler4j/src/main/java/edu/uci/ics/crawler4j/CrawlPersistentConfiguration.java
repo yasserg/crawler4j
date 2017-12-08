@@ -10,12 +10,6 @@ public interface CrawlPersistentConfiguration {
 
     void close() throws Exception;
 
-    String getStorageFolder();
-
-    void setStorageFolder(String storageFolder);
-
-    void setResumableCrawling(boolean resumableCrawling);
-
     PageStatistics getPageStatistics();
 
     PageHarvests getPageHarvests();

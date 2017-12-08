@@ -32,6 +32,18 @@ public class CrawlerConfiguration {
     private CrawlPersistentConfiguration crawlPersistentConfiguration;
 
     /**
+     * The folder which will be used by crawler for storing the intermediate crawl data. The content
+     * of this folder should not be modified manually.
+     */
+    private String storageFolder = "/frontier";
+
+    /**
+     * If this feature is enabled, you would be able to resume a previously stopped/crashed crawl.
+     * However, it makes crawling slightly slower
+     */
+    private boolean resumableCrawling = false;
+
+    /**
      * Number of crawlers to startup
      */
     private int numberOfCrawlers;
@@ -186,11 +198,6 @@ public class CrawlerConfiguration {
 
     private DnsResolver dnsResolver = new SystemDefaultDnsResolver();
 
-    public CrawlerConfiguration(CrawlPersistentConfiguration crawlPersistentConfiguration) {
-        super();
-        this.crawlPersistentConfiguration = crawlPersistentConfiguration;
-    }
-
     /**
      * Validates and initialize data in the configs specified by this instance.
      *
@@ -198,7 +205,9 @@ public class CrawlerConfiguration {
      *             on Validation fail
      */
     public void initialize() throws Exception {
-        crawlPersistentConfiguration.initialize();
+        if (null == storageFolder) {
+            throw new Exception("Crawl storage folder is not set in the CrawlerConfiguration.");
+        }
 
         if (numberOfCrawlers <= 0) {
             throw new Exception("Number of crawlers must be greater than 0: " + numberOfCrawlers);
@@ -214,6 +223,29 @@ public class CrawlerConfiguration {
         if (Short.MAX_VALUE < maxDepthOfCrawling) {
             throw new Exception("Maximum value for crawl depth is " + Short.MAX_VALUE);
         }
+
+        if (null == crawlPersistentConfiguration) {
+            throw new Exception(
+                    "Crawl persistence configuration is not set in the CrawlerConfiguration.");
+        }
+
+        crawlPersistentConfiguration.initialize();
+    }
+
+    public String getStorageFolder() {
+        return storageFolder;
+    }
+
+    public void setStorageFolder(String storageFolder) {
+        this.storageFolder = storageFolder;
+    }
+
+    public boolean isResumableCrawling() {
+        return resumableCrawling;
+    }
+
+    public void setResumableCrawling(boolean resumableCrawling) {
+        this.resumableCrawling = resumableCrawling;
     }
 
     public boolean hasAuthentication() {

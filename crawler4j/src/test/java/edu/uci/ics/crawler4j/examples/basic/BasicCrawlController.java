@@ -47,11 +47,11 @@ public class BasicCrawlController {
          */
         int numberOfCrawlers = Integer.parseInt(args[1]);
 
-        CrawlerConfiguration config = new CrawlerConfiguration(
-                new SleepyCatCrawlPersistentConfiguration());
+        CrawlerConfiguration config = new CrawlerConfiguration();
+        config.setCrawlPersistentConfiguration(new SleepyCatCrawlPersistentConfiguration(config));
 
         config.setNumberOfCrawlers(numberOfCrawlers);
-        config.getCrawlPersistentConfiguration().setStorageFolder(crawlStorageFolder);
+        config.setStorageFolder(crawlStorageFolder);
 
         /*
          * Be polite: Make sure that we don't send more than 1 request per second (1000 milliseconds
@@ -90,7 +90,7 @@ public class BasicCrawlController {
          * resuming feature and want to start a fresh crawl, you need to delete the contents of
          * rootFolder manually.
          */
-        config.getCrawlPersistentConfiguration().setResumableCrawling(false);
+        config.setResumableCrawling(false);
 
         /*
          * Instantiate the controller for this crawl.

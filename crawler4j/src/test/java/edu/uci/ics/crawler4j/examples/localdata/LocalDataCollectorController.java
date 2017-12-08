@@ -39,9 +39,9 @@ public class LocalDataCollectorController {
         String rootFolder = args[0];
         int numberOfCrawlers = Integer.parseInt(args[1]);
 
-        CrawlerConfiguration config = new CrawlerConfiguration(
-                new SleepyCatCrawlPersistentConfiguration());
-        config.getCrawlPersistentConfiguration().setStorageFolder(rootFolder);
+        CrawlerConfiguration config = new CrawlerConfiguration();
+        config.setCrawlPersistentConfiguration(new SleepyCatCrawlPersistentConfiguration(config));
+        config.setStorageFolder(rootFolder);
         config.setMaxPagesToFetch(10);
         config.setPolitenessDelay(1000);
         config.setNumberOfCrawlers(numberOfCrawlers);

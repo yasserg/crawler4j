@@ -41,10 +41,10 @@ public class ImageCrawlController {
         int numberOfCrawlers = Integer.parseInt(args[1]);
         String storageFolder = args[2];
 
-        CrawlerConfiguration config = new CrawlerConfiguration(
-                new SleepyCatCrawlPersistentConfiguration());
+        CrawlerConfiguration config = new CrawlerConfiguration();
+        config.setCrawlPersistentConfiguration(new SleepyCatCrawlPersistentConfiguration(config));
 
-        config.getCrawlPersistentConfiguration().setStorageFolder(rootFolder);
+        config.setStorageFolder(rootFolder);
         config.setNumberOfCrawlers(numberOfCrawlers);
 
         /*

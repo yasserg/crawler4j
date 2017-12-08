@@ -41,7 +41,9 @@ public class Downloader {
     private final PageFetcher pageFetcher;
 
     public Downloader() throws InstantiationException, IllegalAccessException {
-        configuration = new CrawlerConfiguration(new SleepyCatCrawlPersistentConfiguration());
+        configuration = new CrawlerConfiguration();
+        configuration.setCrawlPersistentConfiguration(new SleepyCatCrawlPersistentConfiguration(
+                configuration));
         parser = new Parser(configuration);
         pageFetcher = new DefaultPageFetcher(configuration);
     }

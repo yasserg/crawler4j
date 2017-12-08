@@ -37,8 +37,8 @@ public class PageFetcherHtmlTest {
         WireMock.stubFor(WireMock.head(WireMock.urlEqualTo("/some/invoice.pdf")).willReturn(WireMock
                 .aResponse().withStatus(200).withHeader("Content-Type", "application/pdf")));
 
-        CrawlerConfiguration cfg = new CrawlerConfiguration(
-                new SleepyCatCrawlPersistentConfiguration());
+        CrawlerConfiguration cfg = new CrawlerConfiguration();
+        cfg.setCrawlPersistentConfiguration(new SleepyCatCrawlPersistentConfiguration(cfg));
         WebURL url = new WebURL();
 
         url.setURL("http://localhost:8080/some/index.html");

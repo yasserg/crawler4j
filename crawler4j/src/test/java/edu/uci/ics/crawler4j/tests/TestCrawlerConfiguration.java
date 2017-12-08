@@ -7,8 +7,9 @@ import edu.uci.ics.crawler4j.*;
 public class TestCrawlerConfiguration extends CrawlerConfiguration {
 
     public TestCrawlerConfiguration(TemporaryFolder temp) {
-        super(new SleepyCatCrawlPersistentConfiguration());
-        getCrawlPersistentConfiguration().setStorageFolder(temp.getRoot().getAbsolutePath());
+        super();
+        setCrawlPersistentConfiguration(new SleepyCatCrawlPersistentConfiguration(this));
+        setStorageFolder(temp.getRoot().getAbsolutePath());
 
         setNumberOfCrawlers(1);
         setPolitenessDelay(100);
