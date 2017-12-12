@@ -14,6 +14,8 @@
 //
 package edu.uci.ics.crawler4j.parser.tagsoup;
 import java.io.*;
+import java.util.LinkedList;
+
 import org.xml.sax.SAXException;
 import org.ccil.cowan.tagsoup.PYXWriter;
 import org.ccil.cowan.tagsoup.ScanHandler;
@@ -398,9 +400,31 @@ public class HTMLScanner implements Scanner, Locator {
 
 		int firstChar = r.read();	// Remove any leading BOM
 		if (firstChar != '\uFEFF') unread(r, firstChar);
-
+		
+		// To address issue #261
+		int prev = 0; int markPrev = 0;
+		int curr = 0; int markCurr = 0;
+		int next = 0; int markNext = 0;
+		PushbackReader look = new PushbackReader(new BufferedReader(r0), 1);
+		LinkedList<Character> stash = new LinkedList<Character>();
+		int savedOffset = 0;
+		int savedSize = 0;
+		
 		while (theState != S_DONE) {
-			int ch = r.read();
+
+			int ch = r.read(); look.read();
+			prev = curr;
+			curr = ch;
+			next = look.read(); unread(look, next); // read the next character and put it back
+			
+			
+			if (ch == '\n') {
+				theCurrentLine++;
+				theCurrentColumn = 0;
+				}
+			else {
+				theCurrentColumn++;
+				}
 
 			// Process control characters
 			if (ch >= 0x80 && ch <= 0x9F) ch = theWinMap[ch-0x80];
@@ -411,14 +435,6 @@ public class HTMLScanner implements Scanner, Locator {
 					unread(r, ch);	// nope
 					ch = '\n';
 					}
-				}
-
-			if (ch == '\n') {
-				theCurrentLine++;
-				theCurrentColumn = 0;
-				}
-			else {
-				theCurrentColumn++;
 				}
 
 			if (!(ch >= 0x20 || ch == '\n' || ch == '\t' || ch == -1)) continue;
@@ -484,7 +500,13 @@ public class HTMLScanner implements Scanner, Locator {
 				theSize = 0;
 				break;
 			case A_ENTITY_START:
-				h.pcdata(theOutputBuffer, 0, theSize);
+				//h.pcdata(theOutputBuffer, 0, theSize);
+				savedOffset = 0;
+				savedSize = theSize;
+				markPrev = prev;
+				markCurr = curr;
+				markNext = next;
+				pushToStash(theOutputBuffer, stash);
 				theSize = 0;
 				save(ch, h);
 				break;
@@ -534,8 +556,15 @@ public class HTMLScanner implements Scanner, Locator {
 						ent = 0;
 						}
 					else if (ent <= 0xFFFF) {
+						
+						// handles the case where entity was in the middle of a word
+						if ((markPrev != 0 || markPrev > 0x20) && (markNext != 0 || markNext > 0x20)) {
+							mergeBuffWithStash(theOutputBuffer, savedOffset, savedSize, stash);
+							theOutputBuffer[theOutputBuffer.length] = (char) ent;
+						}
+						continue; // Read in more characters to complete the word
 						// BMP character
-						save(ent, h);
+						//save(ent, h);
 						}
 					else {
 						// Astral converted to two surrogates
@@ -709,5 +738,24 @@ public class HTMLScanner implements Scanner, Locator {
 		if (in < 32) return "0x"+Integer.toHexString(in);
 		return "'"+((char)in)+"'";
 		}
+	
+	/*
+	 * This saves the current buffer state while an entity is being resolved
+	 */
+	private void pushToStash(char[] buff, LinkedList<Character> stash ) {
+		for (char c : buff ) {
+			stash.add(c);
+		}
+	}
+	
+	/*
+	 * This retrieves the buffer state to add a resolve entity to the parsed text
+	 */
+	private void mergeBuffWithStash(char[] buff, int offset, int size, LinkedList<Character> stash) {
+		int i = 0;
+		while (!stash.isEmpty()) {
+			buff[i++] = stash.removeFirst();
+		}
+	}
 
 	}

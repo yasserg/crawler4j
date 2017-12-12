@@ -113,6 +113,7 @@ public class Parser extends Configurable {
             // Please note that identifying language takes less than 10 milliseconds
             LanguageIdentifier languageIdentifier = new LanguageIdentifier(parseData.getText());
             page.setLanguage(languageIdentifier.getLanguage());
+            logger.debug("The parser has identified html page language as: " + page.getLanguage());
 
             Set<WebURL> outgoingUrls = new HashSet<>();
 
