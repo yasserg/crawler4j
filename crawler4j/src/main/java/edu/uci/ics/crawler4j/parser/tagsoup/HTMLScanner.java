@@ -412,10 +412,10 @@ public class HTMLScanner implements Scanner, Locator {
 		
 		while (theState != S_DONE) {
 
-			int ch = r.read(); look.read();
+			int ch = r.read();
 			prev = curr;
 			curr = ch;
-			next = look.read(); unread(look, next); // read the next character and put it back
+			next = r.read(); unread(r, next); // read the next character and put it back
 			
 			
 			if (ch == '\n') {
@@ -506,7 +506,7 @@ public class HTMLScanner implements Scanner, Locator {
 				markPrev = prev;
 				markCurr = curr;
 				markNext = next;
-				pushToStash(theOutputBuffer, stash);
+				pushToStash(theOutputBuffer, savedSize, stash);
 				theSize = 0;
 				save(ch, h);
 				break;
@@ -559,10 +559,14 @@ public class HTMLScanner implements Scanner, Locator {
 						
 						// handles the case where entity was in the middle of a word
 						if ((markPrev != 0 || markPrev > 0x20) && (markNext != 0 || markNext > 0x20)) {
-							mergeBuffWithStash(theOutputBuffer, savedOffset, savedSize, stash);
-							theOutputBuffer[theOutputBuffer.length] = (char) ent;
+							loadBuffWithStash(theOutputBuffer, savedOffset, savedSize, stash);
+							theOutputBuffer[savedSize] = (char) ent; // add entity to end of current word fragment
+							// Restore parsing state to before entity encountered
+							theSize = ++savedSize; // Accounting for one entity character added to theOutputBuffer
+							savedOffset = 0;
+							savedSize = 0;							
 						}
-						continue; // Read in more characters to complete the word
+						
 						// BMP character
 						//save(ent, h);
 						}
@@ -742,16 +746,16 @@ public class HTMLScanner implements Scanner, Locator {
 	/*
 	 * This saves the current buffer state while an entity is being resolved
 	 */
-	private void pushToStash(char[] buff, LinkedList<Character> stash ) {
-		for (char c : buff ) {
-			stash.add(c);
+	private void pushToStash(char[] buff, int savedSize, LinkedList<Character> stash ) {
+		for (int i = 0; i < savedSize; i++ ) {
+			stash.add(buff[i]);
 		}
 	}
 	
 	/*
-	 * This retrieves the buffer state to add a resolve entity to the parsed text
+	 * This retrieves the buffer state to add a resolved entity to the parsed text
 	 */
-	private void mergeBuffWithStash(char[] buff, int offset, int size, LinkedList<Character> stash) {
+	private void loadBuffWithStash(char[] buff, int offset, int size, LinkedList<Character> stash) {
 		int i = 0;
 		while (!stash.isEmpty()) {
 			buff[i++] = stash.removeFirst();

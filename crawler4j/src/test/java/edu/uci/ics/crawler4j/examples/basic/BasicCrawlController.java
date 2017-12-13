@@ -114,7 +114,7 @@ public class BasicCrawlController {
         //controller.addSeed("http://www.ics.uci.edu/");
         //controller.addSeed("http://www.ics.uci.edu/~lopes/");
         //controller.addSeed("http://www.ics.uci.edu/~welling/");
-        controller.addSeed("http://localhost:8080/testUmlaut.html");
+        controller.addSeed("http://localhost:8080/testUmlaut%20copy.html");
 
     /*
      * Start the crawl. This is a blocking operation, meaning that your code

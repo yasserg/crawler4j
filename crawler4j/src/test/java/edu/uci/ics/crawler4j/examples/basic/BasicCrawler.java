@@ -47,7 +47,7 @@ public class BasicCrawler extends WebCrawler {
         }
 
         // Only accept the url if it is in the "www.ics.uci.edu" domain and protocol is "http".
-        return href.startsWith("http:localhost://8080/testUmlaut.html");
+        return href.startsWith("http:localhost://8080/testUmlaut%20copy.html");
     }
 
     /**

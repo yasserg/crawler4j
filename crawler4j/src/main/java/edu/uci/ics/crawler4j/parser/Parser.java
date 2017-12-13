@@ -28,7 +28,7 @@ import org.apache.tika.metadata.DublinCore;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.html.HtmlMapper;
-import org.apache.tika.parser.html.HtmlParser;
+import edu.uci.ics.crawler4j.parser.tagsoup.HtmlParser;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
