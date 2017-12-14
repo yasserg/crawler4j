@@ -33,7 +33,7 @@ defects.  It implements the Scanner interface, which accepts a Reader
 object to fetch characters from and a ScanHandler object to report lexical
 events to.
 
-modified by Saleem Halipoto
+modified by Saleem Halipoto (shalipoto@gmail.com)
 */
 
 public class HTMLScanner implements Scanner, Locator {
@@ -576,7 +576,7 @@ public class HTMLScanner implements Scanner, Locator {
 						}
 						// handles the case where entity was in the middle of a word
 						else if ((markPrev != 0 && markPrev > 0x20) && 		// Checks for printable character preceding entity
-								(markNext != 0 && markNext > 0x20)) {	// Checks for printable character following entity
+								(markNext != 0 && markNext > 0x20)) {		// Checks for printable character following entity
 							loadBuffWithStash(theOutputBuffer, savedOffset, savedSize, stash);
 							theOutputBuffer[savedSize] = (char) ent; // add entity to end of current word fragment
 							// Restore parsing state to before entity encountered
@@ -586,7 +586,17 @@ public class HTMLScanner implements Scanner, Locator {
 						}
 						// handles the case where entity was in the end of a word
 						else if ((markPrev != 0 && markPrev > 0x20) && 		// Checks for printable character preceding entity
-								(markNext != 0 && markNext <= 0x20)) {	// Checks for whitespace following entity
+								(markNext != 0 && markNext <= 0x20)) {		// Checks for whitespace following entity
+							loadBuffWithStash(theOutputBuffer, savedOffset, savedSize, stash);
+							theOutputBuffer[savedSize] = (char) ent; // add entity to end of current word fragment
+							// Restore parsing state to before entity encountered
+							theSize = ++savedSize; // Accounting for one entity character added to theOutputBuffer
+							savedOffset = 0;
+							savedSize = 0;							
+						}
+						// handles the case where entity is not in a word but stands alone
+						else if ((markPrev != 0 && markPrev <= 0x20) && 	// Checks for whitespace preceding entity
+								(markNext != 0 && markNext <= 0x20)) {		// Checks for whitespace following entity
 							loadBuffWithStash(theOutputBuffer, savedOffset, savedSize, stash);
 							theOutputBuffer[savedSize] = (char) ent; // add entity to end of current word fragment
 							// Restore parsing state to before entity encountered
@@ -596,7 +606,7 @@ public class HTMLScanner implements Scanner, Locator {
 						}
 						else {
 							//Handle error condition
-							logger.error("The HTMLScanner failed to perform A_ENTITY action for entity decimal value: " + ent);
+							logger.error("The HTMLScanner failed to integrate entity in A_ENTITY action for entity with decimal value: " + ent);
 						}
 						
 						// BMP character
