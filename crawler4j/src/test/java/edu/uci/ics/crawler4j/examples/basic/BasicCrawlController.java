@@ -66,7 +66,7 @@ public class BasicCrawlController {
      * You can set the maximum crawl depth here. The default value is -1 for
      * unlimited depth
      */
-        config.setMaxDepthOfCrawling(2);
+        config.setMaxDepthOfCrawling(0);
 
     /*
      * You can set the maximum number of pages to crawl. The default value
@@ -115,6 +115,9 @@ public class BasicCrawlController {
         //controller.addSeed("http://www.ics.uci.edu/~lopes/");
         //controller.addSeed("http://www.ics.uci.edu/~welling/");
         controller.addSeed("http://localhost:8080/testUmlaut%20copy.html");
+        //controller.addSeed("https://www.extendshop.de/index/extend-orange/news-und-events/internetschutz.html");
+        //controller.addSeed("https://www.theatlantic.com/magazine/archive/2017/01/my-president-was-black/508793/");
+        
 
     /*
      * Start the crawl. This is a blocking operation, meaning that your code

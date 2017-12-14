@@ -17,9 +17,14 @@ import java.io.*;
 import java.util.LinkedList;
 
 import org.xml.sax.SAXException;
+
+import edu.uci.ics.crawler4j.examples.basic.BasicCrawlController;
+
 import org.ccil.cowan.tagsoup.PYXWriter;
 import org.ccil.cowan.tagsoup.ScanHandler;
 import org.ccil.cowan.tagsoup.Scanner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.Locator;
 
 /**
@@ -33,6 +38,8 @@ modified by Saleem Halipoto
 
 public class HTMLScanner implements Scanner, Locator {
 
+	private static final Logger logger = LoggerFactory.getLogger(HTMLScanner.class);
+	
 	// Start of state table
 		private static final int S_ANAME = 1;
 	private static final int S_APOS = 2;
@@ -557,14 +564,39 @@ public class HTMLScanner implements Scanner, Locator {
 						}
 					else if (ent <= 0xFFFF) {
 						
-						// handles the case where entity was in the middle of a word
-						if ((markPrev != 0 || markPrev > 0x20) && (markNext != 0 || markNext > 0x20)) {
+						// handles the case where entity was in the beginning of a word
+						if ((markPrev != 0 && markPrev <= 0x20) && 		// Checks for whitespace preceding entity
+								(markNext != 0 && markNext > 0x20)) {	// Checks for printable character following entity
 							loadBuffWithStash(theOutputBuffer, savedOffset, savedSize, stash);
 							theOutputBuffer[savedSize] = (char) ent; // add entity to end of current word fragment
 							// Restore parsing state to before entity encountered
 							theSize = ++savedSize; // Accounting for one entity character added to theOutputBuffer
 							savedOffset = 0;
 							savedSize = 0;							
+						}
+						// handles the case where entity was in the middle of a word
+						else if ((markPrev != 0 && markPrev > 0x20) && 		// Checks for printable character preceding entity
+								(markNext != 0 && markNext > 0x20)) {	// Checks for printable character following entity
+							loadBuffWithStash(theOutputBuffer, savedOffset, savedSize, stash);
+							theOutputBuffer[savedSize] = (char) ent; // add entity to end of current word fragment
+							// Restore parsing state to before entity encountered
+							theSize = ++savedSize; // Accounting for one entity character added to theOutputBuffer
+							savedOffset = 0;
+							savedSize = 0;							
+						}
+						// handles the case where entity was in the end of a word
+						else if ((markPrev != 0 && markPrev > 0x20) && 		// Checks for printable character preceding entity
+								(markNext != 0 && markNext <= 0x20)) {	// Checks for whitespace following entity
+							loadBuffWithStash(theOutputBuffer, savedOffset, savedSize, stash);
+							theOutputBuffer[savedSize] = (char) ent; // add entity to end of current word fragment
+							// Restore parsing state to before entity encountered
+							theSize = ++savedSize; // Accounting for one entity character added to theOutputBuffer
+							savedOffset = 0;
+							savedSize = 0;							
+						}
+						else {
+							//Handle error condition
+							logger.error("The HTMLScanner failed to perform A_ENTITY action for entity decimal value: " + ent);
 						}
 						
 						// BMP character
