@@ -616,7 +616,6 @@ public class CrawlConfig {
         sb.append("Proxy host: " + getProxyHost() + "\n");
         sb.append("Proxy port: " + getProxyPort() + "\n");
         sb.append("Proxy username: " + getProxyUsername() + "\n");
-        sb.append("Proxy password: " + getProxyPassword() + "\n");
         sb.append("Thread monitoring delay: " + getThreadMonitoringDelaySeconds() + "\n");
         sb.append("Thread shutdown delay: " + getThreadShutdownDelaySeconds() + "\n");
         sb.append("Cleanup delay: " + getCleanupDelaySeconds() + "\n");
