@@ -301,15 +301,20 @@ public class DefaultWebCrawler implements WebCrawler {
             webURL.setId(-1);
             webURL.setAnchor(url.getAnchor());
             if (shouldVisit(page, webURL)) {
-                if (!shouldFollowLinksIn(webURL) || robotstxtServer.allows(webURL)) {
+                if (!robotstxtServer.allows(webURL)) {
+                    logger.debug(
+                            "Not visiting redirect {} as per the server's \"robots.txt\" policy",
+                            webURL.getURL());
+                } else if (!shouldFollowLinksIn(webURL)) {
+                    logger.debug(
+                            "Not visiting redirect {} as per your \"shouldFollowLinksIn\" policy",
+                            page.getWebURL().getURL());
+                } else {
                     webURL.setId(pageHarvests.add(movedToUrl));
                     frontier.schedule(webURL);
-                } else {
-                    logger.debug("Not visiting: {} as per the server's \"robots.txt\" policy",
-                            webURL.getURL());
                 }
             } else {
-                logger.debug("Not visiting: {} as per your \"shouldVisit\" policy", webURL
+                logger.debug("Not visiting redirect {} as per your \"shouldVisit\" policy", webURL
                         .getURL());
             }
         }
@@ -381,7 +386,7 @@ public class DefaultWebCrawler implements WebCrawler {
             frontier.scheduleAll(toSchedule);
         } else {
             logger.debug("Not looking for links in page {}, "
-                    + "as per your \"shouldFollowLinksInPage\" policy", page.getWebURL().getURL());
+                    + "as per your \"shouldFollowLinksIn\" policy", page.getWebURL().getURL());
         }
 
         if (noIndexMetaTag(page)) {
