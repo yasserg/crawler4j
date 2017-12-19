@@ -20,6 +20,7 @@ package edu.uci.ics.crawler4j.parser;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -132,7 +133,13 @@ public class Parser extends Configurable {
                 String hrefLoweredCase = href.trim().toLowerCase();
                 if (!hrefLoweredCase.contains("javascript:") &&
                     !hrefLoweredCase.contains("mailto:") && !hrefLoweredCase.contains("@")) {
-                    String url = URLCanonicalizer.getCanonicalURL(href, contextURL);
+                    // prefer page's content charset to encode href url
+                    String charsetName = page.getContentCharset();
+                    if (charsetName == null || charsetName.isEmpty()) {
+                        charsetName = "UTF-8";
+                    }
+                    Charset hrefCharset = Charset.forName(charsetName);
+                    String url = URLCanonicalizer.getCanonicalURL(href, contextURL, hrefCharset);
                     if (url != null) {
                         WebURL webURL = new WebURL();
                         webURL.setURL(url);
