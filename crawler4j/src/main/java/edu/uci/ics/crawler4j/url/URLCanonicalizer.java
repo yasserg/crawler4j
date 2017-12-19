@@ -148,6 +148,8 @@ public class URLCanonicalizer {
      *
      * @param paramsMap
      *            Parameter map whose name-value pairs are in order of insertion.
+     * @param charset
+     *            Charset of html page
      * @return Canonical form of query string.
      */
     private static String canonicalize(Map<String, String> paramsMap, Charset charset) {
