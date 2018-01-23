@@ -31,8 +31,20 @@ pipeline {
                     script {
                         def repositoryUrl = scm.getUserRemoteConfigs()[0].getUrl()
                         echo "Validating rules on ${repositoryUrl}:${env.BRANCH_NAME}"
-                        env.getEnvironment().each { name, value -> println "Name: $name -> Value $value" }
-                        sh "REPO_URL=${repositoryUrl} BRANCH=${env.CHANGE_BRANCH} bash sandimetz.enforcer.sh"
+                        // env.getEnvironment().each { name, value -> println "Name: $name -> Value $value" }
+                        try {
+                            //sh "REPO_URL=${repositoryUrl} BRANCH=${env.CHANGE_BRANCH} bash sandimetz.enforcer.sh"
+                            sh "exit 1"
+                            githubNotify status: "SUCCESS", description:"Sandi Metz's rules check passed" 
+                        } catch (exc) {
+                            // githubNotify status: "FAILURE", description:"Sandi Metz's rules check failed" 
+                            pullRequest.createStatus(
+                                status: 'failure',
+                                context: 'sandi-metz',
+                                description: 'All tests are failing'//,
+                                //targetUrl: "${JOB_URL}/testResults"
+                            )
+                        }
                     }
                 }
             }
