@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
 public class HostDirectives {
     // If we fetched the directives for this host more than
     // 24 hours, we have to re-fetch it.
-    private static final long EXPIRATION_DELAY = TimeUnit.MILLISECONDS.convert(1, TimeUnit.DAYS);;
+    private static final long EXPIRATION_DELAY = TimeUnit.MILLISECONDS.convert(1, TimeUnit.DAYS);
 
     public static final int ALLOWED = 1;
     public static final int DISALLOWED = 2;
