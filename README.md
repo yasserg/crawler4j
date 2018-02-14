@@ -10,7 +10,7 @@ crawling the Web. Using it, you can setup a multi-threaded web crawler in few mi
 
 - [Installation](#installation)
 - [Quickstart](#quickstart)   
-- [Using a factory](#using-factory)
+- [Using a factory](#using-a-factory) (for Spring or Guice)
 - [More Examples](#more-examples)
 - [Configuration Details](#configuration-details)
 - [License](#license)
