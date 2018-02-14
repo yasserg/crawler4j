@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import org.apache.http.Header;
+import org.apache.http.client.CookieStore;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.message.BasicHeader;
 
@@ -199,6 +200,12 @@ public class CrawlConfig {
      * Whether to honor "noindex" flag
      */
     private boolean respectNoIndex = true;
+
+    /**
+     * The {@link CookieStore} to use to store and retrieve cookies <br />
+     * useful for passing initial cookies to the crawler.
+     */
+    private CookieStore cookieStore;
 
     /**
      * Validates the configs specified by this instance.
@@ -584,6 +591,27 @@ public class CrawlConfig {
         this.cookiePolicy = cookiePolicy;
     }
 
+    /**
+     * Gets the configured {@link CookieStore} or null if none is set
+     * @return the {@link CookieStore}
+     */
+
+    public CookieStore getCookieStore() {
+        return cookieStore;
+    }
+
+    /**
+     * Sets the {@link CookieStore to be used}
+     * @param cookieStore the {@link CookieStore}
+     */
+    public void setCookieStore(CookieStore cookieStore) {
+        this.cookieStore = cookieStore;
+    }
+
+    /**
+     * Gets the current {@link CookieStore} used
+     * @return the {@link CookieStore}
+     */
     public boolean isRespectNoFollow() {
         return respectNoFollow;
     }
