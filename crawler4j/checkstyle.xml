@@ -6,7 +6,7 @@
 
     <module name="TreeWalker">
         <module name="LineLength">
-            <property name="max" value="100"/>
+            <property name="max" value="120"/>
             <property name="ignorePattern" value="^(package .*;)|(import .*;)|(\{@link .*)$"/>
         </module>
         <module name="FileContentsHolder"/>

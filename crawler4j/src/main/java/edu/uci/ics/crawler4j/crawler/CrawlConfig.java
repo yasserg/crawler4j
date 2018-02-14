@@ -25,6 +25,8 @@ import java.util.List;
 import org.apache.http.Header;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.config.CookieSpecs;
+import org.apache.http.conn.DnsResolver;
+import org.apache.http.impl.conn.SystemDefaultDnsResolver;
 import org.apache.http.message.BasicHeader;
 
 import edu.uci.ics.crawler4j.crawler.authentication.AuthInfo;
@@ -206,6 +208,19 @@ public class CrawlConfig {
      * useful for passing initial cookies to the crawler.
      */
     private CookieStore cookieStore;
+
+    /**
+     * DNS resolver to use, #{@link SystemDefaultDnsResolver()} is default.
+     */
+    public void setDnsResolver(final DnsResolver dnsResolver) {
+        this.dnsResolver = dnsResolver;
+    }
+
+    public DnsResolver getDnsResolver() {
+        return dnsResolver;
+    }
+
+    private DnsResolver dnsResolver = new SystemDefaultDnsResolver();
 
     /**
      * Validates the configs specified by this instance.
@@ -648,7 +663,6 @@ public class CrawlConfig {
         sb.append("Proxy host: " + getProxyHost() + "\n");
         sb.append("Proxy port: " + getProxyPort() + "\n");
         sb.append("Proxy username: " + getProxyUsername() + "\n");
-        sb.append("Proxy password: " + getProxyPassword() + "\n");
         sb.append("Thread monitoring delay: " + getThreadMonitoringDelaySeconds() + "\n");
         sb.append("Thread shutdown delay: " + getThreadShutdownDelaySeconds() + "\n");
         sb.append("Cleanup delay: " + getCleanupDelaySeconds() + "\n");
