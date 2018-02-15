@@ -18,6 +18,7 @@
 package edu.uci.ics.crawler4j.fetcher;
 
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -72,11 +73,13 @@ public class PageFetchResult {
         this.fetchedUrl = fetchedUrl;
     }
 
-    public boolean fetchContent(Page page, int maxBytes) {
+    public boolean fetchContent(Page page, int maxBytes) throws SocketTimeoutException {
         try {
-            page.load(entity, maxBytes);
             page.setFetchResponseHeaders(responseHeaders);
+            page.load(entity, maxBytes);
             return true;
+        } catch (SocketTimeoutException e) {
+            throw e;
         } catch (Exception e) {
             logger.info("Exception while fetching content for: {} [{}]", page.getWebURL().getURL(),
                         e.getMessage());
