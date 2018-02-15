@@ -43,7 +43,7 @@
 		<apache.tika.version>1.16</apache.tika.version>
 		<!--test dependency versions -->
 		<junit.version>4.12</junit.version>
-		<wiremock.version>2.4.1</wiremock.version>
+		<wiremock.version>2.14.0</wiremock.version>
 		<spock.version>1.0-groovy-2.4</spock.version>
 		<groovy.version>2.4.12</groovy.version>
 	</properties>
