@@ -39,17 +39,18 @@ public class Downloader {
 
     private final Parser parser;
     private final PageFetcher pageFetcher;
+    private final CrawlConfig config = new CrawlConfig();
 
     public Downloader() throws InstantiationException, IllegalAccessException {
-        CrawlConfig config = new CrawlConfig();
+        config.setFollowRedirects(true);
         parser = new Parser(config);
         pageFetcher = new PageFetcher(config);
     }
 
     public static void main(String[] args) throws InstantiationException, IllegalAccessException {
         Downloader downloader = new Downloader();
-        downloader.processUrl("http://en.wikipedia.org/wiki/Main_Page/");
-        downloader.processUrl("http://www.yahoo.com/");
+        downloader.processUrl("https://en.wikipedia.org/wiki/Main_Page/");
+        downloader.processUrl("https://api.ipify.org?format=html");
     }
 
     public void processUrl(String url) {
@@ -81,7 +82,7 @@ public class Downloader {
             fetchResult = pageFetcher.fetchPage(curURL);
             if (fetchResult.getStatusCode() == HttpStatus.SC_OK) {
                 Page page = new Page(curURL);
-                fetchResult.fetchContent(page, pageFetcher.getConfig().getMaxDownloadSize());
+                fetchResult.fetchContent(page, config.getMaxDownloadSize());
                 parser.parse(page, curURL.getURL());
                 return page;
             }

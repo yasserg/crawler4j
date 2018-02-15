@@ -1,6 +1,6 @@
 <configuration>
 
-    <property name="LOG_HOME" value="logs" />
+    <property name="LOG_HOME" value="target/test-logs" />
     <property name="LOG_FILE_NAME" value="/crawler4j.log" />
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
