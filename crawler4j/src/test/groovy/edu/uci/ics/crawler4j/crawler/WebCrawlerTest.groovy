@@ -1,5 +1,6 @@
 package edu.uci.ics.crawler4j.crawler
 
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.junit.WireMockRule
 import edu.uci.ics.crawler4j.fetcher.PageFetcher
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtConfig
@@ -17,7 +18,7 @@ class WebCrawlerTest extends Specification {
     public TemporaryFolder temp = new TemporaryFolder()
 
     @Rule
-    public WireMockRule wireMockRule = new WireMockRule()
+    public WireMockRule wireMockRule = new WireMockRule(new WireMockConfiguration().dynamicPort())
 
     static String pageWhichLinksMustNotBeVisited = "page2.html"
     def pageUnvisited = "page4.html"
@@ -81,7 +82,7 @@ class WebCrawlerTest extends Specification {
         PageFetcher pageFetcher = new PageFetcher(config)
         RobotstxtServer robotstxtServer = new RobotstxtServer(new RobotstxtConfig(), pageFetcher)
         CrawlController controller = new CrawlController(config, pageFetcher, robotstxtServer)
-        controller.addSeed "http://localhost:8080/some/index.html"
+        controller.addSeed "http://localhost:" + wireMockRule.port() + "/some/index.html"
 
         controller.start(ShouldNotVisitPageWebCrawler.class, 1)
 
