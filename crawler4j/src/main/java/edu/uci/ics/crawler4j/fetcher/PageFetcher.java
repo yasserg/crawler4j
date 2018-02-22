@@ -248,13 +248,15 @@ public class PageFetcher extends Configurable {
         HttpUriRequest request = null;
         try {
             request = newHttpUriRequest(toFetchURL);
-            // Applying Politeness delay
-            synchronized (mutex) {
-                long now = (new Date()).getTime();
-                if ((now - lastFetchTime) < config.getPolitenessDelay()) {
-                    Thread.sleep(config.getPolitenessDelay() - (now - lastFetchTime));
+            if (config.getPolitenessDelay() > 0) {
+                // Applying Politeness delay
+                synchronized (mutex) {
+                    long now = (new Date()).getTime();
+                    if ((now - lastFetchTime) < config.getPolitenessDelay()) {
+                        Thread.sleep(config.getPolitenessDelay() - (now - lastFetchTime));
+                    }
+                    lastFetchTime = (new Date()).getTime();
                 }
-                lastFetchTime = (new Date()).getTime();
             }
 
             CloseableHttpResponse response = httpClient.execute(request);
