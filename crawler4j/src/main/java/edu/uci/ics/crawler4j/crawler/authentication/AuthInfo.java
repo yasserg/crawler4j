@@ -31,10 +31,6 @@ public abstract class AuthInfo {
     protected String username;
     protected String password;
 
-    /** Constructs a new AuthInfo. */
-    public AuthInfo() {
-    }
-
     /**
      * This constructor should only be used by extending classes
      *

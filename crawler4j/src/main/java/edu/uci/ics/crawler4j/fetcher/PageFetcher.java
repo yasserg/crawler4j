@@ -31,11 +31,9 @@ import javax.net.ssl.SSLContext;
 
 import org.apache.http.Header;
 import org.apache.http.HttpHost;
-import org.apache.http.HttpRequest;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.AuthState;
 import org.apache.http.auth.Credentials;
 import org.apache.http.auth.NTCredentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -47,7 +45,6 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
@@ -55,14 +52,11 @@ import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustStrategy;
-import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.protocol.HttpContext;
-import org.apache.http.protocol.HttpCoreContext;
 import org.apache.http.ssl.SSLContexts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -165,20 +159,7 @@ public class PageFetcher extends Configurable {
                     credentialsProvider.setCredentials(authscope, credentials);
                 });
                 clientBuilder.setDefaultCredentialsProvider(credentialsProvider);
-
-                clientBuilder.addInterceptorFirst((HttpRequest request, HttpContext context) -> {
-                    AuthState authState = (AuthState) context.getAttribute(HttpClientContext.TARGET_AUTH_STATE);
-                    if (authState.getAuthScheme() == null) {
-                        CredentialsProvider credsProvider =
-                                (CredentialsProvider) context.getAttribute(HttpClientContext.CREDS_PROVIDER);
-                        HttpHost targetHost = (HttpHost) context.getAttribute(HttpCoreContext.HTTP_TARGET_HOST);
-                        Credentials credentials = credsProvider.getCredentials(
-                                new AuthScope(targetHost.getHostName(), targetHost.getPort()));
-                        if (credentials != null) {
-                            authState.update(new BasicScheme(), credentials);
-                        }
-                    }
-                });
+                clientBuilder.addInterceptorFirst(new BasicAuthHttpRequestInterceptor());
             }
             httpClient = clientBuilder.build();
 
