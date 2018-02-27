@@ -27,14 +27,15 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.net.ssl.SSLContext;
 
 import org.apache.http.Header;
 import org.apache.http.HttpHost;
+import org.apache.http.HttpRequest;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.AuthState;
 import org.apache.http.auth.Credentials;
 import org.apache.http.auth.NTCredentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -46,6 +47,7 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
@@ -53,11 +55,14 @@ import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustStrategy;
+import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.protocol.HttpContext;
+import org.apache.http.protocol.HttpCoreContext;
 import org.apache.http.ssl.SSLContexts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,7 +70,6 @@ import org.slf4j.LoggerFactory;
 import edu.uci.ics.crawler4j.crawler.Configurable;
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.crawler.authentication.AuthInfo;
-import edu.uci.ics.crawler4j.crawler.authentication.AuthInfo.AuthenticationType;
 import edu.uci.ics.crawler4j.crawler.authentication.BasicAuthInfo;
 import edu.uci.ics.crawler4j.crawler.authentication.FormAuthInfo;
 import edu.uci.ics.crawler4j.crawler.authentication.NtAuthInfo;
@@ -88,12 +92,12 @@ public class PageFetcher extends Configurable {
         super(config);
 
         RequestConfig requestConfig = RequestConfig.custom()
-                                                   .setExpectContinueEnabled(false)
-                                                   .setCookieSpec(config.getCookiePolicy())
-                                                   .setRedirectsEnabled(false)
-                                                   .setSocketTimeout(config.getSocketTimeout())
-                                                   .setConnectTimeout(config.getConnectionTimeout())
-                                                   .build();
+                .setExpectContinueEnabled(false)
+                .setCookieSpec(config.getCookiePolicy())
+                .setRedirectsEnabled(false)
+                .setSocketTimeout(config.getSocketTimeout())
+                .setConnectTimeout(config.getConnectionTimeout())
+                .build();
 
         RegistryBuilder<ConnectionSocketFactory> connRegistryBuilder = RegistryBuilder.create();
         connRegistryBuilder.register("http", PlainConnectionSocketFactory.INSTANCE);
@@ -101,14 +105,14 @@ public class PageFetcher extends Configurable {
             try { // Fixing: https://code.google.com/p/crawler4j/issues/detail?id=174
                 // By always trusting the ssl certificate
                 SSLContext sslContext =
-                    SSLContexts.custom().loadTrustMaterial(null, new TrustStrategy() {
-                        @Override
-                        public boolean isTrusted(final X509Certificate[] chain, String authType) {
-                            return true;
-                        }
-                    }).build();
+                        SSLContexts.custom().loadTrustMaterial(null, new TrustStrategy() {
+                            @Override
+                            public boolean isTrusted(final X509Certificate[] chain, String authType) {
+                                return true;
+                            }
+                        }).build();
                 SSLConnectionSocketFactory sslsf =
-                    new SniSSLConnectionSocketFactory(sslContext, NoopHostnameVerifier.INSTANCE);
+                        new SniSSLConnectionSocketFactory(sslContext, NoopHostnameVerifier.INSTANCE);
                 connRegistryBuilder.register("https", sslsf);
             } catch (Exception e) {
                 logger.warn("Exception thrown while trying to register https");
@@ -148,24 +152,39 @@ public class PageFetcher extends Configurable {
         List<AuthInfo> authInfos = config.getAuthInfos();
         if (authInfos != null) {
             for (AuthInfo authInfo : authInfos) {
-                if (authInfo.getAuthenticationType() == AuthenticationType.BASIC_AUTHENTICATION) {
+                if (AuthInfo.AuthenticationType.BASIC_AUTHENTICATION.equals(authInfo.getAuthenticationType())) {
                     addBasicCredentials((BasicAuthInfo) authInfo, credentialsMap);
-                } else if (authInfo.getAuthenticationType() == AuthenticationType
-                        .NT_AUTHENTICATION) {
+                } else if (AuthInfo.AuthenticationType.NT_AUTHENTICATION.equals(authInfo.getAuthenticationType())) {
                     addNtCredentials((NtAuthInfo) authInfo, credentialsMap);
                 }
             }
 
             if (!credentialsMap.isEmpty()) {
                 CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-                credentialsMap.forEach(credentialsProvider::setCredentials);
+                credentialsMap.forEach((AuthScope authscope, Credentials credentials) -> {
+                    credentialsProvider.setCredentials(authscope, credentials);
+                });
                 clientBuilder.setDefaultCredentialsProvider(credentialsProvider);
+
+                clientBuilder.addInterceptorFirst((HttpRequest request, HttpContext context) -> {
+                    AuthState authState = (AuthState) context.getAttribute(HttpClientContext.TARGET_AUTH_STATE);
+                    if (authState.getAuthScheme() == null) {
+                        CredentialsProvider credsProvider =
+                                (CredentialsProvider) context.getAttribute(HttpClientContext.CREDS_PROVIDER);
+                        HttpHost targetHost = (HttpHost) context.getAttribute(HttpCoreContext.HTTP_TARGET_HOST);
+                        Credentials credentials = credsProvider.getCredentials(
+                                new AuthScope(targetHost.getHostName(), targetHost.getPort()));
+                        if (credentials != null) {
+                            authState.update(new BasicScheme(), credentials);
+                        }
+                    }
+                });
             }
             httpClient = clientBuilder.build();
 
             authInfos.stream()
-                    .filter(info -> info.getAuthenticationType() == AuthenticationType
-                            .FORM_AUTHENTICATION)
+                    .filter(info ->
+                            AuthInfo.AuthenticationType.FORM_AUTHENTICATION.equals(info.getAuthenticationType()))
                     .map(FormAuthInfo.class::cast)
                     .forEach(this::doFormLogin);
         } else {
@@ -184,7 +203,7 @@ public class PageFetcher extends Configurable {
      * /apache/http/examples/client/ClientAuthentication.java
      */
     private void addBasicCredentials(BasicAuthInfo authInfo,
-            Map<AuthScope, Credentials> credentialsMap) {
+                                     Map<AuthScope, Credentials> credentialsMap) {
         logger.info("BASIC authentication for: {}", authInfo.getLoginTarget());
         Credentials credentials = new UsernamePasswordCredentials(authInfo.getUsername(),
                 authInfo.getPassword());
@@ -214,14 +233,14 @@ public class PageFetcher extends Configurable {
     private void doFormLogin(FormAuthInfo authInfo) {
         logger.info("FORM authentication for: {}", authInfo.getLoginTarget());
         String fullUri =
-            authInfo.getProtocol() + "://" + authInfo.getHost() + ":" + authInfo.getPort() +
-            authInfo.getLoginTarget();
+                authInfo.getProtocol() + "://" + authInfo.getHost() + ":" + authInfo.getPort() +
+                        authInfo.getLoginTarget();
         HttpPost httpPost = new HttpPost(fullUri);
         List<NameValuePair> formParams = new ArrayList<>();
         formParams.add(
-            new BasicNameValuePair(authInfo.getUsernameFormStr(), authInfo.getUsername()));
+                new BasicNameValuePair(authInfo.getUsernameFormStr(), authInfo.getUsername()));
         formParams.add(
-            new BasicNameValuePair(authInfo.getPasswordFormStr(), authInfo.getPassword()));
+                new BasicNameValuePair(authInfo.getPasswordFormStr(), authInfo.getPassword()));
         UrlEncodedFormEntity entity = new UrlEncodedFormEntity(formParams, StandardCharsets.UTF_8);
         httpPost.setEntity(entity);
 
@@ -239,7 +258,7 @@ public class PageFetcher extends Configurable {
     }
 
     public PageFetchResult fetchPage(WebURL webUrl)
-        throws InterruptedException, IOException, PageBiggerThanMaxSizeException {
+            throws InterruptedException, IOException, PageBiggerThanMaxSizeException {
         // Getting URL, setting headers & content
         PageFetchResult fetchResult = new PageFetchResult();
         String toFetchURL = webUrl.getURL();
@@ -266,17 +285,17 @@ public class PageFetcher extends Configurable {
 
             // If Redirect ( 3xx )
             if (statusCode == HttpStatus.SC_MOVED_PERMANENTLY ||
-                statusCode == HttpStatus.SC_MOVED_TEMPORARILY ||
-                statusCode == HttpStatus.SC_MULTIPLE_CHOICES ||
-                statusCode == HttpStatus.SC_SEE_OTHER ||
-                statusCode == HttpStatus.SC_TEMPORARY_REDIRECT ||
-                statusCode == 308) { // todo follow
+                    statusCode == HttpStatus.SC_MOVED_TEMPORARILY ||
+                    statusCode == HttpStatus.SC_MULTIPLE_CHOICES ||
+                    statusCode == HttpStatus.SC_SEE_OTHER ||
+                    statusCode == HttpStatus.SC_TEMPORARY_REDIRECT ||
+                    statusCode == 308) { // todo follow
                 // https://issues.apache.org/jira/browse/HTTPCORE-389
 
                 Header header = response.getFirstHeader("Location");
                 if (header != null) {
                     String movedToUrl =
-                        URLCanonicalizer.getCanonicalURL(header.getValue(), toFetchURL);
+                            URLCanonicalizer.getCanonicalURL(header.getValue(), toFetchURL);
                     fetchResult.setMovedToUrl(movedToUrl);
                 }
             } else if (statusCode >= 200 && statusCode <= 299) { // is 2XX, everything looks ok
