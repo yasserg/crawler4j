@@ -27,7 +27,6 @@ import com.sleepycat.je.DatabaseException;
 import com.sleepycat.je.Environment;
 import com.sleepycat.je.OperationStatus;
 
-import edu.uci.ics.crawler4j.crawler.Configurable;
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.util.Util;
 
@@ -35,7 +34,7 @@ import edu.uci.ics.crawler4j.util.Util;
  * @author Yasser Ganjisaffar
  */
 
-public class DocIDServer extends Configurable {
+public class DocIDServer {
     private static final Logger logger = LoggerFactory.getLogger(DocIDServer.class);
 
     private final Database docIDsDB;
@@ -46,7 +45,6 @@ public class DocIDServer extends Configurable {
     private int lastDocID;
 
     public DocIDServer(Environment env, CrawlConfig config) {
-        super(config);
         DatabaseConfig dbConfig = new DatabaseConfig();
         dbConfig.setAllowCreate(true);
         dbConfig.setTransactional(config.isResumableCrawling());

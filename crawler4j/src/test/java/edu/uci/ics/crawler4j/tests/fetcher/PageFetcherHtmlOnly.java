@@ -28,8 +28,8 @@ public class PageFetcherHtmlOnly extends PageFetcher {
 
             synchronized (mutex) {
                 long now = new Date().getTime();
-                if (now - this.lastFetchTime < this.config.getPolitenessDelay()) {
-                    Thread.sleep(this.config.getPolitenessDelay() - (now - this.lastFetchTime));
+                if (now - this.lastFetchTime < getConfig().getPolitenessDelay()) {
+                    Thread.sleep(getConfig().getPolitenessDelay() - (now - this.lastFetchTime));
                 }
                 this.lastFetchTime = new Date().getTime();
             }
