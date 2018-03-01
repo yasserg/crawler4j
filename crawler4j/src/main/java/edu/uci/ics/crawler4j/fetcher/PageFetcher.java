@@ -61,7 +61,6 @@ import org.apache.http.ssl.SSLContexts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.uci.ics.crawler4j.crawler.Configurable;
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.crawler.authentication.AuthInfo;
 import edu.uci.ics.crawler4j.crawler.authentication.BasicAuthInfo;
@@ -74,16 +73,21 @@ import edu.uci.ics.crawler4j.url.WebURL;
 /**
  * @author Yasser Ganjisaffar
  */
-public class PageFetcher extends Configurable {
+public class PageFetcher {
     protected static final Logger logger = LoggerFactory.getLogger(PageFetcher.class);
     protected final Object mutex = new Object();
+    /**
+     * This field is protected for retro compatibility. Please use the getter method: getConfig() to
+     * read this field;
+     */
+    protected final CrawlConfig config;
     protected PoolingHttpClientConnectionManager connectionManager;
     protected CloseableHttpClient httpClient;
     protected long lastFetchTime = 0;
     protected IdleConnectionMonitorThread connectionMonitorThread = null;
 
     public PageFetcher(CrawlConfig config) {
-        super(config);
+        this.config = config;
 
         RequestConfig requestConfig = RequestConfig.custom()
                 .setExpectContinueEnabled(false)
@@ -336,4 +340,7 @@ public class PageFetcher extends Configurable {
         return new HttpGet(url);
     }
 
+    protected CrawlConfig getConfig() {
+        return config;
+    }
 }

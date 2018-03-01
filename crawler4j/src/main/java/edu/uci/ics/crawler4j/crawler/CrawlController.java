@@ -43,9 +43,10 @@ import edu.uci.ics.crawler4j.util.IO;
  *
  * @author Yasser Ganjisaffar
  */
-public class CrawlController extends Configurable {
+public class CrawlController {
 
     static final Logger logger = LoggerFactory.getLogger(CrawlController.class);
+    private final CrawlConfig config;
 
     /**
      * The 'customData' object can be used for passing custom crawl-related
@@ -80,9 +81,9 @@ public class CrawlController extends Configurable {
 
     public CrawlController(CrawlConfig config, PageFetcher pageFetcher,
                            RobotstxtServer robotstxtServer) throws Exception {
-        super(config);
-
         config.validate();
+        this.config = config;
+
         File folder = new File(config.getCrawlStorageFolder());
         if (!folder.exists()) {
             if (folder.mkdirs()) {
@@ -233,8 +234,6 @@ public class CrawlController extends Configurable {
             }
 
             final CrawlController controller = this;
-            final CrawlConfig config = this.getConfig();
-
             Thread monitorThread = new Thread(new Runnable() {
 
                 @Override
@@ -546,5 +545,9 @@ public class CrawlController extends Configurable {
         this.shuttingDown = true;
         pageFetcher.shutDown();
         frontier.finish();
+    }
+
+    public CrawlConfig getConfig() {
+        return config;
     }
 }

@@ -21,8 +21,10 @@ package edu.uci.ics.crawler4j.crawler;
  * Several core components of crawler4j extend this class
  * to make them configurable.
  *
+ * @deprecated This will removed without notice.
  * @author Yasser Ganjisaffar
  */
+@Deprecated
 public abstract class Configurable {
 
     protected CrawlConfig config;
