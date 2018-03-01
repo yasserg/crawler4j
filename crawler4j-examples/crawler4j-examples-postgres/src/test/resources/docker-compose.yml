@@ -1,0 +1,13 @@
+'version': "3"
+
+services:
+    db:
+      image: postgres:latest
+      restart: always
+      environment:
+        POSTGRES_USER: crawler4j
+        POSTGRES_PASSWORD: crawler4j
+        POSTGRES_DB: crawler4j
+      ports:
+        - ${POSTGRES_PORT}:5432
+

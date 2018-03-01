@@ -1,0 +1,15 @@
+<configuration>
+
+    <property name="LOG_HOME" value="target/test-logs" />
+    <property name="LOG_FILE_NAME" value="/crawler4j.log" />
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%date{HH:mm:ss} %-5level [%thread] - [%logger{0}]- %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="STDOUT" />
+    </root>
+</configuration>
