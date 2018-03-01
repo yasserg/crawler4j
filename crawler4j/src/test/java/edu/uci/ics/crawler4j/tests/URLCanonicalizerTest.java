@@ -11,11 +11,6 @@ import edu.uci.ics.crawler4j.url.URLCanonicalizer;
 public class URLCanonicalizerTest {
 
     @Test
-    public void adsad() {
-        System.out.println("::"+ (char)12288 + "::");
-    }
-
-    @Test
     public void testCanonizalier() {
 
         assertEquals("http://www.example.com/display?category=foo%2Fbar%2Bbaz",
@@ -92,8 +87,10 @@ public class URLCanonicalizerTest {
                         Charset.forName("gb2312")));
 
         // https://github.com/yasserg/crawler4j/issues/26
-        assertEquals("http://seagateplastics.com/Stock_Plastics_Catalog/images_catalog/SG2078%20PDF%20(1).pdf)",
-            URLCanonicalizer.getCanonicalURL("http://seagateplastics.com/Stock_Plastics_Catalog/images_catalog/SG2078 PDF (1).pdf)"));
+        assertEquals(
+                "http://seagateplastics.com/Stock_Plastics_Catalog/images_catalog/SG2078%20PDF%20(1).pdf)",
+            URLCanonicalizer.getCanonicalURL(
+                    "http://seagateplastics.com/Stock_Plastics_Catalog/images_catalog/SG2078 PDF (1).pdf)"));
         assertEquals("http://www.example.com/search/?query=hello%E3%80%80world",
                 URLCanonicalizer.getCanonicalURL("http://www.example.com/search/?query=hello　world"));
         //
