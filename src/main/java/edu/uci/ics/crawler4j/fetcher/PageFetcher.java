@@ -253,7 +253,10 @@ public class PageFetcher extends Configurable {
             int retriesRemaining = config.getRequestRetryCount();
             int retryBackoff = config.getRequestRetryBackoff();
             while (true) {
+                long startTime = System.nanoTime();
                 response = httpClient.execute(request);
+                long endTime = System.nanoTime();
+                fetchResult.setTimeToFirstByte((endTime - startTime) / 1000000);
                 fetchResult.setEntity(response.getEntity());
                 fetchResult.setResponseHeaders(response.getAllHeaders());
                 statusCode = response.getStatusLine().getStatusCode();

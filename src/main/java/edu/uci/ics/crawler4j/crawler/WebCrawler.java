@@ -380,6 +380,7 @@ public class WebCrawler implements Runnable {
                                                                                Locale.ENGLISH));
 
             Page page = new Page(curURL);
+            page.setTimeToFirstByte(fetchResult.getTimeToFirstByte());
             page.setFetchResponseHeaders(fetchResult.getResponseHeaders());
             page.setStatusCode(statusCode);
 
