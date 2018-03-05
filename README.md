@@ -242,7 +242,7 @@ By default crawling binary content (i.e. images, audio etc.) is turned off. To e
 crawlConfig.setIncludeBinaryContentInCrawling(true);
 ```
 
-See an example [here](crawler4j-examples/src/test/java/edu/uci/ics/crawler4j/examples/imagecrawler/) for more details.
+See an example [here](crawler4j-examples/crawler4j-examples-base/src/test/java/edu/uci/ics/crawler4j/examples/imagecrawler/) for more details.
 
 ### Politeness
 crawler4j is designed very efficiently and has the ability to crawl domains very fast
