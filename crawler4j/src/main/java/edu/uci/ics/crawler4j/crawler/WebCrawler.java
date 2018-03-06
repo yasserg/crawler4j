@@ -395,7 +395,6 @@ public class WebCrawler implements Runnable {
                                  EnglishReasonPhraseCatalog.INSTANCE.getReason(statusCode,
                                                                                Locale.ENGLISH));
 
-            Page page = new Page(curURL);
             page.setTimeToFirstByte(fetchResult.getTimeToFirstByte());
             page.setFetchResponseHeaders(fetchResult.getResponseHeaders());
             page.setStatusCode(statusCode);
