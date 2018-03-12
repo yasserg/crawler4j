@@ -1,18 +1,5 @@
 package edu.uci.ics.crawler4j.parser;
 
-import edu.uci.ics.crawler4j.crawler.CrawlConfig;
-import edu.uci.ics.crawler4j.crawler.Page;
-import edu.uci.ics.crawler4j.crawler.exceptions.ParseException;
-import edu.uci.ics.crawler4j.url.URLCanonicalizer;
-import edu.uci.ics.crawler4j.url.WebURL;
-import org.apache.tika.metadata.DublinCore;
-import org.apache.tika.metadata.Metadata;
-import org.apache.tika.parser.ParseContext;
-import org.apache.tika.parser.html.HtmlMapper;
-import org.apache.tika.parser.html.HtmlParser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -20,6 +7,18 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Set;
+import org.apache.tika.metadata.DublinCore;
+import org.apache.tika.metadata.Metadata;
+import org.apache.tika.parser.ParseContext;
+import org.apache.tika.parser.html.HtmlMapper;
+import org.apache.tika.parser.html.HtmlParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import edu.uci.ics.crawler4j.crawler.CrawlConfig;
+import edu.uci.ics.crawler4j.crawler.Page;
+import edu.uci.ics.crawler4j.crawler.exceptions.ParseException;
+import edu.uci.ics.crawler4j.url.URLCanonicalizer;
+import edu.uci.ics.crawler4j.url.WebURL;
 
 public class TikaHtmlParser implements edu.uci.ics.crawler4j.parser.HtmlParser {
     protected static final Logger logger = LoggerFactory.getLogger(TikaHtmlParser.class);
@@ -35,7 +34,6 @@ public class TikaHtmlParser implements edu.uci.ics.crawler4j.parser.HtmlParser {
         htmlParser = new HtmlParser();
         parseContext = new ParseContext();
         parseContext.set(HtmlMapper.class, AllTagMapper.class.newInstance());
-        
     }
 
     public HtmlParseData parse(Page page, String contextURL) throws ParseException {
@@ -118,7 +116,7 @@ public class TikaHtmlParser implements edu.uci.ics.crawler4j.parser.HtmlParser {
 
     private String chooseEncoding(Page page, Metadata metadata) {
         String pageCharset = page.getContentCharset();
-        if(pageCharset == null || pageCharset.isEmpty()) {
+        if (pageCharset == null || pageCharset.isEmpty()) {
             return metadata.get("Content-Encoding");
         }
         return pageCharset;

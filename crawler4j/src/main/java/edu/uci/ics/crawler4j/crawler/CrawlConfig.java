@@ -17,18 +17,18 @@
 
 package edu.uci.ics.crawler4j.crawler;
 
-import edu.uci.ics.crawler4j.crawler.authentication.AuthInfo;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+
 import org.apache.http.Header;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.conn.DnsResolver;
 import org.apache.http.impl.conn.SystemDefaultDnsResolver;
 import org.apache.http.message.BasicHeader;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
+import edu.uci.ics.crawler4j.crawler.authentication.AuthInfo;
 
 public class CrawlConfig {
 
