@@ -231,7 +231,7 @@ public class PageFetcher {
 
         try {
             httpClient.execute(httpPost);
-            logger.debug("Successfully Logged in with user: {} to: {}", authInfo.getUsername(),
+            logger.debug("Successfully request to login in with user: {} to: {}", authInfo.getUsername(),
                     authInfo.getHost());
         } catch (ClientProtocolException e) {
             logger.error("While trying to login to: {} - Client protocol not supported",
