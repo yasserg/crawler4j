@@ -118,7 +118,7 @@ public class WebCrawler implements Runnable {
         this.robotstxtServer = crawlController.getRobotstxtServer();
         this.docIdServer = crawlController.getDocIdServer();
         this.frontier = crawlController.getFrontier();
-        this.parser = new Parser(crawlController.getConfig());
+        this.parser = crawlController.getParser();
         this.myController = crawlController;
         this.isWaitingForNewURLs = false;
     }

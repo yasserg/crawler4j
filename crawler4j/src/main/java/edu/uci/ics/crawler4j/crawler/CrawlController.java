@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import edu.uci.ics.crawler4j.parser.Parser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,7 +80,14 @@ public class CrawlController {
     protected final Object waitingLock = new Object();
     protected final Environment env;
 
+    protected Parser parser;
+
     public CrawlController(CrawlConfig config, PageFetcher pageFetcher,
+                           RobotstxtServer robotstxtServer) throws Exception {
+        this(config, pageFetcher, new Parser(config), robotstxtServer);
+    }
+
+    public CrawlController(CrawlConfig config, PageFetcher pageFetcher, Parser parser,
                            RobotstxtServer robotstxtServer) throws Exception {
         config.validate();
         this.config = config;
@@ -126,10 +134,15 @@ public class CrawlController {
         frontier = new Frontier(env, config);
 
         this.pageFetcher = pageFetcher;
+        this.parser = parser;
         this.robotstxtServer = robotstxtServer;
 
         finished = false;
         shuttingDown = false;
+    }
+
+    public Parser getParser() {
+        return parser;
     }
 
     public interface WebCrawlerFactory<T extends WebCrawler> {
