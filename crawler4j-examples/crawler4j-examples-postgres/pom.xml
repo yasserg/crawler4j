@@ -16,10 +16,9 @@
     <packaging>jar</packaging>
 
     <properties>
-        <!-- 3rd party libs -->
         <postgresql.version>42.2.1</postgresql.version>
-        <crawler4j.version>4.4.0-SNAPSHOT</crawler4j.version>
         <c3p0.version>0.9.5.2</c3p0.version>
+        <flyway.db.version>5.0.7</flyway.db.version>
     </properties>
 
     <repositories>
@@ -62,14 +61,14 @@
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
-            <version>5.0.7</version>
+            <version>${flyway.db.version}</version>
         </dependency>
 
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
-            <version>4.12</version>
+            <version>${junit.version}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.palantir.docker.compose/docker-compose-rule-junit4 -->
         <dependency>
