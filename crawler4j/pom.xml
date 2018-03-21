@@ -14,14 +14,9 @@
 		<slf4j.version>1.7.22</slf4j.version>
 		<logback.version>1.1.7</logback.version>
 		<guava.version>24.0-jre</guava.version>
-		<apache.http.components.version>4.5.3</apache.http.components.version>
+		<apache.http.components.version>4.5.5</apache.http.components.version>
 		<je.version>5.0.84</je.version>
-		<apache.tika.version>1.16</apache.tika.version>
-		<!--test dependency versions -->
-		<junit.version>4.12</junit.version>
-		<wiremock.version>2.14.0</wiremock.version>
-		<spock.version>1.0-groovy-2.4</spock.version>
-		<groovy.version>2.4.12</groovy.version>
+		<apache.tika.version>1.17</apache.tika.version>
 	</properties>
 
 	<profiles>
@@ -34,7 +29,7 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-source-plugin</artifactId>
-						<version>2.4</version>
+						<version>${maven.source.version}</version>
 						<executions>
 							<execution>
 								<id>attach-sources</id>
@@ -48,9 +43,9 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-javadoc-plugin</artifactId>
-						<version>2.10.1</version>
+						<version>${maven.javadoc.version}</version>
 						<configuration>
-							<additionalparam>-Xdoclint:none</additionalparam>
+							<doclint>none</doclint>
 						</configuration>
 						<executions>
 							<execution>
@@ -64,7 +59,7 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-gpg-plugin</artifactId>
-						<version>1.5</version>
+						<version>${maven.gpg.version}</version>
 						<executions>
 							<execution>
 								<id>sign-artifacts</id>
@@ -78,7 +73,7 @@
 					<plugin>
 						<groupId>org.sonatype.plugins</groupId>
 						<artifactId>nexus-staging-maven-plugin</artifactId>
-						<version>1.6.7</version>
+						<version>${maven.nexus.staging.version}</version>
 						<extensions>true</extensions>
 						<configuration>
 							<serverId>ossrh</serverId>
@@ -89,7 +84,7 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-release-plugin</artifactId>
-						<version>2.5.3</version>
+						<version>${maven.release.version}</version>
 						<configuration>
 							<autoVersionSubmodules>true</autoVersionSubmodules>
 							<useReleaseProfile>false</useReleaseProfile>
@@ -107,7 +102,7 @@
 				<plugins>
 					<plugin>
 						<artifactId>maven-assembly-plugin</artifactId>
-						<version>2.5.3</version>
+						<version>${maven.assembly.version}</version>
 						<configuration>
 							<descriptorRefs>
 								<descriptorRef>jar-with-dependencies</descriptorRef>
@@ -136,16 +131,17 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.2</version>
+				<version>${maven.compiler.version}</version>
 				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
+					<source>${java.source}</source>
+					<target>${java.target}</target>
+					<encoding>${encoding}</encoding>
 				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
-				<version>2.5</version>
+				<version>${maven.jar.version}</version>
 				<configuration>
 					<excludes>
 						<exclude>**/*.properties</exclude>
@@ -159,7 +155,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.7.9</version>
+                <version>${maven.jacoco.version}</version>
                 <executions>
                     <execution>
                         <id>pre-unit-test</id>
@@ -185,7 +181,7 @@
 			<plugin>
 				<groupId>org.codehaus.gmavenplus</groupId>
 				<artifactId>gmavenplus-plugin</artifactId>
-				<version>1.5</version>
+				<version>${maven.gmaven.plus.version}</version>
 				<executions>
 					<execution>
 						<goals>
@@ -204,7 +200,7 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>
-				<version>1.9.1</version>
+				<version>${maven.build.helper.version}</version>
 				<executions>
 					<execution>
 						<id>add-source</id>
@@ -264,13 +260,11 @@
 		<version>${apache.http.components.version}</version>
 		<scope>compile</scope>
 	</dependency>
-
 	<dependency>
 		<groupId>com.sleepycat</groupId>
 		<artifactId>je</artifactId>
 		<version>${je.version}</version>
 	</dependency>
-
 	<dependency>
 		<groupId>org.apache.tika</groupId>
 		<artifactId>tika-parsers</artifactId>

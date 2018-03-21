@@ -15,7 +15,7 @@
         <dependency>
             <groupId>edu.uci.ics</groupId>
             <artifactId>crawler4j</artifactId>
-            <version>${project.parent.version}</version>
+            <version>${crawler4j.version}</version>
         </dependency>
     </dependencies>
 
