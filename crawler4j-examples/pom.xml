@@ -8,6 +8,30 @@
     <description>Open Source Web Crawler for Java</description>
     <url>https://github.com/yasserg/crawler4j</url>
 
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+    <scm>
+        <url>https://github.com/yasserg/crawler4j</url>
+        <connection>scm:git:git@github.com:yasserg/crawler4j.git</connection>
+        <developerConnection>scm:git:git@github.com:yasserg/crawler4j.git</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
+
     <modules>
         <module>crawler4j-examples-base</module>
         <module>crawler4j-examples-postgres</module>
