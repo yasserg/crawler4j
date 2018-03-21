@@ -3,13 +3,17 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>crawler4j-examples</artifactId>
+        <artifactId>crawler4j-parent</artifactId>
         <groupId>edu.uci.ics</groupId>
         <version>4.4.0-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
     <artifactId>crawler4j-examples-base</artifactId>
     <modelVersion>4.0.0</modelVersion>
+
+    <properties>
+        <maven.javadoc.skip>true</maven.javadoc.skip>
+    </properties>
 
     <dependencies>
         <dependency>
@@ -18,6 +22,5 @@
             <version>${project.parent.version}</version>
         </dependency>
     </dependencies>
-
 
 </project>

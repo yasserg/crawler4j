@@ -34,12 +34,32 @@
 
     <modules>
         <module>crawler4j</module>
-        <module>crawler4j-examples</module>
+        <module>crawler4j-examples/crawler4j-examples-base</module>
+        <module>crawler4j-examples/crawler4j-examples-postgres</module>
     </modules>
+
+    <properties>
+        <!-- Maven specific settings -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.build.resourceEncoding>UTF-8</project.build.resourceEncoding>
+        <maven.compile.encoding>UTF-8</maven.compile.encoding>
+
+        <java.source>1.8</java.source>
+        <java.target>1.8</java.target>
+    </properties>
 
     <build>
         <pluginManagement>
             <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.2</version>
+                    <configuration>
+                        <source>${java.source}</source>
+                        <target>${java.target}</target>
+                    </configuration>
+                </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-checkstyle-plugin</artifactId>

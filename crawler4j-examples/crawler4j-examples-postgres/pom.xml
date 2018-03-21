@@ -3,23 +3,20 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>crawler4j-examples</artifactId>
+        <artifactId>crawler4j-parent</artifactId>
         <groupId>edu.uci.ics</groupId>
         <version>4.4.0-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
-    <groupId>crawler4j-examples</groupId>
     <artifactId>crawler4j-examples-postgres</artifactId>
-
-    <packaging>jar</packaging>
 
     <properties>
         <!-- 3rd party libs -->
         <postgresql.version>42.2.1</postgresql.version>
-        <crawler4j.version>4.4.0-SNAPSHOT</crawler4j.version>
         <c3p0.version>0.9.5.2</c3p0.version>
+
+        <maven.javadoc.skip>true</maven.javadoc.skip>
     </properties>
 
     <repositories>
@@ -57,7 +54,7 @@
         <dependency>
             <groupId>edu.uci.ics</groupId>
             <artifactId>crawler4j</artifactId>
-            <version>${crawler4j.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>org.flywaydb</groupId>
@@ -79,17 +76,4 @@
             <version>0.33.0</version>
         </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>${java.source}</source>
-                    <target>${java.target}</target>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 </project>
