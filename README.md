@@ -25,7 +25,7 @@ To use the latest release of crawler4j, please use the following snippet in your
     <dependency>
         <groupId>edu.uci.ics</groupId>
         <artifactId>crawler4j</artifactId>
-        <version>4.3</version>
+        <version>4.4.0</version>
     </dependency>
 ```
 
@@ -46,7 +46,7 @@ You can add the following to use the next SNAPSHOT release
         <dependency>
             <groupId>edu.uci.ics</groupId>
             <artifactId>crawler4j</artifactId>
-            <version>4.4-SNAPSHOT</version>
+            <version>4.5.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
 ```
@@ -67,7 +67,7 @@ you will find in `target/` folder a jar named like `crawler4j-X.Y-with-dependenc
 
 Please include the following dependency in the build.gradle file to use crawler4j
 
-    compile group: 'edu.uci.ics', name: 'crawler4j', version: '4.3'
+    compile group: 'edu.uci.ics', name: 'crawler4j', version: '4.4.0'
     
 Also, add the following repository url in build.gradle, for the dependency [sleepycat](https://mvnrepository.com/artifact/com.sleepycat/je/5.0.84)
 
