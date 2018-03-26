@@ -3,7 +3,7 @@
     <groupId>edu.uci.ics</groupId>
     <artifactId>crawler4j-parent</artifactId>
     <packaging>pom</packaging>
-    <version>4.4.0</version>
+    <version>4.5.0-SNAPSHOT</version>
     <name>${project.groupId}:${project.artifactId}</name>
     <description>Open Source Web Crawler for Java</description>
     <url>https://github.com/yasserg/crawler4j</url>
@@ -19,7 +19,7 @@
         <url>https://github.com/yasserg/crawler4j</url>
         <connection>scm:git:git@github.com:yasserg/crawler4j.git</connection>
         <developerConnection>scm:git:git@github.com:yasserg/crawler4j.git</developerConnection>
-        <tag>crawler4j-4.4.0</tag>
+        <tag>HEAD</tag>
     </scm>
     <distributionManagement>
         <snapshotRepository>
