@@ -5,6 +5,7 @@
     <artifactId>crawler4j-parent</artifactId>
     <packaging>pom</packaging>
     <version>4.4.0-SNAPSHOT</version>
+    <name>${project.groupId}:${project.artifactId}</name>
     <description>Open Source Web Crawler for Java</description>
     <url>https://github.com/yasserg/crawler4j</url>
 
@@ -31,6 +32,21 @@
             <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
     </distributionManagement>
+    <developers>
+        <developer>
+            <id>yasserg</id>
+            <name>Yasser Ganjisaffar</name>
+            <email></email>
+            <timezone>America/Los_Angeles</timezone>
+        </developer>
+        <developer>
+            <id>s17t</id>
+            <name>Federico Tolomei</name>
+            <email>fede@s17t.net</email>
+            <url>https://s17t.net</url>
+            <timezone>Europe/Rome</timezone>
+        </developer>
+    </developers>
 
     <modules>
         <module>crawler4j</module>

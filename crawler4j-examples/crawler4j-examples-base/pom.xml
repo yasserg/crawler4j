@@ -9,11 +9,10 @@
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <artifactId>crawler4j-examples-base</artifactId>
+    <name>${project.groupId}:${project.artifactId}</name>
+    <description>Open Source Web Crawler for Java - base examples</description>
+    <url>https://github.com/yasserg/crawler4j</url>
     <modelVersion>4.0.0</modelVersion>
-
-    <properties>
-        <maven.javadoc.skip>true</maven.javadoc.skip>
-    </properties>
 
     <dependencies>
         <dependency>

@@ -7,6 +7,7 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 	<artifactId>crawler4j</artifactId>
+	<name>${project.groupId}:${project.artifactId}</name>
 	<description>Open Source Web Crawler for Java</description>
 	<url>https://github.com/yasserg/crawler4j</url>
 
