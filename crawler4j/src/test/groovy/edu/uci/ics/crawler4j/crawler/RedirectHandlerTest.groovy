@@ -49,6 +49,9 @@ class RedirectHandlerTest extends Specification {
                 .withHeader("Content-Type", "text/html")
                 .withBody(
                 $/<html>
+                    <head>
+                        <meta charset="UTF-8">
+                    </head>
                     <body>
                         <h1>Redirected here.</h1>
                     </body>

@@ -42,6 +42,7 @@ class CrawlerWithJSTest extends Specification {
                 .withBody(
                 $/<html>
                     <head>
+                        <meta charset="UTF-8">
                         <script src="/js/app.js"></script>
                     </head>
                     <body> 
@@ -59,6 +60,7 @@ class CrawlerWithJSTest extends Specification {
                 .withBody(
                 $/<html>
                     <head>
+                        <meta charset="UTF-8">
                         <script src="/js/app.js"></script>
                     </head> 
                     <body>
@@ -74,6 +76,7 @@ class CrawlerWithJSTest extends Specification {
                 .withBody(
                 $/<html>
                     <head>
+                        <meta charset="UTF-8">
                         <script src="/js/app.js"></script>
                     </head> 
                     <body>

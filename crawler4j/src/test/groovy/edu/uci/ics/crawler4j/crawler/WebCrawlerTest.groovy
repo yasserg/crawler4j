@@ -31,6 +31,9 @@ class WebCrawlerTest extends Specification {
                 .withHeader("Content-Type", "text/html")
                 .withBody(
                 $/<html>
+                    <head>
+                        <meta charset="UTF-8">
+                    </head>
                     <body> 
                         <a href="/some/page1.html">a link</a>
                         <a href="/some/\${pageWhichLinksMustNotBeVisited}">ignore links in this page</a>
@@ -44,6 +47,9 @@ class WebCrawlerTest extends Specification {
                 .withHeader("Content-Type", "text/html")
                 .withBody(
                 $/<html>
+                    <head>
+                        <meta charset="UTF-8">
+                    </head>
                     <body>
                         <h1>title</h1>
                     </body>
@@ -54,6 +60,9 @@ class WebCrawlerTest extends Specification {
                 .withHeader("Content-Type", "text/html")
                 .withBody(
                 $/<html>
+                    <head>
+                        <meta charset="UTF-8">
+                    </head>
                     <body>
                         <a href="/some/\${pageUnvisited}">should not visit this</a>
                     </body>

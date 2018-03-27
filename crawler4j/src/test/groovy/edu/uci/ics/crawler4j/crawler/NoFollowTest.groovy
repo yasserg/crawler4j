@@ -28,6 +28,9 @@ class NoFollowTest extends Specification {
                 .withHeader("Content-Type", "text/html")
                 .withBody(
                 $/<html>
+                    <head>
+                      <meta charset="UTF-8">
+                    </head>
                     <body> 
                         <a href="/some/page1.html" rel="nofollow">should not visit this</a>
                         <a href="/some/page2.html">link to a nofollow page</a>
@@ -40,6 +43,9 @@ class NoFollowTest extends Specification {
                 .withHeader("Content-Type", "text/html")
                 .withBody(
                 $/<html>
+                    <head>
+                      <meta charset="UTF-8">
+                    </head>
                     <body>
                         <h1>title</h1>
                     </body>
@@ -51,6 +57,7 @@ class NoFollowTest extends Specification {
                 .withBody(
                 $/<html>
                     <head>
+                      <meta charset="UTF-8">
                       <meta name="robots" content="nofollow">
                     </head>
                     <body>

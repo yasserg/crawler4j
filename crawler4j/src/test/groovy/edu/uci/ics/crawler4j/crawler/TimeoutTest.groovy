@@ -81,6 +81,9 @@ class TimeoutTest extends Specification {
                 .withHeader("Content-Type", "text/html")
                 .withBody(
                 $/<html>
+                    <head>
+                        <meta charset="UTF-8">
+                    </head>
                     <body> 
                         <title>Hello, world!</title>
                     </body>

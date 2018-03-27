@@ -15,9 +15,9 @@
 		<slf4j.version>1.7.22</slf4j.version>
 		<logback.version>1.1.7</logback.version>
 		<guava.version>24.0-jre</guava.version>
-		<apache.http.components.version>4.5.3</apache.http.components.version>
+		<apache.http.components.version>4.5.5</apache.http.components.version>
 		<je.version>5.0.84</je.version>
-		<apache.tika.version>1.16</apache.tika.version>
+		<apache.tika.version>1.17</apache.tika.version>
 		<!--test dependency versions -->
 		<junit.version>4.12</junit.version>
 		<wiremock.version>2.14.0</wiremock.version>
@@ -32,7 +32,7 @@
 				<plugins>
 					<plugin>
 						<artifactId>maven-assembly-plugin</artifactId>
-						<version>2.5.3</version>
+						<version>${maven.assembly.version}</version>
 						<configuration>
 							<descriptorRefs>
 								<descriptorRef>jar-with-dependencies</descriptorRef>
@@ -65,7 +65,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
-				<version>2.5</version>
+				<version>${maven.jar.version}</version>
 				<configuration>
 					<excludes>
 						<exclude>**/*.properties</exclude>
@@ -79,7 +79,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.7.9</version>
+				<version>${maven.jacoco.version}</version>
                 <executions>
                     <execution>
                         <id>pre-unit-test</id>
@@ -105,7 +105,7 @@
 			<plugin>
 				<groupId>org.codehaus.gmavenplus</groupId>
 				<artifactId>gmavenplus-plugin</artifactId>
-				<version>1.5</version>
+				<version>${maven.gmaven.plus.version}</version>
 				<executions>
 					<execution>
 						<goals>
@@ -124,7 +124,7 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>
-				<version>1.9.1</version>
+				<version>${maven.build.helper.version}</version>
 				<executions>
 					<execution>
 						<id>add-source</id>
@@ -184,13 +184,11 @@
 		<version>${apache.http.components.version}</version>
 		<scope>compile</scope>
 	</dependency>
-
 	<dependency>
 		<groupId>com.sleepycat</groupId>
 		<artifactId>je</artifactId>
 		<version>${je.version}</version>
 	</dependency>
-
 	<dependency>
 		<groupId>org.apache.tika</groupId>
 		<artifactId>tika-parsers</artifactId>

@@ -36,6 +36,7 @@ class BasicAuthTest extends Specification {
                 .withBody(
                 $/<html>
                     <head>
+                        <meta charset="UTF-8">
                         <title>Landing page</title>
                     </head>
                     <body> 
@@ -53,6 +54,7 @@ class BasicAuthTest extends Specification {
                 .withBody(
                 $/<html>
                     <head>
+                        <meta charset="UTF-8">
                         <title>Hello, world!</title>
                     </head>
                     <body> 
@@ -70,6 +72,7 @@ class BasicAuthTest extends Specification {
                 .withBody(
                 $/<html>
                     <head>
+                        <meta charset="UTF-8">
                         <title>Landing page</title>
                     </head>
                     <body> 
@@ -86,6 +89,7 @@ class BasicAuthTest extends Specification {
                 .withBody(
                 $/<html>
                     <head>
+                        <meta charset="UTF-8">
                         <title>Hello, world!</title>
                     </head>
                     <body> 

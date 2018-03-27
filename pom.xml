@@ -54,13 +54,37 @@
     </modules>
 
     <properties>
-        <!-- Maven specific settings -->
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.build.resourceEncoding>UTF-8</project.build.resourceEncoding>
-        <maven.compile.encoding>UTF-8</maven.compile.encoding>
+        <crawler4j.version>4.4.0-SNAPSHOT</crawler4j.version>
+        <!-- 3rd party test dependencies -->
+        <junit.version>4.12</junit.version>
+        <wiremock.version>2.14.0</wiremock.version>
+        <spock.version>1.1-groovy-2.4</spock.version>
+        <groovy.version>2.4.12</groovy.version>
 
+        <!-- Maven specific settings -->
+        <encoding>UTF-8</encoding>
         <java.source>1.8</java.source>
         <java.target>1.8</java.target>
+        <project.build.sourceEncoding>${encoding}</project.build.sourceEncoding>
+        <project.build.resourceEncoding>${encoding}</project.build.resourceEncoding>
+        <maven.compile.encoding>${encoding}</maven.compile.encoding>
+        <maven.compiler.target>${java.target}</maven.compiler.target>
+
+        <!-- Maven plugin version -->
+        <maven.source.version>3.0.1</maven.source.version>
+        <maven.javadoc.version>3.0.0</maven.javadoc.version>
+        <maven.gpg.version>1.5</maven.gpg.version>
+        <maven.build.helper.version>3.0.0</maven.build.helper.version>
+        <maven.release.version>2.5.3</maven.release.version>
+        <maven.assembly.version>2.5.3</maven.assembly.version>
+        <maven.nexus.staging.version>1.6.7</maven.nexus.staging.version>
+        <maven.jar.version>3.0.0</maven.jar.version>
+        <maven.compiler.version>3.7.0</maven.compiler.version>
+        <maven.checkstyle.version>3.0.0</maven.checkstyle.version>
+        <maven.jacoco.version>0.7.9</maven.jacoco.version>
+        <maven.gmaven.plus.version>1.5</maven.gmaven.plus.version>
+        <maven.versions.version>2.5</maven.versions.version>
+        <maven.forbiddenapis.version>2.4.1</maven.forbiddenapis.version>
     </properties>
 
     <profiles>
@@ -73,7 +97,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-source-plugin</artifactId>
-                        <version>2.4</version>
+                        <version>${maven.source.version}</version>
                         <executions>
                             <execution>
                                 <id>attach-sources</id>
@@ -87,9 +111,9 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>2.10.1</version>
+                        <version>${maven.javadoc.version}</version>
                         <configuration>
-                            <additionalparam>-Xdoclint:none</additionalparam>
+                            <doclint>none</doclint>
                         </configuration>
                         <executions>
                             <execution>
@@ -103,7 +127,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.5</version>
+                        <version>${maven.gpg.version}</version>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>
@@ -117,7 +141,7 @@
                     <plugin>
                         <groupId>org.sonatype.plugins</groupId>
                         <artifactId>nexus-staging-maven-plugin</artifactId>
-                        <version>1.6.7</version>
+                        <version>${maven.nexus.staging.version}</version>
                         <extensions>true</extensions>
                         <configuration>
                             <serverId>ossrh</serverId>
@@ -128,13 +152,77 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-release-plugin</artifactId>
-                        <version>2.5.3</version>
+                        <version>${maven.release.version}</version>
                         <configuration>
                             <autoVersionSubmodules>true</autoVersionSubmodules>
                             <useReleaseProfile>false</useReleaseProfile>
                             <releaseProfiles>release</releaseProfiles>
                             <goals>deploy</goals>
                         </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>version-check</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>versions-maven-plugin</artifactId>
+                        <version>${maven.versions.version}</version>
+                        <executions>
+                            <execution>
+                                <id>show-updates</id>
+                                <phase>compile</phase>
+                                <goals>
+                                    <goal>display-plugin-updates</goal>
+                                    <goal>display-dependency-updates</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>forbiddenapis</id>
+            <build>
+                <plugins>
+                    <!-- A maven plugin to check for certain code quality rules -->
+                    <plugin>
+                        <groupId>de.thetaphi</groupId>
+                        <artifactId>forbiddenapis</artifactId>
+                        <version>${maven.forbiddenapis.version}</version>
+                        <configuration>
+                            <!--
+                          if the used Java version is too new,
+                          don't fail, just do nothing:
+                        -->
+                            <failOnUnsupportedJava>false</failOnUnsupportedJava>
+                            <bundledSignatures>
+                                <!--
+                              This will automatically choose the right
+                              signatures based on 'maven.compiler.target':
+                            -->
+                                <bundledSignature>jdk-deprecated</bundledSignature>
+                                <bundledSignature>jdk-internal</bundledSignature>
+                                <!-- disallow undocumented classes like sun.misc.Unsafe: -->
+                                <bundledSignature>jdk-non-portable</bundledSignature>
+                                <!-- interesting, yet inactive for the moment:
+                                <bundledSignature>jdk-unsafe</bundledSignature>
+                                <bundledSignature>jdk-reflection</bundledSignature>
+                            -->
+                            </bundledSignatures>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>check</goal>
+                                    <goal>testCheck</goal>
+                                </goals>
+                            </execution>
+                        </executions>
                     </plugin>
                 </plugins>
             </build>
@@ -147,16 +235,17 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.2</version>
+                    <version>${maven.compiler.version}</version>
                     <configuration>
                         <source>${java.source}</source>
                         <target>${java.target}</target>
+                        <encoding>${encoding}</encoding>
                     </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-checkstyle-plugin</artifactId>
-                    <version>2.17</version>
+                    <version>${maven.checkstyle.version}</version>
                     <executions>
                         <execution>
                             <id>compile</id>
@@ -184,5 +273,4 @@
             </plugins>
         </pluginManagement>
     </build>
-
 </project>

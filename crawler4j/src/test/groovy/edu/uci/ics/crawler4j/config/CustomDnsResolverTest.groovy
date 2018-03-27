@@ -33,6 +33,7 @@ class CustomDnsResolverTest extends Specification {
                 .withBody(
                 $/<html>
                     <head>
+                        <meta charset="UTF-8">
                         <title>Hello, world!</title>
                     </head>
                     <body> 

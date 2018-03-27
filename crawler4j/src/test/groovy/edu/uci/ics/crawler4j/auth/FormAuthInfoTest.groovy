@@ -44,6 +44,7 @@ class FormAuthInfoTest extends Specification {
                 .withBody(
                 $/<html>
                     <head>
+                        <meta charset="UTF-8">
                         <title>Home page</title>
                     </head>
                     <body>
@@ -62,6 +63,7 @@ class FormAuthInfoTest extends Specification {
                 .withBody(
                 $/<html>
                     <head>
+                        <meta charset="UTF-8">
                         <title>Landing page</title>
                     </head>
                     <body>
@@ -90,6 +92,7 @@ class FormAuthInfoTest extends Specification {
                 .withBody(
                 $/<html>
                     <head>
+                        <meta charset="UTF-8">
                         <title>Profile page</title>
                     </head>
                     <body>
