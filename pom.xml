@@ -54,7 +54,6 @@
     </modules>
 
     <properties>
-        <crawler4j.version>4.4.0-SNAPSHOT</crawler4j.version>
         <!-- 3rd party test dependencies -->
         <junit.version>4.12</junit.version>
         <wiremock.version>2.14.0</wiremock.version>
