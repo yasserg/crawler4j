@@ -7,4 +7,10 @@ package edu.uci.ics.crawler4j.crawler.exceptions;
  */
 public class ParseException extends Exception {
 
+    public ParseException() {
+    }
+
+    public ParseException(Throwable cause) {
+        super(cause);
+    }
 }

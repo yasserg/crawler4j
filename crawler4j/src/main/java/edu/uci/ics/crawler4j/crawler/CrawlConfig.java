@@ -600,16 +600,17 @@ public class CrawlConfig {
     }
 
     public CookieStore getCookieStore() {
-                return cookieStore;
-            }
+        return cookieStore;
+    }
 
-            /**
-      * Sets the {@link CookieStore to be used}
-      * @param cookieStore the {@link CookieStore}
-      */
-            public void setCookieStore(CookieStore cookieStore) {
-                this.cookieStore = cookieStore;
-            }
+    /**
+     * Sets the {@link CookieStore to be used}
+     *
+     * @param cookieStore the {@link CookieStore}
+     */
+    public void setCookieStore(CookieStore cookieStore) {
+        this.cookieStore = cookieStore;
+    }
 
     @Override
     public String toString() {

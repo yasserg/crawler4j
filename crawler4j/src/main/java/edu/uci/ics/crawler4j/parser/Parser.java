@@ -90,7 +90,7 @@ public class Parser extends Configurable {
                 page.setParseData(parseData);
             } catch (Exception e) {
                 logger.error("{}, while parsing: {}", e.getMessage(), page.getWebURL().getURL());
-                throw new ParseException();
+                throw new ParseException(e);
             }
         } else { // isHTML
             Metadata metadata = new Metadata();
@@ -99,7 +99,7 @@ public class Parser extends Configurable {
                 htmlParser.parse(inputStream, contentHandler, metadata, parseContext);
             } catch (Exception e) {
                 logger.error("{}, while parsing: {}", e.getMessage(), page.getWebURL().getURL());
-                throw new ParseException();
+                throw new ParseException(e);
             }
 
             if (page.getContentCharset() == null) {
@@ -159,7 +159,7 @@ public class Parser extends Configurable {
                 page.setParseData(parseData);
             } catch (UnsupportedEncodingException e) {
                 logger.error("error parsing the html: " + page.getWebURL().getURL(), e);
-                throw new ParseException();
+                throw new ParseException(e);
             }
         }
     }
