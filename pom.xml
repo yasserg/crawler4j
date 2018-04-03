@@ -80,7 +80,7 @@
         <maven.jar.version>3.0.0</maven.jar.version>
         <maven.compiler.version>3.7.0</maven.compiler.version>
         <maven.checkstyle.version>3.0.0</maven.checkstyle.version>
-        <maven.jacoco.version>0.7.9</maven.jacoco.version>
+        <maven.jacoco.version>0.8.1</maven.jacoco.version>
         <maven.gmaven.plus.version>1.5</maven.gmaven.plus.version>
         <maven.versions.version>2.5</maven.versions.version>
         <maven.forbiddenapis.version>2.4.1</maven.forbiddenapis.version>
