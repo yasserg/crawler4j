@@ -30,6 +30,7 @@ import java.util.Map;
 import javax.net.ssl.SSLContext;
 
 import org.apache.http.Header;
+import org.apache.http.HttpHeaders;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
@@ -277,7 +278,7 @@ public class PageFetcher {
                     statusCode == 308) { // todo follow
                 // https://issues.apache.org/jira/browse/HTTPCORE-389
 
-                Header header = response.getFirstHeader("Location");
+                Header header = response.getFirstHeader(HttpHeaders.LOCATION);
                 if (header != null) {
                     String movedToUrl =
                             URLCanonicalizer.getCanonicalURL(header.getValue(), toFetchURL);
@@ -296,7 +297,7 @@ public class PageFetcher {
                 if (fetchResult.getEntity() != null) {
                     long size = fetchResult.getEntity().getContentLength();
                     if (size == -1) {
-                        Header length = response.getLastHeader("Content-Length");
+                        Header length = response.getLastHeader(HttpHeaders.CONTENT_LENGTH);
                         if (length == null) {
                             length = response.getLastHeader("Content-length");
                         }
