@@ -7,13 +7,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.google.common.base.Suppliers;
 
 /**
  * This class is a singleton which obtains a list of TLDs (from online or a local file) in order to
@@ -43,7 +44,7 @@ public class TLDList {
     }
 
     private TLDList() {
-        memoizer = Suppliers.memoize(TLDList::tldSupplier)::get;
+        memoizer = TLDList.memoize(TLDList::tldSupplier)::get;
     }
 
     private static int readStream(InputStream stream, Set<String> tldSet) {
@@ -119,5 +120,11 @@ public class TLDList {
             logger.error("Couldn't read the TLD list from file");
             throw new RuntimeException(e);
         }
+    }
+
+    // Naive but no need to account for threading in this case.
+    private static <T> Supplier<T> memoize(Supplier<T> supplier) {
+        Map<Object, T> mem = new HashMap<>();
+        return () -> mem.computeIfAbsent("memoizeMe", key -> supplier.get());
     }
 }

@@ -16,6 +16,7 @@
         <postgresql.version>42.2.1</postgresql.version>
         <c3p0.version>0.9.5.2</c3p0.version>
         <flyway.db.version>5.0.7</flyway.db.version>
+        <guava.version>24.0-jre</guava.version>
     </properties>
 
     <repositories>
@@ -59,6 +60,12 @@
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
             <version>${flyway.db.version}</version>
+        </dependency>
+        <dependency>
+            <!-- Google's core Java libraries -->
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>${guava.version}</version>
         </dependency>
 
         <dependency>

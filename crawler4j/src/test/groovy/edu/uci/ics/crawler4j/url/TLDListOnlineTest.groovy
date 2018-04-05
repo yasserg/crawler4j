@@ -35,5 +35,6 @@ omega
         expect:
         assert tldList.contains("alpha")
         assert !tldList.contains("delta")
+        verify(1, getRequestedFor(urlEqualTo("/tld-names.txt")));
     }
 }

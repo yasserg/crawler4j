@@ -14,7 +14,6 @@
 	<properties>
 		<slf4j.version>1.7.22</slf4j.version>
 		<logback.version>1.1.7</logback.version>
-		<guava.version>24.0-jre</guava.version>
 		<apache.http.components.version>4.5.5</apache.http.components.version>
 		<je.version>5.0.84</je.version>
 		<apache.tika.version>1.17</apache.tika.version>
@@ -171,12 +170,6 @@
         <artifactId>logback-classic</artifactId>
         <version>${logback.version}</version>
         <scope>runtime</scope>
-    </dependency>
-    <dependency>
-        <!-- Google's core Java libraries -->
-        <groupId>com.google.guava</groupId>
-        <artifactId>guava</artifactId>
-        <version>${guava.version}</version>
     </dependency>
 	<dependency>
 		<groupId>org.apache.httpcomponents</groupId>
