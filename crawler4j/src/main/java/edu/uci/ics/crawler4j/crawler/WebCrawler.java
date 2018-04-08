@@ -365,6 +365,12 @@ public class WebCrawler implements Runnable {
         return true;
     }
 
+    /**
+     * Determine whether a page should be parsed
+     *
+     * @param page the page under consideration
+     * @return true if the page should be parsed
+     */
     protected boolean shouldParse(Page page) {
         return true;
     }
@@ -398,10 +404,6 @@ public class WebCrawler implements Runnable {
             page.setTimeToFirstByte(fetchResult.getTimeToFirstByte());
             page.setFetchResponseHeaders(fetchResult.getResponseHeaders());
             page.setStatusCode(statusCode);
-
-            if (!shouldParse(page)) {
-                return;
-            }
 
             if (statusCode < 200 ||
                 statusCode > 299) { // Not 2XX: 2XX status codes indicate success
@@ -465,6 +467,11 @@ public class WebCrawler implements Runnable {
                 }
 
             } else { // if status code is 200
+
+                if (!shouldParse(page)) {
+                    return;
+                }
+
                 if (!curURL.getURL().equals(fetchResult.getFetchedUrl())) {
                     if (docIdServer.isSeenBefore(fetchResult.getFetchedUrl())) {
                         logger.debug("Redirect page: {} has already been seen", curURL);
