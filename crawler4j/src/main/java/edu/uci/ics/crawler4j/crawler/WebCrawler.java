@@ -500,6 +500,7 @@ public class WebCrawler implements Runnable {
                     List<WebURL> toSchedule = new ArrayList<>();
                     int maxCrawlDepth = myController.getConfig().getMaxDepthOfCrawling();
                     for (WebURL webURL : parseData.getOutgoingUrls()) {
+                        webURL = handleUrlBeforeProcess(webURL);
                         webURL.setParentDocid(curURL.getDocid());
                         webURL.setParentUrl(curURL.getURL());
                         int newdocid = docIdServer.getDocId(webURL.getURL());
