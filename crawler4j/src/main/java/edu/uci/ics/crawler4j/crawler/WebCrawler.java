@@ -177,6 +177,11 @@ public class WebCrawler implements Runnable {
      * @return tweaked WebURL
      */
     protected WebURL handleUrlBeforeProcess(WebURL curURL) {
+        CrawlConfig config = myController.getConfig();
+        if (config.isEnforceHttps() && curURL.getScheme().equals("http")) {
+            curURL.setScheme("https");
+        }
+
         return curURL;
     }
 
@@ -203,15 +208,15 @@ public class WebCrawler implements Runnable {
      * This function is called if the crawler encountered an unexpected http status code ( a
      * status code other than 3xx)
      *
-     * @param urlStr URL in which an unexpected error was encountered while crawling
+     * @param webUrl URL in which an unexpected error was encountered while crawling
      * @param statusCode Html StatusCode
      * @param contentType Type of Content
      * @param description Error Description
      */
-    protected void onUnexpectedStatusCode(String urlStr, int statusCode, String contentType,
+    protected void onUnexpectedStatusCode(WebURL webUrl, int statusCode, String contentType,
                                           String description) {
-        logger.warn("Skipping URL: {}, StatusCode: {}, {}, {}", urlStr, statusCode, contentType,
-                    description);
+        logger.warn("Skipping URL: {}, StatusCode: {}, {}, {}", webUrl.getURL(), statusCode,
+            contentType, description);
         // Do nothing by default (except basic logging)
         // Sub-classed can override this to add their custom functionality
     }
@@ -280,18 +285,19 @@ public class WebCrawler implements Runnable {
 
     @Override
     public void run() {
+        CrawlConfig config = myController.getConfig();
         onStart();
         while (true) {
-            List<WebURL> assignedURLs = new ArrayList<>(50);
+            List<WebURL> assignedURLs = new ArrayList<>(config.getWorkerUrlDequeueCount());
             isWaitingForNewURLs = true;
-            frontier.getNextURLs(50, assignedURLs);
+            frontier.getNextURLs(config.getWorkerUrlDequeueCount(), assignedURLs);
             isWaitingForNewURLs = false;
             if (assignedURLs.isEmpty()) {
                 if (frontier.isFinished()) {
                     return;
                 }
                 try {
-                    Thread.sleep(3000);
+                    Thread.sleep(1000);
                 } catch (InterruptedException e) {
                     logger.error("Error occurred", e);
                 }
@@ -358,6 +364,16 @@ public class WebCrawler implements Runnable {
     }
 
     /**
+     * Determine whether a page should be parsed
+     *
+     * @param page the page under consideration
+     * @return true if the page should be parsed
+     */
+    protected boolean shouldParse(Page page) {
+        return true;
+    }
+
+    /**
      * Classes that extends WebCrawler should overwrite this function to process
      * the content of the fetched and parsed page.
      *
@@ -369,7 +385,7 @@ public class WebCrawler implements Runnable {
         // Sub-classed should override this to add their custom functionality
     }
 
-    private void processPage(WebURL curURL) {
+    protected void processPage(WebURL curURL) {
         PageFetchResult fetchResult = null;
         Page page = new Page(curURL);
         try {
@@ -382,10 +398,11 @@ public class WebCrawler implements Runnable {
             handlePageStatusCode(curURL, statusCode,
                                  EnglishReasonPhraseCatalog.INSTANCE.getReason(statusCode,
                                                                                Locale.ENGLISH));
-            // Finds the status reason for all known statuses
 
+            page.setTimeToFirstByte(fetchResult.getTimeToFirstByte());
             page.setFetchResponseHeaders(fetchResult.getResponseHeaders());
             page.setStatusCode(statusCode);
+
             if (statusCode < 200 ||
                 statusCode > 299) { // Not 2XX: 2XX status codes indicate success
                 if (statusCode == HttpStatus.SC_MOVED_PERMANENTLY ||
@@ -443,11 +460,16 @@ public class WebCrawler implements Runnable {
                     String contentType = fetchResult.getEntity() == null ? "" :
                                          fetchResult.getEntity().getContentType() == null ? "" :
                                          fetchResult.getEntity().getContentType().getValue();
-                    onUnexpectedStatusCode(curURL.getURL(), fetchResult.getStatusCode(),
-                                           contentType, description);
+                    onUnexpectedStatusCode(curURL, fetchResult.getStatusCode(), contentType,
+                        description);
                 }
 
             } else { // if status code is 200
+
+                if (!shouldParse(page)) {
+                    return;
+                }
+
                 if (!curURL.getURL().equals(fetchResult.getFetchedUrl())) {
                     if (docIdServer.isSeenBefore(fetchResult.getFetchedUrl())) {
                         logger.debug("Redirect page: {} has already been seen", curURL);
@@ -476,6 +498,7 @@ public class WebCrawler implements Runnable {
                     List<WebURL> toSchedule = new ArrayList<>();
                     int maxCrawlDepth = myController.getConfig().getMaxDepthOfCrawling();
                     for (WebURL webURL : parseData.getOutgoingUrls()) {
+                        webURL = handleUrlBeforeProcess(webURL);
                         webURL.setParentDocid(curURL.getDocid());
                         webURL.setParentUrl(curURL.getURL());
                         int newdocid = docIdServer.getDocId(webURL.getURL());

@@ -90,14 +90,7 @@ public class PageFetcher {
     public PageFetcher(CrawlConfig config) {
         this.config = config;
 
-        RequestConfig requestConfig = RequestConfig.custom()
-                .setExpectContinueEnabled(false)
-                .setCookieSpec(config.getCookiePolicy())
-                .setRedirectsEnabled(false)
-                .setSocketTimeout(config.getSocketTimeout())
-                .setConnectTimeout(config.getConnectionTimeout())
-                .build();
-
+        RequestConfig requestConfig = config.getRequestConfig();
         RegistryBuilder<ConnectionSocketFactory> connRegistryBuilder = RegistryBuilder.create();
         connRegistryBuilder.register("http", PlainConnectionSocketFactory.INSTANCE);
         if (config.isIncludeHttpsPages()) {
@@ -262,14 +255,32 @@ public class PageFetcher {
                 }
             }
 
-            CloseableHttpResponse response = httpClient.execute(request);
-            fetchResult.setEntity(response.getEntity());
-            fetchResult.setResponseHeaders(response.getAllHeaders());
+            CloseableHttpResponse response = null;
+            int statusCode = -1;
 
-            // Setting HttpStatus
-            int statusCode = response.getStatusLine().getStatusCode();
+            //Retry 5XX responses w/ exponential back off
+            int retriesRemaining = config.getRequestRetryCount();
+            int retryBackoff = config.getRequestRetryBackoff();
+            while (true) {
+                long startTime = System.nanoTime();
+                response = httpClient.execute(request);
+                long endTime = System.nanoTime();
+                fetchResult.setTimeToFirstByte((endTime - startTime) / 1000000);
+                fetchResult.setEntity(response.getEntity());
+                fetchResult.setResponseHeaders(response.getAllHeaders());
+                statusCode = response.getStatusLine().getStatusCode();
 
-            // If Redirect ( 3xx )
+                if (statusCode >= 500 && statusCode < 600 && retriesRemaining > 0) {
+                    response.close();
+                    logger.info("Retrying request " + toFetchURL + " in " + retryBackoff);
+                    Thread.sleep(1000 * retryBackoff);
+                    retriesRemaining--;
+                    retryBackoff *= retryBackoff;
+                } else {
+                    break;
+                }
+            }
+
             if (statusCode == HttpStatus.SC_MOVED_PERMANENTLY ||
                     statusCode == HttpStatus.SC_MOVED_TEMPORARILY ||
                     statusCode == HttpStatus.SC_MULTIPLE_CHOICES ||

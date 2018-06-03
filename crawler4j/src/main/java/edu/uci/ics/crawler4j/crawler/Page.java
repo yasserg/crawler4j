@@ -46,6 +46,11 @@ public class Page {
     protected WebURL url;
 
     /**
+     * Time to first byte
+     */
+    protected long timeToFirstByte;
+
+    /**
      * Redirection flag
      */
     protected boolean redirect;
@@ -195,6 +200,14 @@ public class Page {
 
     public void setWebURL(WebURL url) {
         this.url = url;
+    }
+
+    public long getTimeToFirstByte() {
+        return timeToFirstByte;
+    }
+
+    public void setTimeToFirstByte(long timeToFirstByte) {
+        this.timeToFirstByte = timeToFirstByte;
     }
 
     public boolean isRedirect() {

@@ -35,11 +35,20 @@ public class PageFetchResult {
 
     protected static final Logger logger = LoggerFactory.getLogger(PageFetchResult.class);
 
+    protected long ttfb = 0;
     protected int statusCode;
     protected HttpEntity entity = null;
     protected Header[] responseHeaders = null;
     protected String fetchedUrl = null;
     protected String movedToUrl = null;
+
+    public long getTimeToFirstByte() {
+        return ttfb;
+    }
+
+    public void setTimeToFirstByte(long ttfb) {
+        this.ttfb = ttfb;
+    }
 
     public int getStatusCode() {
         return statusCode;
