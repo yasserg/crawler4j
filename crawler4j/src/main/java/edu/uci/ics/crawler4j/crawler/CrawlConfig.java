@@ -25,6 +25,7 @@ import java.util.List;
 import org.apache.http.Header;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.config.CookieSpecs;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.conn.DnsResolver;
 import org.apache.http.impl.conn.SystemDefaultDnsResolver;
 import org.apache.http.message.BasicHeader;
@@ -82,6 +83,11 @@ public class CrawlConfig {
      * Should we also crawl https pages?
      */
     private boolean includeHttpsPages = true;
+
+    /**
+     * Should we enforce https?
+     */
+    private boolean enforceHttps = false;
 
     /**
      * Should we fetch binary content such as images, audio, ...?
@@ -157,6 +163,11 @@ public class CrawlConfig {
     private int cleanupDelaySeconds = 10;
 
     /**
+     * The number of URLs to dequeue in a batch for processing
+     */
+    private int workerUrlDequeueCount = 10;
+
+    /**
      * If crawler should run behind a proxy, this parameter can be used for
      * specifying the proxy host.
      */
@@ -193,6 +204,11 @@ public class CrawlConfig {
     private String cookiePolicy = CookieSpecs.STANDARD;
 
     /**
+     * Max redirects to follow
+     */
+    private int maxRedirects = 1;
+
+    /**
      * Whether to honor "nofollow" flag
      */
     private boolean respectNoFollow = true;
@@ -201,6 +217,22 @@ public class CrawlConfig {
      * Whether to honor "noindex" flag
      */
     private boolean respectNoIndex = true;
+
+    /**
+     * The number of times to retry requests which result in 5XX errors
+     */
+    private int requestRetryCount = 0;
+
+    /**
+     * Use this interval to calculate the amount of time to wait in between
+     * retried requests in seconds.
+     */
+    private int requestRetryBackoff = 2;
+
+    /**
+     * HTTP client RequestConfig
+     */
+    private RequestConfig requestConfig;
 
     /**
      * The {@link CookieStore} to use to store and retrieve cookies <br />
@@ -442,6 +474,14 @@ public class CrawlConfig {
         this.connectionTimeout = connectionTimeout;
     }
 
+    public int getWorkerUrlDequeueCount() {
+        return workerUrlDequeueCount;
+    }
+
+    public void setWorkerUrlDequeueCount(int workerUrlDequeueCount) {
+        this.workerUrlDequeueCount = workerUrlDequeueCount;
+    }
+
     public int getMaxOutgoingLinksToFollow() {
         return maxOutgoingLinksToFollow;
     }
@@ -605,11 +645,18 @@ public class CrawlConfig {
         this.cookiePolicy = cookiePolicy;
     }
 
+    public int getMaxRedirects() {
+        return maxRedirects;
+    }
+
+    public void setMaxRedirects(int maxRedirects) {
+        this.maxRedirects = maxRedirects;
+    }
+
     /**
      * Gets the configured {@link CookieStore} or null if none is set
      * @return the {@link CookieStore}
      */
-
     public CookieStore getCookieStore() {
         return cookieStore;
     }
@@ -622,10 +669,6 @@ public class CrawlConfig {
         this.cookieStore = cookieStore;
     }
 
-    /**
-     * Gets the current {@link CookieStore} used
-     * @return the {@link CookieStore}
-     */
     public boolean isRespectNoFollow() {
         return respectNoFollow;
     }
@@ -640,6 +683,49 @@ public class CrawlConfig {
 
     public void setRespectNoIndex(boolean respectNoIndex) {
         this.respectNoIndex = respectNoIndex;
+    }
+
+    public boolean isEnforceHttps() {
+        return enforceHttps;
+    }
+
+    public void setEnforceHttps(boolean enforceHttps) {
+        this.enforceHttps = enforceHttps;
+    }
+
+    public int getRequestRetryCount() {
+        return requestRetryCount;
+    }
+
+    public void setRequestRetryCount(int requestRetryCount) {
+        this.requestRetryCount = requestRetryCount;
+    }
+
+    public int getRequestRetryBackoff() {
+        return requestRetryBackoff;
+    }
+
+    public void setRequestRetryBackoff(int requestRetryBackoff) {
+        this.requestRetryBackoff = requestRetryBackoff;
+    }
+
+    public RequestConfig getRequestConfig() {
+        if (requestConfig == null) {
+            return RequestConfig.custom()
+            .setExpectContinueEnabled(false)
+            .setCookieSpec(getCookiePolicy())
+            .setRedirectsEnabled(false)
+            .setSocketTimeout(getSocketTimeout())
+            .setConnectTimeout(getConnectionTimeout())
+            .setMaxRedirects(getMaxRedirects())
+            .build();
+        }
+
+        return requestConfig;
+    }
+
+    public void overrideRequestConfig(RequestConfig config) {
+        this.requestConfig = config;
     }
 
     @Override
@@ -668,6 +754,7 @@ public class CrawlConfig {
         sb.append("Cookie policy: " + getCookiePolicy() + "\n");
         sb.append("Respect nofollow: " + isRespectNoFollow() + "\n");
         sb.append("Respect noindex: " + isRespectNoIndex() + "\n");
+        sb.append("Enforce https: " + isEnforceHttps() + "\n");
         return sb.toString();
     }
 }
