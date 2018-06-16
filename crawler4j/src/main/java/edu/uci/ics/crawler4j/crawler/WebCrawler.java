@@ -290,6 +290,14 @@ public class WebCrawler implements Runnable {
         CrawlConfig config = myController.getConfig();
         onStart();
         while (true) {
+            if (myController.isPaused()) {
+                try {
+                    Thread.sleep(250);
+                } catch (InterruptedException e) {
+                    logger.error("Error occurred", e);
+                }
+                continue;
+            }
             List<WebURL> assignedURLs = new ArrayList<>(config.getWorkerUrlDequeueCount());
             isWaitingForNewURLs = true;
             frontier.getNextURLs(config.getWorkerUrlDequeueCount(), assignedURLs);
@@ -309,6 +317,7 @@ public class WebCrawler implements Runnable {
                         logger.info("Exiting because of controller shutdown.");
                         return;
                     }
+
                     if (curURL != null) {
                         curURL = handleUrlBeforeProcess(curURL);
                         processPage(curURL);
@@ -394,7 +403,6 @@ public class WebCrawler implements Runnable {
             if (curURL == null) {
                 return;
             }
-
             fetchResult = pageFetcher.fetchPage(curURL);
             int statusCode = fetchResult.getStatusCode();
             handlePageStatusCode(curURL, statusCode,
@@ -553,7 +561,6 @@ public class WebCrawler implements Runnable {
         } catch (ParseException pe) {
             onParseError(curURL);
         } catch (ContentFetchException | SocketTimeoutException cfe) {
-            onContentFetchError(curURL);
             onContentFetchError(page);
         } catch (NotAllowedContentException nace) {
             logger.debug(

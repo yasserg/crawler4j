@@ -71,6 +71,8 @@ public class CrawlController {
      */
     protected boolean shuttingDown;
 
+    protected boolean paused;
+
     protected PageFetcher pageFetcher;
     protected RobotstxtServer robotstxtServer;
     protected Frontier frontier;
@@ -243,6 +245,9 @@ public class CrawlController {
 
                             while (true) {
                                 sleep(config.getThreadMonitoringDelaySeconds());
+                                if (paused) {
+                                    continue;
+                                }
                                 boolean someoneIsWorking = false;
                                 for (int i = 0; i < threads.size(); i++) {
                                     Thread thread = threads.get(i);
@@ -265,9 +270,7 @@ public class CrawlController {
                                 }
                                 boolean shutOnEmpty = config.isShutdownOnEmptyQueue();
                                 if (!someoneIsWorking && shutOnEmpty) {
-                                    // Make sure again that none of the threads
-                                    // are
-                                    // alive.
+                                    // Make sure again that none of the threads is alive
                                     logger.info(
                                         "It looks like no thread is working, waiting for " +
                                          config.getThreadShutdownDelaySeconds() +
@@ -340,7 +343,6 @@ public class CrawlController {
             if (isBlocking) {
                 waitUntilFinish();
             }
-
         } catch (Exception e) {
             logger.error("Error happened", e);
         }
@@ -535,6 +537,20 @@ public class CrawlController {
         return shuttingDown;
     }
 
+    public boolean isPaused() {
+        return paused;
+    }
+
+    public void pause() {
+        logger.info("Pausing...");
+        paused = true;
+    }
+
+    public void resume() {
+        logger.info("Resuming...");
+        paused = false;
+    }
+
     /**
      * Set the current crawling session set to 'shutdown'. Crawler threads
      * monitor the shutdown flag and when it is set to true, they will no longer
@@ -542,6 +558,7 @@ public class CrawlController {
      */
     public void shutdown() {
         logger.info("Shutting down...");
+        this.paused = false;
         this.shuttingDown = true;
         pageFetcher.shutDown();
         frontier.finish();
