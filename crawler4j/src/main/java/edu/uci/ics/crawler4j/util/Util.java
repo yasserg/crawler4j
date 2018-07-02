@@ -79,4 +79,10 @@ public class Util {
         return typeStr.contains("text") && !typeStr.contains("html");
     }
 
+    public static boolean hasCssTextContent(String contentType) {
+        String typeStr = (contentType != null) ? contentType.toLowerCase() : "";
+
+        return typeStr.contains("css");
+    }
+
 }
