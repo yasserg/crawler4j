@@ -114,7 +114,9 @@ public class TLDList {
 
         try (InputStream tldFile = TLDList.class.getClassLoader()
                 .getResourceAsStream(TLD_NAMES_TXT_FILENAME)) {
-            int n = readStream(tldFile, tldSet);
+        	int n = 0;
+        	if(tldFile != null)
+                n = readStream(tldFile, tldSet);
             logger.info("Obtained {} TLD from packaged file {}", n, TLD_NAMES_TXT_FILENAME);
         } catch (IOException e) {
             logger.error("Couldn't read the TLD list from file");
