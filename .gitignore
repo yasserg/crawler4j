@@ -114,9 +114,13 @@ local.properties
 # Code Recommenders
 .recommenders/
 
-Eclipse_Console_Output
 PracticeJava/src/RegexTestHarness.java
 **/frontier/
 output.txt
 PracticeJava/*
-
+**/Eclipse_Console_Output.txt
+**/tempfolder/
+/**/savedpagesfolder*
+/BAD_internet_exception.txt
+**/saved_crawler_output
+**/saved_etsy_folder
