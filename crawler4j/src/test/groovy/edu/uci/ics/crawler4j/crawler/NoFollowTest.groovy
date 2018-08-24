@@ -1,5 +1,6 @@
 package edu.uci.ics.crawler4j.crawler
 
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.junit.WireMockRule
 import edu.uci.ics.crawler4j.fetcher.PageFetcher
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtConfig
@@ -17,7 +18,7 @@ class NoFollowTest extends Specification {
     public TemporaryFolder temp = new TemporaryFolder()
 
     @Rule
-    public WireMockRule wireMockRule = new WireMockRule()
+    public WireMockRule wireMockRule = new WireMockRule(new WireMockConfiguration().dynamicPort())
 
     def "ignore nofollow links"() {
         given: "an index page with two links"
@@ -27,6 +28,9 @@ class NoFollowTest extends Specification {
                 .withHeader("Content-Type", "text/html")
                 .withBody(
                 $/<html>
+                    <head>
+                      <meta charset="UTF-8">
+                    </head>
                     <body> 
                         <a href="/some/page1.html" rel="nofollow">should not visit this</a>
                         <a href="/some/page2.html">link to a nofollow page</a>
@@ -39,6 +43,9 @@ class NoFollowTest extends Specification {
                 .withHeader("Content-Type", "text/html")
                 .withBody(
                 $/<html>
+                    <head>
+                      <meta charset="UTF-8">
+                    </head>
                     <body>
                         <h1>title</h1>
                     </body>
@@ -50,6 +57,7 @@ class NoFollowTest extends Specification {
                 .withBody(
                 $/<html>
                     <head>
+                      <meta charset="UTF-8">
                       <meta name="robots" content="nofollow">
                     </head>
                     <body>
@@ -80,7 +88,7 @@ class NoFollowTest extends Specification {
         PageFetcher pageFetcher = new PageFetcher(config)
         RobotstxtServer robotstxtServer = new RobotstxtServer(new RobotstxtConfig(), pageFetcher)
         CrawlController controller = new CrawlController(config, pageFetcher, robotstxtServer)
-        controller.addSeed "http://localhost:8080/some/index.html"
+        controller.addSeed "http://localhost:" + wireMockRule.port() + "/some/index.html"
 
         controller.start(WebCrawler.class, 1)
 

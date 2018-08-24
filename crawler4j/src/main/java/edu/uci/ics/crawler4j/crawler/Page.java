@@ -91,7 +91,7 @@ public class Page {
     /**
      * Headers which were present in the response of the fetch request
      */
-    protected Header[] fetchResponseHeaders;
+    protected Header[] fetchResponseHeaders = new Header[0];
 
     /**
      * The parsed data populated by parsers

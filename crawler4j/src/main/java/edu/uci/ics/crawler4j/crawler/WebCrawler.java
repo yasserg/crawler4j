@@ -17,15 +17,14 @@
 
 package edu.uci.ics.crawler4j.crawler;
 
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-
 import org.apache.http.HttpStatus;
 import org.apache.http.impl.EnglishReasonPhraseCatalog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import edu.uci.ics.crawler4j.crawler.exceptions.ContentFetchException;
 import edu.uci.ics.crawler4j.crawler.exceptions.PageBiggerThanMaxSizeException;
 import edu.uci.ics.crawler4j.crawler.exceptions.ParseException;
@@ -117,7 +116,7 @@ public class WebCrawler implements Runnable {
         this.robotstxtServer = crawlController.getRobotstxtServer();
         this.docIdServer = crawlController.getDocIdServer();
         this.frontier = crawlController.getFrontier();
-        this.parser = new Parser(crawlController.getConfig());
+        this.parser = crawlController.getParser();
         this.myController = crawlController;
         this.isWaitingForNewURLs = false;
     }
@@ -221,9 +220,23 @@ public class WebCrawler implements Runnable {
      * This function is called if the content of a url could not be fetched.
      *
      * @param webUrl URL which content failed to be fetched
+     *
+     * @deprecated use {@link #onContentFetchError(Page)}
      */
+    @Deprecated
     protected void onContentFetchError(WebURL webUrl) {
         logger.warn("Can't fetch content of: {}", webUrl.getURL());
+        // Do nothing by default (except basic logging)
+        // Sub-classed can override this to add their custom functionality
+    }
+
+    /**
+     * This function is called if the content of a url could not be fetched.
+     *
+     * @param page Partial page object
+     */
+    protected void onContentFetchError(Page page) {
+        logger.warn("Can't fetch content of: {}", page.getWebURL().getURL());
         // Do nothing by default (except basic logging)
         // Sub-classed can override this to add their custom functionality
     }
@@ -358,6 +371,7 @@ public class WebCrawler implements Runnable {
 
     private void processPage(WebURL curURL) {
         PageFetchResult fetchResult = null;
+        Page page = new Page(curURL);
         try {
             if (curURL == null) {
                 return;
@@ -370,7 +384,6 @@ public class WebCrawler implements Runnable {
                                                                                Locale.ENGLISH));
             // Finds the status reason for all known statuses
 
-            Page page = new Page(curURL);
             page.setFetchResponseHeaders(fetchResult.getResponseHeaders());
             page.setStatusCode(statusCode);
             if (statusCode < 200 ||
@@ -514,8 +527,9 @@ public class WebCrawler implements Runnable {
             onPageBiggerThanMaxSize(curURL.getURL(), e.getPageSize());
         } catch (ParseException pe) {
             onParseError(curURL);
-        } catch (ContentFetchException cfe) {
+        } catch (ContentFetchException | SocketTimeoutException cfe) {
             onContentFetchError(curURL);
+            onContentFetchError(page);
         } catch (NotAllowedContentException nace) {
             logger.debug(
                 "Skipping: {} as it contains binary content which you configured not to crawl",

@@ -10,7 +10,7 @@ crawling the Web. Using it, you can setup a multi-threaded web crawler in few mi
 
 - [Installation](#installation)
 - [Quickstart](#quickstart)   
-- [Using a factory](#using-factory)
+- [Using a factory](#using-a-factory) (for Spring or Guice)
 - [More Examples](#more-examples)
 - [Configuration Details](#configuration-details)
 - [License](#license)
@@ -25,7 +25,7 @@ To use the latest release of crawler4j, please use the following snippet in your
     <dependency>
         <groupId>edu.uci.ics</groupId>
         <artifactId>crawler4j</artifactId>
-        <version>4.3</version>
+        <version>4.4.0</version>
     </dependency>
 ```
 
@@ -46,7 +46,7 @@ You can add the following to use the next SNAPSHOT release
         <dependency>
             <groupId>edu.uci.ics</groupId>
             <artifactId>crawler4j</artifactId>
-            <version>4.4-SNAPSHOT</version>
+            <version>4.5.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
 ```
@@ -67,7 +67,7 @@ you will find in `target/` folder a jar named like `crawler4j-X.Y-with-dependenc
 
 Please include the following dependency in the build.gradle file to use crawler4j
 
-    compile group: 'edu.uci.ics', name: 'crawler4j', version: '4.3'
+    compile group: 'edu.uci.ics', name: 'crawler4j', version: '4.4.0'
     
 Also, add the following repository url in build.gradle, for the dependency [sleepycat](https://mvnrepository.com/artifact/com.sleepycat/je/5.0.84)
 
@@ -197,12 +197,12 @@ To use a factory just call the right method in the `CrawlController` (probably y
             controller.startNonBlocking(factory, numberOfCrawlers);
 ```
 ## More Examples
-- [Basic crawler](crawler4j/src/test/java/edu/uci/ics/crawler4j/examples/basic/): the full source code of the above example with more details.
-- [Image crawler](crawler4j/src/test/java/edu/uci/ics/crawler4j/examples/imagecrawler/): a simple image crawler that downloads image content from the crawling domain and stores them in a folder. This example demonstrates how binary content can be fetched using crawler4j.
-- [Collecting data from threads](crawler4j/src/test/java/edu/uci/ics/crawler4j/examples/localdata/): this example demonstrates how the controller can collect data/statistics from crawling threads.
-- [Multiple crawlers](crawler4j/src/test/java/edu/uci/ics/crawler4j/examples/multiple/): this is a sample that shows how two distinct crawlers can run concurrently. For example, you might want to split your crawling into different domains and then take different crawling policies for each group. Each crawling controller can have its own configurations.
-- [Shutdown crawling](crawler4j/src/test/java/edu/uci/ics/crawler4j/examples/shutdown/): this example shows have crawling can be terminated gracefully by sending the 'shutdown' command to the controller.
-- [Postgres/JDBC integration](https://github.com/rzo1/crawler4j-postgres-sample): this shows how to save the crawled content into a Postgres database (or any other JDBC repository).
+- [Basic crawler](crawler4j-examples/crawler4j-examples-base/src/test/java/edu/uci/ics/crawler4j/examples/basic/): the full source code of the above example with more details.
+- [Image crawler](crawler4j-examples/crawler4j-examples-base/src/test/java/edu/uci/ics/crawler4j/examples/imagecrawler/): a simple image crawler that downloads image content from the crawling domain and stores them in a folder. This example demonstrates how binary content can be fetched using crawler4j.
+- [Collecting data from threads](crawler4j-examples/crawler4j-examples-base/src/test/java/edu/uci/ics/crawler4j/examples/localdata/): this example demonstrates how the controller can collect data/statistics from crawling threads.
+- [Multiple crawlers](crawler4j-examples/crawler4j-examples-base/src/test/java/edu/uci/ics/crawler4j/examples/multiple/): this is a sample that shows how two distinct crawlers can run concurrently. For example, you might want to split your crawling into different domains and then take different crawling policies for each group. Each crawling controller can have its own configurations.
+- [Shutdown crawling](crawler4j-examples/crawler4j-examples-base/src/test/java/edu/uci/ics/crawler4j/examples/shutdown/): this example shows have crawling can be terminated gracefully by sending the 'shutdown' command to the controller.
+- [Postgres/JDBC integration](crawler4j-examples/crawler4j-examples-postgres/): this shows how to save the crawled content into a Postgres database (or any other JDBC repository), thanks [rzo1](https://github.com/rzo1/).
 
 ## Configuration Details
 The controller class has a mandatory parameter of type [CrawlConfig](crawler4j/src/main/java/edu/uci/ics/crawler4j/crawler/CrawlConfig.java).
@@ -242,7 +242,7 @@ By default crawling binary content (i.e. images, audio etc.) is turned off. To e
 crawlConfig.setIncludeBinaryContentInCrawling(true);
 ```
 
-See an example [here](crawler4j/src/test/java/edu/uci/ics/crawler4j/examples/imagecrawler/) for more details.
+See an example [here](crawler4j-examples/crawler4j-examples-base/src/test/java/edu/uci/ics/crawler4j/examples/imagecrawler/) for more details.
 
 ### Politeness
 crawler4j is designed very efficiently and has the ability to crawl domains very fast
@@ -292,6 +292,6 @@ crawlConfig.setUserAgentString(userAgentString);
 
 ## License
 
-Copyright (c) 2010-2017 Yasser Ganjisaffar
+Copyright (c) 2010-2018 Yasser Ganjisaffar
 
 Published under [Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0), see LICENSE

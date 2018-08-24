@@ -30,6 +30,7 @@ public class HtmlParseData implements ParseData {
     private Map<String, String> metaTags;
 
     private Set<WebURL> outgoingUrls;
+    private String contentCharset;
 
     public String getHtml() {
         return html;
@@ -80,5 +81,13 @@ public class HtmlParseData implements ParseData {
     @Override
     public String toString() {
         return text;
+    }
+
+    public void setContentCharset(String contentCharset) {
+        this.contentCharset = contentCharset;
+    }
+
+    public String getContentCharset() {
+        return contentCharset;
     }
 }

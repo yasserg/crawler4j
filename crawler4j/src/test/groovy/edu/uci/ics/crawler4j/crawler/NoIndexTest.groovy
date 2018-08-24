@@ -1,5 +1,6 @@
 package edu.uci.ics.crawler4j.crawler
 
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.junit.WireMockRule
 import edu.uci.ics.crawler4j.fetcher.PageFetcher
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtConfig
@@ -17,7 +18,7 @@ class NoIndexTest extends Specification {
     public TemporaryFolder temp = new TemporaryFolder()
 
     @Rule
-    public WireMockRule wireMockRule = new WireMockRule()
+    public WireMockRule wireMockRule = new WireMockRule(new WireMockConfiguration().dynamicPort())
 
     def "ignore noindex pages"() {
         given: "an index page with two links"
@@ -27,6 +28,9 @@ class NoIndexTest extends Specification {
                 .withHeader("Content-Type", "text/html")
                 .withBody(
                 $/<html>
+                    <head>
+                        <meta charset="UTF-8">
+                    </head>
                     <body> 
                         <a href="/some/page1.html">link to normal page</a>
                         <a href="/some/page2.html">link to noindex page</a>
@@ -39,6 +43,9 @@ class NoIndexTest extends Specification {
                 .withHeader("Content-Type", "text/html")
                 .withBody(
                 $/<html>
+                    <head>
+                        <meta charset="UTF-8">
+                    </head>
                     <body>
                         <h1>title</h1>
                     </body>
@@ -50,6 +57,7 @@ class NoIndexTest extends Specification {
                 .withBody(
                 $/<html>
                     <head>
+                      <meta charset="UTF-8">
                       <meta name="robots" content="noindex, nofollow">
                     </head>
                     <body>
@@ -80,15 +88,15 @@ class NoIndexTest extends Specification {
         PageFetcher pageFetcher = new PageFetcher(config)
         RobotstxtServer robotstxtServer = new RobotstxtServer(new RobotstxtConfig(), pageFetcher)
         CrawlController controller = new CrawlController(config, pageFetcher, robotstxtServer)
-        controller.addSeed "http://localhost:8080/some/index.html"
+        controller.addSeed "http://localhost:" + wireMockRule.port() + "/some/index.html"
 
         controller.start(NoIndexWebCrawler.class, 1)
 
         then: "noindex pages should be ignored"
         Map<String, Page> visitedPages = (Map<String, Page>)controller.getCrawlersLocalData().get(0);
-        visitedPages.containsKey("http://localhost:8080/some/index.html")
-        visitedPages.containsKey("http://localhost:8080/some/page1.html")
-        !visitedPages.containsKey("http://localhost:8080/some/page2.html")
+        visitedPages.containsKey("http://localhost:" + wireMockRule.port() + "/some/index.html")
+        visitedPages.containsKey("http://localhost:" + wireMockRule.port() + "/some/page1.html")
+        !visitedPages.containsKey("http://localhost:" + wireMockRule.port() + "/some/page2.html")
     }
  }
     

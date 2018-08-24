@@ -17,6 +17,7 @@
 
 package edu.uci.ics.crawler4j.crawler
 
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.junit.WireMockRule
 import edu.uci.ics.crawler4j.fetcher.PageFetcher
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtConfig
@@ -33,7 +34,7 @@ class RedirectHandlerTest extends Specification {
     public TemporaryFolder temp = new TemporaryFolder()
 
     @Rule
-    public WireMockRule wireMockRule = new WireMockRule()
+    public WireMockRule wireMockRule = new WireMockRule(new WireMockConfiguration().dynamicPort())
 
     def "follow redirects"(int redirectStatus) {
         given: "an index page with a ${redirectStatus}"
@@ -48,6 +49,9 @@ class RedirectHandlerTest extends Specification {
                 .withHeader("Content-Type", "text/html")
                 .withBody(
                 $/<html>
+                    <head>
+                        <meta charset="UTF-8">
+                    </head>
                     <body>
                         <h1>Redirected here.</h1>
                     </body>
@@ -76,14 +80,14 @@ class RedirectHandlerTest extends Specification {
         PageFetcher pageFetcher = new PageFetcher(config)
         RobotstxtServer robotstxtServer = new RobotstxtServer(new RobotstxtConfig(), pageFetcher)
         CrawlController controller = new CrawlController(config, pageFetcher, robotstxtServer)
-        controller.addSeed "http://localhost:8080/some/index.html"
+        controller.addSeed "http://localhost:" + wireMockRule.port() + "/some/index.html"
 
         controller.start(HandleRedirectWebCrawler.class, 1)
 
         then: "envent in WebCrawler will trigger"
         List<Object> crawlerData = controller.getCrawlersLocalData().get(0)
         assert crawlerData.get(0) == 1
-        assert crawlerData.get(1) == "http://localhost:8080/another/index.html"
+        assert crawlerData.get(1) == "http://localhost:" + wireMockRule.port() + "/another/index.html"
 
         verify(exactly(1), getRequestedFor(urlEqualTo("/some/index.html")))
         verify(exactly(1), getRequestedFor(urlEqualTo("/another/index.html")))

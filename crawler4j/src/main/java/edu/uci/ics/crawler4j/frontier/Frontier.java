@@ -25,7 +25,6 @@ import org.slf4j.LoggerFactory;
 import com.sleepycat.je.DatabaseException;
 import com.sleepycat.je.Environment;
 
-import edu.uci.ics.crawler4j.crawler.Configurable;
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.url.WebURL;
 
@@ -33,11 +32,12 @@ import edu.uci.ics.crawler4j.url.WebURL;
  * @author Yasser Ganjisaffar
  */
 
-public class Frontier extends Configurable {
+public class Frontier {
     protected static final Logger logger = LoggerFactory.getLogger(Frontier.class);
 
     private static final String DATABASE_NAME = "PendingURLsDB";
     private static final int IN_PROCESS_RESCHEDULE_BATCH_SIZE = 100;
+    private final CrawlConfig config;
     protected WorkQueues workQueues;
 
     protected InProcessPagesDB inProcessPages;
@@ -52,7 +52,7 @@ public class Frontier extends Configurable {
     protected Counters counters;
 
     public Frontier(Environment env, CrawlConfig config) {
-        super(config);
+        this.config = config;
         this.counters = new Counters(env, config);
         try {
             workQueues = new WorkQueues(env, DATABASE_NAME, config.isResumableCrawling());

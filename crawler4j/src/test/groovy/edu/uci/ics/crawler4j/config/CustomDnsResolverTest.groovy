@@ -1,5 +1,6 @@
 package edu.uci.ics.crawler4j.config
 
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.junit.WireMockRule
 import edu.uci.ics.crawler4j.crawler.CrawlConfig
 import edu.uci.ics.crawler4j.crawler.CrawlController
@@ -20,7 +21,7 @@ class CustomDnsResolverTest extends Specification {
     public TemporaryFolder temp = new TemporaryFolder()
 
     @Rule
-    public WireMockRule wireMockRule = new WireMockRule()
+    public WireMockRule wireMockRule = new WireMockRule(new WireMockConfiguration().dynamicPort())
 
 
     def "visit javascript files"() {
@@ -32,6 +33,7 @@ class CustomDnsResolverTest extends Specification {
                 .withBody(
                 $/<html>
                     <head>
+                        <meta charset="UTF-8">
                         <title>Hello, world!</title>
                     </head>
                     <body> 
@@ -57,7 +59,7 @@ class CustomDnsResolverTest extends Specification {
         RobotstxtServer robotstxtServer = new RobotstxtServer(robotstxtConfig, pageFetcher)
         CrawlController controller = new CrawlController(config, pageFetcher, robotstxtServer)
 
-        controller.addSeed("http://googhle.com:8080/some/index.html")
+        controller.addSeed("http://googhle.com:" + wireMockRule.port() + "/some/index.html")
         controller.start(WebCrawler.class, 1)
 
 
