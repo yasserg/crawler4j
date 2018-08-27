@@ -93,6 +93,9 @@ public class Parser {
             page.setLanguage(languageIdentifier.getLanguage());
 
             page.setParseData(parsedData);
+            
+            // write page content data to a file for testing purposes
+            
 
         }
     }

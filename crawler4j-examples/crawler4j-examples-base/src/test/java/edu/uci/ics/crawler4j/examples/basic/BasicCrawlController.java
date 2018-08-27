@@ -115,7 +115,7 @@ public class BasicCrawlController {
         //controller.addSeed("http://www.ics.uci.edu/~lopes/");
         //controller.addSeed("http://www.ics.uci.edu/~welling/");
         //controller.addSeed("https://www.dashlane.com/de/security/");
-        controller.addSeed("http://127.0.0.1:8080/testHtmlEntity.html/");
+        controller.addSeed("http://127.0.0.1:8080/oneGermanWord.html/");
 
     /*
      * Start the crawl. This is a blocking operation, meaning that your code
