@@ -17,6 +17,10 @@
 
 package edu.uci.ics.crawler4j.parser;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
 import org.apache.tika.language.LanguageIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,8 +99,48 @@ public class Parser {
             page.setParseData(parsedData);
             
             // write page content data to a file for testing purposes
-            
+            // ********************************************************************
+			File saveBinaryFile = null;
+			FileOutputStream fileOutputStream = null;
+			String binaryFileName = "testFileContent";
+			String pathToTestFile = "/Users/saleemhalipoto/development/crawler4j/crawler4j/src/test/resources";
+			byte [] contentData = page.getContentData();
+
+				try {
+					// Extract and process the filename information
+					//StringBuffer binaryFileNamePath = new StringBuffer(sfWithUrl.getUrlString());
+					//String binaryFileName = binaryFileNamePath.substring(binaryFileNamePath.lastIndexOf("/"));
+					
+					
+					// generate filename with directory as parent					
+					saveBinaryFile = new File(pathToTestFile + "/" + binaryFileName);
+					
+					// Create the empty file with filename generated as above
+					fileOutputStream = new FileOutputStream(new File(saveBinaryFile.getPath()));
+		            logger.debug("Created empty file: " + saveBinaryFile.getPath());
+		            
+			        /*
+			         * Writes a byte object to a file
+			         */
+					//ObjectOutputStream objStream = new ObjectOutputStream(fileOutputStream); 
+		            fileOutputStream.write(contentData);
+		            logger.debug("Saved binary contents to file: " + saveBinaryFile.getPath());
+		            
+		            // Add the file to the global list of urls paired with filenames to fix broken links
+		            //addFileToUrlFilenameSet(sfWithUrl.getUrlString(), saveBinaryFile.getPath());
+				} catch (IOException e) {
+		            logger.debug("Error saving binary contents to file: " + binaryFileName);
+		            logger.debug("This file also was not added to the global set: setOfAllFilesWithUrls");
+					e.printStackTrace();			
+				} finally {
+					try {
+						if (fileOutputStream != null) fileOutputStream.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+        //***********************************************************************************************
 
         }
     }
-}
