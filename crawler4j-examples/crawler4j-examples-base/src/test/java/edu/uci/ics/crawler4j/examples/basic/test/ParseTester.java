@@ -40,10 +40,13 @@ public class ParseTester {
 
 	WebURL testURL = new WebURL();
 	
-    @Test
-    // This will test correct parsing of German characters 'ö' represented by the HTML entity &ouml;
-    // This test method directly manages the parsing process and therefore bypasses the Crawler object,
-    // as a result, some debug statements from the Crawler will not appear.
+    
+    /* 
+     * This will test correct parsing of German characters 'ö' represented by the HTML entity &ouml;
+     * This test method directly manages the parsing process and therefore bypasses the Crawler object,
+     * as a result, some debug statements from the Crawler will not appear.
+     */
+	@Test
     public void testHTMLGermantextParsing() throws IllegalAccessException, InstantiationException{	
     	Parser parser = new Parser(config);
     	HtmlParser htmlContentParser = new TikaHtmlParser(config);    	
