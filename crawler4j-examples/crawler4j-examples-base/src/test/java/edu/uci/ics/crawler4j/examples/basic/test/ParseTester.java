@@ -1,6 +1,6 @@
 package edu.uci.ics.crawler4j.examples.basic.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 import java.io.FileInputStream;

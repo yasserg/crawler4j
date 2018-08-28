@@ -162,7 +162,7 @@
 	<dependency>
         <groupId>edu.uci.ics</groupId>
         <artifactId>crawler4j</artifactId>
-        <version>4.3</version>
+        <version>4.4.0</version>
     </dependency>
 
     <!-- Compile time Dependencies -->

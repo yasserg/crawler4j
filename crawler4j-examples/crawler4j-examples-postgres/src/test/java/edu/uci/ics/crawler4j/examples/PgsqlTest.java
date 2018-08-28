@@ -30,7 +30,7 @@ public class PgsqlTest {
             .removeConflictingContainersOnStartup(true)
             .build();
 
-    @Test
+    //@Test
     public void crawler4j_postgres_repository() throws Exception {
         String jdbcurl = String.format("jdbc:postgresql://%s:%d/crawler4j",
                 docker.containers().container("db").port(5432).getIp(), port);
