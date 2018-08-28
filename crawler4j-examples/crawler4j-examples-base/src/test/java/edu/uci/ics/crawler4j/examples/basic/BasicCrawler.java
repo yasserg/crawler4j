@@ -77,7 +77,11 @@ public class BasicCrawler extends WebCrawler {
             String text = htmlParseData.getText();
             String html = htmlParseData.getHtml();
             Set<WebURL> links = htmlParseData.getOutgoingUrls();
-
+            
+            logger.debug("***********************************************");
+            logger.debug("HTML file output:");
+            logger.debug("***********************************************");
+            logger.debug(text);
             logger.debug("Text length: {}", text.length());
             logger.debug("Html length: {}", html.length());
             logger.debug("Number of outgoing links: {}", links.size());

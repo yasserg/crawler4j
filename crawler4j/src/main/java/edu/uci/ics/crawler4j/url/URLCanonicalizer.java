@@ -29,6 +29,11 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import edu.uci.ics.crawler4j.crawler.WebCrawler;
+
 /**
  * See http://en.wikipedia.org/wiki/URL_normalization for a reference Note: some
  * parts of the code are adapted from: http://stackoverflow.com/a/4057470/405418
@@ -37,6 +42,7 @@ import java.util.Objects;
  */
 public class URLCanonicalizer {
 
+	protected static final Logger logger = LoggerFactory.getLogger(WebCrawler.class);
     public static String getCanonicalURL(String url) {
         return getCanonicalURL(url, null);
     }
@@ -106,6 +112,7 @@ public class URLCanonicalizer {
             return result.toExternalForm();
 
         } catch (MalformedURLException | URISyntaxException ex) {
+        	logger.info("Stacktrace: ", ex);
             return null;
         }
     }

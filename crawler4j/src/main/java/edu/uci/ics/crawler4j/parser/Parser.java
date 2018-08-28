@@ -22,6 +22,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 import org.apache.tika.language.LanguageIdentifier;
+import org.apache.tika.metadata.DublinCore;
+import org.apache.tika.metadata.Metadata;
+import org.apache.tika.parser.ParseContext;
+import org.apache.tika.parser.html.HtmlMapper;
+//import edu.uci.ics.crawler4j.parser.tagsoup.HtmlParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
@@ -95,6 +100,7 @@ public class Parser {
             // Please note that identifying language takes less than 10 milliseconds
             LanguageIdentifier languageIdentifier = new LanguageIdentifier(parsedData.getText());
             page.setLanguage(languageIdentifier.getLanguage());
+            logger.debug("The parser has identified html page language as: " + page.getLanguage());
 
             page.setParseData(parsedData);
             

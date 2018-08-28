@@ -11,7 +11,7 @@ import org.apache.tika.metadata.DublinCore;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.html.HtmlMapper;
-import org.apache.tika.parser.html.HtmlParser;
+//import org.apache.tika.parser.html.HtmlParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
@@ -19,6 +19,7 @@ import edu.uci.ics.crawler4j.crawler.Page;
 import edu.uci.ics.crawler4j.crawler.exceptions.ParseException;
 import edu.uci.ics.crawler4j.url.URLCanonicalizer;
 import edu.uci.ics.crawler4j.url.WebURL;
+import edu.uci.ics.crawler4j.parser.tagsoup.HtmlParser;
 
 public class TikaHtmlParser implements edu.uci.ics.crawler4j.parser.HtmlParser {
     protected static final Logger logger = LoggerFactory.getLogger(TikaHtmlParser.class);
