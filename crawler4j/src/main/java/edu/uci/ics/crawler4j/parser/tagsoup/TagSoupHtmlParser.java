@@ -49,14 +49,14 @@ import org.xml.sax.SAXException;
  * and post-processes the events to produce XHTML and metadata expected by
  * Tika clients.
  */
-public class HtmlParser extends AbstractEncodingDetectorParser {
+public class TagSoupHtmlParser extends AbstractEncodingDetectorParser {
 
     /**
      * Serial version UID
      */
     private static final long serialVersionUID = 7895315240498733128L;
 
-    private static final Logger LOG = LoggerFactory.getLogger(HtmlParser.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TagSoupHtmlParser.class);
 
     private static final MediaType XHTML = MediaType.application("xhtml+xml");
     private static final MediaType WAP_XHTML = MediaType.application("vnd.wap.xhtml+xml");
@@ -81,11 +81,11 @@ public class HtmlParser extends AbstractEncodingDetectorParser {
         return SUPPORTED_TYPES;
     }
 
-    public HtmlParser() {
+    public TagSoupHtmlParser() {
         super();
     }
 
-    public HtmlParser(EncodingDetector encodingDetector) {
+    public TagSoupHtmlParser(EncodingDetector encodingDetector) {
         super(encodingDetector);
     }
 
@@ -120,18 +120,18 @@ public class HtmlParser extends AbstractEncodingDetectorParser {
                     context.get(HtmlMapper.class, new HtmlParserMapper());
 
             // Parse the HTML document
-            edu.uci.ics.crawler4j.parser.tagsoup.Parser parser =
-                    new edu.uci.ics.crawler4j.parser.tagsoup.Parser();
+            edu.uci.ics.crawler4j.parser.tagsoup.TagSoupParser parser =
+                    new edu.uci.ics.crawler4j.parser.tagsoup.TagSoupParser();
 
             // Use schema from context or default
             Schema schema = context.get(Schema.class, HTML_SCHEMA);
 
             // TIKA-528: Reuse share schema to avoid heavy instantiation
             parser.setProperty(
-            		edu.uci.ics.crawler4j.parser.tagsoup.Parser.schemaProperty, schema);
+            		edu.uci.ics.crawler4j.parser.tagsoup.TagSoupParser.schemaProperty, schema);
             // TIKA-599: Shared schema is thread-safe only if bogons are ignored
             parser.setFeature(
-            		edu.uci.ics.crawler4j.parser.tagsoup.Parser.ignoreBogonsFeature, true);
+            		edu.uci.ics.crawler4j.parser.tagsoup.TagSoupParser.ignoreBogonsFeature, true);
 
             parser.setContentHandler(new XHTMLDowngradeHandler(
                     new HtmlHandler(mapper, handler, metadata, context, extractScripts)));
@@ -196,15 +196,15 @@ public class HtmlParser extends AbstractEncodingDetectorParser {
      */
     private class HtmlParserMapper implements HtmlMapper {
         public String mapSafeElement(String name) {
-            return HtmlParser.this.mapSafeElement(name);
+            return TagSoupHtmlParser.this.mapSafeElement(name);
         }
 
         public boolean isDiscardElement(String name) {
-            return HtmlParser.this.isDiscardElement(name);
+            return TagSoupHtmlParser.this.isDiscardElement(name);
         }
 
         public String mapSafeAttribute(String elementName, String attributeName) {
-            return HtmlParser.this.mapSafeAttribute(elementName, attributeName);
+            return TagSoupHtmlParser.this.mapSafeAttribute(elementName, attributeName);
         }
     }
 

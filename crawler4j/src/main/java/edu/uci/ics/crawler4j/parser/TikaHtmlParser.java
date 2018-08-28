@@ -19,20 +19,20 @@ import edu.uci.ics.crawler4j.crawler.Page;
 import edu.uci.ics.crawler4j.crawler.exceptions.ParseException;
 import edu.uci.ics.crawler4j.url.URLCanonicalizer;
 import edu.uci.ics.crawler4j.url.WebURL;
-import edu.uci.ics.crawler4j.parser.tagsoup.HtmlParser;
+import edu.uci.ics.crawler4j.parser.tagsoup.TagSoupHtmlParser;
 
 public class TikaHtmlParser implements edu.uci.ics.crawler4j.parser.HtmlParser {
     protected static final Logger logger = LoggerFactory.getLogger(TikaHtmlParser.class);
 
     private final CrawlConfig config;
 
-    private final HtmlParser htmlParser;
+    private final TagSoupHtmlParser htmlParser;
     private final ParseContext parseContext;
 
     public TikaHtmlParser(CrawlConfig config) throws InstantiationException, IllegalAccessException {
         this.config = config;
 
-        htmlParser = new HtmlParser();
+        htmlParser = new TagSoupHtmlParser();
         parseContext = new ParseContext();
         parseContext.set(HtmlMapper.class, AllTagMapper.class.newInstance());
     }

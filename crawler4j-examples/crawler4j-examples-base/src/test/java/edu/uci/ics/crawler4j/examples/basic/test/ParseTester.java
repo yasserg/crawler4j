@@ -21,8 +21,15 @@ import edu.uci.ics.crawler4j.url.URLCanonicalizer;
 import edu.uci.ics.crawler4j.url.WebURL;
 
 /**
- * Class to test html parsing in response to 
+ * This class tests html parsing in response to 
  * issue #261 (closed) on https://github.com/yasserg/crawler4j/issues/261
+ * 
+ * Crawler4j issue #261 showed the German word passwörtern parsed as passw örtern.
+ * The root cause was in the org.ccil.cowan.tagsoup.HTMLScanner class
+ * The fix was to debug the state machine and reference the update instead of the tagsoup version
+ * 
+ * This test verifies parsing process using a generated HTML file containing
+ * only one german word to simulate the use of an HTML entity such as '&ouml;' representing 'ö'
  * 
  * @author saleemhalipoto
  *
@@ -30,25 +37,24 @@ import edu.uci.ics.crawler4j.url.WebURL;
 public class ParseTester {
 	CrawlConfig config = new CrawlConfig();
 	protected CrawlController crawlController;
-	//private Parser parser = crawlController.getParser();
 
 	WebURL testURL = new WebURL();
 	
-
     @Test
-    // This will test correct parsing of German characters 'ö' represented by
-    // the HTML entity &ouml;
+    // This will test correct parsing of German characters 'ö' represented by the HTML entity &ouml;
+    // This test method directly manages the parsing process and therefore bypasses the Crawler object,
+    // as a result, some debug statements from the Crawler will not appear.
     public void testHTMLGermantextParsing() throws IllegalAccessException, InstantiationException{	
     	Parser parser = new Parser(config);
     	HtmlParser htmlContentParser = new TikaHtmlParser(config);    	
-    	testURL.setURL("http://127.0.0.1:8080/oneGermanWord.html");
+    	testURL.setURL("http://127.0.0.1:8080/oneGermanWord.html"); // url in not fetched in this unit test
     	Page page = new Page(testURL);
 
     	// file is simulating a fetched HTML resource that contains
     	// a German word having a language specific character 'ö' and is needed for this test
     	File file = new File("/Users/saleemhalipoto/development/crawler4j/crawler4j/src/test/resources/testFileContent");
 		FileInputStream fis = null;
-
+		
 		try {
 			fis = new FileInputStream(file);
 			byte [] contentData = new byte [fis.available()];
@@ -82,11 +88,11 @@ public class ParseTester {
     	try {
     		HtmlParseData parsedData = htmlContentParser.parse(page, testURL.getURL());
         	String testText = parsedData.getText();
-            assertEquals("passwörtern", testText); // passwörtern 
+
+            assertEquals("passwörtern", testText);
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
     }
 }

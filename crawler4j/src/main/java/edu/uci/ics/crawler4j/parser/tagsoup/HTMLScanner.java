@@ -30,7 +30,9 @@ defects.  It implements the Scanner interface, which accepts a Reader
 object to fetch characters from and a ScanHandler object to report lexical
 events to.
 
-modified by Saleem Halipoto (shalipoto@gmail.com)
+modified by Saleem Halipoto (shalipoto@gmail.com) in response to need for pull request to patch
+issue #261 (closed) on https://github.com/yasserg/crawler4j/issues/261
+
 */
 
 public class HTMLScanner implements Scanner, Locator {

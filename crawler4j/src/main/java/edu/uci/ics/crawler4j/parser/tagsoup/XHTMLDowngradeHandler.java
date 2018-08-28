@@ -32,7 +32,7 @@ import org.xml.sax.helpers.AttributesImpl;
  * old-style HTML elements before passing them on to the decorated
  * content handler. This downgrading consists of dropping all namespaces
  * (and namespaced attributes) and uppercasing all element names.
- * Used by the {@link HtmlParser} to make all incoming HTML look the same.
+ * Used by the {@link TagSoupHtmlParser} to make all incoming HTML look the same.
  */
 class XHTMLDowngradeHandler extends ContentHandlerDecorator {
 
