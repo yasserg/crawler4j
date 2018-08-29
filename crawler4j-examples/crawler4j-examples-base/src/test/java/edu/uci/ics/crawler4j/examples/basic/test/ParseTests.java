@@ -34,7 +34,7 @@ import edu.uci.ics.crawler4j.url.WebURL;
  * @author saleemhalipoto
  *
  */
-public class ParseTester {
+public class ParseTests {
 	CrawlConfig config = new CrawlConfig();
 	protected CrawlController crawlController;
 
@@ -47,7 +47,7 @@ public class ParseTester {
      * as a result, some debug statements from the Crawler will not appear.
      */
 	@Test
-    public void testHTMLGermantextParsing() throws IllegalAccessException, InstantiationException{	
+    public void germanTextParsingTest() throws IllegalAccessException, InstantiationException{	
     	Parser parser = new Parser(config);
     	HtmlParser htmlContentParser = new TikaHtmlParser(config);    	
     	testURL.setURL("http://127.0.0.1:8080/oneGermanWord.html"); // url in not fetched in this unit test
