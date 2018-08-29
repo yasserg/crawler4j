@@ -34,7 +34,7 @@ import edu.uci.ics.crawler4j.url.WebURL;
  * @author saleemhalipoto
  *
  */
-public class ParseTests {
+public class ParseTest {
 	CrawlConfig config = new CrawlConfig();
 	protected CrawlController crawlController;
 
@@ -57,6 +57,8 @@ public class ParseTests {
     	// a German word having a language specific character 'ö' and is needed for this test
     	File file = new File("/Users/saleemhalipoto/development/crawler4j/crawler4j/src/test/resources/testFileContent");
 		FileInputStream fis = null;
+		
+		// ****Added comment here for maven testing*********
 		
 		try {
 			fis = new FileInputStream(file);
