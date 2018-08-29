@@ -17,18 +17,11 @@
 
 package edu.uci.ics.crawler4j.parser;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-
 import org.apache.tika.language.LanguageIdentifier;
-import org.apache.tika.metadata.DublinCore;
-import org.apache.tika.metadata.Metadata;
-import org.apache.tika.parser.ParseContext;
-import org.apache.tika.parser.html.HtmlMapper;
 //import edu.uci.ics.crawler4j.parser.tagsoup.HtmlParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.crawler.Page;
 import edu.uci.ics.crawler4j.crawler.exceptions.ParseException;
@@ -103,6 +96,6 @@ public class Parser {
             logger.debug("The parser has identified html page language as: " + page.getLanguage());
 
             page.setParseData(parsedData);
-            }
         }
-   }
+    }
+}

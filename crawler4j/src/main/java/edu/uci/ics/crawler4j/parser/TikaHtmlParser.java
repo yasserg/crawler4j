@@ -17,9 +17,9 @@ import org.slf4j.LoggerFactory;
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.crawler.Page;
 import edu.uci.ics.crawler4j.crawler.exceptions.ParseException;
+import edu.uci.ics.crawler4j.parser.tagsoup.TagSoupHtmlParser;
 import edu.uci.ics.crawler4j.url.URLCanonicalizer;
 import edu.uci.ics.crawler4j.url.WebURL;
-import edu.uci.ics.crawler4j.parser.tagsoup.TagSoupHtmlParser;
 
 public class TikaHtmlParser implements edu.uci.ics.crawler4j.parser.HtmlParser {
     protected static final Logger logger = LoggerFactory.getLogger(TikaHtmlParser.class);

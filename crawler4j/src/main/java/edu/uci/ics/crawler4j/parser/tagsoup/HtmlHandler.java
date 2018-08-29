@@ -1,5 +1,4 @@
 //**************************************************
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package edu.uci.ics.crawler4j.parser.tagsoup;
 
 import java.io.ByteArrayInputStream;
@@ -63,8 +63,8 @@ class HtmlHandler extends TextContentHandler {
     private int bodyLevel = 0;
     private int discardLevel = 0;
     private int titleLevel = 0;
-    private int scriptLevel= 0;
-    private Attributes scriptAtts = EMPTY_ATTS;//attributes from outermost script element
+    private int scriptLevel = 0;
+    private Attributes scriptAtts = EMPTY_ATTS; //attributes from outermost script element
     private final StringBuilder script = new StringBuilder();
 
     private boolean isTitleSetToMetadata = false;
@@ -93,7 +93,7 @@ class HtmlHandler extends TextContentHandler {
         }
     }
 
-    public HtmlHandler(
+    HtmlHandler(
             HtmlMapper mapper, ContentHandler handler, Metadata metadata, ParseContext context,
             boolean extractScripts) {
         this(mapper, new XHTMLContentHandler(handler, metadata), metadata, context, extractScripts);
@@ -106,11 +106,10 @@ class HtmlHandler extends TextContentHandler {
      * @param metadata
      */
     @Deprecated
-    public HtmlHandler(
+    HtmlHandler(
             HtmlMapper mapper, ContentHandler handler, Metadata metadata) {
         this(mapper, new XHTMLContentHandler(handler, metadata), metadata, new ParseContext(), false);
     }
-
 
     @Override
     public void startElement(

@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package edu.uci.ics.crawler4j.parser.tagsoup;
 
 import java.io.IOException;
@@ -36,7 +37,6 @@ import org.apache.tika.parser.AbstractEncodingDetectorParser;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.html.DefaultHtmlMapper;
 import org.apache.tika.parser.html.HtmlMapper;
-import org.apache.tika.parser.html.*;
 import org.ccil.cowan.tagsoup.HTMLSchema;
 import org.ccil.cowan.tagsoup.Schema;
 import org.slf4j.Logger;
@@ -128,10 +128,10 @@ public class TagSoupHtmlParser extends AbstractEncodingDetectorParser {
 
             // TIKA-528: Reuse share schema to avoid heavy instantiation
             parser.setProperty(
-            		edu.uci.ics.crawler4j.parser.tagsoup.TagSoupParser.schemaProperty, schema);
+                edu.uci.ics.crawler4j.parser.tagsoup.TagSoupParser.schemaProperty, schema);
             // TIKA-599: Shared schema is thread-safe only if bogons are ignored
             parser.setFeature(
-            		edu.uci.ics.crawler4j.parser.tagsoup.TagSoupParser.ignoreBogonsFeature, true);
+                edu.uci.ics.crawler4j.parser.tagsoup.TagSoupParser.ignoreBogonsFeature, true);
 
             parser.setContentHandler(new XHTMLDowngradeHandler(
                     new HtmlHandler(mapper, handler, metadata, context, extractScripts)));

@@ -1,7 +1,6 @@
 //***********************************************************
 
 //This file is part of TagSoup and is Copyright 2002-2008 by John Cowan.
-//
 //TagSoup is licensed under the Apache License,
 //Version 2.0.  You may obtain a copy of this license at
 //http://www.apache.org/licenses/LICENSE-2.0 .  You may also have
@@ -12,16 +11,19 @@
 //is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS
 //OF ANY KIND, either express or implied; not even the implied warranty
 //of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-//
-//
 //The TagSoup parser
 
 package edu.uci.ics.crawler4j.parser.tagsoup;
-import java.util.HashMap;
-import java.util.ArrayList;
-import java.io.*;
+
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.ccil.cowan.tagsoup.AutoDetector;
 import org.ccil.cowan.tagsoup.Element;
@@ -40,23 +42,21 @@ The SAX parser class.
 **/
 public class TagSoupParser extends DefaultHandler implements ScanHandler, XMLReader, LexicalHandler {
 
-	// XMLReader implementation
+    // XMLReader implementation
+    private ContentHandler theContentHandler = this;
+    private LexicalHandler theLexicalHandler = this;
+    private DTDHandler theDTDHandler = this;
+    private ErrorHandler theErrorHandler = this;
+    private EntityResolver theEntityResolver = this;
+    private Schema theSchema;
+    private Scanner theScanner;
+    private AutoDetector theAutoDetector;
 
-	private ContentHandler theContentHandler = this;
-	private LexicalHandler theLexicalHandler = this;
-	private DTDHandler theDTDHandler = this;
-	private ErrorHandler theErrorHandler = this;
-	private EntityResolver theEntityResolver = this;
-	private Schema theSchema;
-	private Scanner theScanner;
-	private AutoDetector theAutoDetector;
-
-	// Default values for feature flags
-
-	private static boolean DEFAULT_NAMESPACES = true;
-	private static boolean DEFAULT_IGNORE_BOGONS = false;
-	private static boolean DEFAULT_BOGONS_EMPTY = false;
-     private static boolean DEFAULT_ROOT_BOGONS = true;
+    // Default values for feature flags
+    private static boolean DEFAULT_NAMESPACES = true;
+    private static boolean DEFAULT_IGNORE_BOGONS = false;
+    private static boolean DEFAULT_BOGONS_EMPTY = false;
+    private static boolean DEFAULT_ROOT_BOGONS = true;
 	private static boolean DEFAULT_DEFAULT_ATTRIBUTES = true;
 	private static boolean DEFAULT_TRANSLATE_COLONS = false;
 	private static boolean DEFAULT_RESTART_ELEMENTS = true;
@@ -64,7 +64,6 @@ public class TagSoupParser extends DefaultHandler implements ScanHandler, XMLRea
 	private static boolean DEFAULT_CDATA_ELEMENTS = true;
 
 	// Feature flags.  
-
 	private boolean namespaces = DEFAULT_NAMESPACES;
 	private boolean ignoreBogons = DEFAULT_IGNORE_BOGONS;
 	private boolean bogonsEmpty = DEFAULT_BOGONS_EMPTY;
@@ -287,7 +286,6 @@ public class TagSoupParser extends DefaultHandler implements ScanHandler, XMLRea
 	// entries are maintained separately from the initial values of
 	// the corresponding instance variables, but care must be taken
 	// to keep them in sync.
-
 	private HashMap theFeatures = new HashMap();
 	{
 		theFeatures.put(namespacesFeature, truthValue(DEFAULT_NAMESPACES));
@@ -519,10 +517,8 @@ public class TagSoupParser extends DefaultHandler implements ScanHandler, XMLRea
 		URLConnection c = url.openConnection();
 		return c.getInputStream();
 		}
-		// We don't process publicids (who uses them anyhow?)
-
+	// We don't process publicids (who uses them anyhow?)
 	// ScanHandler implementation
-
 	private Element theNewElement = null;
 	private String theAttributeName = null;
 	private boolean theDoctypeIsPresent = false;
@@ -1112,7 +1108,6 @@ public class TagSoupParser extends DefaultHandler implements ScanHandler, XMLRea
 		}
 
 	// Default LexicalHandler implementation
-
 	public void comment(char[] ch, int start, int length) throws SAXException { }
 	public void endCDATA() throws SAXException { }
 	public void endDTD() throws SAXException { }

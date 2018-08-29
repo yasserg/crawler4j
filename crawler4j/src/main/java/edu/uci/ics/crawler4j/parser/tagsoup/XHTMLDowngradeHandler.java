@@ -16,11 +16,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package edu.uci.ics.crawler4j.parser.tagsoup;
 
-import javax.xml.XMLConstants;
 import java.util.Locale;
-
+import javax.xml.XMLConstants;
 import org.apache.tika.sax.ContentHandlerDecorator;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
@@ -36,7 +36,7 @@ import org.xml.sax.helpers.AttributesImpl;
  */
 class XHTMLDowngradeHandler extends ContentHandlerDecorator {
 
-    public XHTMLDowngradeHandler(ContentHandler handler) {
+    XHTMLDowngradeHandler(ContentHandler handler) {
         super(handler);
     }
 

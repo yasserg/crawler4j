@@ -42,7 +42,8 @@ import edu.uci.ics.crawler4j.crawler.WebCrawler;
  */
 public class URLCanonicalizer {
 
-	protected static final Logger logger = LoggerFactory.getLogger(WebCrawler.class);
+    protected static final Logger logger = LoggerFactory.getLogger(WebCrawler.class);
+
     public static String getCanonicalURL(String url) {
         return getCanonicalURL(url, null);
     }
@@ -112,7 +113,7 @@ public class URLCanonicalizer {
             return result.toExternalForm();
 
         } catch (MalformedURLException | URISyntaxException ex) {
-        	logger.info("Stacktrace: ", ex);
+            logger.info("Stacktrace: ", ex);
             return null;
         }
     }
