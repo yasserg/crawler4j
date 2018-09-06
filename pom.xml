@@ -255,6 +255,8 @@
                                 <consoleOutput>true</consoleOutput>
                                 <failsOnError>true</failsOnError>
                                 <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                                <sourceDirectories>${project.compileSourceRoots}</sourceDirectories>
+                                <testSourceDirectories>${project.testCompileSourceRoots}</testSourceDirectories>
                             </configuration>
                             <goals>
                                 <goal>check</goal>
