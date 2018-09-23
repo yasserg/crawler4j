@@ -37,14 +37,16 @@ public class Parser {
 
     private final HtmlParser htmlContentParser;
 
+    private final Net net;
+
     public Parser(CrawlConfig config) throws IllegalAccessException, InstantiationException {
-        this.config = config;
-        this.htmlContentParser = new TikaHtmlParser(config);
+        this(config, new TikaHtmlParser(config));
     }
 
     public Parser(CrawlConfig config, HtmlParser htmlParser) {
         this.config = config;
         this.htmlContentParser = htmlParser;
+        this.net = new Net(config);
     }
 
     public void parse(Page page, String contextURL)
@@ -61,7 +63,7 @@ public class Parser {
                 if (parseData.getHtml() == null) {
                     throw new ParseException();
                 }
-                parseData.setOutgoingUrls(Net.extractUrls(parseData.getHtml()));
+                parseData.setOutgoingUrls(net.extractUrls(parseData.getHtml()));
             } else {
                 throw new NotAllowedContentException();
             }
@@ -74,7 +76,7 @@ public class Parser {
                     parseData.setTextContent(
                         new String(page.getContentData(), page.getContentCharset()));
                 }
-                parseData.setOutgoingUrls(Net.extractUrls(parseData.getTextContent()));
+                parseData.setOutgoingUrls(net.extractUrls(parseData.getTextContent()));
                 page.setParseData(parseData);
             } catch (Exception e) {
                 logger.error("{}, while parsing: {}", e.getMessage(), page.getWebURL().getURL());

@@ -1,50 +1,54 @@
 package edu.uci.ics.crawler4j.util;
 
-import java.util.HashSet;
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
+import com.linkedin.urls.Url;
+import com.linkedin.urls.detection.UrlDetector;
+import com.linkedin.urls.detection.UrlDetectorOptions;
+
+import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.url.WebURL;
 
 /**
  * Created by Avi Hayun on 9/22/2014.
  * Net related Utils
+ *
+ * @author Paul Galbraith <paul.d.galbraith@gmail.com>
  */
 public class Net {
-    private static final Pattern pattern = initializePattern();
 
-    public static Set<WebURL> extractUrls(String input) {
-        Set<WebURL> extractedUrls = new HashSet<>();
+    private static final Function<Url, WebURL> urlMapper = url -> {
+        WebURL webUrl = new WebURL();
+        webUrl.setURL(url.getFullUrl());
+        return webUrl;
+    };
 
-        if (input != null) {
-            Matcher matcher = pattern.matcher(input);
-            while (matcher.find()) {
-                WebURL webURL = new WebURL();
-                String urlStr = matcher.group();
-                if (!urlStr.startsWith("http")) {
-                    urlStr = "http://" + urlStr;
-                }
+    private CrawlConfig config;
 
-                webURL.setURL(urlStr);
-                extractedUrls.add(webURL);
-            }
+    public Net(CrawlConfig config) {
+        this.config = config;
+    }
+
+    public Set<WebURL> extractUrls(String input) {
+        if (input == null) {
+            return Collections.emptySet();
+        } else {
+            UrlDetector detector = new UrlDetector(input, getOptions());
+            List<Url> urls = detector.detect();
+            return urls.stream().map(urlMapper).collect(Collectors.toSet());
         }
-
-        return extractedUrls;
     }
 
-    /** Singleton like one time call to initialize the Pattern */
-    private static Pattern initializePattern() {
-        return Pattern.compile("\\b(((ht|f)tp(s?)\\:\\/\\/|~\\/|\\/)|www.)" +
-                               "(\\w+:\\w+@)?(([-\\w]+\\.)+(com|org|net|gov" +
-                               "|mil|biz|info|mobi|name|aero|jobs|museum" +
-                               "|travel|[a-z]{2}))(:[\\d]{1,5})?" +
-                               "(((\\/([-\\w~!$+|.,=]|%[a-f\\d]{2})+)+|\\/)+|\\?|#)?" +
-                               "((\\?([-\\w~!$+|.,*:]|%[a-f\\d{2}])+=?" +
-                               "([-\\w~!$+|.,*:=]|%[a-f\\d]{2})*)" +
-                               "(&(?:[-\\w~!$+|.,*:]|%[a-f\\d{2}])+=?" +
-                               "([-\\w~!$+|.,*:=]|%[a-f\\d]{2})*)*)*" +
-                               "(#([-\\w~!$+|.,*:=]|%[a-f\\d]{2})*)?\\b");
+    private UrlDetectorOptions getOptions() {
+        if (config.isAllowSingleLevelDomain()) {
+            return UrlDetectorOptions.ALLOW_SINGLE_LEVEL_DOMAIN;
+        } else {
+            return UrlDetectorOptions.Default;
+        }
     }
+
 }

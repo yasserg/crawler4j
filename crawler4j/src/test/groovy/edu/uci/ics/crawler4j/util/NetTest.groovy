@@ -16,7 +16,8 @@
 
 package edu.uci.ics.crawler4j.util
 
-import spock.lang.Specification
+import spock.lang.*
+import edu.uci.ics.crawler4j.crawler.*
 
 /**
  * Test the Net utility class.
@@ -24,21 +25,34 @@ import spock.lang.Specification
  * @author Paul Galbraith <paul.d.galbraith@gmail.com>
  */
 class NetTest extends Specification {
-    def "FEATURE: correctly identify URLs in a text document" () {
-        given: "a test document with embedded URLs"
-            def testDocument = '''
-                www.wikipedia.com
-                https://en.wikipedia.org/wiki/Main_Page
-                http://somesite.com:8080/page/1
-                http://localhost/page/1
-                http://localhost:8080/page/1
-            '''
-            
-            when: "identify and extract URLs"
-                def urls = Net.extractUrls(testDocument)
-                
-            then: "should have found 5 URLs"
-                urls.size() == 5
+
+    @Shared standard = new Net(new CrawlConfig())
+    @Shared allowSingleLevelDomain = new Net(new CrawlConfig(allowSingleLevelDomain: true))
+    
+    def "no scheme specified" () {
+        when: def extracted = standard.extractUrls "www.wikipedia.com"
+        then: expectMatch extracted, "http://www.wikipedia.com/"
+    }
+    
+    def "localhost" () {
+        when: def extracted = allowSingleLevelDomain.extractUrls "http://localhost/page/1"
+        then: expectMatch extracted, "http://localhost/page/1"
+    }
+    
+    def "no url found" () {
+        when: def extracted = standard.extractUrls "http://localhost"
+        then: expectMatch extracted     // no expected URL
+    }
+    
+    def "multiple urls" () {
+        when: def extracted = standard.extractUrls " hey com check out host.com/toodles and http://例子.测试 real soon "
+        then: expectMatch extracted, "http://host.com/toodles", "http://例子.测试/"
+    }
+    
+    void expectMatch(def extractedUrls, String... expectedUrls) {
+        def extracted = extractedUrls.collect { it.URL } as Set
+        def expected = expectedUrls as Set
+        assert extracted == expected
     }
 
 }

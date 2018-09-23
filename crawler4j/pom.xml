@@ -17,6 +17,7 @@
 		<apache.http.components.version>4.5.5</apache.http.components.version>
 		<je.version>5.0.84</je.version>
 		<apache.tika.version>1.17</apache.tika.version>
+        <url-detector.version>0.1.20</url-detector.version>
 		<!--test dependency versions -->
 		<junit.version>4.12</junit.version>
 		<wiremock.version>2.14.0</wiremock.version>
@@ -369,6 +370,11 @@
 			</exclusion>
 		</exclusions>
 	</dependency>
+    <dependency>
+        <groupId>io.github.pgalbraith</groupId>
+        <artifactId>url-detector</artifactId>
+        <version>${url-detector.version}</version>
+    </dependency>
 
     <!-- Test Dependencies -->
 		<dependency>
