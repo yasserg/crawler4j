@@ -375,6 +375,11 @@
         <artifactId>url-detector</artifactId>
         <version>${url-detector.version}</version>
     </dependency>
+    <dependency>
+        <groupId>javax.inject</groupId>
+        <artifactId>javax.inject</artifactId>
+        <version>1</version>
+    </dependency>
 
     <!-- Test Dependencies -->
 		<dependency>

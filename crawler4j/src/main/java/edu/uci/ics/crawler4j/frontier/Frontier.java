@@ -26,6 +26,7 @@ import com.sleepycat.je.DatabaseException;
 import com.sleepycat.je.Environment;
 
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
+import edu.uci.ics.crawler4j.crawler.CrawlSynchronizer;
 import edu.uci.ics.crawler4j.url.WebURL;
 
 /**
@@ -38,21 +39,30 @@ public class Frontier {
     private static final String DATABASE_NAME = "PendingURLsDB";
     private static final int IN_PROCESS_RESCHEDULE_BATCH_SIZE = 100;
     private final CrawlConfig config;
+    private final CrawlSynchronizer sync;
     protected WorkQueues workQueues;
 
     protected InProcessPagesDB inProcessPages;
 
     protected final Object mutex = new Object();
+    @Deprecated
     protected final Object waitingList = new Object();
 
+    @Deprecated
     protected boolean isFinished = false;
 
     protected long scheduledPages;
 
     protected Counters counters;
 
+    @Deprecated
     public Frontier(Environment env, CrawlConfig config) {
+        this(env, config, config.getCrawlSynchronizer());
+    }
+
+    public Frontier(Environment env, CrawlConfig config, CrawlSynchronizer sync) {
         this.config = config;
+        this.sync = sync;
         this.counters = new Counters(env, config);
         try {
             workQueues = new WorkQueues(env, DATABASE_NAME, config.isResumableCrawling());
@@ -107,6 +117,7 @@ public class Frontier {
                 waitingList.notifyAll();
             }
         }
+        sync.foundMorePages();
     }
 
     public void schedule(WebURL url) {
@@ -122,42 +133,21 @@ public class Frontier {
                 logger.error("Error while putting the url in the work queue", e);
             }
         }
+        sync.foundMorePages();
     }
 
-    public void getNextURLs(int max, List<WebURL> result) {
-        while (true) {
-            synchronized (mutex) {
-                if (isFinished) {
-                    return;
-                }
-                try {
-                    List<WebURL> curResults = workQueues.get(max);
-                    workQueues.delete(curResults.size());
-                    if (inProcessPages != null) {
-                        for (WebURL curPage : curResults) {
-                            inProcessPages.put(curPage);
-                        }
-                    }
-                    result.addAll(curResults);
-                } catch (DatabaseException e) {
-                    logger.error("Error while getting next urls", e);
-                }
-
-                if (result.size() > 0) {
-                    return;
+    public void getNextURLs(int max, List<WebURL> result) throws InterruptedException {
+        try {
+            List<WebURL> curResults = workQueues.get(max);
+            workQueues.delete(curResults.size());
+            if (inProcessPages != null) {
+                for (WebURL curPage : curResults) {
+                    inProcessPages.put(curPage);
                 }
             }
-
-            try {
-                synchronized (waitingList) {
-                    waitingList.wait();
-                }
-            } catch (InterruptedException ignored) {
-                // Do nothing
-            }
-            if (isFinished) {
-                return;
-            }
+            result.addAll(curResults);
+        } catch (DatabaseException e) {
+            logger.error("Error while getting next urls", e);
         }
     }
 
@@ -186,6 +176,7 @@ public class Frontier {
         return counters.getValue(Counters.ReservedCounterNames.SCHEDULED_PAGES);
     }
 
+    @Deprecated
     public boolean isFinished() {
         return isFinished;
     }
@@ -198,6 +189,7 @@ public class Frontier {
         }
     }
 
+    @Deprecated
     public void finish() {
         isFinished = true;
         synchronized (waitingList) {

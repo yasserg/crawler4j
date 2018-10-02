@@ -59,7 +59,9 @@ public class WebCrawler implements Runnable {
      * reference to the controller can be used for getting configurations of the
      * current crawl or adding new seeds during runtime.
      */
-    protected CrawlController myController;
+    protected CrawlController<?> myController;
+
+    private CrawlSynchronizer sync;
 
     /**
      * The thread within which this crawler instance is running.
@@ -98,6 +100,7 @@ public class WebCrawler implements Runnable {
      * instances are waiting for new URLs and therefore there is no more work
      * and crawling can be stopped.
      */
+    @Deprecated
     private boolean isWaitingForNewURLs;
 
     private Throwable error;
@@ -112,9 +115,10 @@ public class WebCrawler implements Runnable {
      * @throws IllegalAccessException
      * @throws InstantiationException
      */
-    public void init(int id, CrawlController crawlController)
+    public void init(int id, CrawlController<?> crawlController)
         throws InstantiationException, IllegalAccessException {
         this.myId = id;
+        this.sync = crawlController.getCrawlSynchronizer();
         this.pageFetcher = crawlController.getPageFetcher();
         this.robotstxtServer = crawlController.getRobotstxtServer();
         this.docIdServer = crawlController.getDocIdServer();
@@ -133,7 +137,7 @@ public class WebCrawler implements Runnable {
         return myId;
     }
 
-    public CrawlController getMyController() {
+    public CrawlController<?> getMyController() {
         return myController;
     }
 
@@ -300,42 +304,46 @@ public class WebCrawler implements Runnable {
         try {
             onStart();
             setError(null);
-            boolean halt = false;
-            while (!halt) {
-                List<WebURL> assignedURLs = new ArrayList<>(50);
-                isWaitingForNewURLs = true;
-                frontier.getNextURLs(50, assignedURLs);
-                isWaitingForNewURLs = false;
-                if (assignedURLs.isEmpty()) {
-                    if (frontier.isFinished()) {
-                        return;
+            sync.registerCrawler();
+            boolean finished = false;
+            while (!finished) {
+                try {
+                    if (Thread.interrupted()) {
+                        throw new InterruptedException();
                     }
-                    try {
-                        Thread.sleep(3000);
-                    } catch (InterruptedException e) {
-                        logger.error("Error occurred", e);
-                    }
-                } else {
-                    for (WebURL curURL : assignedURLs) {
-                        if (myController.isShuttingDown()) {
-                            logger.info("Exiting because of controller shutdown.");
-                            return;
+                    List<WebURL> assignedURLs = new ArrayList<>(50);
+                    frontier.getNextURLs(50, assignedURLs);
+                    if (assignedURLs.isEmpty()) {
+                        isWaitingForNewURLs = true;
+                        sync.awaitCompletion();
+                        isWaitingForNewURLs = false;
+                        if (sync.isFinished()) {
+                            finished = true;
+                            break;
                         }
-                        if (curURL != null) {
-                            curURL = handleUrlBeforeProcess(curURL);
-                            processPage(curURL);
-                            frontier.setProcessed(curURL);
+                    } else {
+                        for (WebURL curURL : assignedURLs) {
+                            if (Thread.interrupted()) {
+                                throw new InterruptedException();
+                            }
+                            if (curURL != null) {
+                                curURL = handleUrlBeforeProcess(curURL);
+                                processPage(curURL);
+                                frontier.setProcessed(curURL);
+                            }
                         }
                     }
-                }
-                if (myController.getConfig().isHaltOnError() && myController.getError() != null) {
-                    halt = true;
-                    logger.info("halting because an error has occurred on another thread");
+                } catch (InterruptedException e) {
+                    logger.debug("interrupted", e);
+                    finished = true;
+                    break;
                 }
             }
         } catch (Throwable t) {
             setError(t);
         }
+        onBeforeExit();
+        myController.getCrawlersLocalData().add(getMyLocalData());
     }
 
     /**
@@ -561,7 +569,9 @@ public class WebCrawler implements Runnable {
             logger.debug(
                 "Skipping: {} as it contains binary content which you configured not to crawl",
                 curURL.getURL());
-        } catch (IOException | InterruptedException | RuntimeException e) {
+        } catch (InterruptedException e) {
+            throw e;
+        } catch (IOException | RuntimeException e) {
             onUnhandledException(curURL, e);
         } finally {
             if (fetchResult != null) {
@@ -578,6 +588,7 @@ public class WebCrawler implements Runnable {
         this.myThread = myThread;
     }
 
+    @Deprecated
     public boolean isNotWaitingForNewURLs() {
         return !isWaitingForNewURLs;
     }

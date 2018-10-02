@@ -144,16 +144,19 @@ public class CrawlConfig {
     /**
      * Wait this long before checking the status of the worker threads.
      */
+    @Deprecated
     private int threadMonitoringDelaySeconds = 10;
 
     /**
      * Wait this long to verify the craweler threads are finished working.
      */
+    @Deprecated
     private int threadShutdownDelaySeconds = 10;
 
     /**
      * Wait this long in seconds before launching cleanup.
      */
+    @Deprecated
     private int cleanupDelaySeconds = 10;
 
     /**
@@ -232,6 +235,18 @@ public class CrawlConfig {
      */
     public void setHaltOnError(boolean haltOnError) {
         this.haltOnError = haltOnError;
+    }
+
+    /*
+     * This really doesn't belong here (it should be in CrawlController), but keep
+     * it here for the time being because it's better for backwards compatibility:
+     * things like Frontier don't need the synchronizer provided separately this
+     * way.
+     */
+    private final CrawlSynchronizer sync = new CrawlSynchronizer(this);
+
+    public CrawlSynchronizer getCrawlSynchronizer() {
+        return sync;
     }
 
     /**
@@ -595,26 +610,32 @@ public class CrawlConfig {
         this.authInfos = authInfos;
     }
 
+    @Deprecated
     public int getThreadMonitoringDelaySeconds() {
         return threadMonitoringDelaySeconds;
     }
 
+    @Deprecated
     public void setThreadMonitoringDelaySeconds(int delay) {
         this.threadMonitoringDelaySeconds = delay;
     }
 
+    @Deprecated
     public int getThreadShutdownDelaySeconds() {
         return threadShutdownDelaySeconds;
     }
 
+    @Deprecated
     public void setThreadShutdownDelaySeconds(int delay) {
         this.threadShutdownDelaySeconds = delay;
     }
 
+    @Deprecated
     public int getCleanupDelaySeconds() {
         return cleanupDelaySeconds;
     }
 
+    @Deprecated
     public void setCleanupDelaySeconds(int delay) {
         this.cleanupDelaySeconds = delay;
     }
