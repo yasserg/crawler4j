@@ -37,23 +37,32 @@ public class Parser {
 
     private final HtmlParser htmlContentParser;
 
+    private final Net net;
+
     public Parser(CrawlConfig config) throws IllegalAccessException, InstantiationException {
-        this.config = config;
-        this.htmlContentParser = new TikaHtmlParser(config);
+        this(config, new TikaHtmlParser(config));
     }
 
     public Parser(CrawlConfig config, HtmlParser htmlParser) {
         this.config = config;
         this.htmlContentParser = htmlParser;
+        this.net = new Net(config);
     }
 
-    public void parse(Page page, String contextURL)
-        throws NotAllowedContentException, ParseException {
+    public void parse(Page page, String contextURL) throws NotAllowedContentException, ParseException {
         if (Util.hasBinaryContent(page.getContentType())) { // BINARY
             BinaryParseData parseData = new BinaryParseData();
             if (config.isIncludeBinaryContentInCrawling()) {
                 if (config.isProcessBinaryContentInCrawling()) {
-                    parseData.setBinaryContent(page.getContentData());
+                    try {
+                        parseData.setBinaryContent(page.getContentData());
+                    } catch (Exception e) {
+                        if (config.isHaltOnError()) {
+                            throw new ParseException(e);
+                        } else {
+                            logger.error("Error parsing file", e);
+                        }
+                    }
                 } else {
                     parseData.setHtml("<html></html>");
                 }
@@ -61,7 +70,7 @@ public class Parser {
                 if (parseData.getHtml() == null) {
                     throw new ParseException();
                 }
-                parseData.setOutgoingUrls(Net.extractUrls(parseData.getHtml()));
+                parseData.setOutgoingUrls(net.extractUrls(parseData.getHtml()));
             } else {
                 throw new NotAllowedContentException();
             }
@@ -74,11 +83,11 @@ public class Parser {
                     parseData.setTextContent(
                         new String(page.getContentData(), page.getContentCharset()));
                 }
-                parseData.setOutgoingUrls(Net.extractUrls(parseData.getTextContent()));
+                parseData.setOutgoingUrls(net.extractUrls(parseData.getTextContent()));
                 page.setParseData(parseData);
             } catch (Exception e) {
                 logger.error("{}, while parsing: {}", e.getMessage(), page.getWebURL().getURL());
-                throw new ParseException();
+                throw new ParseException(e);
             }
         } else { // isHTML
 

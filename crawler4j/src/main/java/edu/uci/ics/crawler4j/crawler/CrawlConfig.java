@@ -221,6 +221,28 @@ public class CrawlConfig {
 
     private DnsResolver dnsResolver = new SystemDefaultDnsResolver();
 
+    private boolean allowSingleLevelDomain = false;
+
+    /**
+     * Should all crawling stop if an unexpected error occurs? Default is
+     * {@code false}.
+     *
+     * @param haltOnError
+     *            {@code true} if all crawling should be halted
+     */
+    public void setHaltOnError(boolean haltOnError) {
+        this.haltOnError = haltOnError;
+    }
+
+    /**
+     * Indicates if all crawling will stop if an unexpected error occurs.
+     */
+    public boolean isHaltOnError() {
+        return haltOnError;
+    }
+
+    private boolean haltOnError = false;
+
     /**
      * Validates the configs specified by this instance.
      *
@@ -642,6 +664,26 @@ public class CrawlConfig {
         this.respectNoIndex = respectNoIndex;
     }
 
+    /**
+     * Are single level domains (e.g. http://localhost) considered valid?
+     *
+     * @return
+     */
+    public boolean isAllowSingleLevelDomain() {
+        return allowSingleLevelDomain;
+    }
+
+    /**
+     * Allow single level domains (e.g. http://localhost). This is very useful for
+     * testing especially when you may be using localhost.
+     *
+     * @param allowSingleLevelDomain
+     *            {@code true} if single level domain should be considered valid
+     */
+    public void setAllowSingleLevelDomain(boolean allowSingleLevelDomain) {
+        this.allowSingleLevelDomain = allowSingleLevelDomain;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -668,6 +710,7 @@ public class CrawlConfig {
         sb.append("Cookie policy: " + getCookiePolicy() + "\n");
         sb.append("Respect nofollow: " + isRespectNoFollow() + "\n");
         sb.append("Respect noindex: " + isRespectNoIndex() + "\n");
+        sb.append("Allow single level domain:" + isAllowSingleLevelDomain() + "\n");
         return sb.toString();
     }
 }

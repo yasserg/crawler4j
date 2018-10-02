@@ -17,6 +17,7 @@
 
 package edu.uci.ics.crawler4j.url;
 
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -37,15 +38,22 @@ import java.util.Objects;
  */
 public class URLCanonicalizer {
 
-    public static String getCanonicalURL(String url) {
+    private static boolean haltOnError = false;
+
+    public static void setHaltOnError(boolean haltOnError) {
+        URLCanonicalizer.haltOnError = haltOnError;
+    }
+
+    public static String getCanonicalURL(String url) throws UnsupportedEncodingException {
         return getCanonicalURL(url, null);
     }
 
-    public static String getCanonicalURL(String href, String context) {
+    public static String getCanonicalURL(String href, String context) throws UnsupportedEncodingException {
         return getCanonicalURL(href, context, StandardCharsets.UTF_8);
     }
 
-    public static String getCanonicalURL(String href, String context, Charset charset) {
+    public static String getCanonicalURL(String href, String context, Charset charset)
+            throws UnsupportedEncodingException {
 
         try {
             URL canonicalURL =
@@ -154,8 +162,10 @@ public class URLCanonicalizer {
      * @param charset
      *            Charset of html page
      * @return Canonical form of query string.
+     * @throws UnsupportedEncodingException
      */
-    private static String canonicalize(Map<String, String> paramsMap, Charset charset) {
+    private static String canonicalize(Map<String, String> paramsMap, Charset charset)
+            throws UnsupportedEncodingException {
         if ((paramsMap == null) || paramsMap.isEmpty()) {
             return "";
         }
@@ -182,14 +192,18 @@ public class URLCanonicalizer {
         return path.replace("%7E", "~").replace(" ", "%20");
     }
 
-    private static String percentEncodeRfc3986(String string, Charset charset) {
+    private static String percentEncodeRfc3986(String string, Charset charset) throws UnsupportedEncodingException {
         try {
             string = string.replace("+", "%2B");
             string = URLDecoder.decode(string, "UTF-8");
             string = URLEncoder.encode(string, charset.name());
             return string.replace("+", "%20").replace("*", "%2A").replace("%7E", "~");
-        } catch (Exception e) {
-            return string;
+        } catch (UnsupportedEncodingException | RuntimeException e) {
+            if (haltOnError) {
+                throw e;
+            } else {
+                return string;
+            }
         }
     }
 }
