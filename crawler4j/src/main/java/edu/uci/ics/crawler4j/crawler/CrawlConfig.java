@@ -222,6 +222,26 @@ public class CrawlConfig {
     private DnsResolver dnsResolver = new SystemDefaultDnsResolver();
 
     /**
+     * Should all crawling stop if an unexpected error occurs? Default is
+     * {@code false}.
+     *
+     * @param haltOnError
+     *            {@code true} if all crawling should be halted
+     */
+    public void setHaltOnError(boolean haltOnError) {
+        this.haltOnError = haltOnError;
+    }
+
+    /**
+     * Indicates if all crawling will stop if an unexpected error occurs.
+     */
+    public boolean isHaltOnError() {
+        return haltOnError;
+    }
+
+    private boolean haltOnError = false;
+
+    /**
      * Validates the configs specified by this instance.
      *
      * @throws Exception on Validation fail

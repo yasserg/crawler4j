@@ -1,5 +1,9 @@
 package edu.uci.ics.crawler4j.tests.fetcher;
 
+<<<<<<< HEAD
+import java.io.IOException;
+=======
+>>>>>>> 94872a0... Add "haltOnError" config option
 import org.junit.Rule;
 import org.junit.Test;
 import com.github.tomakehurst.wiremock.client.WireMock;

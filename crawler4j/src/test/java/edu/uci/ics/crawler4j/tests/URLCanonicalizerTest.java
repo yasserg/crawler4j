@@ -2,6 +2,7 @@ package edu.uci.ics.crawler4j.tests;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 
 import org.junit.Test;
@@ -11,7 +12,7 @@ import edu.uci.ics.crawler4j.url.URLCanonicalizer;
 public class URLCanonicalizerTest {
 
     @Test
-    public void testCanonizalier() {
+    public void testCanonizalier() throws UnsupportedEncodingException {
 
         assertEquals("http://www.example.com/display?category=foo%2Fbar%2Bbaz",
                      URLCanonicalizer.getCanonicalURL(

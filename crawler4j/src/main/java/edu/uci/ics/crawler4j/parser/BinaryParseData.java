@@ -19,6 +19,7 @@ package edu.uci.ics.crawler4j.parser;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -33,12 +34,14 @@ import javax.xml.transform.sax.SAXTransformerFactory;
 import javax.xml.transform.sax.TransformerHandler;
 import javax.xml.transform.stream.StreamResult;
 
+import org.apache.tika.exception.TikaException;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.AutoDetectParser;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.SAXException;
 
 import edu.uci.ics.crawler4j.url.WebURL;
 
@@ -60,7 +63,8 @@ public class BinaryParseData implements ParseData {
         context.set(Parser.class, AUTO_DETECT_PARSER);
     }
 
-    public void setBinaryContent(byte[] data) {
+    public void setBinaryContent(byte[] data)
+                throws TransformerConfigurationException, TikaException, SAXException, IOException {
         InputStream inputStream = new ByteArrayInputStream(data);
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
@@ -72,8 +76,8 @@ public class BinaryParseData implements ParseData {
             // Hacking the following line to remove Tika's inserted DocType
             this.html = new String(outputStream.toByteArray(), DEFAULT_ENCODING).replace(
                 "http://www.w3.org/1999/xhtml", "");
-        } catch (Exception e) {
-            logger.error("Error parsing file", e);
+        } catch (TransformerConfigurationException | TikaException | SAXException | IOException | RuntimeException e) {
+            throw e;
         }
     }
 

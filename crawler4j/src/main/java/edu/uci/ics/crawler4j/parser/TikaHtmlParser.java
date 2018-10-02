@@ -46,7 +46,7 @@ public class TikaHtmlParser implements edu.uci.ics.crawler4j.parser.HtmlParser {
             htmlParser.parse(inputStream, contentHandler, metadata, parseContext);
         } catch (Exception e) {
             logger.error("{}, while parsing: {}", e.getMessage(), page.getWebURL().getURL());
-            throw new ParseException();
+            throw new ParseException("could not parse [" + page.getWebURL().getURL() + "]", e);
         }
 
         String contentCharset = chooseEncoding(page, metadata);
@@ -56,10 +56,10 @@ public class TikaHtmlParser implements edu.uci.ics.crawler4j.parser.HtmlParser {
         parsedData.setTitle(metadata.get(DublinCore.TITLE));
         parsedData.setMetaTags(contentHandler.getMetaTags());
 
-        Set<WebURL> outgoingUrls = getOutgoingUrls(contextURL, contentHandler, contentCharset);
-        parsedData.setOutgoingUrls(outgoingUrls);
-
         try {
+            Set<WebURL> outgoingUrls = getOutgoingUrls(contextURL, contentHandler, contentCharset);
+            parsedData.setOutgoingUrls(outgoingUrls);
+
             if (page.getContentCharset() == null) {
                 parsedData.setHtml(new String(page.getContentData()));
             } else {
@@ -69,12 +69,13 @@ public class TikaHtmlParser implements edu.uci.ics.crawler4j.parser.HtmlParser {
             return parsedData;
         } catch (UnsupportedEncodingException e) {
             logger.error("error parsing the html: " + page.getWebURL().getURL(), e);
-            throw new ParseException();
+            throw new ParseException("could not parse [" + page.getWebURL().getURL() + "]", e);
         }
 
     }
 
-    private Set<WebURL> getOutgoingUrls(String contextURL, HtmlContentHandler contentHandler, String contentCharset) {
+    private Set<WebURL> getOutgoingUrls(String contextURL, HtmlContentHandler contentHandler, String contentCharset)
+            throws UnsupportedEncodingException {
         Set<WebURL> outgoingUrls = new HashSet<>();
 
         String baseURL = contentHandler.getBaseUrl();

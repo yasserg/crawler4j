@@ -158,9 +158,9 @@ public class Page {
      *
      * @param entity HttpEntity
      * @param maxBytes The maximum number of bytes to read
-     * @throws Exception when load fails
+     * @throws IOException when load fails
      */
-    public void load(HttpEntity entity, int maxBytes) throws Exception {
+    public void load(HttpEntity entity, int maxBytes) throws IOException {
 
         contentType = null;
         Header type = entity.getContentType();
