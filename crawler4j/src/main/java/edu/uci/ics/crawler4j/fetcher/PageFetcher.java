@@ -21,6 +21,9 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Date;
@@ -87,7 +90,7 @@ public class PageFetcher {
     protected long lastFetchTime = 0;
     protected IdleConnectionMonitorThread connectionMonitorThread = null;
 
-    public PageFetcher(CrawlConfig config) {
+    public PageFetcher(CrawlConfig config) throws NoSuchAlgorithmException, KeyManagementException, KeyStoreException {
         this.config = config;
 
         RequestConfig requestConfig = RequestConfig.custom()
@@ -113,9 +116,13 @@ public class PageFetcher {
                 SSLConnectionSocketFactory sslsf =
                         new SniSSLConnectionSocketFactory(sslContext, NoopHostnameVerifier.INSTANCE);
                 connRegistryBuilder.register("https", sslsf);
-            } catch (Exception e) {
-                logger.warn("Exception thrown while trying to register https");
-                logger.debug("Stacktrace", e);
+            } catch (NoSuchAlgorithmException | KeyManagementException | KeyStoreException | RuntimeException e) {
+                if (config.isHaltOnError()) {
+                    throw e;
+                } else {
+                    logger.warn("Exception thrown while trying to register https");
+                    logger.debug("Stacktrace", e);
+                }
             }
         }
 
@@ -246,7 +253,7 @@ public class PageFetcher {
     public PageFetchResult fetchPage(WebURL webUrl)
             throws InterruptedException, IOException, PageBiggerThanMaxSizeException {
         // Getting URL, setting headers & content
-        PageFetchResult fetchResult = new PageFetchResult();
+        PageFetchResult fetchResult = new PageFetchResult(config.isHaltOnError());
         String toFetchURL = webUrl.getURL();
         HttpUriRequest request = null;
         try {

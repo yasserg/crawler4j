@@ -41,13 +41,13 @@ public class Downloader {
     private final PageFetcher pageFetcher;
     private final CrawlConfig config = new CrawlConfig();
 
-    public Downloader() throws InstantiationException, IllegalAccessException {
+    public Downloader() throws Exception {
         config.setFollowRedirects(true);
         parser = new Parser(config);
         pageFetcher = new PageFetcher(config);
     }
 
-    public static void main(String[] args) throws InstantiationException, IllegalAccessException {
+    public static void main(String[] args) throws Exception {
         Downloader downloader = new Downloader();
         downloader.processUrl("https://en.wikipedia.org/wiki/Main_Page/");
         downloader.processUrl("https://api.ipify.org?format=html");
