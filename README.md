@@ -92,14 +92,14 @@ public class MyCrawler extends WebCrawler {
      * the given url should be crawled or not (based on your crawling logic).
      * In this example, we are instructing the crawler to ignore urls that
      * have css, js, git, ... extensions and to only accept urls that start
-     * with "http://www.ics.uci.edu/". In this case, we didn't need the
+     * with "https://www.ics.uci.edu/". In this case, we didn't need the
      * referringPage parameter to make the decision.
      */
      @Override
      public boolean shouldVisit(Page referringPage, WebURL url) {
          String href = url.getURL().toLowerCase();
          return !FILTERS.matcher(href).matches()
-                && href.startsWith("http://www.ics.uci.edu/");
+                && href.startsWith("https://www.ics.uci.edu/");
      }
 
      /**
@@ -158,9 +158,9 @@ public class Controller {
          * URLs that are fetched and then the crawler starts following links
          * which are found in these pages
          */
-        controller.addSeed("http://www.ics.uci.edu/~lopes/");
-        controller.addSeed("http://www.ics.uci.edu/~welling/");
-    	controller.addSeed("http://www.ics.uci.edu/");
+        controller.addSeed("https://www.ics.uci.edu/~lopes/");
+        controller.addSeed("https://www.ics.uci.edu/~welling/");
+    	controller.addSeed("https://www.ics.uci.edu/");
 
         /*
          * Start the crawl. This is a blocking operation, meaning that your code

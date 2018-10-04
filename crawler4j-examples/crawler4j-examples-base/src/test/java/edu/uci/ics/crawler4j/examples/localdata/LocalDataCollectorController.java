@@ -53,7 +53,7 @@ public class LocalDataCollectorController {
         RobotstxtServer robotstxtServer = new RobotstxtServer(robotstxtConfig, pageFetcher);
         CrawlController controller = new CrawlController(config, pageFetcher, robotstxtServer);
 
-        controller.addSeed("http://www.ics.uci.edu/");
+        controller.addSeed("https://www.ics.uci.edu/");
         controller.start(LocalDataCollectorCrawler.class, numberOfCrawlers);
 
         List<Object> crawlersLocalData = controller.getCrawlersLocalData();
