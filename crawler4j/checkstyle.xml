@@ -9,7 +9,6 @@
             <property name="max" value="120"/>
             <property name="ignorePattern" value="^(package .*;)|(import .*;)|(\{@link .*)$"/>
         </module>
-        <module name="FileContentsHolder"/>
         <module name="SuppressWarningsHolder"/>
         <module name="JavadocMethod">
             <property name="allowMissingJavadoc" value="true"/>
@@ -38,6 +37,7 @@
         <module name="ImportOrder">
             <property name="groups" value="java,javax,org,com,*"/>
             <property name="ordered" value="true"/>
+            <property name="separated" value="true"/>
             <property name="caseSensitive" value="true"/>
             <!-- This ensures that static imports go first. -->
             <property name="option" value="top"/>
