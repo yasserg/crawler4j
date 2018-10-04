@@ -20,6 +20,7 @@ package edu.uci.ics.crawler4j.parser;
 import org.apache.tika.language.LanguageIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.crawler.Page;
 import edu.uci.ics.crawler4j.crawler.exceptions.ParseException;
