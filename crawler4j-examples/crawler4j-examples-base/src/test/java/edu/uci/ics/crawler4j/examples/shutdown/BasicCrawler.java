@@ -39,7 +39,7 @@ public class BasicCrawler extends WebCrawler {
         ".*(\\.(css|js|bmp|gif|jpe?g|png|tiff?|mid|mp2|mp3|mp4|wav|avi|mov|mpeg|ram|m4v|pdf" +
         "|rm|smil|wmv|swf|wma|zip|rar|gz))$");
 
-    private static final String DOMAIN = "http://www.ics.uci.edu/";
+    private static final String DOMAIN = "https://www.ics.uci.edu/";
 
     @Override
     public boolean shouldVisit(Page referringPage, WebURL url) {

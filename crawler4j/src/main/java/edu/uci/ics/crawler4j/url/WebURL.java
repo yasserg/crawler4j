@@ -18,7 +18,6 @@
 package edu.uci.ics.crawler4j.url;
 
 import java.io.Serializable;
-
 import java.util.Map;
 
 import com.sleepycat.persist.model.Entity;

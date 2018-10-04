@@ -59,6 +59,7 @@
         <wiremock.version>2.14.0</wiremock.version>
         <spock.version>1.1-groovy-2.4</spock.version>
         <groovy.version>2.4.12</groovy.version>
+        <checkstyle.version>8.12</checkstyle.version>
 
         <!-- Maven specific settings -->
         <encoding>UTF-8</encoding>
@@ -255,6 +256,8 @@
                                 <consoleOutput>true</consoleOutput>
                                 <failsOnError>true</failsOnError>
                                 <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                                <sourceDirectories>${project.compileSourceRoots}</sourceDirectories>
+                                <testSourceDirectories>${project.testCompileSourceRoots}</testSourceDirectories>
                             </configuration>
                             <goals>
                                 <goal>check</goal>
@@ -265,7 +268,7 @@
                         <dependency>
                             <groupId>com.puppycrawl.tools</groupId>
                             <artifactId>checkstyle</artifactId>
-                            <version>7.1</version>
+                            <version>${checkstyle.version}</version>
                         </dependency>
                     </dependencies>
                 </plugin>
