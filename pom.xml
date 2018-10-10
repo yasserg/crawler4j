@@ -84,6 +84,7 @@
         <maven.gmaven.plus.version>1.5</maven.gmaven.plus.version>
         <maven.versions.version>2.5</maven.versions.version>
         <maven.forbiddenapis.version>2.4.1</maven.forbiddenapis.version>
+        <maven.enforcer.version>3.0.0-M2</maven.enforcer.version>
     </properties>
 
     <profiles>
@@ -268,6 +269,11 @@
                             <version>7.1</version>
                         </dependency>
                     </dependencies>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-enforcer-plugin</artifactId>
+                    <version>${maven.enforcer.version}</version>
                 </plugin>
             </plugins>
         </pluginManagement>
