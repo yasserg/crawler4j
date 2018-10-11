@@ -1,6 +1,7 @@
 package edu.uci.ics.crawler4j.url
 
 import com.github.tomakehurst.wiremock.junit.WireMockRule
+import edu.uci.ics.crawler4j.crawler.CrawlConfig
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Ignore
@@ -29,8 +30,8 @@ omega
 """
         )))
         and: "TLDList instance that download fresh list"
-        TLDList.setUseOnline(true, "http://localhost:${wireMockRule.port()}/tld-names.txt")
-        def tldList = TLDList.getInstance()
+        def config = new CrawlConfig(onlineTldListUpdate: true, publicSuffixSourceUrl: "http://localhost:${wireMockRule.port()}/tld-names.txt")
+        def tldList = new TLDList(config)
 
         expect:
         assert tldList.contains("alpha")

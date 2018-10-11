@@ -133,9 +133,11 @@ public class CrawlConfig {
     /**
      * Should the TLD list be updated automatically on each run? Alternatively,
      * it can be loaded from the embedded tld-names.zip file that was obtained from
-     * https://publicsuffix.org/list/effective_tld_names.dat
+     * https://publicsuffix.org/list/public_suffix_list.dat
      */
     private boolean onlineTldListUpdate = false;
+
+    private String publicSuffixSourceUrl = "https://publicsuffix.org/list/public_suffix_list.dat";
 
     /**
      * Should the crawler stop running when the queue is empty?
@@ -495,10 +497,22 @@ public class CrawlConfig {
     /**
      * Should the TLD list be updated automatically on each run? Alternatively,
      * it can be loaded from the embedded tld-names.txt resource file that was
-     * obtained from https://publicsuffix.org/list/effective_tld_names.dat
+     * obtained from https://publicsuffix.org/list/public_suffix_list.dat
      */
     public void setOnlineTldListUpdate(boolean online) {
         onlineTldListUpdate = online;
+    }
+
+    public String getPublicSuffixSourceUrl() {
+        return publicSuffixSourceUrl;
+    }
+
+    /**
+     * URL from which the public suffix list is obtained.  By default
+     * this is https://publicsuffix.org/list/public_suffix_list.dat
+     */
+    public void setPublicSuffixSourceUrl(String publicSuffixSourceUrl) {
+        this.publicSuffixSourceUrl = publicSuffixSourceUrl;
     }
 
     public String getProxyHost() {

@@ -46,6 +46,18 @@ public class WebURL implements Serializable {
     private byte priority;
     private String tag;
     private Map<String, String> attributes;
+    private TLDList tldList;
+
+    /**
+     * Set the TLDList if you want {@linkplain #getDomain()} and
+     * {@link #getSubDomain()} to properly identify effective top level domain as
+     * defined at <a href="https://publicsuffix.org">publicsuffix.org</a>
+     *
+     * @param tldList
+     */
+    public void setTldList(TLDList tldList) {
+        this.tldList = tldList;
+    }
 
     /**
      * @return unique document id assigned to this Url.
@@ -73,19 +85,21 @@ public class WebURL implements Serializable {
         domainEndIdx = (domainEndIdx > domainStartIdx) ? domainEndIdx : url.length();
         domain = url.substring(domainStartIdx, domainEndIdx);
         subDomain = "";
-        String[] parts = domain.split("\\.");
-        if (parts.length > 2) {
-            domain = parts[parts.length - 2] + "." + parts[parts.length - 1];
-            int limit = 2;
-            if (TLDList.getInstance().contains(domain)) {
-                domain = parts[parts.length - 3] + "." + domain;
-                limit = 3;
-            }
-            for (int i = 0; i < (parts.length - limit); i++) {
-                if (!subDomain.isEmpty()) {
-                    subDomain += ".";
+        if (tldList != null) {
+            String[] parts = domain.split("\\.");
+            if (parts.length > 2) {
+                domain = parts[parts.length - 2] + "." + parts[parts.length - 1];
+                int limit = 2;
+                if (tldList.contains(domain)) {
+                    domain = parts[parts.length - 3] + "." + domain;
+                    limit = 3;
                 }
-                subDomain += parts[i];
+                for (int i = 0; i < (parts.length - limit); i++) {
+                    if (!subDomain.isEmpty()) {
+                        subDomain += ".";
+                    }
+                    subDomain += parts[i];
+                }
             }
         }
         path = url.substring(domainEndIdx);
@@ -135,14 +149,24 @@ public class WebURL implements Serializable {
     }
 
     /**
-     * @return
-     *      domain of this Url. For 'http://www.example.com/sample.htm', domain will be 'example
-     *      .com'
+     * If {@link WebURL} was provided with a {@link TLDList} then domain will be the
+     * effective top level domain as defined at
+     * <a href="https://publicsuffix.org">publicsuffix.org</a>. Otherwise it will be
+     * the entire domain.
+     *
+     * @return domain of this Url. For 'http://www.example.com/sample.htm', domain
+     *         will be 'example.com'
      */
     public String getDomain() {
         return domain;
     }
 
+    /**
+     * If {@link WebURL} was provided with a {@link TLDList} then domain will be the
+     * effective private portion of the domain as defined at
+     * <a href="https://publicsuffix.org">publicsuffix.org</a>. Otherwise it will be
+     * empty.
+     */
     public String getSubDomain() {
         return subDomain;
     }

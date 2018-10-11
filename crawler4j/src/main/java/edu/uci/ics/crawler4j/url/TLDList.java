@@ -17,38 +17,30 @@ import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.uci.ics.crawler4j.crawler.CrawlConfig;
+
 /**
  * This class is a singleton which obtains a list of TLDs (from online or a local file) in order to
  * compare against those TLDs
- *
- * TODO: Nuke this singleton.
  */
 public class TLDList {
 
-    private static final Logger logger = LoggerFactory.getLogger(TLDList.class);
+    private final Logger logger = LoggerFactory.getLogger(TLDList.class);
 
-    private static final String TLD_NAMES_ONLINE_URL =
-            "https://publicsuffix.org/list/public_suffix_list.dat";
     private static final String TLD_NAMES_TXT_FILENAME = "tld-names.txt";
 
-    private static boolean onlineUpdate = false;
-    private static String url = TLD_NAMES_ONLINE_URL;
+    private boolean onlineUpdate;
+    private String url;
 
     private final Supplier<Set<String>> memoizer;
 
-    private static class SingletonHolder {
-        private static final TLDList INSTANCE = new TLDList();
+    public TLDList(CrawlConfig config) {
+        this.onlineUpdate = config.isOnlineTldListUpdate();
+        this.url = config.getPublicSuffixSourceUrl();
+        memoizer = memoize(this::tldSupplier)::get;
     }
 
-    public static TLDList getInstance() {
-        return SingletonHolder.INSTANCE;
-    }
-
-    private TLDList() {
-        memoizer = TLDList.memoize(TLDList::tldSupplier)::get;
-    }
-
-    private static int readStream(InputStream stream, Set<String> tldSet) {
+    private int readStream(InputStream stream, Set<String> tldSet) {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(stream))) {
             String line;
             while ((line = reader.readLine()) != null) {
@@ -64,15 +56,7 @@ public class TLDList {
         return tldSet.size();
     }
 
-    /**
-     * If {@code online} is set to true, the list of TLD files will be downloaded and refreshed,
-     * otherwise the one cached in src/main/resources/tld-names.txt will be used.
-     */
-    public static void setUseOnline(boolean online) {
-        setUseOnline(online, TLD_NAMES_ONLINE_URL);
-    }
-
-    protected static void setUseOnline(boolean online, String downloadFromUrl) {
+    protected void setUseOnline(boolean online, String downloadFromUrl) {
         onlineUpdate = online;
         url = downloadFromUrl;
     }
@@ -81,7 +65,7 @@ public class TLDList {
         return memoizer.get().contains(str);
     }
 
-    private static Set<String> tldSupplier() {
+    private Set<String> tldSupplier() {
         final Set<String> tldSet = new HashSet<>(10000);
 
         if (onlineUpdate) {
@@ -102,7 +86,7 @@ public class TLDList {
         return tldSet;
     }
 
-    private static void loadFromFiles(Set<String> tldSet) {
+    private void loadFromFiles(Set<String> tldSet) {
         try (InputStream tldFile = FileUtils.openInputStream(new File(TLD_NAMES_TXT_FILENAME))) {
             logger.debug("Fetching the list from a local file {}", TLD_NAMES_TXT_FILENAME);
             int n = readStream(tldFile, tldSet);
@@ -127,7 +111,7 @@ public class TLDList {
     }
 
     // Naive but no need to account for threading in this case.
-    private static <T> Supplier<T> memoize(Supplier<T> supplier) {
+    private <T> Supplier<T> memoize(Supplier<T> supplier) {
         Map<Object, T> mem = new HashMap<>();
         return () -> mem.computeIfAbsent("memoizeMe", key -> supplier.get());
     }
