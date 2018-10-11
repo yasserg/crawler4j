@@ -9,7 +9,7 @@ import org.apache.http.entity.*
 class HtmlParserTest extends Specification {
     
     def "can parse html page"() {
-        def parser = new TikaHtmlParser(new CrawlConfig())
+        def parser = new TikaHtmlParser(new CrawlConfig(), null)
         def url = new WebURL(url: "http://wiki.c2.com/")
         def file = new File("src/test/resources/html/wiki.c2.com.html")
         def contentType = new ContentType("text/html", Charset.forName("UTF-8"))

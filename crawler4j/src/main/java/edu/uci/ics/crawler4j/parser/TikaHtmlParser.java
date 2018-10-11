@@ -47,6 +47,10 @@ public class TikaHtmlParser implements edu.uci.ics.crawler4j.parser.HtmlParser {
         HtmlContentHandler contentHandler = new HtmlContentHandler();
         Metadata metadata = new Metadata();
 
+        if (page.getContentType() != null) {
+            metadata.add(Metadata.CONTENT_TYPE, page.getContentType());
+        }
+
         try (InputStream inputStream = new ByteArrayInputStream(page.getContentData())) {
             htmlParser.parse(inputStream, contentHandler, metadata, parseContext);
         } catch (Exception e) {
