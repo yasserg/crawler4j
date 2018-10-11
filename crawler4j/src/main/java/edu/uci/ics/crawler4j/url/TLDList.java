@@ -56,11 +56,6 @@ public class TLDList {
         return tldSet.size();
     }
 
-    protected void setUseOnline(boolean online, String downloadFromUrl) {
-        onlineUpdate = online;
-        url = downloadFromUrl;
-    }
-
     public boolean contains(String str) {
         return memoizer.get().contains(str);
     }
