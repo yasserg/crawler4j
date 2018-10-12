@@ -139,6 +139,8 @@ public class CrawlConfig {
 
     private String publicSuffixSourceUrl = "https://publicsuffix.org/list/public_suffix_list.dat";
 
+    private String publicSuffixLocalFile = null;
+
     /**
      * Should the crawler stop running when the queue is empty?
      */
@@ -513,6 +515,21 @@ public class CrawlConfig {
      */
     public void setPublicSuffixSourceUrl(String publicSuffixSourceUrl) {
         this.publicSuffixSourceUrl = publicSuffixSourceUrl;
+    }
+
+    public String getPublicSuffixLocalFile() {
+        return publicSuffixLocalFile;
+    }
+
+    /**
+     * Only used if {@link #setOnlineTldListUpdate(boolean)} is {@code true}. If
+     * this property is not null then it overrides
+     * {@link #setPublicSuffixSourceUrl(String)}
+     *
+     * @param publicSuffixLocalFile local filename of public suffix list
+     */
+    public void setPublicSuffixLocalFile(String publicSuffixLocalFile) {
+        this.publicSuffixLocalFile = publicSuffixLocalFile;
     }
 
     public String getProxyHost() {

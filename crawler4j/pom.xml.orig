@@ -17,8 +17,12 @@
 		<apache.http.components.version>4.5.5</apache.http.components.version>
 		<je.version>5.0.84</je.version>
 		<apache.tika.version>1.17</apache.tika.version>
+<<<<<<< HEAD
+=======
+        <url-detector.version>0.1.20</url-detector.version>
         <guava.version>26.0-jre</guava.version>
         <public.suffix.list.version>2.2.0</public.suffix.list.version>
+>>>>>>> e94c59c... Use Guava and public-suffix-list libs for public suffix lookups.
 		<!--test dependency versions -->
 		<junit.version>4.12</junit.version>
 		<wiremock.version>2.14.0</wiremock.version>
@@ -371,6 +375,12 @@
 			</exclusion>
 		</exclusions>
 	</dependency>
+<<<<<<< HEAD
+=======
+    <dependency>
+        <groupId>io.github.pgalbraith</groupId>
+        <artifactId>url-detector</artifactId>
+        <version>${url-detector.version}</version>
     </dependency>
     <dependency>
         <groupId>com.google.guava</groupId>
@@ -381,6 +391,8 @@
         <groupId>de.malkusch.whois-server-list</groupId>
         <artifactId>public-suffix-list</artifactId>
         <version>${public.suffix.list.version}</version>
+    </dependency>
+>>>>>>> e94c59c... Use Guava and public-suffix-list libs for public suffix lookups.
 
     <!-- Test Dependencies -->
 		<dependency>

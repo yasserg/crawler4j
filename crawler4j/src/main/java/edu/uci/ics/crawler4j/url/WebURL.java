@@ -20,6 +20,7 @@ package edu.uci.ics.crawler4j.url;
 import java.io.Serializable;
 import java.util.Map;
 
+import com.google.common.net.InternetDomainName;
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
 
@@ -39,7 +40,7 @@ public class WebURL implements Serializable {
     private int parentDocid;
     private String parentUrl;
     private short depth;
-    private String domain;
+    private String registeredDomain;
     private String subDomain;
     private String path;
     private String anchor;
@@ -50,7 +51,7 @@ public class WebURL implements Serializable {
 
     /**
      * Set the TLDList if you want {@linkplain #getDomain()} and
-     * {@link #getSubDomain()} to properly identify effective top level domain as
+     * {@link #getSubDomain()} to properly identify effective top level registeredDomain as
      * defined at <a href="https://publicsuffix.org">publicsuffix.org</a>
      *
      * @param tldList
@@ -83,23 +84,37 @@ public class WebURL implements Serializable {
         int domainStartIdx = url.indexOf("//") + 2;
         int domainEndIdx = url.indexOf('/', domainStartIdx);
         domainEndIdx = (domainEndIdx > domainStartIdx) ? domainEndIdx : url.length();
-        domain = url.substring(domainStartIdx, domainEndIdx);
+        String domain = url.substring(domainStartIdx, domainEndIdx);
+        registeredDomain = domain;
         subDomain = "";
-        if (tldList != null) {
+        if (tldList != null && !(domain.isEmpty()) && InternetDomainName.isValid(domain)) {
+            String candidate = null;
+            String rd = null;
+            String sd = null;
             String[] parts = domain.split("\\.");
-            if (parts.length > 2) {
-                domain = parts[parts.length - 2] + "." + parts[parts.length - 1];
-                int limit = 2;
-                if (tldList.contains(domain)) {
-                    domain = parts[parts.length - 3] + "." + domain;
-                    limit = 3;
-                }
-                for (int i = 0; i < (parts.length - limit); i++) {
-                    if (!subDomain.isEmpty()) {
-                        subDomain += ".";
+            for (int i = parts.length - 1; i >= 0; i--) {
+                if (rd == null) {
+                    if (candidate == null) {
+                        candidate = parts[i];
+                    } else {
+                        candidate = parts[i] + "." + candidate;
                     }
-                    subDomain += parts[i];
+                    if (tldList.isRegisteredDomain(candidate)) {
+                        rd = candidate;
+                    }
+                } else {
+                    if (sd == null) {
+                        sd = parts[i];
+                    } else {
+                        sd = parts[i] + "." + sd;
+                    }
                 }
+            }
+            if (rd != null) {
+                registeredDomain = rd;
+            }
+            if (sd != null) {
+                subDomain = sd;
             }
         }
         path = url.substring(domainEndIdx);
@@ -150,22 +165,25 @@ public class WebURL implements Serializable {
 
     /**
      * If {@link WebURL} was provided with a {@link TLDList} then domain will be the
-     * effective top level domain as defined at
+     * privately registered domain which is an immediate child of an effective top
+     * level domain as defined at
      * <a href="https://publicsuffix.org">publicsuffix.org</a>. Otherwise it will be
      * the entire domain.
      *
-     * @return domain of this Url. For 'http://www.example.com/sample.htm', domain
-     *         will be 'example.com'
+     * @return Domain of this Url. For 'http://www.example.com/sample.htm',
+     *         effective top level domain is 'example.com'. For
+     *         'http://www.my.company.co.uk' the domain is 'company.co.uk'.
      */
     public String getDomain() {
-        return domain;
+        return registeredDomain;
     }
 
     /**
-     * If {@link WebURL} was provided with a {@link TLDList} then domain will be the
-     * effective private portion of the domain as defined at
-     * <a href="https://publicsuffix.org">publicsuffix.org</a>. Otherwise it will be
-     * empty.
+     * If {@link WebURL} was provided with a {@link TLDList} then subDomain will be
+     * the private portion of the entire domain which is a child of the identified
+     * registered domain. Otherwise it will be empty. e.g. in
+     * "http://www.example.com" the subdomain is "www". In
+     * "http://www.my.company.co.uk" the subdomain would be "www.my".
      */
     public String getSubDomain() {
         return subDomain;
@@ -173,7 +191,7 @@ public class WebURL implements Serializable {
 
     /**
      * @return
-     *      path of this Url. For 'http://www.example.com/sample.htm', domain will be 'sample.htm'
+     *      path of this Url. For 'http://www.example.com/sample.htm', registeredDomain will be 'sample.htm'
      */
     public String getPath() {
         return path;

@@ -20,22 +20,18 @@ class TLDListOnlineTest extends Specification {
     def "download TLD from url"() {
         given: "an online TLD file list"
         stubFor(get(urlEqualTo("/tld-names.txt"))
-                .willReturn(aResponse()
-                .withStatus(200)
-                .withHeader("Content-Type", "text/plain")
-                .withBody(
-                """
-alpha
-omega
-"""
-        )))
+            .willReturn(aResponse()
+            .withStatus(200)
+            .withHeader("Content-Type", "text/plain")
+            .withBody("fakeprovince.ca")
+        ))
         and: "TLDList instance that download fresh list"
         def config = new CrawlConfig(onlineTldListUpdate: true, publicSuffixSourceUrl: "http://localhost:${wireMockRule.port()}/tld-names.txt")
         def tldList = new TLDList(config)
 
         expect:
-        assert tldList.contains("alpha")
-        assert !tldList.contains("delta")
+        assert tldList.contains("fakeprovince.ca")
+        assert !tldList.contains("on.ca")
         verify(1, getRequestedFor(urlEqualTo("/tld-names.txt")));
     }
 }
