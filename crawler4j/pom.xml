@@ -371,7 +371,6 @@
 			</exclusion>
 		</exclusions>
 	</dependency>
-    </dependency>
     <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
@@ -381,6 +380,7 @@
         <groupId>de.malkusch.whois-server-list</groupId>
         <artifactId>public-suffix-list</artifactId>
         <version>${public.suffix.list.version}</version>
+    </dependency>
 
     <!-- Test Dependencies -->
 		<dependency>
