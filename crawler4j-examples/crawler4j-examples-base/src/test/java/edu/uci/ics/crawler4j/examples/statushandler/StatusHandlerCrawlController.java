@@ -99,7 +99,7 @@ public class StatusHandlerCrawlController {
         PageFetcher pageFetcher = new PageFetcher(config);
         RobotstxtConfig robotstxtConfig = new RobotstxtConfig();
         RobotstxtServer robotstxtServer = new RobotstxtServer(robotstxtConfig, pageFetcher);
-        CrawlController<StatusHandlerCrawler> controller = new CrawlController<>(config, pageFetcher, robotstxtServer);
+        CrawlController controller = new CrawlController(config, pageFetcher, robotstxtServer);
 
     /*
      * For each crawl, you need to add some seed urls. These are the first

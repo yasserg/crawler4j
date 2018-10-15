@@ -60,7 +60,7 @@ public class ImageCrawlController {
         PageFetcher pageFetcher = new PageFetcher(config);
         RobotstxtConfig robotstxtConfig = new RobotstxtConfig();
         RobotstxtServer robotstxtServer = new RobotstxtServer(robotstxtConfig, pageFetcher);
-        CrawlController<ImageCrawler> controller = new CrawlController<>(config, pageFetcher, robotstxtServer);
+        CrawlController controller = new CrawlController(config, pageFetcher, robotstxtServer);
         for (String domain : crawlDomains) {
             controller.addSeed(domain);
         }

@@ -74,8 +74,8 @@ public class MultipleCrawlerController {
         RobotstxtConfig robotstxtConfig = new RobotstxtConfig();
         RobotstxtServer robotstxtServer = new RobotstxtServer(robotstxtConfig, pageFetcher1);
 
-        CrawlController<BasicCrawler> controller1 = new CrawlController<>(config1, pageFetcher1, robotstxtServer);
-        CrawlController<BasicCrawler> controller2 = new CrawlController<>(config2, pageFetcher2, robotstxtServer);
+        CrawlController controller1 = new CrawlController(config1, pageFetcher1, robotstxtServer);
+        CrawlController controller2 = new CrawlController(config2, pageFetcher2, robotstxtServer);
 
         String[] crawler1Domains = {"https://www.ics.uci.edu/", "https://www.cnn.com/"};
         String[] crawler2Domains = {"https://en.wikipedia.org/"};

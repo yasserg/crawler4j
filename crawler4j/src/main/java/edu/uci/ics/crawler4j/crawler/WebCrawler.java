@@ -61,7 +61,7 @@ public class WebCrawler implements Runnable {
      * reference to the controller can be used for getting configurations of the
      * current crawl or adding new seeds during runtime.
      */
-    protected CrawlController<?> myController;
+    protected CrawlController myController;
 
     private CrawlSynchronizer sync;
 
@@ -117,7 +117,7 @@ public class WebCrawler implements Runnable {
      * @throws IllegalAccessException
      * @throws InstantiationException
      */
-    public void init(int id, CrawlController<?> crawlController)
+    public void init(int id, CrawlController crawlController)
         throws InstantiationException, IllegalAccessException {
         this.myId = id;
         this.sync = crawlController.getCrawlSynchronizer();
@@ -139,7 +139,7 @@ public class WebCrawler implements Runnable {
         return myId;
     }
 
-    public CrawlController<?> getMyController() {
+    public CrawlController getMyController() {
         return myController;
     }
 
