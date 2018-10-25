@@ -26,6 +26,9 @@ import org.slf4j.LoggerFactory;
  * A utility class to help multiple crawler threads know when the entire
  * crawling process is finished.
  * <p>
+ * Each crawler should register itself when it starts processing by calling
+ * {@link #registerCrawler()}.
+ * <p>
  * When a crawler finds new pages for processing, it should call
  * {@link #foundMorePages()} to indicate that there is still more work to do.
  * This will free up any crawlers currently waiting at
@@ -76,8 +79,13 @@ public final class CrawlSynchronizer {
         assert !finished;
 
         Thread t = Thread.currentThread();
-        workers.remove(t);
-        logger.debug("thread [" + t + "] waiting for completion");
+        boolean worker = workers.remove(t);
+
+        if (worker) {
+            logger.debug("worker thread [" + t + "] waiting for completion");
+        } else {
+            logger.debug("non-worker thread [" + t + "] waiting for completion");
+        }
 
         if (workers.isEmpty()) {
             // no crawlers are working, so all crawling is finished
@@ -90,7 +98,9 @@ public final class CrawlSynchronizer {
             }
         } else {
             wait(3000);
-            workers.add(t);
+            if (worker) {
+                workers.add(t);
+            }
         }
 
         return finished;
@@ -109,8 +119,17 @@ public final class CrawlSynchronizer {
     }
 
     /**
-     * @return {@code true} if all crawling is completed
+     * All crawler threads should call this method to register themselves, as soon
+     * as they begin working.
      */
+    public synchronized void registerCrawler() {
+        assert !finished;
+
+        Thread t = Thread.currentThread();
+        logger.debug("registering worker thread [" + t + "]");
+        workers.add(t);
+    }
+
     public synchronized boolean isFinished() {
         return finished;
     }

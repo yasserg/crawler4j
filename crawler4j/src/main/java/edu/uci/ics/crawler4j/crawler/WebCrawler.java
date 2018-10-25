@@ -306,6 +306,7 @@ public class WebCrawler implements Runnable {
         try {
             onStart();
             setError(null);
+            sync.registerCrawler();
             boolean finished = false;
             while (!finished) {
                 try {
