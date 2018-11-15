@@ -81,6 +81,7 @@ local.properties
 .loadpath
 .recommenders
 .checkstyle
+.groovy
 
 # External tool builders
 .externalToolBuilders/
