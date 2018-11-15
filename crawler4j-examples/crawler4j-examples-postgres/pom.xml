@@ -12,74 +12,37 @@
     <artifactId>crawler4j-examples-postgres</artifactId>
     <modelVersion>4.0.0</modelVersion>
 
-    <properties>
-        <postgresql.version>42.2.1</postgresql.version>
-        <c3p0.version>0.9.5.2</c3p0.version>
-        <flyway.db.version>5.0.7</flyway.db.version>
-        <guava.version>24.0-jre</guava.version>
-    </properties>
-
-    <repositories>
-        <repository>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <id>bintray-palantir-releases</id>
-            <name>bintray</name>
-            <url>https://palantir.bintray.com/releases</url>
-        </repository>
-    </repositories>
-    <pluginRepositories>
-        <pluginRepository>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <id>bintray-palantir-releases</id>
-            <name>bintray-plugins</name>
-            <url>https://palantir.bintray.com/releases</url>
-        </pluginRepository>
-    </pluginRepositories>
-
     <dependencies>
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>${postgresql.version}</version>
         </dependency>
         <dependency>
             <groupId>com.mchange</groupId>
             <artifactId>c3p0</artifactId>
-            <version>${c3p0.version}</version>
         </dependency>
         <dependency>
             <groupId>edu.uci.ics</groupId>
             <artifactId>crawler4j</artifactId>
-            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
-            <version>${flyway.db.version}</version>
         </dependency>
         <dependency>
             <!-- Google's core Java libraries -->
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>${guava.version}</version>
         </dependency>
 
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <scope>test</scope>
-            <version>${junit.version}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.palantir.docker.compose/docker-compose-rule-junit4 -->
         <dependency>
             <groupId>com.palantir.docker.compose</groupId>
             <artifactId>docker-compose-rule-junit4</artifactId>
-            <scope>test</scope>
-            <version>0.33.0</version>
         </dependency>
     </dependencies>
 </project>
