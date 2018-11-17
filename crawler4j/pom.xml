@@ -65,78 +65,15 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-				<version>${maven.jacoco.version}</version>
-                <executions>
-                    <execution>
-                        <id>pre-unit-test</id>
-                        <goals>
-                            <goal>prepare-agent</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>post-unit-test</id>
-                        <phase>test</phase>
-                        <goals>
-                            <goal>report</goal>
-                        </goals>
-                        <configuration>
-                            <excludes>
-                                <exclude>**/exceptions/**</exclude>
-                            </excludes>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
 			<!-- Groovy compiler stuff -->
 			<plugin>
 				<groupId>org.codehaus.gmavenplus</groupId>
 				<artifactId>gmavenplus-plugin</artifactId>
-				<version>${maven.gmaven.plus.version}</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>addSources</goal>
-							<goal>addTestSources</goal>
-							<goal>generateStubs</goal>
-							<goal>compile</goal>
-							<goal>testGenerateStubs</goal>
-							<goal>testCompile</goal>
-							<goal>removeStubs</goal>
-							<goal>removeTestStubs</goal>
-						</goals>
-					</execution>
-				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>
-				<version>${maven.build.helper.version}</version>
-				<executions>
-					<execution>
-						<id>add-source</id>
-						<phase>generate-sources</phase>
-						<goals>
-							<goal>add-source</goal>
-						</goals>
-						<configuration>
-							<sources>
-								<source>src/main/groovy</source>
-							</sources>
-						</configuration>
-					</execution>
-					<execution>
-						<id>add-test-source</id>
-						<phase>generate-test-sources</phase>
-						<goals>
-							<goal>add-test-source</goal>
-						</goals>
-						<configuration>
-							<sources>
-								<source>src/test/groovy</source>
-							</sources>
-						</configuration>
-					</execution>
-				</executions>
 			</plugin>
 		</plugins>
 	</build>
