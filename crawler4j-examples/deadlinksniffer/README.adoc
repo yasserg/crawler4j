@@ -1,0 +1,3 @@
+= Crawler4j Dead Link Sniffer
+
+This application scans a web page for dead links.
