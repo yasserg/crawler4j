@@ -38,7 +38,7 @@ import org.apache.http.Header;
  */
 public class DeadLinkCrawler extends WebCrawler {
 
-    private static final Pattern IMAGE_EXTENSIONS = Pattern.compile(".*\\.(bmp|gif|jpg|png|jpeg|css|js)$");
+    private static final Pattern IMAGE_EXTENSIONS = Pattern.compile(".*\\.(bmp|gif|jpg|png|jpeg|css|js|pdf)$");
 
 
     private AtomicInteger maxVisits = new AtomicInteger(0);

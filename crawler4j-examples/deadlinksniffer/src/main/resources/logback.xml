@@ -1,7 +1,5 @@
 <configuration>
 
-    <property name="LOG_HOME" value="target/test-logs" />
-    <property name="LOG_FILE_NAME" value="/crawler4j.log" />
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
@@ -9,18 +7,9 @@
         </encoder>
     </appender>
 
-    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-        <file>${LOG_HOME}/${LOG_FILE_NAME}</file>
-        <encoder>
-            <pattern>%date %-5level [%thread] - [%logger] - %msg%n</pattern>
-        </encoder>
-    </appender>
-
     <logger name="com.github.tomakehurst" level="ERROR"/>
-    <logger name="org.eclipse.jetty" level="ERROR" />
 
     <root level="INFO">
         <appender-ref ref="STDOUT" />
-        <!--<appender-ref ref="FILE" />-->
     </root>
 </configuration>

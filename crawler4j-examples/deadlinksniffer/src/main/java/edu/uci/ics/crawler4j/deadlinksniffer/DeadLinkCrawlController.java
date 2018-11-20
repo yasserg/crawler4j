@@ -66,7 +66,7 @@ public class DeadLinkCrawlController {
                 "Maximum Depth of Crawling. Defaults to 3.");
 
         options.addOption("p", "pages", true,
-                "Maximum number of pages to fetch. Defaults to 1000.");
+                "Maximum number of pages to fetch. Defaults to 2000.");
 
         CommandLine cmd = null;
         try {
@@ -200,7 +200,10 @@ public class DeadLinkCrawlController {
 
     private static void printHelpAndExit(Options options) {
         HelpFormatter hf = new HelpFormatter();
-        hf.printHelp("DeadLinkSniffer", options);
+        hf.printHelp("\n\tDeadLinkSniffer -?                     - for help"+
+                     "\n\tDeadLinkSniffer -s=http://mypage.org   - for scanning this page" +
+                     "\n\tDeadLinkSniffer -s=http://mypage.org -u=\"https://.*mypage.org.*\"  - for scanning this page with all subdomains, etc"
+                     , options);
 
         System.exit(-1);
     }

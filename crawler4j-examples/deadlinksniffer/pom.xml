@@ -46,6 +46,13 @@
                     </programs>
                     <platforms>all</platforms>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>bundle</id>
+                        <phase>package</phase>
+                        <goals><goal>assemble</goal></goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

@@ -1,3 +1,45 @@
 = Crawler4j Dead Link Sniffer
 
 This application scans a web page for dead links.
+
+== Compiling
+
+The whole application can be built by using maven
+
+----
+$> mvn clean install
+----
+
+This will also bundle an executable application in `crawler4j-examples/deadlinksniffer/target/appassembler`.
+
+== Usage
+
+==== Getting more help
+For getting the parameter description:
+----
+$> ./bin/DeadLinkSniffer -?
+----
+
+==== Scanning a web page for dead links.
+Example how to scan a sample page for dead links:
+This will scan all sub pages which are reachable by all the `seed` (`-s`) pages given.
+----
+$> ./bin/DeadLinkSniffer -s=http://mypage.org
+----
+
+You can also define which URLs should be accessed via a list of regExp parameters `-u`.
+For defining multiple rules, simply add multiple `-u` parameters.
+
+----
+$> ./bin/DeadLinkSniffer -s=http://mypage.org -u="https://.*mypage.org.*"
+----
+
+==== Output
+
+By default the output files are in `./crawl`.
+The output directory can be specified with the `-o` parameter.
+
+The output directory contains a file `brokenPages.csv` which contains all broken links.
+The first row is the HTTP status, e.g. 404 for 'not found'.
+The second row is the name of the resource which is missing.
+The third row is the html page on which the dead link was found.
