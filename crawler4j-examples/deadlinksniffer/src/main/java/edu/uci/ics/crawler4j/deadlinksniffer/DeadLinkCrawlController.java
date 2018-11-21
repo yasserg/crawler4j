@@ -167,6 +167,11 @@ public class DeadLinkCrawlController {
          */
         config.setResumableCrawling(false);
 
+        /*
+         * Yes, we gonna follow a HTTP-301
+         */
+        config.setFollowRedirects(true);
+
 
         /*
          * Instantiate the controller for this crawl.

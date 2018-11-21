@@ -29,6 +29,7 @@ import edu.uci.ics.crawler4j.crawler.WebCrawler;
 import edu.uci.ics.crawler4j.parser.HtmlParseData;
 import edu.uci.ics.crawler4j.url.WebURL;
 import org.apache.http.Header;
+import org.apache.http.HttpStatus;
 
 /**
  * TODO: Currently not thread safe!
@@ -44,7 +45,6 @@ public class DeadLinkCrawler extends WebCrawler {
     private AtomicInteger maxVisits = new AtomicInteger(0);
 
     private File rootFolder;
-    private FileWriter brokenPages;
 
 
     /**
@@ -74,15 +74,12 @@ public class DeadLinkCrawler extends WebCrawler {
 
     @Override
     protected void handlePageStatusCode(WebURL webUrl, int statusCode, String statusDescription) {
-        if (statusCode != 200) {
+        if (statusCode != HttpStatus.SC_OK &&
+            statusCode != HttpStatus.SC_TEMPORARY_REDIRECT &&
+            statusCode != HttpStatus.SC_MOVED_TEMPORARILY &&
+            statusCode != HttpStatus.SC_MOVED_PERMANENTLY) {
             logger.info("\n\n FEHLERHAFTE SEITE status {} {} \n\n", statusCode, webUrl.getURL());
-            try {
-                getBrokenPages().append("" + statusCode + ", " + webUrl.getURL() + ", " + webUrl.getParentUrl() + "\n");
-                getBrokenPages().flush();
-            }
-            catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+                getConfig().getCrawlerStore().storePageStatus(statusCode, webUrl);
         }
     }
 
@@ -147,25 +144,16 @@ public class DeadLinkCrawler extends WebCrawler {
 
     @Override
     public void onBeforeExit() {
-        closeFile(brokenPages, "errorPages");
+        getConfig().getCrawlerStore().close();
     }
 
-    private void closeFile(FileWriter fw, String name) {
-        if (fw == null) {
-            return;
-        }
-
-        try {
-            fw.close();
-        }
-        catch (IOException e) {
-            logger.error("problem with closing" + name, e);
-        }
+    private DeadLinkCrawlConfig getConfig() {
+        return (DeadLinkCrawlConfig) getMyController().getConfig();
     }
 
     public File getRootFolder() {
         if (rootFolder == null) {
-            rootFolder = new File(getMyController().getConfig().getCrawlStorageFolder(), "content");
+            rootFolder = new File(getConfig().getCrawlStorageFolder(), "content");
             rootFolder.mkdirs();
         }
         return rootFolder;
@@ -176,17 +164,4 @@ public class DeadLinkCrawler extends WebCrawler {
     }
 
 
-    private FileWriter getBrokenPages() {
-        if (brokenPages == null) {
-            try {
-                brokenPages = new FileWriter(new File(getMyController().getConfig().getCrawlStorageFolder(), "brokenPages.csv"));
-
-            }
-            catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-
-        }
-        return brokenPages;
-    }
 }

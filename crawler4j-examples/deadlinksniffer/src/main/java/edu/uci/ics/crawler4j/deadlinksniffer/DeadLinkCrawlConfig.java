@@ -27,6 +27,7 @@ import edu.uci.ics.crawler4j.crawler.CrawlConfig;
  */
 public class DeadLinkCrawlConfig extends CrawlConfig {
     private List<Pattern> urlPatterns = new ArrayList<>();
+    private volatile DeadLinkCrawlerStore crawlerStore;
 
     public List<Pattern> getUrlPatterns() {
         return urlPatterns;
@@ -34,5 +35,17 @@ public class DeadLinkCrawlConfig extends CrawlConfig {
 
     public void addUrlPattern(String urlPattern) {
         this.urlPatterns.add(Pattern.compile(urlPattern));
+    }
+
+    public DeadLinkCrawlerStore getCrawlerStore() {
+        if (crawlerStore == null) {
+            synchronized (this) {
+                if (crawlerStore == null) {
+                    crawlerStore = new DeadLinkCrawlerStore(this);
+                }
+            }
+        }
+
+        return crawlerStore;
     }
 }
