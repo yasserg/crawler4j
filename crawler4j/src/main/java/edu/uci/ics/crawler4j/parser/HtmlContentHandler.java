@@ -18,6 +18,7 @@
 package edu.uci.ics.crawler4j.parser;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -68,6 +69,7 @@ public class HtmlContentHandler extends DefaultHandler {
     private final StringBuilder bodyText;
 
     private final List<ExtractedUrlAnchorPair> outgoingUrls;
+    private final List<ImageData> imageData;
 
     private ExtractedUrlAnchorPair curUrl = null;
     private boolean anchorFlag = false;
@@ -77,6 +79,7 @@ public class HtmlContentHandler extends DefaultHandler {
         isWithinBodyElement = false;
         bodyText = new StringBuilder();
         outgoingUrls = new ArrayList<>();
+        imageData = new ArrayList<>();
     }
 
     @Override
@@ -94,7 +97,19 @@ public class HtmlContentHandler extends DefaultHandler {
             String imgSrc = attributes.getValue("src");
             if (imgSrc != null) {
                 addToOutgoingUrls(imgSrc, localName);
+
+                Map<String, String> attrVals;
+                if (attributes.getLength() == 0) {
+                    attrVals = Collections.emptyMap();
+                } else {
+                    attrVals = new HashMap<>();
+                    for (int i = 0; i < attributes.getLength(); i++) {
+                        attrVals.put(attributes.getLocalName(i), attributes.getValue(i));
+                    }
+                }
+                imageData.add(new ImageData(imgSrc, attrVals));
             }
+
         } else if ((element == Element.IFRAME) || (element == Element.FRAME) ||
                    (element == Element.EMBED) || (element == Element.SCRIPT)) {
             String src = attributes.getValue("src");
@@ -208,5 +223,9 @@ public class HtmlContentHandler extends DefaultHandler {
 
     public Map<String, String> getMetaTags() {
         return metaTags;
+    }
+
+    public List<ImageData> getImageData() {
+        return imageData;
     }
 }

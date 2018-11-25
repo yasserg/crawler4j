@@ -20,6 +20,7 @@ package edu.uci.ics.crawler4j.deadlinksniffer;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
@@ -27,6 +28,7 @@ import java.util.regex.Pattern;
 import edu.uci.ics.crawler4j.crawler.Page;
 import edu.uci.ics.crawler4j.crawler.WebCrawler;
 import edu.uci.ics.crawler4j.parser.HtmlParseData;
+import edu.uci.ics.crawler4j.parser.ImageData;
 import edu.uci.ics.crawler4j.url.WebURL;
 import org.apache.http.Header;
 import org.apache.http.HttpStatus;
@@ -79,7 +81,7 @@ public class DeadLinkCrawler extends WebCrawler {
             statusCode != HttpStatus.SC_MOVED_TEMPORARILY &&
             statusCode != HttpStatus.SC_MOVED_PERMANENTLY) {
             logger.info("\n\n FEHLERHAFTE SEITE status {} {} \n\n", statusCode, webUrl.getURL());
-                getConfig().getCrawlerStore().storePageStatus(statusCode, webUrl);
+            getConfig().getCrawlerStore().storePageStatus(statusCode, webUrl);
         }
     }
 
@@ -116,6 +118,13 @@ public class DeadLinkCrawler extends WebCrawler {
             logger.debug("Number of outgoing links: {}", links.size());
 
             storeHtml(url, html);
+
+            List<ImageData> imageDatas = htmlParseData.getImageData();
+            int imgNr = 0;
+            for (ImageData imageData : imageDatas) {
+                imgNr++;
+                getConfig().getCrawlerStore().storeImageInfo(page, imgNr, imageData);
+            }
         }
 
         Header[] responseHeaders = page.getFetchResponseHeaders();

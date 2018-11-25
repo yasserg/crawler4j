@@ -20,6 +20,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
+import edu.uci.ics.crawler4j.crawler.Page;
+import edu.uci.ics.crawler4j.parser.ImageData;
 import edu.uci.ics.crawler4j.url.WebURL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,12 +37,14 @@ public class DeadLinkCrawlerStore {
     private final DeadLinkCrawlConfig config;
 
     private FileWriter brokenPages;
+    private FileWriter imageWoAlt;
 
 
     protected DeadLinkCrawlerStore(DeadLinkCrawlConfig config) {
         this.config = config;
         try {
             brokenPages = new FileWriter(new File(config.getCrawlStorageFolder(), "brokenPages.csv"));
+            imageWoAlt = new FileWriter(new File(config.getCrawlStorageFolder(), "imageWoAlt.csv"));
         }
         catch (IOException e) {
             throw new RuntimeException(e);
@@ -52,8 +56,10 @@ public class DeadLinkCrawlerStore {
 
 
     public synchronized void close() {
-        closeFile(brokenPages, "errorPages");
+        closeFile(brokenPages, "brokenPages");
+        closeFile(imageWoAlt, "imageWoAlt");
         brokenPages = null;
+        imageWoAlt = null;
     }
 
     private void closeFile(FileWriter fw, String name) {
@@ -76,6 +82,35 @@ public class DeadLinkCrawlerStore {
         }
         catch (IOException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public synchronized void storeImageInfo(Page page, int imgNr, ImageData imageData) {
+        // log all images with missing alt tag
+        if (!imageData.getAttrVals().containsKey("alt") || imageData.getAttrVals().get("alt").isEmpty()) {
+            String url = page.getWebURL().getURL();
+            logger.info("\n\n IMAGE without 'alt' tag on page {} img: {}", url, imageData.getSrc());
+            try {
+                String src = imageData.getSrc();
+                String imgLink;
+                if (src.startsWith("https://") || src.startsWith("http://")) {
+                    // absolute image
+                    imgLink = src;
+                }
+                else if (src.startsWith("/")) {
+                    // server-root relative image
+                    imgLink = page.getWebURL().getRootUrl() + src;
+                }
+                else {
+                    // relative image
+                    imgLink = page.getWebURL().getRootUrl() + page.getWebURL().getPath() + "/" + src;
+                }
+                imageWoAlt.append(url + ", " + imgNr + ", " + src + ", " + imgLink + "\n");
+                imageWoAlt.flush();
+            }
+            catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 }

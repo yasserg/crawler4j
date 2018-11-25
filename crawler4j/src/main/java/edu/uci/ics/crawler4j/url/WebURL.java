@@ -38,6 +38,7 @@ public class WebURL implements Serializable {
     private int docid;
     private int parentDocid;
     private String parentUrl;
+    private String rootUrl;
     private short depth;
     private String domain;
     private String subDomain;
@@ -93,6 +94,8 @@ public class WebURL implements Serializable {
         if (pathEndIdx >= 0) {
             path = path.substring(0, pathEndIdx);
         }
+
+        this.rootUrl = domainEndIdx > 0 ? url.substring(0, domainEndIdx) : url;
     }
 
     /**
@@ -119,6 +122,15 @@ public class WebURL implements Serializable {
 
     public void setParentUrl(String parentUrl) {
         this.parentUrl = parentUrl;
+    }
+
+    /**
+     * The root URL of the page
+     * E.g. for the url http://somesub.domain.org/myapp?idx=4 this would be
+     * http://somesub.domain.org/
+     */
+    public String getRootUrl() {
+        return rootUrl;
     }
 
     /**
