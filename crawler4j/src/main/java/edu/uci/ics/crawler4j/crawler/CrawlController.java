@@ -504,7 +504,11 @@ public class CrawlController {
     private synchronized void shutdown(boolean interrupt) {
         if (!shuttingDown) {
             synchronized (waitingLock) {
-                logger.info("Shutting down...");
+                if (interrupt) {
+                    logger.info("Shutting down immediately...");
+                } else {
+                    logger.info("waiting for crawl to finish...");
+                }
                 this.shuttingDown = true;
 
                 if (!interrupt && Thread.interrupted()) {
