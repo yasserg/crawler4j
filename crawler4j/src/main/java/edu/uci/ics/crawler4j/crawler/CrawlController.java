@@ -96,16 +96,6 @@ public class CrawlController {
 
     public CrawlController(CrawlConfig config, PageFetcher pageFetcher, Parser parser,
                            RobotstxtServer robotstxtServer) throws Exception {
-        // register JVM shutdown hook
-        Runtime.getRuntime().addShutdownHook(new Thread("Shutdown-" + super.toString()) {
-
-            @Override
-            public void run() {
-                shutdown();
-            }
-
-        });
-
         config.validate();
         this.config = config;
         sync = config.getCrawlSynchronizer();
@@ -250,6 +240,16 @@ public class CrawlController {
 
     protected <T extends WebCrawler> void start(final WebCrawlerFactory<T> crawlerFactory,
                                                 final int numberOfCrawlers, boolean isBlocking) {
+        // register JVM shutdown hook
+        Runtime.getRuntime().addShutdownHook(new Thread("Shutdown-" + super.toString()) {
+
+            @Override
+            public void run() {
+                shutdown();
+            }
+
+        });
+
         try {
             finished = false;
             setError(null);
