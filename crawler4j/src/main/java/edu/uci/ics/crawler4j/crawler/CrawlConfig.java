@@ -209,8 +209,6 @@ public class CrawlConfig {
      */
     private CookieStore cookieStore;
 
-    private boolean haltOnError = false;
-
     /**
      * DNS resolver to use, #{@link SystemDefaultDnsResolver()} is default.
      */
@@ -223,6 +221,8 @@ public class CrawlConfig {
     }
 
     private DnsResolver dnsResolver = new SystemDefaultDnsResolver();
+
+    private boolean haltOnError = false;
 
     /**
      * Validates the configs specified by this instance.
