@@ -227,16 +227,7 @@ public class CrawlConfig {
 
     private boolean allowSingleLevelDomain = false;
 
-    /**
-     * Should all crawling stop if an unexpected error occurs? Default is
-     * {@code false}.
-     *
-     * @param haltOnError
-     *            {@code true} if all crawling should be halted
-     */
-    public void setHaltOnError(boolean haltOnError) {
-        this.haltOnError = haltOnError;
-    }
+    private boolean haltOnError = false;
 
     /*
      * This really doesn't belong here (it should be in CrawlController), but keep
@@ -245,15 +236,6 @@ public class CrawlConfig {
      * way.
      */
     private final CrawlSynchronizer sync = new CrawlSynchronizer(this);
-
-    /**
-     * Indicates if all crawling will stop if an unexpected error occurs.
-     */
-    public boolean isHaltOnError() {
-        return haltOnError;
-    }
-
-    private boolean haltOnError = false;
 
     /**
      * Validates the configs specified by this instance.
@@ -702,6 +684,24 @@ public class CrawlConfig {
         this.allowSingleLevelDomain = allowSingleLevelDomain;
     }
 
+    /**
+     * Indicates if all crawling will stop if an unexpected error occurs.
+     */
+    public boolean isHaltOnError() {
+        return haltOnError;
+    }
+
+    /**
+     * Should all crawling stop if an unexpected error occurs? Default is
+     * {@code false}.
+     *
+     * @param haltOnError
+     *            {@code true} if all crawling should be halted
+     */
+    public void setHaltOnError(boolean haltOnError) {
+        this.haltOnError = haltOnError;
+    }
+
     public CrawlSynchronizer getCrawlSynchronizer() {
         return sync;
     }
@@ -733,6 +733,7 @@ public class CrawlConfig {
         sb.append("Respect nofollow: " + isRespectNoFollow() + "\n");
         sb.append("Respect noindex: " + isRespectNoIndex() + "\n");
         sb.append("Allow single level domain:" + isAllowSingleLevelDomain() + "\n");
+        sb.append("Halt on error: " + isHaltOnError() + "\n");
         return sb.toString();
     }
 }
