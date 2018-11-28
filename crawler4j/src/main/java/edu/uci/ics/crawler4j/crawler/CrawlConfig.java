@@ -246,10 +246,6 @@ public class CrawlConfig {
      */
     private final CrawlSynchronizer sync = new CrawlSynchronizer(this);
 
-    public CrawlSynchronizer getCrawlSynchronizer() {
-        return sync;
-    }
-
     /**
      * Indicates if all crawling will stop if an unexpected error occurs.
      */
@@ -704,6 +700,10 @@ public class CrawlConfig {
      */
     public void setAllowSingleLevelDomain(boolean allowSingleLevelDomain) {
         this.allowSingleLevelDomain = allowSingleLevelDomain;
+    }
+
+    public CrawlSynchronizer getCrawlSynchronizer() {
+        return sync;
     }
 
     @Override
