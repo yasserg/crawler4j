@@ -209,6 +209,8 @@ public class CrawlConfig {
      */
     private CookieStore cookieStore;
 
+    private boolean haltOnError = false;
+
     /**
      * DNS resolver to use, #{@link SystemDefaultDnsResolver()} is default.
      */
@@ -221,26 +223,6 @@ public class CrawlConfig {
     }
 
     private DnsResolver dnsResolver = new SystemDefaultDnsResolver();
-
-    /**
-     * Should all crawling stop if an unexpected error occurs? Default is
-     * {@code false}.
-     *
-     * @param haltOnError
-     *            {@code true} if all crawling should be halted
-     */
-    public void setHaltOnError(boolean haltOnError) {
-        this.haltOnError = haltOnError;
-    }
-
-    /**
-     * Indicates if all crawling will stop if an unexpected error occurs.
-     */
-    public boolean isHaltOnError() {
-        return haltOnError;
-    }
-
-    private boolean haltOnError = false;
 
     /**
      * Validates the configs specified by this instance.
@@ -663,6 +645,24 @@ public class CrawlConfig {
         this.respectNoIndex = respectNoIndex;
     }
 
+    /**
+     * Indicates if all crawling will stop if an unexpected error occurs.
+     */
+    public boolean isHaltOnError() {
+        return haltOnError;
+    }
+
+    /**
+     * Should all crawling stop if an unexpected error occurs? Default is
+     * {@code false}.
+     *
+     * @param haltOnError
+     *            {@code true} if all crawling should be halted
+     */
+    public void setHaltOnError(boolean haltOnError) {
+        this.haltOnError = haltOnError;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -689,6 +689,7 @@ public class CrawlConfig {
         sb.append("Cookie policy: " + getCookiePolicy() + "\n");
         sb.append("Respect nofollow: " + isRespectNoFollow() + "\n");
         sb.append("Respect noindex: " + isRespectNoIndex() + "\n");
+        sb.append("Halt on error: " + isHaltOnError() + "\n");
         return sb.toString();
     }
 }
