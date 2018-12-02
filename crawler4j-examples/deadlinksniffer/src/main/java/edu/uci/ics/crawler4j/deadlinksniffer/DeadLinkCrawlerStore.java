@@ -44,7 +44,12 @@ public class DeadLinkCrawlerStore {
         this.config = config;
         try {
             brokenPages = new FileWriter(new File(config.getCrawlStorageFolder(), "brokenPages.csv"));
+            brokenPages.append("status, url, parent_url\n");
+            brokenPages.flush();
+
             imageWoAlt = new FileWriter(new File(config.getCrawlStorageFolder(), "imageWoAlt.csv"));
+            imageWoAlt.append("onPage, imageNr, imgSrc, imgLink\n");
+            imageWoAlt.flush();
         }
         catch (IOException e) {
             throw new RuntimeException(e);
