@@ -47,8 +47,11 @@ public class DeadLinkCrawlController {
                 "Seeding page where the crawling should get started from.");
 
         options.addOption("u", "url", true,
-                "Url Regular Expressions for pages which should get crawled. " +
+                "Regular Expressions for page URLs which should get crawled. " +
                 "If not given the seed will act as a starting point");
+
+        options.addOption("x", "exclude", true,
+                "Regular Expressions for page URLs which should NOT get crawled.");
 
         options.addOption("?", "help", false,
                 "Print detailed infos about the usage.");
@@ -140,6 +143,14 @@ public class DeadLinkCrawlController {
 
             for (String urlPattern : urlPatterns) {
                 config.addUrlPattern(urlPattern);
+            }
+        }
+
+        if (cmd.hasOption("x")) {
+            String[] urlPatterns = cmd.getOptionValues("x");
+
+            for (String urlPattern : urlPatterns) {
+                config.addExcludePattern(urlPattern);
             }
         }
 

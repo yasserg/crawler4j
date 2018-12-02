@@ -62,9 +62,19 @@ public class DeadLinkCrawler extends WebCrawler {
         }
 
         // Only accept the url if it is in the requested url domains.
-        return ((DeadLinkCrawlConfig) getMyController().getConfig()).getUrlPatterns()
+        if (!((DeadLinkCrawlConfig) getMyController().getConfig()).getUrlPatterns()
                 .stream()
-                .anyMatch(pattern -> pattern.matcher(href).matches());
+                .anyMatch(pattern -> pattern.matcher(href).matches())) {
+            return false;
+        }
+
+        // and also only if the url is not explicitly excluded
+        if (((DeadLinkCrawlConfig) getMyController().getConfig()).getExcludePatterns()
+                .stream()
+                .anyMatch(pattern -> pattern.matcher(href).matches())) {
+            return false;
+        }
+        return true;
     }
 
     @Override

@@ -28,13 +28,31 @@ import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 public class DeadLinkCrawlConfig extends CrawlConfig {
     private List<Pattern> urlPatterns = new ArrayList<>();
     private volatile DeadLinkCrawlerStore crawlerStore;
+    private List<Pattern> excludePatterns = new ArrayList<>();
 
     public List<Pattern> getUrlPatterns() {
         return urlPatterns;
     }
 
+    public List<Pattern> getExcludePatterns() {
+        return excludePatterns;
+    }
+
+    /**
+     * Add a regular expression for URLs which should be followed
+     * by the crawler.
+     */
     public void addUrlPattern(String urlPattern) {
         this.urlPatterns.add(Pattern.compile(urlPattern));
+    }
+
+    /**
+     * Add a regular expression for URLs which should be excluded from scanning.
+     * This is effectively a stop-criterium and will get evaluated
+     * after all the patterns added via {@link #addUrlPattern(String)}.
+     */
+    public void addExcludePattern(String excludePattern) {
+        this.excludePatterns.add(Pattern.compile(excludePattern));
     }
 
     public DeadLinkCrawlerStore getCrawlerStore() {
