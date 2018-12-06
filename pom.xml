@@ -85,7 +85,7 @@
         <maven.gmaven.plus.version>1.6.2</maven.gmaven.plus.version>
         <maven.versions.version>2.5</maven.versions.version>
         <maven.forbiddenapis.version>2.4.1</maven.forbiddenapis.version>
-        <maven.surefire.version>2.12.4</maven.surefire.version>
+        <maven.surefire.version>2.22.1</maven.surefire.version>
     </properties>
 
     <profiles>
