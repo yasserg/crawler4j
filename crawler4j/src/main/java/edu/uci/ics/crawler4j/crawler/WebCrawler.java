@@ -420,6 +420,7 @@ public class WebCrawler implements Runnable {
                         }
 
                         WebURL webURL = new WebURL();
+                        webURL.setTldList(myController.getTldList());
                         webURL.setURL(movedToUrl);
                         webURL.setParentDocid(curURL.getParentDocid());
                         webURL.setParentUrl(curURL.getParentUrl());

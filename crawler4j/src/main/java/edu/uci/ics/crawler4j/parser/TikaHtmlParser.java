@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.crawler.Page;
 import edu.uci.ics.crawler4j.crawler.exceptions.ParseException;
+import edu.uci.ics.crawler4j.url.TLDList;
 import edu.uci.ics.crawler4j.url.URLCanonicalizer;
 import edu.uci.ics.crawler4j.url.WebURL;
 
@@ -26,12 +27,14 @@ public class TikaHtmlParser implements edu.uci.ics.crawler4j.parser.HtmlParser {
     protected static final Logger logger = LoggerFactory.getLogger(TikaHtmlParser.class);
 
     private final CrawlConfig config;
+    private final TLDList tldList;
 
     private final HtmlParser htmlParser;
     private final ParseContext parseContext;
 
-    public TikaHtmlParser(CrawlConfig config) throws InstantiationException, IllegalAccessException {
+    public TikaHtmlParser(CrawlConfig config, TLDList tldList) throws InstantiationException, IllegalAccessException {
         this.config = config;
+        this.tldList = tldList;
 
         htmlParser = new HtmlParser();
         parseContext = new ParseContext();
@@ -101,6 +104,7 @@ public class TikaHtmlParser implements edu.uci.ics.crawler4j.parser.HtmlParser {
                 String url = URLCanonicalizer.getCanonicalURL(href, contextURL, hrefCharset);
                 if (url != null) {
                     WebURL webURL = new WebURL();
+                    webURL.setTldList(tldList);
                     webURL.setURL(url);
                     webURL.setTag(urlAnchorPair.getTag());
                     webURL.setAnchor(urlAnchorPair.getAnchor());
