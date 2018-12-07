@@ -20,8 +20,12 @@ package edu.uci.ics.crawler4j.deadlinksniffer;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
@@ -47,6 +51,11 @@ public class DeadLinkCrawler extends WebCrawler {
     private AtomicInteger maxVisits = new AtomicInteger(0);
 
     private File rootFolder;
+
+    /**
+     * contains all broken Urls detected in {@link #handlePageStatusCode(WebURL, int, String)}
+     */
+    private ConcurrentMap<String, Integer> brokenUrls = new ConcurrentHashMap();
 
 
     /**
@@ -91,6 +100,7 @@ public class DeadLinkCrawler extends WebCrawler {
             statusCode != HttpStatus.SC_MOVED_TEMPORARILY &&
             statusCode != HttpStatus.SC_MOVED_PERMANENTLY) {
             logger.info("\n\n FEHLERHAFTE SEITE status {} {} \n\n", statusCode, webUrl.getURL());
+            brokenUrls.put(webUrl.getURL(), statusCode);
             getConfig().getCrawlerStore().storePageStatus(statusCode, webUrl);
         }
     }
@@ -127,7 +137,14 @@ public class DeadLinkCrawler extends WebCrawler {
             logger.debug("Html length: {}", html.length());
             logger.debug("Number of outgoing links: {}", links.size());
 
-            storeHtml(url, html);
+            for (WebURL link : links) {
+                if (brokenUrls.keySet().contains(link.getURL())) {
+                    getConfig().getCrawlerStore().storePageStatus(brokenUrls.get(link.getURL()), link);
+                }
+            }
+
+            storeHtml(page.getWebURL(), html);
+
 
             List<ImageData> imageDatas = htmlParseData.getImageData();
             int imgNr = 0;
@@ -148,8 +165,15 @@ public class DeadLinkCrawler extends WebCrawler {
         logger.debug("=============");
     }
 
-    private void storeHtml(String url, String html) {
-        File f = new File(getRootFolder(), url.replace("/", "_"));
+    private void storeHtml(WebURL webURL, String html) {
+        String rootUrl = webURL.getRootUrl();
+        File rootUrlDir = new File(getRootFolder(), rootUrl.replace("/", "_"));
+        if (!rootUrlDir.exists()) {
+            rootUrlDir.mkdir();
+        }
+
+
+        File f = new File(rootUrlDir, webURL.getURL().replace("/", "_"));
         if (f.exists()) {
             return;
         }
