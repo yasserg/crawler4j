@@ -50,7 +50,11 @@
     <modules>
         <module>crawler4j</module>
         <module>crawler4j-examples/crawler4j-examples-base</module>
+        <!--
+        disabled as it uses palantir stuff...
         <module>crawler4j-examples/crawler4j-examples-postgres</module>
+        -->
+        <module>crawler4j-examples/deadlinksniffer</module>
     </modules>
 
     <properties>

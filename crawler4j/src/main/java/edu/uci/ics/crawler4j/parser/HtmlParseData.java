@@ -17,6 +17,7 @@
 
 package edu.uci.ics.crawler4j.parser;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -31,6 +32,7 @@ public class HtmlParseData implements ParseData {
 
     private Set<WebURL> outgoingUrls;
     private String contentCharset;
+    private List<ImageData> imageData;
 
     public String getHtml() {
         return html;
@@ -78,6 +80,10 @@ public class HtmlParseData implements ParseData {
         this.outgoingUrls = outgoingUrls;
     }
 
+    public void setImageData(List<ImageData> imageData) {
+        this.imageData = imageData;
+    }
+
     @Override
     public String toString() {
         return text;
@@ -89,5 +95,9 @@ public class HtmlParseData implements ParseData {
 
     public String getContentCharset() {
         return contentCharset;
+    }
+
+    public List<ImageData> getImageData() {
+        return imageData;
     }
 }

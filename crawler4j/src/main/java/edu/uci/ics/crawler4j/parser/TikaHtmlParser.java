@@ -68,6 +68,8 @@ public class TikaHtmlParser implements edu.uci.ics.crawler4j.parser.HtmlParser {
         Set<WebURL> outgoingUrls = getOutgoingUrls(contextURL, contentHandler, contentCharset);
         parsedData.setOutgoingUrls(outgoingUrls);
 
+        parsedData.setImageData(contentHandler.getImageData());
+
         try {
             if (page.getContentCharset() == null) {
                 parsedData.setHtml(new String(page.getContentData()));
