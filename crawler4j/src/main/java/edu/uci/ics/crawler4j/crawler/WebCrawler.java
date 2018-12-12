@@ -340,6 +340,8 @@ public class WebCrawler implements Runnable {
             }
         } catch (Throwable t) {
             setError(t);
+        } finally {
+            myController.unregisterCrawler(this);
         }
         onBeforeExit();
         myController.getCrawlersLocalData().add(getMyLocalData());

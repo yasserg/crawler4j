@@ -527,8 +527,6 @@ public class CrawlController {
                 }
             }
         }
-
-        close();
     }
 
     /**
@@ -575,24 +573,11 @@ public class CrawlController {
     public synchronized boolean awaitCompletion(WebCrawler crawler) throws InterruptedException {
         assert !finished;
 
-        if (workers.remove(crawler)) {
-            logger.debug("worker [" + crawler + "] waiting for completion");
-        } else {
-            throw new RuntimeException("worker [" + crawler + "] not found in worker pool");
-        }
+        unregisterCrawler(crawler);
 
-        if (workers.isEmpty()) {
-            // no crawlers are working, so all crawling is finished
-            logger.info("all crawling is finished");
-            if (config.isShutdownOnEmptyQueue()) {
-                finished = true;
-                notifyAll();
-            } else {
-                logger.info("not stopping crawlers because CrawlConfig.shutdownOnEmptyQueue is configured false");
-            }
-        } else {
+        if (!finished) {
             wait(60000);
-            workers.add(crawler);
+            registerCrawler(crawler);
         }
 
         return finished;
@@ -615,10 +600,27 @@ public class CrawlController {
      * as they begin working.
      */
     public synchronized void registerCrawler(WebCrawler crawler) {
-        assert !finished;
-
         logger.debug("registering worker [" + crawler + "]");
         workers.add(crawler);
+    }
+
+    /**
+     * When a crawler is completed processing it should call this method to
+     * unregister itself as an actively working crawler.
+     */
+    public synchronized void unregisterCrawler(WebCrawler crawler) {
+        logger.debug("unregistering worker [" + crawler + "]");
+        if (workers.remove(crawler) && !finished && workers.isEmpty()) {
+            // the last crawler is finished, so all crawling is finished
+            logger.info("all crawling is finished");
+            if (config.isShutdownOnEmptyQueue()) {
+                finished = true;
+                notifyAll();
+                close();
+            } else {
+                logger.info("not stopping crawlers because CrawlConfig.shutdownOnEmptyQueue is configured false");
+            }
+        }
     }
 
 }
