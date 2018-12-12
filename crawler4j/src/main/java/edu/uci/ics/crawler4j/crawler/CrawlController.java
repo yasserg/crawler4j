@@ -52,7 +52,7 @@ public class CrawlController {
 
     static final Logger logger = LoggerFactory.getLogger(CrawlController.class);
     private final CrawlConfig config;
-    private final Set<Thread> workers = new HashSet<>();
+    private final Set<WebCrawler> workers = new HashSet<>();
     private final List<Thread> threads = new ArrayList<>();
     private final List<WebCrawler> crawlers = new ArrayList<>();
 
@@ -572,16 +572,13 @@ public class CrawlController {
      *         is still more work to do
      * @throws InterruptedException
      */
-    public synchronized boolean awaitCompletion() throws InterruptedException {
+    public synchronized boolean awaitCompletion(WebCrawler crawler) throws InterruptedException {
         assert !finished;
 
-        Thread t = Thread.currentThread();
-        boolean worker = workers.remove(t);
-
-        if (worker) {
-            logger.debug("worker thread [" + t + "] waiting for completion");
+        if (workers.remove(crawler)) {
+            logger.debug("worker [" + crawler + "] waiting for completion");
         } else {
-            logger.debug("non-worker thread [" + t + "] waiting for completion");
+            throw new RuntimeException("worker [" + crawler + "] not found in worker pool");
         }
 
         if (workers.isEmpty()) {
@@ -595,9 +592,7 @@ public class CrawlController {
             }
         } else {
             wait(60000);
-            if (worker) {
-                workers.add(t);
-            }
+            workers.add(crawler);
         }
 
         return finished;
@@ -619,12 +614,11 @@ public class CrawlController {
      * All crawler threads should call this method to register themselves, as soon
      * as they begin working.
      */
-    public synchronized void registerCrawler() {
+    public synchronized void registerCrawler(WebCrawler crawler) {
         assert !finished;
 
-        Thread t = Thread.currentThread();
-        logger.debug("registering worker thread [" + t + "]");
-        workers.add(t);
+        logger.debug("registering worker [" + crawler + "]");
+        workers.add(crawler);
     }
 
 }

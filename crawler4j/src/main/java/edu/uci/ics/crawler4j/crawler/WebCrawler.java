@@ -125,6 +125,7 @@ public class WebCrawler implements Runnable {
         this.parser = crawlController.getParser();
         this.myController = crawlController;
         this.isWaitingForNewURLs = false;
+        myController.registerCrawler(this);
     }
 
     /**
@@ -303,7 +304,6 @@ public class WebCrawler implements Runnable {
         try {
             onStart();
             setError(null);
-            myController.registerCrawler();
             boolean finished = false;
             while (!finished) {
                 try {
@@ -314,7 +314,7 @@ public class WebCrawler implements Runnable {
                     frontier.getNextURLs(50, assignedURLs);
                     if (assignedURLs.isEmpty()) {
                         isWaitingForNewURLs = true;
-                        myController.awaitCompletion();
+                        myController.awaitCompletion(this);
                         isWaitingForNewURLs = false;
                         if (myController.isFinished()) {
                             finished = true;
