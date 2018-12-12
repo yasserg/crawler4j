@@ -63,8 +63,6 @@ public class WebCrawler implements Runnable {
      */
     protected CrawlController myController;
 
-    private CrawlSynchronizer sync;
-
     /**
      * The thread within which this crawler instance is running.
      */
@@ -120,7 +118,6 @@ public class WebCrawler implements Runnable {
     public void init(int id, CrawlController crawlController)
         throws InstantiationException, IllegalAccessException {
         this.myId = id;
-        this.sync = crawlController.getCrawlSynchronizer();
         this.pageFetcher = crawlController.getPageFetcher();
         this.robotstxtServer = crawlController.getRobotstxtServer();
         this.docIdServer = crawlController.getDocIdServer();
@@ -306,7 +303,7 @@ public class WebCrawler implements Runnable {
         try {
             onStart();
             setError(null);
-            sync.registerCrawler();
+            myController.registerCrawler();
             boolean finished = false;
             while (!finished) {
                 try {
@@ -317,9 +314,9 @@ public class WebCrawler implements Runnable {
                     frontier.getNextURLs(50, assignedURLs);
                     if (assignedURLs.isEmpty()) {
                         isWaitingForNewURLs = true;
-                        sync.awaitCompletion();
+                        myController.awaitCompletion();
                         isWaitingForNewURLs = false;
-                        if (sync.isFinished()) {
+                        if (myController.isFinished()) {
                             finished = true;
                             break;
                         }

@@ -26,7 +26,7 @@ import com.sleepycat.je.DatabaseException;
 import com.sleepycat.je.Environment;
 
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
-import edu.uci.ics.crawler4j.crawler.CrawlSynchronizer;
+import edu.uci.ics.crawler4j.crawler.CrawlController;
 import edu.uci.ics.crawler4j.url.WebURL;
 
 /**
@@ -39,7 +39,7 @@ public class Frontier {
     private static final String DATABASE_NAME = "PendingURLsDB";
     private static final int IN_PROCESS_RESCHEDULE_BATCH_SIZE = 100;
     private final CrawlConfig config;
-    private final CrawlSynchronizer sync;
+    private final CrawlController controller;
     protected WorkQueues workQueues;
 
     protected InProcessPagesDB inProcessPages;
@@ -55,14 +55,9 @@ public class Frontier {
 
     protected Counters counters;
 
-    @Deprecated
-    public Frontier(Environment env, CrawlConfig config) {
-        this(env, config, config.getCrawlSynchronizer());
-    }
-
-    public Frontier(Environment env, CrawlConfig config, CrawlSynchronizer sync) {
+    public Frontier(Environment env, CrawlConfig config, CrawlController controller) {
         this.config = config;
-        this.sync = sync;
+        this.controller = controller;
         this.counters = new Counters(env, config);
         try {
             workQueues = new WorkQueues(env, DATABASE_NAME, config.isResumableCrawling());
@@ -117,7 +112,7 @@ public class Frontier {
                 waitingList.notifyAll();
             }
         }
-        sync.foundMorePages();
+        controller.foundMorePages();
     }
 
     public void schedule(WebURL url) {
@@ -133,7 +128,7 @@ public class Frontier {
                 logger.error("Error while putting the url in the work queue", e);
             }
         }
-        sync.foundMorePages();
+        controller.foundMorePages();
     }
 
     public void getNextURLs(int max, List<WebURL> result) throws InterruptedException {
