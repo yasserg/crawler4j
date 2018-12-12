@@ -5,6 +5,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import edu.uci.ics.crawler4j.url.TLDList;
 import edu.uci.ics.crawler4j.url.WebURL;
 
 /**
@@ -12,9 +13,14 @@ import edu.uci.ics.crawler4j.url.WebURL;
  * Net related Utils
  */
 public class Net {
+    private TLDList tldList;
     private static final Pattern pattern = initializePattern();
 
-    public static Set<WebURL> extractUrls(String input) {
+    public Net(TLDList tldList) {
+        this.tldList = tldList;
+    }
+
+    public Set<WebURL> extractUrls(String input) {
         Set<WebURL> extractedUrls = new HashSet<>();
 
         if (input != null) {
@@ -26,6 +32,7 @@ public class Net {
                     urlStr = "http://" + urlStr;
                 }
 
+                webURL.setTldList(tldList);
                 webURL.setURL(urlStr);
                 extractedUrls.add(webURL);
             }

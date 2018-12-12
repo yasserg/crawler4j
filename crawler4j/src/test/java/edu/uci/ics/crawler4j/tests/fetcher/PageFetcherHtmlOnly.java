@@ -2,8 +2,10 @@ package edu.uci.ics.crawler4j.tests.fetcher;
 
 import java.io.IOException;
 import java.util.Date;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpHead;
+
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.crawler.exceptions.PageBiggerThanMaxSizeException;
 import edu.uci.ics.crawler4j.fetcher.PageFetchResult;

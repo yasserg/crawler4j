@@ -28,6 +28,7 @@ import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.conn.DnsResolver;
 import org.apache.http.impl.conn.SystemDefaultDnsResolver;
 import org.apache.http.message.BasicHeader;
+
 import edu.uci.ics.crawler4j.crawler.authentication.AuthInfo;
 
 public class CrawlConfig {
@@ -132,9 +133,13 @@ public class CrawlConfig {
     /**
      * Should the TLD list be updated automatically on each run? Alternatively,
      * it can be loaded from the embedded tld-names.zip file that was obtained from
-     * https://publicsuffix.org/list/effective_tld_names.dat
+     * https://publicsuffix.org/list/public_suffix_list.dat
      */
     private boolean onlineTldListUpdate = false;
+
+    private String publicSuffixSourceUrl = "https://publicsuffix.org/list/public_suffix_list.dat";
+
+    private String publicSuffixLocalFile = null;
 
     /**
      * Should the crawler stop running when the queue is empty?
@@ -220,6 +225,11 @@ public class CrawlConfig {
     }
 
     private DnsResolver dnsResolver = new SystemDefaultDnsResolver();
+
+    /*
+     * number of pages to fetch/process from the database in a single read
+     */
+    private int batchReadSize = 50;
 
     /**
      * Validates the configs specified by this instance.
@@ -494,10 +504,37 @@ public class CrawlConfig {
     /**
      * Should the TLD list be updated automatically on each run? Alternatively,
      * it can be loaded from the embedded tld-names.txt resource file that was
-     * obtained from https://publicsuffix.org/list/effective_tld_names.dat
+     * obtained from https://publicsuffix.org/list/public_suffix_list.dat
      */
     public void setOnlineTldListUpdate(boolean online) {
         onlineTldListUpdate = online;
+    }
+
+    public String getPublicSuffixSourceUrl() {
+        return publicSuffixSourceUrl;
+    }
+
+    /**
+     * URL from which the public suffix list is obtained.  By default
+     * this is https://publicsuffix.org/list/public_suffix_list.dat
+     */
+    public void setPublicSuffixSourceUrl(String publicSuffixSourceUrl) {
+        this.publicSuffixSourceUrl = publicSuffixSourceUrl;
+    }
+
+    public String getPublicSuffixLocalFile() {
+        return publicSuffixLocalFile;
+    }
+
+    /**
+     * Only used if {@link #setOnlineTldListUpdate(boolean)} is {@code true}. If
+     * this property is not null then it overrides
+     * {@link #setPublicSuffixSourceUrl(String)}
+     *
+     * @param publicSuffixLocalFile local filename of public suffix list
+     */
+    public void setPublicSuffixLocalFile(String publicSuffixLocalFile) {
+        this.publicSuffixLocalFile = publicSuffixLocalFile;
     }
 
     public String getProxyHost() {
@@ -642,6 +679,19 @@ public class CrawlConfig {
         this.respectNoIndex = respectNoIndex;
     }
 
+    /**
+     * Number of pages to fetch/process from the database in a single read transaction.
+     *
+     * @return the batch read size
+     */
+    public int getBatchReadSize() {
+        return batchReadSize;
+    }
+
+    public void setBatchReadSize(int batchReadSize) {
+        this.batchReadSize = batchReadSize;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -668,6 +718,7 @@ public class CrawlConfig {
         sb.append("Cookie policy: " + getCookiePolicy() + "\n");
         sb.append("Respect nofollow: " + isRespectNoFollow() + "\n");
         sb.append("Respect noindex: " + isRespectNoIndex() + "\n");
+        sb.append("Batch read size: " + getBatchReadSize() + "\n");
         return sb.toString();
     }
 }

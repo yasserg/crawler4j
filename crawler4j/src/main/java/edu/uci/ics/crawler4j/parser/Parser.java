@@ -20,9 +20,11 @@ package edu.uci.ics.crawler4j.parser;
 import org.apache.tika.language.LanguageIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.crawler.Page;
 import edu.uci.ics.crawler4j.crawler.exceptions.ParseException;
+import edu.uci.ics.crawler4j.url.TLDList;
 import edu.uci.ics.crawler4j.util.Net;
 import edu.uci.ics.crawler4j.util.Util;
 
@@ -37,14 +39,26 @@ public class Parser {
 
     private final HtmlParser htmlContentParser;
 
+    private Net net;
+
+    @Deprecated
     public Parser(CrawlConfig config) throws IllegalAccessException, InstantiationException {
-        this.config = config;
-        this.htmlContentParser = new TikaHtmlParser(config);
+        this(config, new TikaHtmlParser(config, null));
     }
 
+    public Parser(CrawlConfig config, TLDList tldList) throws IllegalAccessException, InstantiationException {
+        this(config, new TikaHtmlParser(config, tldList), tldList);
+    }
+
+    @Deprecated
     public Parser(CrawlConfig config, HtmlParser htmlParser) {
+        this(config, htmlParser, null);
+    }
+
+    public Parser(CrawlConfig config, HtmlParser htmlParser, TLDList tldList) {
         this.config = config;
         this.htmlContentParser = htmlParser;
+        this.net = new Net(tldList);
     }
 
     public void parse(Page page, String contextURL)
@@ -61,7 +75,7 @@ public class Parser {
                 if (parseData.getHtml() == null) {
                     throw new ParseException();
                 }
-                parseData.setOutgoingUrls(Net.extractUrls(parseData.getHtml()));
+                parseData.setOutgoingUrls(net.extractUrls(parseData.getHtml()));
             } else {
                 throw new NotAllowedContentException();
             }
@@ -74,7 +88,7 @@ public class Parser {
                     parseData.setTextContent(
                         new String(page.getContentData(), page.getContentCharset()));
                 }
-                parseData.setOutgoingUrls(Net.extractUrls(parseData.getTextContent()));
+                parseData.setOutgoingUrls(net.extractUrls(parseData.getTextContent()));
                 page.setParseData(parseData);
             } catch (Exception e) {
                 logger.error("{}, while parsing: {}", e.getMessage(), page.getWebURL().getURL());

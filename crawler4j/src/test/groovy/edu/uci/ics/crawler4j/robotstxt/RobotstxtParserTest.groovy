@@ -1,3 +1,5 @@
+package edu.uci.ics.crawler4j.robotstxt;
+
 import com.github.tomakehurst.wiremock.junit.WireMockRule
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtConfig
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtParser

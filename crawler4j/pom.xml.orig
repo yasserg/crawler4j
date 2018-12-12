@@ -15,15 +15,19 @@
 		<slf4j.version>1.7.22</slf4j.version>
 		<logback.version>1.1.7</logback.version>
 		<apache.http.components.version>4.5.5</apache.http.components.version>
-		<je.version>18.3.12</je.version>
+		<je.version>5.0.84</je.version>
 		<apache.tika.version>1.17</apache.tika.version>
+<<<<<<< HEAD
+=======
+        <url-detector.version>0.1.20</url-detector.version>
         <guava.version>26.0-jre</guava.version>
         <public.suffix.list.version>2.2.0</public.suffix.list.version>
+>>>>>>> e94c59c... Use Guava and public-suffix-list libs for public suffix lookups.
 		<!--test dependency versions -->
 		<junit.version>4.12</junit.version>
 		<wiremock.version>2.14.0</wiremock.version>
 		<spock.version>1.0-groovy-2.4</spock.version>
-		<groovy.version>2.5.4</groovy.version>
+		<groovy.version>2.4.12</groovy.version>
 	</properties>
 
 	<profiles>
@@ -114,8 +118,8 @@
 							<goal>addTestSources</goal>
 							<goal>generateStubs</goal>
 							<goal>compile</goal>
-                            <goal>generateTestStubs</goal>
-                            <goal>compileTests</goal>
+							<goal>testGenerateStubs</goal>
+							<goal>testCompile</goal>
 							<goal>removeStubs</goal>
 							<goal>removeTestStubs</goal>
 						</goals>
@@ -153,83 +157,31 @@
 					</execution>
 				</executions>
 			</plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-enforcer-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>enforce-banned-dependencies</id>
-                        <goals>
-                            <goal>enforce</goal>
-                        </goals>
-                        <configuration>
-                            <rules>
-                                <bannedDependencies>
-                                    <excludes>
-                                        <!-- 
-                                            Banning JCL because we use SLF4J (and jcl-over-slf4j).
-                                            If this occurs in your build you should find what 
-                                            dependency is bringing in JCL and add an exclusion 
-                                            rule to prevent it.
-                                        -->
-                                        <exclude>commons-logging</exclude>
-                                        <!--
-                                            Banning Log4j because we use SLF4J/Logback.  If you
-                                            come across this, exclude the Log4j dependency and 
-                                            add the log4j-over-slf4j library to replace it.
-                                        -->
-                                        <exclude>log4j</exclude>
-                                        <exclude>org.apache.logging.log4j</exclude>
-                                    </excludes>
-                                </bannedDependencies>
-                            </rules>
-                            <fail>true</fail>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
 		</plugins>
 	</build>
 
 	<dependencies>
 
-    <!-- Logging API -->
+    <!-- Compile time Dependencies -->
+
     <dependency>
+        <!-- Logging framework -->
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-api</artifactId>
         <version>${slf4j.version}</version>
     </dependency>
     <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>jcl-over-slf4j</artifactId>
-        <version>${slf4j.version}</version>
-    </dependency>
-    <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>jul-to-slf4j</artifactId>
-        <version>${slf4j.version}</version>
-    </dependency>
-    
-    <!-- Logging Provider -->
-    <dependency>
+        <!-- Implementation of slf4j -->
         <groupId>ch.qos.logback</groupId>
         <artifactId>logback-classic</artifactId>
         <version>${logback.version}</version>
         <scope>runtime</scope>
     </dependency>
-    
-    <!-- Compile time Dependencies -->
 	<dependency>
 		<groupId>org.apache.httpcomponents</groupId>
 		<artifactId>httpclient</artifactId>
 		<version>${apache.http.components.version}</version>
 		<scope>compile</scope>
-		<exclusions>
-		    <exclusion>
-		        <groupId>commons-logging</groupId>
-		        <artifactId>commons-logging</artifactId>
-		    </exclusion>
-		</exclusions>
 	</dependency>
 	<dependency>
 		<groupId>com.sleepycat</groupId>
@@ -241,6 +193,10 @@
 		<artifactId>tika-parsers</artifactId>
 		<version>${apache.tika.version}</version>
 		<exclusions>
+			<exclusion>
+				<groupId>org.apache.poi</groupId>
+				<artifactId>poi</artifactId>
+			</exclusion>
 			<exclusion>
 				<groupId>org.apache.poi</groupId>
 				<artifactId>poi-ooxml</artifactId>
@@ -419,6 +375,13 @@
 			</exclusion>
 		</exclusions>
 	</dependency>
+<<<<<<< HEAD
+=======
+    <dependency>
+        <groupId>io.github.pgalbraith</groupId>
+        <artifactId>url-detector</artifactId>
+        <version>${url-detector.version}</version>
+    </dependency>
     <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
@@ -429,6 +392,7 @@
         <artifactId>public-suffix-list</artifactId>
         <version>${public.suffix.list.version}</version>
     </dependency>
+>>>>>>> e94c59c... Use Guava and public-suffix-list libs for public suffix lookups.
 
     <!-- Test Dependencies -->
 		<dependency>
@@ -447,7 +411,6 @@
 			<groupId>org.codehaus.groovy</groupId>
 			<artifactId>groovy-all</artifactId>
 			<version>${groovy.version}</version>
-            <type>pom</type>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
