@@ -600,7 +600,7 @@ public class CrawlController {
                 logger.info("not stopping crawlers because CrawlConfig.shutdownOnEmptyQueue is configured false");
             }
         } else {
-            wait(3000);
+            wait(60000);
             if (worker) {
                 workers.add(t);
             }
