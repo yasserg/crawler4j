@@ -45,11 +45,6 @@ public class Frontier {
     protected InProcessPagesDB inProcessPages;
 
     protected final Object mutex = new Object();
-    @Deprecated
-    protected final Object waitingList = new Object();
-
-    @Deprecated
-    protected boolean isFinished = false;
 
     protected long scheduledPages;
 
@@ -107,9 +102,6 @@ public class Frontier {
             if (newScheduledPage > 0) {
                 scheduledPages += newScheduledPage;
                 counters.increment(Counters.ReservedCounterNames.SCHEDULED_PAGES, newScheduledPage);
-            }
-            synchronized (waitingList) {
-                waitingList.notifyAll();
             }
         }
         controller.foundMorePages();
@@ -171,11 +163,6 @@ public class Frontier {
         return counters.getValue(Counters.ReservedCounterNames.SCHEDULED_PAGES);
     }
 
-    @Deprecated
-    public boolean isFinished() {
-        return isFinished;
-    }
-
     public void close() {
         workQueues.close();
         counters.close();
@@ -184,11 +171,4 @@ public class Frontier {
         }
     }
 
-    @Deprecated
-    public void finish() {
-        isFinished = true;
-        synchronized (waitingList) {
-            waitingList.notifyAll();
-        }
-    }
 }

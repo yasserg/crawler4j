@@ -537,7 +537,6 @@ public class CrawlController {
     public synchronized void close() {
         if (!closed) {
             pageFetcher.shutDown();
-            frontier.finish();
             frontier.close();
             docIdServer.close();
             env.close();
