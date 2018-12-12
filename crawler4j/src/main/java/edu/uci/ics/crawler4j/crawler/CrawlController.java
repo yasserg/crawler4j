@@ -86,8 +86,6 @@ public class CrawlController {
     protected Frontier frontier;
     protected DocIDServer docIdServer;
 
-    @Deprecated
-    protected final Object waitingLock = new Object();
     protected final Environment env;
 
     protected Parser parser;
@@ -538,15 +536,12 @@ public class CrawlController {
      */
     public synchronized void close() {
         if (!closed) {
-            synchronized (waitingLock) {
-                pageFetcher.shutDown();
-                frontier.finish();
-                frontier.close();
-                docIdServer.close();
-                env.close();
-                waitingLock.notifyAll();
-                closed = true;
-            }
+            pageFetcher.shutDown();
+            frontier.finish();
+            frontier.close();
+            docIdServer.close();
+            env.close();
+            closed = true;
         }
     }
 
