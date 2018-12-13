@@ -33,8 +33,8 @@ import com.sleepycat.je.Environment;
 import com.sleepycat.je.EnvironmentConfig;
 
 import edu.uci.ics.crawler4j.fetcher.PageFetcher;
+import edu.uci.ics.crawler4j.frontier.BerkeleyJeFrontier;
 import edu.uci.ics.crawler4j.frontier.DocIDServer;
-import edu.uci.ics.crawler4j.frontier.Frontier;
 import edu.uci.ics.crawler4j.parser.Parser;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
 import edu.uci.ics.crawler4j.url.TLDList;
@@ -83,7 +83,7 @@ public class CrawlController {
 
     protected PageFetcher pageFetcher;
     protected RobotstxtServer robotstxtServer;
-    protected Frontier frontier;
+    protected BerkeleyJeFrontier frontier;
     protected DocIDServer docIdServer;
     protected TLDList tldList;
 
@@ -146,7 +146,7 @@ public class CrawlController {
 
         env = new Environment(envHome, envConfig);
         docIdServer = new DocIDServer(env, config);
-        frontier = new Frontier(env, config, this);
+        frontier = new BerkeleyJeFrontier(env, config, this);
 
         this.pageFetcher = pageFetcher;
         this.parser = parser == null ? new Parser(config, tldList) : parser;
@@ -480,11 +480,11 @@ public class CrawlController {
         this.robotstxtServer = robotstxtServer;
     }
 
-    public Frontier getFrontier() {
+    public BerkeleyJeFrontier getFrontier() {
         return frontier;
     }
 
-    public void setFrontier(Frontier frontier) {
+    public void setFrontier(BerkeleyJeFrontier frontier) {
         this.frontier = frontier;
     }
 

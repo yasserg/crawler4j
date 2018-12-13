@@ -33,8 +33,8 @@ import edu.uci.ics.crawler4j.url.WebURL;
  * @author Yasser Ganjisaffar
  */
 
-public class Frontier {
-    protected static final Logger logger = LoggerFactory.getLogger(Frontier.class);
+public class BerkeleyJeFrontier {
+    protected static final Logger logger = LoggerFactory.getLogger(BerkeleyJeFrontier.class);
 
     private static final String DATABASE_NAME = "PendingURLsDB";
     private static final int IN_PROCESS_RESCHEDULE_BATCH_SIZE = 100;
@@ -50,7 +50,7 @@ public class Frontier {
 
     protected Counters counters;
 
-    public Frontier(Environment env, CrawlConfig config, CrawlController controller) {
+    public BerkeleyJeFrontier(Environment env, CrawlConfig config, CrawlController controller) {
         this.config = config;
         this.controller = controller;
         this.counters = new Counters(env, config);

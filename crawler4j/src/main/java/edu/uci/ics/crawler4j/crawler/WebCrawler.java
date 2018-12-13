@@ -33,8 +33,8 @@ import edu.uci.ics.crawler4j.crawler.exceptions.PageBiggerThanMaxSizeException;
 import edu.uci.ics.crawler4j.crawler.exceptions.ParseException;
 import edu.uci.ics.crawler4j.fetcher.PageFetchResult;
 import edu.uci.ics.crawler4j.fetcher.PageFetcher;
+import edu.uci.ics.crawler4j.frontier.BerkeleyJeFrontier;
 import edu.uci.ics.crawler4j.frontier.DocIDServer;
-import edu.uci.ics.crawler4j.frontier.Frontier;
 import edu.uci.ics.crawler4j.parser.HtmlParseData;
 import edu.uci.ics.crawler4j.parser.NotAllowedContentException;
 import edu.uci.ics.crawler4j.parser.ParseData;
@@ -92,7 +92,7 @@ public class WebCrawler implements Runnable {
     /**
      * The Frontier object that manages the crawl queue.
      */
-    private Frontier frontier;
+    private BerkeleyJeFrontier frontier;
 
     /**
      * Is the current crawler instance waiting for new URLs? This field is
