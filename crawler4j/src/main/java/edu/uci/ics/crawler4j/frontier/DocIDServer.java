@@ -17,6 +17,8 @@
 
 package edu.uci.ics.crawler4j.frontier;
 
+import java.util.function.Consumer;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -158,5 +160,12 @@ public class DocIDServer {
         } catch (DatabaseException e) {
             logger.error("Exception thrown while closing DocIDServer", e);
         }
+    }
+
+    /**
+     * @param consumer
+     */
+    public void process(Consumer<Database> consumer) {
+        consumer.accept(docIDsDB);
     }
 }

@@ -17,30 +17,24 @@
 
 package edu.uci.ics.crawler4j.crawler;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sleepycat.je.Environment;
-import com.sleepycat.je.EnvironmentConfig;
-
 import edu.uci.ics.crawler4j.fetcher.PageFetcher;
 import edu.uci.ics.crawler4j.frontier.BerkeleyJeFrontier;
-import edu.uci.ics.crawler4j.frontier.DocIDServer;
+import edu.uci.ics.crawler4j.frontier.Frontier;
 import edu.uci.ics.crawler4j.parser.Parser;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
 import edu.uci.ics.crawler4j.url.TLDList;
 import edu.uci.ics.crawler4j.url.URLCanonicalizer;
 import edu.uci.ics.crawler4j.url.WebURL;
-import edu.uci.ics.crawler4j.util.IO;
 
 /**
  * The controller that manages a crawling session. This class creates the
@@ -83,11 +77,8 @@ public class CrawlController {
 
     protected PageFetcher pageFetcher;
     protected RobotstxtServer robotstxtServer;
-    protected BerkeleyJeFrontier frontier;
-    protected DocIDServer docIdServer;
+    protected Frontier frontier;
     protected TLDList tldList;
-
-    protected final Environment env;
 
     protected Parser parser;
 
@@ -106,47 +97,16 @@ public class CrawlController {
         config.validate();
         this.config = config;
 
-        File folder = new File(config.getCrawlStorageFolder());
-        if (!folder.exists()) {
-            if (folder.mkdirs()) {
-                logger.debug("Created folder: " + folder.getAbsolutePath());
-            } else {
-                throw new Exception(
-                    "couldn't create the storage folder: " + folder.getAbsolutePath() +
-                    " does it already exist ?");
-            }
-        }
-
         this.tldList = tldList == null ? new TLDList(config) : tldList;
         URLCanonicalizer.setHaltOnError(config.isHaltOnError());
 
+        frontier = new BerkeleyJeFrontier(config, this);
+
         boolean resumable = config.isResumableCrawling();
 
-        EnvironmentConfig envConfig = new EnvironmentConfig();
-        envConfig.setAllowCreate(true);
-        envConfig.setTransactional(resumable);
-        envConfig.setLocking(resumable);
-        envConfig.setLockTimeout(config.getDbLockTimeout(), TimeUnit.MILLISECONDS);
-
-        File envHome = new File(config.getCrawlStorageFolder() + "/frontier");
-        if (!envHome.exists()) {
-            if (envHome.mkdir()) {
-                logger.debug("Created folder: " + envHome.getAbsolutePath());
-            } else {
-                throw new Exception(
-                    "Failed creating the frontier folder: " + envHome.getAbsolutePath());
-            }
-        }
-
         if (!resumable) {
-            IO.deleteFolderContents(envHome);
-            logger.info("Deleted contents of: " + envHome +
-                        " ( as you have configured resumable crawling to false )");
+            frontier.reset();
         }
-
-        env = new Environment(envHome, envConfig);
-        docIdServer = new DocIDServer(env, config);
-        frontier = new BerkeleyJeFrontier(env, config, this);
 
         this.pageFetcher = pageFetcher;
         this.parser = parser == null ? new Parser(config, tldList) : parser;
@@ -398,15 +358,15 @@ public class CrawlController {
             logger.error("Invalid seed URL: {}", pageUrl);
         } else {
             if (docId < 0) {
-                docId = docIdServer.getDocId(canonicalUrl);
+                docId = frontier.getDocId(canonicalUrl);
                 if (docId > 0) {
                     logger.trace("This URL is already seen.");
                     return;
                 }
-                docId = docIdServer.getNewDocID(canonicalUrl);
+                docId = frontier.getNewDocID(canonicalUrl);
             } else {
                 try {
-                    docIdServer.addUrlAndDocId(canonicalUrl, docId);
+                    frontier.addUrlAndDocId(canonicalUrl, docId);
                 } catch (RuntimeException e) {
                     if (config.isHaltOnError()) {
                         throw e;
@@ -453,7 +413,7 @@ public class CrawlController {
             logger.error("Invalid Url: {} (can't cannonicalize it!)", url);
         } else {
             try {
-                docIdServer.addUrlAndDocId(canonicalUrl, docId);
+                frontier.addUrlAndDocId(canonicalUrl, docId);
             } catch (RuntimeException e) {
                 if (config.isHaltOnError()) {
                     throw e;
@@ -480,20 +440,12 @@ public class CrawlController {
         this.robotstxtServer = robotstxtServer;
     }
 
-    public BerkeleyJeFrontier getFrontier() {
+    public Frontier getFrontier() {
         return frontier;
     }
 
-    public void setFrontier(BerkeleyJeFrontier frontier) {
+    public void setFrontier(Frontier frontier) {
         this.frontier = frontier;
-    }
-
-    public DocIDServer getDocIdServer() {
-        return docIdServer;
-    }
-
-    public void setDocIdServer(DocIDServer docIdServer) {
-        this.docIdServer = docIdServer;
     }
 
     /**
@@ -570,8 +522,6 @@ public class CrawlController {
         if (!closed) {
             pageFetcher.shutDown();
             frontier.close();
-            docIdServer.close();
-            env.close();
             closed = true;
         }
     }
@@ -659,6 +609,18 @@ public class CrawlController {
 
     public TLDList getTldList() {
         return tldList;
+    }
+
+    public void setTldList(TLDList tldList) {
+        this.tldList = tldList;
+    }
+
+    /**
+     * Clear all stored crawl tracking data in preparation for a new crawl.
+     */
+    public void reset() {
+        logger.info("clearing all previous crawl data");
+        frontier.reset();
     }
 
 }

@@ -19,6 +19,7 @@ package edu.uci.ics.crawler4j.frontier;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import com.sleepycat.je.Cursor;
 import com.sleepycat.je.Database;
@@ -142,5 +143,12 @@ public class WorkQueues {
 
     public void close() {
         urlsDB.close();
+    }
+
+    /**
+     * @param consumer
+     */
+    public void process(Consumer<Database> consumer) {
+        consumer.accept(urlsDB);
     }
 }
