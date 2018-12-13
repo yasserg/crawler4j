@@ -104,6 +104,8 @@ public class WebCrawler implements Runnable {
 
     private Throwable error;
 
+    private int batchReadSize;
+
     /**
      * Initializes the current instance of the crawler
      *
@@ -124,6 +126,7 @@ public class WebCrawler implements Runnable {
         this.parser = crawlController.getParser();
         this.myController = crawlController;
         this.isWaitingForNewURLs = false;
+        this.batchReadSize = crawlController.getConfig().getBatchReadSize();
     }
 
     /**
@@ -304,9 +307,9 @@ public class WebCrawler implements Runnable {
             setError(null);
             boolean halt = false;
             while (!halt) {
-                List<WebURL> assignedURLs = new ArrayList<>(50);
+                List<WebURL> assignedURLs = new ArrayList<>(batchReadSize);
                 isWaitingForNewURLs = true;
-                frontier.getNextURLs(50, assignedURLs);
+                frontier.getNextURLs(batchReadSize, assignedURLs);
                 isWaitingForNewURLs = false;
                 if (assignedURLs.isEmpty()) {
                     if (frontier.isFinished()) {
@@ -444,6 +447,7 @@ public class WebCrawler implements Runnable {
                         }
 
                         WebURL webURL = new WebURL();
+                        webURL.setTldList(myController.getTldList());
                         webURL.setURL(movedToUrl);
                         webURL.setParentDocid(curURL.getParentDocid());
                         webURL.setParentUrl(curURL.getParentUrl());

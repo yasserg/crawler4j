@@ -1,0 +1,296 @@
+<html>
+<head>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="favicon.gif">
+
+</head>
+<body>
+
+<style>
+  #page {
+    max-width: 500px;
+    margin: 15px;
+    word-wrap: break-word;
+  }
+  h1 {
+    display: flex;
+    align-items: baseline;
+  }
+  h1 span {
+    display: inline-block;
+    margin: 0 0 0 10px;
+  }
+  img {
+    max-width: 500px;
+  }
+  pre {
+    word-wrap: break-word;
+    white-space: pre-wrap;
+  }
+  a {
+    text-decoration: none;
+  }
+  input {
+    width: 60%;
+  }
+  ul, ol {
+    padding-left: 1em;
+  }
+  dd {
+    margin: 1em;
+  }
+</style>
+
+<div id=page>
+ <img src="spin.gif">
+</div>
+
+<script>
+
+  var title
+  var names
+
+  function escape (text) {
+    return text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+  }
+  function emphasis (text) {
+    return text
+      .replace(/'''(.*?)'''/g, '<strong>$1<\/strong>')
+      .replace(/''(.*?)''/g, '<em>$1<\/em>')
+      .replace(/^-----*/, '<hr>')
+  }
+
+  var code = ''
+  var codes = []
+  function enter(key, replacement) {
+    // $code = $key;
+    // while (@code > $depth) {local($_) = pop @code; print "</$_>\n"}
+    // while (@code < $depth) {push (@code, $key); print "<$key>\n"}
+    // if ($code[$#code] ne $key) {
+    //   print "</$code[$#code]><$key>\n";
+    //   $code[$#code] = $key;
+    // }
+    return function (match, p1, p2) {
+      var depth = p1.length || 0
+      var adjust = ''
+      code = key
+      if (code != '...') {
+        while (codes.length > depth) { adjust += "</" + codes.pop() + ">" }
+        while (codes.length < depth) { adjust += "<" + key + ">"; codes.push(key) }
+        if (codes.length && codes[codes.length-1] != key) {
+          adjust += "</" + codes[codes.length-1] + "><" + key + ">"
+          codes[codes.length-1] = key
+        }
+      }
+      return adjust + replacement.replace(/{p1}/, p1).replace(/{p2}/, p2)
+    }
+  }
+  function complete (text) {
+    return enter("", "")("","","") + text
+  }
+  function bullets (text) {
+    // $code = "";
+    // s/^\s*$/<p><\/p>/                && ($code = '...');
+    // s/^(\t+)(.+):\t/<dt>$2<dd>/      && &enter('DL', length $1);
+    // s/^(\t+)\*/<li>/                 && &enter('UL', length $1);
+    // s/^(\*+)/<li>/                   && &enter('UL', length $1);
+    // s/^(\t+)\d+\.?/<li>/             && &enter('OL', length $1);
+    // /^\s/                            && &enter('PRE', 1);
+    code = ''
+    result = text
+      .replace(/^\s*$/,                 enter('...', '<p></p>' ) )
+      .replace(/^(\t+)(.+):\t/,         enter('DL',  '<dt>{p2}<dd>') )
+      .replace(/^(\t+)\*/,              enter('UL',  '<li>') )
+      .replace(/^(\*+)/,                enter('UL',  '<li>') )
+      .replace(/^(\t+)\d+\.?/,          enter('OL',  '<li>') )
+      .replace(/^(\s)/,                 enter('PRE', '{p1}') )
+    return result
+  }
+  function links (text, sanitize) {
+    // link conversion happens in four phases:
+    //   unexpected markers are adulterated
+    //   links are found, converted, and stashed away properly escaped
+    //   remaining text is processed and escaped
+    //   unique markers are replaced with unstashed links
+    var stashed = []
+    function stash (text) {
+      var here = stashed.length
+      stashed.push(text)
+      return "〖" + here + "〗"
+    }
+    function unstash (match, digits) {
+      return stashed[+digits]
+    }
+    function internal (title) {
+      if (names && names.indexOf(title)!=-1) {
+        var url = location.origin + location.pathname + "?" + title
+        return stash("<a href=\""  + url + "\">" + title + "</a>")
+      } else {
+        return title
+      }
+    }
+    function external (url) {
+      if (url.match(/\.(gif|jpg|jpeg|png)$/)) {
+        return stash("<img src=\"" + url.replace(/^http:\/wiki\//,'http://c2.com/wiki/') + "\">")
+      } else {
+        return stash("<a href=\"" + url + "\" rel=\"nofollow\" target=\"_blank\">" + url + "</a>")
+      }
+    }
+    function youtube (match, p1, p2) {
+      var embed =
+        "<object width=\"425\" height=\"344\">" +
+        "<param name=\"movie\" value=\"http://www.youtube.com/v/$2&hl=en&fs=1&\"></param>" +
+        "<param name=\"allowFullScreen\" value=\"true\"></param>" +
+        "<param name=\"allowscriptaccess\" value=\"always\"></param>" +
+        "<embed src=\"http://www.youtube.com/v/" + p2 + "&hl=en&fs=1&\" type=\"application/x-shockwave-flash\" allowscriptaccess=\"always\" allowfullscreen=\"true\" width=\"425\" height=\"344\"></embed>" +
+        "</object>"
+      return stash(embed)
+    }
+    function isbn (match, isbn) {
+      var code = isbn.replace(/[- ]/g, "")
+      if (code.match(/^\d{9}.$/)) {
+        return stash("<a href=\"http://www.amazon.com/exec/obidos/ISBN=" + code + "/portlandpatternrA/\" rel=\"nofollow\">ISBN " + isbn + "</a>")
+      } else {
+        return "ISBN " + isbn
+      }
+    }
+    function titlesearch () {
+      function link(text) {
+        return "<a href=?" + text + ">" + text + "</a>"
+      }
+      get = function() {
+        var want = search.value
+        if (want.length > 1) {
+          var found = names.filter(function (e) { return e.includes(want) })
+          if (found.length) {
+            return window.searchresult.innerHTML = found.slice(0,500).map(link).join('<br>')
+          }
+        }
+        window.searchresult.innerHTML = ''
+      }
+      got = function (e) {
+        if (!e) e = window.event;
+        if ((e.keyCode || e.which) == '13') {
+          search.value = ''
+          window.searchresult.innerHTML = ''
+        }
+      }
+      return stash("<input type=text id=search onInput='get()' onKeyPress='got()'><br><div id=searchresult></div>")
+    }
+    function fullsearch () {
+      return stash("<form action=\"http://c2.com/cgi/fullSearch\"><input type=text name=search></form>")
+    }
+    var prepass = text
+      .replace(/〖(\d+)〗/g, '〖 $1 〗')
+      .replace(/^http:\/\/(www.)?youtube.com\/watch\?v=([-\w]+)/, youtube)
+      .replace(/\[Search\]/, titlesearch)
+      .replace(/\[Fullsearch\]/, fullsearch)
+      .replace(/\[?ISBN:? *([0-9- xX]{10,})\]?/i, isbn)
+      .replace(/\b(https?|ftp|mailto|file|telnet|news):[^\s<>\[\]"'\(\)]*[^\s<>\[\]"'\(\)\,\.\?]/g,external)
+      .replace(/\b[A-Z][a-z]+([A-Z][a-z]+)+\b/g, internal)
+    var postpass = sanitize(prepass)
+      .replace(/〖(\d+)〗/g, unstash)
+    if (code == '') {
+      postpass = complete(postpass)
+    }
+    return postpass
+  }
+  function inner (text) {
+    text = escape(text)
+    text = bullets(text)
+    text = emphasis(text)
+    return text
+  }
+  function render (text) {
+    return links(text, inner)
+  }
+  function markup (text) {
+    var lines = text.replace(/\\\n/,' ').split(/\n/)
+    var expand = lines.map(render).join("\n")
+    return expand + complete('')
+  }
+  function trouble (msg) {
+    var recourse = "<br>See <a href=https://github.com/WardCunningham/remodeling/issues/2 target=\"_blank\">github</a></p>"
+    page.innerHTML = "<p>Trouble Encountered<br>" + msg + recourse
+  }
+  function head() {
+    var words = document.title = title.replace(/([a-z])([A-Z])/g, '$1 $2');
+    return [
+      '<h1><img src=wiki.gif><div><span>',
+      '<a href="http://c2.com/cgi/fullSearch?search=' + title + '" rel=nofollow>' + words + '</a>',
+      '</span></div></h1>'
+    ].join('')
+  }
+  function foot(json) {
+    return [
+      '<hr>Last edit ',
+      json.date,
+      ', See <a href=https://github.com/WardCunningham/remodeling target="_blank">github</a> about remodling.'
+    ].join('')
+  }
+  function anypage () {
+    var any = Math.floor(Math.random() * names.length)
+    return '*' + names[any]
+  }
+  function show (json) {
+    if (Object.keys(json).length == 0) {
+      trouble('Page unavailable until conversion completed.')
+    } else {
+      if (title == 'RandomPages') {
+        json.text = json.text.replace(/\*\w+/g, anypage)
+      }
+      page.innerHTML = head() + markup(json.text) + foot(json)
+    }
+  }
+  function loadDoc(url, done) {
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+      if (this.readyState == 4) {
+        if (this.status == 200) {
+          done(this.responseText)
+        } else {
+          trouble(url + "<br>can't fetch document<br>" + this.statusText)
+        }
+      }
+    }
+    xhttp.open("GET", url, true);
+    xhttp.send();
+  }
+  function fetchNames (done) {
+    loadDoc('names.txt', done)
+  }
+  function fetchPage (done) {
+    title = (location.search.match(/\w+/)||["WelcomeVisitors"])[0]
+    var database = 'http://c2.com/wiki/remodel/pages/'
+    loadDoc(database + title, done)
+  }
+  function init() {
+    var json
+    function ready () { names && json && show(json) }
+    fetchNames(function(data) { names = data.split(/\r?\n/); ready()})
+    fetchPage(function(data) { json = JSON.parse(data); ready()})
+  }
+
+  if (!window.location.origin) {
+    // https://github.com/WardCunningham/remodeling/issues/20
+    window.location.origin = window.location.protocol + '//' +
+      window.location.hostname +
+      (window.location.port ? (':' + window.location.port) : '');
+  }
+
+  init()
+
+</script>
+<script async defer src="https://hypothes.is/embed.js"></script>
+<script src="http://www.google-analytics.com/urchin.js" type="text/javascript"></script>
+<script type="text/javascript">_uacct = "UA-2377314-2";_udn="c2.com"; urchinTracker();</script>
+
+</body>
+</html>
+
+  
