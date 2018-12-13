@@ -369,6 +369,11 @@
 		</exclusions>
 	</dependency>
     <dependency>
+        <groupId>io.github.pgalbraith</groupId>
+        <artifactId>url-detector</artifactId>
+        <version>${url-detector.version}</version>
+    </dependency>
+    <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
         <version>${guava.version}</version>
@@ -377,11 +382,6 @@
         <groupId>de.malkusch.whois-server-list</groupId>
         <artifactId>public-suffix-list</artifactId>
         <version>${public.suffix.list.version}</version>
-    </dependency>
-    <dependency>
-        <groupId>io.github.pgalbraith</groupId>
-        <artifactId>url-detector</artifactId>
-        <version>${url-detector.version}</version>
     </dependency>
 
     <!-- Test Dependencies -->
