@@ -61,12 +61,13 @@
         <checkstyle.version>8.12</checkstyle.version>
         <docker.compose.rule.version>0.33.0</docker.compose.rule.version>
         <flyway.db.version>5.0.7</flyway.db.version>
-        <groovy.version>2.4.12</groovy.version>
-        <guava.version>24.0-jre</guava.version>
-        <je.version>5.0.84</je.version>
+        <groovy.version>2.5.4</groovy.version>
+        <guava.version>26.0-jre</guava.version>
+        <je.version>18.3.12</je.version>
         <junit.version>4.12</junit.version>
         <logback.version>1.1.7</logback.version>
         <postgresql.version>42.2.1</postgresql.version>
+        <public.suffix.list.version>2.2.0</public.suffix.list.version>
         <slf4j.version>1.7.22</slf4j.version>
         <spock.version>1.1-groovy-2.4</spock.version>
         <wiremock.version>2.14.0</wiremock.version>
@@ -91,10 +92,11 @@
         <maven.jar.version>3.0.0</maven.jar.version>
         <maven.compiler.version>3.7.0</maven.compiler.version>
         <maven.checkstyle.version>3.0.0</maven.checkstyle.version>
-        <maven.jacoco.version>0.8.1</maven.jacoco.version>
-        <maven.gmaven.plus.version>1.5</maven.gmaven.plus.version>
+        <maven.jacoco.version>0.8.2</maven.jacoco.version>
+        <maven.gmaven.plus.version>1.6.2</maven.gmaven.plus.version>
         <maven.versions.version>2.5</maven.versions.version>
         <maven.forbiddenapis.version>2.4.1</maven.forbiddenapis.version>
+        <maven.surefire.version>2.22.1</maven.surefire.version>
     </properties>
 
     <dependencyManagement>
@@ -124,6 +126,7 @@
                 <groupId>org.codehaus.groovy</groupId>
                 <artifactId>groovy-all</artifactId>
                 <version>${groovy.version}</version>
+                <type>pom</type>
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -159,10 +162,22 @@
                 <version>${postgresql.version}</version>
             </dependency>
             <dependency>
+                <groupId>de.malkusch.whois-server-list</groupId>
+                <artifactId>public-suffix-list</artifactId>
+                <version>${public.suffix.list.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.spockframework</groupId>
                 <artifactId>spock-core</artifactId>
                 <version>${spock.version}</version>
                 <scope>test</scope>
+                <exclusions>
+                    <!-- excluded because of confusion over jar/pom type, include this dep explicitly when using spock -->
+                    <exclusion>
+                        <groupId>org.codehaus.groovy</groupId>
+                        <artifactId>groovy-all</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
@@ -551,6 +566,11 @@
                     </dependencies>
                 </plugin>
                 <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>${maven.surefire.version}</version>
+                </plugin>
+                <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
                     <version>${maven.jacoco.version}</version>
@@ -586,8 +606,8 @@
                                 <goal>addTestSources</goal>
                                 <goal>generateStubs</goal>
                                 <goal>compile</goal>
-                                <goal>testGenerateStubs</goal>
-                                <goal>testCompile</goal>
+                                <goal>generateTestStubs</goal>
+                                <goal>compileTests</goal>
                                 <goal>removeStubs</goal>
                                 <goal>removeTestStubs</goal>
                             </goals>

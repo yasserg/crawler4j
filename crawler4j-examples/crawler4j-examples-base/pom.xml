@@ -17,11 +17,6 @@
             <groupId>edu.uci.ics</groupId>
             <artifactId>crawler4j</artifactId>
         </dependency>
-        <dependency>
-            <!-- Google's core Java libraries -->
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-        </dependency>
     </dependencies>
 
 </project>
