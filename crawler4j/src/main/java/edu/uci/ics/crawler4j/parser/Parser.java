@@ -20,9 +20,11 @@ package edu.uci.ics.crawler4j.parser;
 import org.apache.tika.language.LanguageIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.crawler.Page;
 import edu.uci.ics.crawler4j.crawler.exceptions.ParseException;
+import edu.uci.ics.crawler4j.url.TLDList;
 import edu.uci.ics.crawler4j.util.Net;
 import edu.uci.ics.crawler4j.util.Util;
 
@@ -39,14 +41,24 @@ public class Parser {
 
     private final Net net;
 
+    @Deprecated
     public Parser(CrawlConfig config) throws IllegalAccessException, InstantiationException {
-        this(config, new TikaHtmlParser(config));
+        this(config, new TikaHtmlParser(config, null));
     }
 
+    public Parser(CrawlConfig config, TLDList tldList) throws IllegalAccessException, InstantiationException {
+        this(config, new TikaHtmlParser(config, tldList), tldList);
+    }
+
+    @Deprecated
     public Parser(CrawlConfig config, HtmlParser htmlParser) {
+        this(config, htmlParser, null);
+    }
+
+    public Parser(CrawlConfig config, HtmlParser htmlParser, TLDList tldList) {
         this.config = config;
         this.htmlContentParser = htmlParser;
-        this.net = new Net(config);
+        this.net = new Net(config, tldList);
     }
 
     public void parse(Page page, String contextURL)

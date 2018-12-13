@@ -26,8 +26,8 @@ import edu.uci.ics.crawler4j.crawler.*
  */
 class NetTest extends Specification {
 
-    @Shared standard = new Net(new CrawlConfig())
-    @Shared allowSingleLevelDomain = new Net(new CrawlConfig(allowSingleLevelDomain: true))
+    @Shared standard = new Net(new CrawlConfig(), null)
+    @Shared allowSingleLevelDomain = new Net(new CrawlConfig(allowSingleLevelDomain: true), null)
     
     def "no scheme specified" () {
         when: def extracted = standard.extractUrls "www.wikipedia.com"

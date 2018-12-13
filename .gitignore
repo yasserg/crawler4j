@@ -63,10 +63,10 @@ pom.xml.next
 release.properties
 dependency-reduced-pom.xml
 buildNumber.properties
-.mvn/timing.properties
 
-# Exclude maven wrapper
-!/.mvn/wrapper/maven-wrapper.jar
+# Local Maven config
+.mvn
+
 ### Eclipse template
 
 .metadata
@@ -80,6 +80,8 @@ local.properties
 .settings/
 .loadpath
 .recommenders
+.checkstyle
+.groovy
 
 # External tool builders
 .externalToolBuilders/

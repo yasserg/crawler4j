@@ -77,20 +77,20 @@ public class MultipleCrawlerController {
         CrawlController controller1 = new CrawlController(config1, pageFetcher1, robotstxtServer);
         CrawlController controller2 = new CrawlController(config2, pageFetcher2, robotstxtServer);
 
-        String[] crawler1Domains = {"http://www.ics.uci.edu/", "http://www.cnn.com/"};
-        String[] crawler2Domains = {"http://en.wikipedia.org/"};
+        String[] crawler1Domains = {"https://www.ics.uci.edu/", "https://www.cnn.com/"};
+        String[] crawler2Domains = {"https://en.wikipedia.org/"};
 
         controller1.setCustomData(crawler1Domains);
         controller2.setCustomData(crawler2Domains);
 
-        controller1.addSeed("http://www.ics.uci.edu/");
-        controller1.addSeed("http://www.cnn.com/");
-        controller1.addSeed("http://www.ics.uci.edu/~lopes/");
-        controller1.addSeed("http://www.cnn.com/POLITICS/");
+        controller1.addSeed("https://www.ics.uci.edu/");
+        controller1.addSeed("https://www.cnn.com/");
+        controller1.addSeed("https://www.ics.uci.edu/~lopes/");
+        controller1.addSeed("https://www.cnn.com/POLITICS/");
 
-        controller2.addSeed("http://en.wikipedia.org/wiki/Main_Page");
-        controller2.addSeed("http://en.wikipedia.org/wiki/Obama");
-        controller2.addSeed("http://en.wikipedia.org/wiki/Bing");
+        controller2.addSeed("https://en.wikipedia.org/wiki/Main_Page");
+        controller2.addSeed("https://en.wikipedia.org/wiki/Obama");
+        controller2.addSeed("https://en.wikipedia.org/wiki/Bing");
 
     /*
      * The first crawler will have 5 concurrent threads and the second

@@ -24,8 +24,10 @@ import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import com.sleepycat.je.Environment;
 import com.sleepycat.je.EnvironmentConfig;
+
 import edu.uci.ics.crawler4j.fetcher.PageFetcher;
 import edu.uci.ics.crawler4j.frontier.DocIDServer;
 import edu.uci.ics.crawler4j.frontier.Frontier;
@@ -74,6 +76,7 @@ public class CrawlController {
     protected RobotstxtServer robotstxtServer;
     protected Frontier frontier;
     protected DocIDServer docIdServer;
+    protected TLDList tldList;
 
     protected final Object waitingLock = new Object();
     protected final Environment env;
@@ -82,11 +85,16 @@ public class CrawlController {
 
     public CrawlController(CrawlConfig config, PageFetcher pageFetcher,
                            RobotstxtServer robotstxtServer) throws Exception {
-        this(config, pageFetcher, new Parser(config), robotstxtServer);
+        this(config, pageFetcher, null, robotstxtServer, null);
+    }
+
+    public CrawlController(CrawlConfig config, PageFetcher pageFetcher,
+            RobotstxtServer robotstxtServer, TLDList tldList) throws Exception {
+        this(config, pageFetcher, null, robotstxtServer, tldList);
     }
 
     public CrawlController(CrawlConfig config, PageFetcher pageFetcher, Parser parser,
-                           RobotstxtServer robotstxtServer) throws Exception {
+                           RobotstxtServer robotstxtServer, TLDList tldList) throws Exception {
         config.validate();
         this.config = config;
 
@@ -101,7 +109,7 @@ public class CrawlController {
             }
         }
 
-        TLDList.setUseOnline(config.isOnlineTldListUpdate());
+        this.tldList = tldList == null ? new TLDList(config) : tldList;
 
         boolean resumable = config.isResumableCrawling();
 
@@ -132,7 +140,7 @@ public class CrawlController {
         frontier = new Frontier(env, config);
 
         this.pageFetcher = pageFetcher;
-        this.parser = parser;
+        this.parser = parser == null ? new Parser(config, tldList) : parser;
         this.robotstxtServer = robotstxtServer;
 
         finished = false;
@@ -446,6 +454,7 @@ public class CrawlController {
             }
 
             WebURL webUrl = new WebURL();
+            webUrl.setTldList(tldList);
             webUrl.setURL(canonicalUrl);
             webUrl.setDocid(docId);
             webUrl.setDepth((short) 0);
@@ -560,5 +569,9 @@ public class CrawlController {
 
     public CrawlConfig getConfig() {
         return config;
+    }
+
+    public TLDList getTldList() {
+        return tldList;
     }
 }

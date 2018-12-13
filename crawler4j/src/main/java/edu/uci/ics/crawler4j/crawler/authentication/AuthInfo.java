@@ -2,6 +2,7 @@ package edu.uci.ics.crawler4j.crawler.authentication;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+
 import javax.swing.text.html.FormSubmitEvent.MethodType;
 
 /**
