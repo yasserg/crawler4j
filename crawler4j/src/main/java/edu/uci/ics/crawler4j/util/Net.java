@@ -11,26 +11,29 @@ import com.linkedin.urls.detection.UrlDetector;
 import com.linkedin.urls.detection.UrlDetectorOptions;
 
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
+import edu.uci.ics.crawler4j.url.TLDList;
 import edu.uci.ics.crawler4j.url.WebURL;
 
 /**
  * Created by Avi Hayun on 9/22/2014.
  * Net related Utils
- *
- * @author Paul Galbraith <paul.d.galbraith@gmail.com>
  */
 public class Net {
 
-    private static final Function<Url, WebURL> urlMapper = url -> {
+    private TLDList tldList;
+
+    private Function<Url, WebURL> urlMapper = url -> {
         WebURL webUrl = new WebURL();
+        webUrl.setTldList(tldList);
         webUrl.setURL(url.getFullUrl());
         return webUrl;
     };
 
     private CrawlConfig config;
 
-    public Net(CrawlConfig config) {
+    public Net(CrawlConfig config, TLDList tldList) {
         this.config = config;
+        this.tldList = tldList;
     }
 
     public Set<WebURL> extractUrls(String input) {

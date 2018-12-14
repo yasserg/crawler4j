@@ -85,6 +85,7 @@ public class CrawlController {
     protected RobotstxtServer robotstxtServer;
     protected Frontier frontier;
     protected DocIDServer docIdServer;
+    protected TLDList tldList;
 
     protected final Environment env;
 
@@ -92,11 +93,16 @@ public class CrawlController {
 
     public CrawlController(CrawlConfig config, PageFetcher pageFetcher,
                            RobotstxtServer robotstxtServer) throws Exception {
-        this(config, pageFetcher, new Parser(config), robotstxtServer);
+        this(config, pageFetcher, null, robotstxtServer, null);
+    }
+
+    public CrawlController(CrawlConfig config, PageFetcher pageFetcher,
+            RobotstxtServer robotstxtServer, TLDList tldList) throws Exception {
+        this(config, pageFetcher, null, robotstxtServer, tldList);
     }
 
     public CrawlController(CrawlConfig config, PageFetcher pageFetcher, Parser parser,
-                           RobotstxtServer robotstxtServer) throws Exception {
+                           RobotstxtServer robotstxtServer, TLDList tldList) throws Exception {
         config.validate();
         this.config = config;
 
@@ -111,7 +117,7 @@ public class CrawlController {
             }
         }
 
-        TLDList.setUseOnline(config.isOnlineTldListUpdate());
+        this.tldList = tldList == null ? new TLDList(config) : tldList;
         URLCanonicalizer.setHaltOnError(config.isHaltOnError());
 
         boolean resumable = config.isResumableCrawling();
@@ -143,7 +149,7 @@ public class CrawlController {
         frontier = new Frontier(env, config, this);
 
         this.pageFetcher = pageFetcher;
-        this.parser = parser;
+        this.parser = parser == null ? new Parser(config, tldList) : parser;
         this.robotstxtServer = robotstxtServer;
 
         finished = false;
@@ -384,6 +390,7 @@ public class CrawlController {
             }
 
             WebURL webUrl = new WebURL();
+            webUrl.setTldList(tldList);
             webUrl.setURL(canonicalUrl);
             webUrl.setDocid(docId);
             webUrl.setDepth((short) 0);
@@ -621,6 +628,10 @@ public class CrawlController {
                 logger.info("not stopping crawlers because CrawlConfig.shutdownOnEmptyQueue is configured false");
             }
         }
+    }
+
+    public TLDList getTldList() {
+        return tldList;
     }
 
 }

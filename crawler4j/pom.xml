@@ -15,14 +15,16 @@
 		<slf4j.version>1.7.22</slf4j.version>
 		<logback.version>1.1.7</logback.version>
 		<apache.http.components.version>4.5.5</apache.http.components.version>
-		<je.version>5.0.84</je.version>
+		<je.version>18.3.12</je.version>
 		<apache.tika.version>1.17</apache.tika.version>
+        <guava.version>26.0-jre</guava.version>
+        <public.suffix.list.version>2.2.0</public.suffix.list.version>
         <url-detector.version>0.1.20</url-detector.version>
 		<!--test dependency versions -->
 		<junit.version>4.12</junit.version>
 		<wiremock.version>2.14.0</wiremock.version>
 		<spock.version>1.0-groovy-2.4</spock.version>
-		<groovy.version>2.4.12</groovy.version>
+		<groovy.version>2.5.4</groovy.version>
 	</properties>
 
 	<profiles>
@@ -113,8 +115,8 @@
 							<goal>addTestSources</goal>
 							<goal>generateStubs</goal>
 							<goal>compile</goal>
-							<goal>testGenerateStubs</goal>
-							<goal>testCompile</goal>
+                            <goal>generateTestStubs</goal>
+                            <goal>compileTests</goal>
 							<goal>removeStubs</goal>
 							<goal>removeTestStubs</goal>
 						</goals>
@@ -188,10 +190,6 @@
 		<artifactId>tika-parsers</artifactId>
 		<version>${apache.tika.version}</version>
 		<exclusions>
-			<exclusion>
-				<groupId>org.apache.poi</groupId>
-				<artifactId>poi</artifactId>
-			</exclusion>
 			<exclusion>
 				<groupId>org.apache.poi</groupId>
 				<artifactId>poi-ooxml</artifactId>
@@ -375,6 +373,16 @@
         <artifactId>url-detector</artifactId>
         <version>${url-detector.version}</version>
     </dependency>
+    <dependency>
+        <groupId>com.google.guava</groupId>
+        <artifactId>guava</artifactId>
+        <version>${guava.version}</version>
+    </dependency>
+    <dependency>
+        <groupId>de.malkusch.whois-server-list</groupId>
+        <artifactId>public-suffix-list</artifactId>
+        <version>${public.suffix.list.version}</version>
+    </dependency>
 
     <!-- Test Dependencies -->
 		<dependency>
@@ -393,6 +401,7 @@
 			<groupId>org.codehaus.groovy</groupId>
 			<artifactId>groovy-all</artifactId>
 			<version>${groovy.version}</version>
+            <type>pom</type>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
