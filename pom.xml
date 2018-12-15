@@ -85,6 +85,7 @@
         <maven.gmaven.plus.version>1.6.2</maven.gmaven.plus.version>
         <maven.versions.version>2.5</maven.versions.version>
         <maven.forbiddenapis.version>2.4.1</maven.forbiddenapis.version>
+        <maven.enforcer.version>3.0.0-M2</maven.enforcer.version>
         <maven.surefire.version>2.22.1</maven.surefire.version>
     </properties>
 
@@ -275,9 +276,14 @@
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-enforcer-plugin</artifactId>
+                    <version>${maven.enforcer.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${maven.surefire.version}</version>
-                </plugin>
+              </plugin>
             </plugins>
         </pluginManagement>
     </build>

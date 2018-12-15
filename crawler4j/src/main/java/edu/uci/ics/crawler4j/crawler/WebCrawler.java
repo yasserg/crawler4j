@@ -208,6 +208,15 @@ public class WebCrawler implements Runnable {
     }
 
     /**
+     * Emitted when the crawler is redirected to an invalid Location.
+     * @param page
+     */
+    protected void onRedirectedToInvalidUrl(Page page) {
+        logger.warn("Unexpected error, URL: {} is redirected to NOTHING",
+            page.url.getURL());
+    }
+
+    /**
      * This function is called if the crawler encountered an unexpected http status code ( a
      * status code other than 3xx)
      *
@@ -432,8 +441,7 @@ public class WebCrawler implements Runnable {
 
                     String movedToUrl = fetchResult.getMovedToUrl();
                     if (movedToUrl == null) {
-                        logger.warn("Unexpected error, URL: {} is redirected to NOTHING",
-                                    curURL);
+                        onRedirectedToInvalidUrl(page);
                         return;
                     }
                     page.setRedirectedToUrl(movedToUrl);

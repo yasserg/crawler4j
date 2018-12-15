@@ -39,7 +39,7 @@ public class Parser {
 
     private final HtmlParser htmlContentParser;
 
-    private Net net;
+    private final Net net;
 
     @Deprecated
     public Parser(CrawlConfig config) throws IllegalAccessException, InstantiationException {
@@ -58,7 +58,7 @@ public class Parser {
     public Parser(CrawlConfig config, HtmlParser htmlParser, TLDList tldList) {
         this.config = config;
         this.htmlContentParser = htmlParser;
-        this.net = new Net(tldList);
+        this.net = new Net(config, tldList);
     }
 
     public void parse(Page page, String contextURL) throws NotAllowedContentException, ParseException {

@@ -19,6 +19,7 @@
 		<apache.tika.version>1.17</apache.tika.version>
         <guava.version>26.0-jre</guava.version>
         <public.suffix.list.version>2.2.0</public.suffix.list.version>
+        <url-detector.version>0.1.20</url-detector.version>
 		<!--test dependency versions -->
 		<junit.version>4.12</junit.version>
 		<wiremock.version>2.14.0</wiremock.version>
@@ -153,31 +154,83 @@
 					</execution>
 				</executions>
 			</plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>enforce-banned-dependencies</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <bannedDependencies>
+                                    <excludes>
+                                        <!-- 
+                                            Banning JCL because we use SLF4J (and jcl-over-slf4j).
+                                            If this occurs in your build you should find what 
+                                            dependency is bringing in JCL and add an exclusion 
+                                            rule to prevent it.
+                                        -->
+                                        <exclude>commons-logging</exclude>
+                                        <!--
+                                            Banning Log4j because we use SLF4J/Logback.  If you
+                                            come across this, exclude the Log4j dependency and 
+                                            add the log4j-over-slf4j library to replace it.
+                                        -->
+                                        <exclude>log4j</exclude>
+                                        <exclude>org.apache.logging.log4j</exclude>
+                                    </excludes>
+                                </bannedDependencies>
+                            </rules>
+                            <fail>true</fail>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
 		</plugins>
 	</build>
 
 	<dependencies>
 
-    <!-- Compile time Dependencies -->
-
+    <!-- Logging API -->
     <dependency>
-        <!-- Logging framework -->
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-api</artifactId>
         <version>${slf4j.version}</version>
     </dependency>
     <dependency>
-        <!-- Implementation of slf4j -->
+        <groupId>org.slf4j</groupId>
+        <artifactId>jcl-over-slf4j</artifactId>
+        <version>${slf4j.version}</version>
+    </dependency>
+    <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>jul-to-slf4j</artifactId>
+        <version>${slf4j.version}</version>
+    </dependency>
+    
+    <!-- Logging Provider -->
+    <dependency>
         <groupId>ch.qos.logback</groupId>
         <artifactId>logback-classic</artifactId>
         <version>${logback.version}</version>
         <scope>runtime</scope>
     </dependency>
+    
+    <!-- Compile time Dependencies -->
 	<dependency>
 		<groupId>org.apache.httpcomponents</groupId>
 		<artifactId>httpclient</artifactId>
 		<version>${apache.http.components.version}</version>
 		<scope>compile</scope>
+		<exclusions>
+		    <exclusion>
+		        <groupId>commons-logging</groupId>
+		        <artifactId>commons-logging</artifactId>
+		    </exclusion>
+		</exclusions>
 	</dependency>
 	<dependency>
 		<groupId>com.sleepycat</groupId>
@@ -367,6 +420,11 @@
 			</exclusion>
 		</exclusions>
 	</dependency>
+    <dependency>
+        <groupId>io.github.pgalbraith</groupId>
+        <artifactId>url-detector</artifactId>
+        <version>${url-detector.version}</version>
+    </dependency>
     <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
