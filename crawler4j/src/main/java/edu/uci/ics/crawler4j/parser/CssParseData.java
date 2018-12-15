@@ -17,6 +17,7 @@
 
 package edu.uci.ics.crawler4j.parser;
 
+import java.io.UnsupportedEncodingException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -24,10 +25,14 @@ import java.util.regex.Pattern;
 
 import edu.uci.ics.crawler4j.url.URLCanonicalizer;
 import edu.uci.ics.crawler4j.url.WebURL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CssParseData extends TextParseData {
 
-    public Set<WebURL> parseOutgoingUrls(WebURL referringPage) {
+    private static final Logger logger = LoggerFactory.getLogger(CssParseData.class);
+
+    private Set<WebURL> parseOutgoingUrls(WebURL referringPage) throws UnsupportedEncodingException {
 
         Set<String> extractedUrls = extractUrlInCssText(this.getTextContent());
 
@@ -48,7 +53,7 @@ public class CssParseData extends TextParseData {
         return outgoingUrls;
     }
 
-    public void setOutgoingUrls(WebURL referringPage) {
+    public void setOutgoingUrls(WebURL referringPage) throws UnsupportedEncodingException {
 
         Set<WebURL> outgoingUrls = parseOutgoingUrls(referringPage);
         this.setOutgoingUrls(outgoingUrls);
