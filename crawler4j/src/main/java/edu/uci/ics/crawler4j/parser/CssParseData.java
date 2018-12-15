@@ -17,60 +17,62 @@
 
 package edu.uci.ics.crawler4j.parser;
 
-import edu.uci.ics.crawler4j.url.WebURL;
-
 import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import edu.uci.ics.crawler4j.url.URLCanonicalizer;
+import edu.uci.ics.crawler4j.url.WebURL;
+
 public class CssParseData extends TextParseData {
 
-    public Set<WebURL> parseOutgoingUrls(WebURL referingPage) {
+    public Set<WebURL> parseOutgoingUrls(WebURL referringPage) {
 
         Set<String> extractedUrls = extractUrlInCssText(this.getTextContent());
 
-        final String pagePath = referingPage.getPath();
-        final String pageUrl = referingPage.getURL();
+        final String pagePath = referringPage.getPath();
+        final String pageUrl = referringPage.getURL();
 
         Set<WebURL> outgoingUrls = new HashSet<>();
         for (String url : extractedUrls) {
 
             String relative = getLinkRelativeTo(pagePath, url);
-            String absolute = getAbsoluteUrlFrom(pageUrl, relative);
+            String absolute = getAbsoluteUrlFrom(URLCanonicalizer.getCanonicalURL(pageUrl), relative);
 
             WebURL webURL = new WebURL();
             webURL.setURL(absolute);
             outgoingUrls.add(webURL);
 
-//            logger.info("CSS Link: {} -> {}", url, absolute);
         }
         return outgoingUrls;
     }
 
-    public void setOutgoingUrls(WebURL referingPage) {
+    public void setOutgoingUrls(WebURL referringPage) {
 
-        Set<WebURL> outgoingUrls = parseOutgoingUrls(referingPage);
+        Set<WebURL> outgoingUrls = parseOutgoingUrls(referringPage);
         this.setOutgoingUrls(outgoingUrls);
     }
 
     private static Set<String> extractUrlInCssText(String input) {
 
         Set<String> extractedUrls = new HashSet<>();
-        if (input == null)
+        if (input == null || input.isEmpty()) {
             return extractedUrls;
+        }
 
         Matcher matcher = pattern.matcher(input);
         while (matcher.find()) {
             String url = matcher.group(1);
-            if (url == null)
+            if (url == null) {
                 url = matcher.group(2);
-            if (url == null)
+            }
+            if (url == null) {
                 url = matcher.group(3);
-            if (url == null)
+            }
+            if (url == null || url.startsWith("data:")) {
                 continue;
-            if (url.startsWith("data:"))
-                continue;
+            }
             extractedUrls.add(url);
         }
         return extractedUrls;
@@ -88,22 +90,25 @@ public class CssParseData extends TextParseData {
     private static String getAbsoluteUrlFrom(String pageUrl, String linkPath) {
 
         String domainUrl = getFullDomainFromUrl(pageUrl);
-        if (linkPath.startsWith("/"))
+        if (linkPath.startsWith("/")) {
             return domainUrl + linkPath;
+        }
         return domainUrl + "/" + linkPath;
     }
 
     private static String getLinkRelativeTo(String pagePath, String linkUrl) {
 
-        if (linkUrl.startsWith("/"))
+        if (linkUrl.startsWith("/") && !linkUrl.startsWith("//")) {
             return linkUrl;
+        }
 
-        if (linkUrl.startsWith("//"))
+        if (linkUrl.startsWith("//")) {
             linkUrl = "http" + linkUrl;
+        }
 
         if (linkUrl.startsWith("http")) {
             String domainUrl = getPathFromUrl(linkUrl);
-            return "/" + domainUrl;
+            return domainUrl;
         }
 
         if (linkUrl.startsWith("../")) {
@@ -117,8 +122,9 @@ public class CssParseData extends TextParseData {
             String absolute = "";
             for (int i = 0; i < diff; i++) {
                 String dir = parts[i];
-                if (!dir.isEmpty())
+                if (!dir.isEmpty()) {
                     absolute = absolute + "/" + dir;
+                }
             }
             return absolute + "/" + linkUrl.substring(pos);
         }
