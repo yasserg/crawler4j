@@ -61,13 +61,20 @@ public class Parser {
         this.net = new Net(config, tldList);
     }
 
-    public void parse(Page page, String contextURL)
-        throws NotAllowedContentException, ParseException {
+    public void parse(Page page, String contextURL) throws NotAllowedContentException, ParseException {
         if (Util.hasBinaryContent(page.getContentType())) { // BINARY
             BinaryParseData parseData = new BinaryParseData();
             if (config.isIncludeBinaryContentInCrawling()) {
                 if (config.isProcessBinaryContentInCrawling()) {
-                    parseData.setBinaryContent(page.getContentData());
+                    try {
+                        parseData.setBinaryContent(page.getContentData());
+                    } catch (Exception e) {
+                        if (config.isHaltOnError()) {
+                            throw new ParseException(e);
+                        } else {
+                            logger.error("Error parsing file", e);
+                        }
+                    }
                 } else {
                     parseData.setHtml("<html></html>");
                 }
@@ -92,7 +99,7 @@ public class Parser {
                 page.setParseData(parseData);
             } catch (Exception e) {
                 logger.error("{}, while parsing: {}", e.getMessage(), page.getWebURL().getURL());
-                throw new ParseException();
+                throw new ParseException(e);
             }
         } else { // isHTML
 

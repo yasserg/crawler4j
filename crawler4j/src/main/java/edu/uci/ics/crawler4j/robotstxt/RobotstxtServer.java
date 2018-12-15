@@ -15,6 +15,7 @@
 
 package edu.uci.ics.crawler4j.robotstxt;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
@@ -28,6 +29,7 @@ import org.apache.http.NoHttpResponseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.crawler.Page;
 import edu.uci.ics.crawler4j.crawler.exceptions.PageBiggerThanMaxSizeException;
 import edu.uci.ics.crawler4j.fetcher.PageFetchResult;
@@ -43,6 +45,8 @@ public class RobotstxtServer {
     private static final Logger logger = LoggerFactory.getLogger(RobotstxtServer.class);
 
     protected RobotstxtConfig config;
+
+    protected CrawlConfig crawlConfig;
 
     protected final Map<String, HostDirectives> host2directivesCache = new HashMap<>();
 
@@ -64,8 +68,13 @@ public class RobotstxtServer {
         return url.getHost().toLowerCase();
     }
 
-    /** Please note that in the case of a bad URL, TRUE will be returned */
-    public boolean allows(WebURL webURL) {
+    /**
+     * Please note that in the case of a bad URL, TRUE will be returned
+     *
+     * @throws InterruptedException
+     * @throws IOException
+     */
+    public boolean allows(WebURL webURL) throws IOException, InterruptedException {
         if (!config.isEnabled()) {
             return true;
         }
@@ -94,7 +103,7 @@ public class RobotstxtServer {
         return true;
     }
 
-    private HostDirectives fetchDirectives(URL url) {
+    private HostDirectives fetchDirectives(URL url) throws IOException, InterruptedException {
         WebURL robotsTxtUrl = new WebURL();
         String host = getHost(url);
         String port = ((url.getPort() == url.getDefaultPort()) || (url.getPort() == -1)) ? "" :
@@ -159,8 +168,14 @@ public class RobotstxtServer {
         } catch (PageBiggerThanMaxSizeException pbtms) {
             logger.error("Error occurred while fetching (robots) url: {}, {}",
                          robotsTxtUrl.getURL(), pbtms.getMessage());
-        } catch (Exception e) {
+        } catch (IOException e) {
             logger.error("Error occurred while fetching (robots) url: " + robotsTxtUrl.getURL(), e);
+        } catch (InterruptedException | RuntimeException e) {
+            if (crawlConfig.isHaltOnError()) {
+                throw e;
+            } else {
+                logger.error("Error occurred while fetching (robots) url: " + robotsTxtUrl.getURL(), e);
+            }
         } finally {
             if (fetchResult != null) {
                 fetchResult.discardContentIfNotConsumed();
@@ -187,5 +202,9 @@ public class RobotstxtServer {
             host2directivesCache.put(host, directives);
         }
         return directives;
+    }
+
+    public void setCrawlConfig(CrawlConfig crawlConfig) {
+        this.crawlConfig = crawlConfig;
     }
 }

@@ -1,6 +1,9 @@
 package edu.uci.ics.crawler4j.tests.fetcher;
 
 import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 
 import org.apache.http.HttpResponse;
@@ -14,7 +17,8 @@ import edu.uci.ics.crawler4j.url.WebURL;
 
 public class PageFetcherHtmlOnly extends PageFetcher {
 
-    public PageFetcherHtmlOnly(CrawlConfig config) {
+    public PageFetcherHtmlOnly(CrawlConfig config)
+            throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException {
         super(config);
     }
 
@@ -23,7 +27,7 @@ public class PageFetcherHtmlOnly extends PageFetcher {
         throws InterruptedException, IOException, PageBiggerThanMaxSizeException {
         String toFetchURL = webUrl.getURL();
 
-        PageFetchResult fetchResult = new PageFetchResult();
+        PageFetchResult fetchResult = new PageFetchResult(config.isHaltOnError());
         HttpHead head = null;
         try {
             head = new HttpHead(toFetchURL);

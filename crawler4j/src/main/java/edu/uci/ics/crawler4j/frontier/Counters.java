@@ -49,6 +49,7 @@ public class Counters {
     private static final String DATABASE_NAME = "Statistics";
     protected Database statisticsDB = null;
     protected Environment env;
+    private CrawlConfig config;
 
     protected final Object mutex = new Object();
 
@@ -57,6 +58,7 @@ public class Counters {
     public Counters(Environment env, CrawlConfig config) {
         this.env = env;
         this.counterValues = new HashMap<>();
+        this.config = config;
 
     /*
      * When crawling is set to be resumable, we have to keep the statistics
@@ -110,8 +112,12 @@ public class Counters {
                                      new DatabaseEntry(Util.long2ByteArray(value)));
                     txn.commit();
                 }
-            } catch (Exception e) {
-                logger.error("Exception setting value", e);
+            } catch (RuntimeException e) {
+                if (config.isHaltOnError()) {
+                    throw e;
+                } else {
+                    logger.error("Exception setting value", e);
+                }
             }
         }
     }
