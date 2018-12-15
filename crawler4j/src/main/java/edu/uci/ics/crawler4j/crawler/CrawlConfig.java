@@ -226,7 +226,6 @@ public class CrawlConfig {
 
     private DnsResolver dnsResolver = new SystemDefaultDnsResolver();
 
-
     private boolean haltOnError = false;
 
     private boolean allowSingleLevelDomain = false;
@@ -701,8 +700,8 @@ public class CrawlConfig {
     public void setHaltOnError(boolean haltOnError) {
         this.haltOnError = haltOnError;
     }
-  
-    /**   
+
+    /**
      * Are single level domains (e.g. http://localhost) considered valid?
      *
      * @return
