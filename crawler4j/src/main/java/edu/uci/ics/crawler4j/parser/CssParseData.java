@@ -25,12 +25,8 @@ import java.util.regex.Pattern;
 
 import edu.uci.ics.crawler4j.url.URLCanonicalizer;
 import edu.uci.ics.crawler4j.url.WebURL;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class CssParseData extends TextParseData {
-
-    private static final Logger logger = LoggerFactory.getLogger(CssParseData.class);
 
     private Set<WebURL> parseOutgoingUrls(WebURL referringPage) throws UnsupportedEncodingException {
 
