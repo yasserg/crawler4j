@@ -1,10 +1,16 @@
 package edu.uci.ics.crawler4j.util;
 
-import java.util.HashSet;
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
+import com.linkedin.urls.Url;
+import com.linkedin.urls.detection.UrlDetector;
+import com.linkedin.urls.detection.UrlDetectorOptions;
+
+import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.url.TLDList;
 import edu.uci.ics.crawler4j.url.WebURL;
 
@@ -13,45 +19,39 @@ import edu.uci.ics.crawler4j.url.WebURL;
  * Net related Utils
  */
 public class Net {
-    private TLDList tldList;
-    private static final Pattern pattern = initializePattern();
 
-    public Net(TLDList tldList) {
+    private TLDList tldList;
+
+    private Function<Url, WebURL> urlMapper = url -> {
+        WebURL webUrl = new WebURL();
+        webUrl.setTldList(tldList);
+        webUrl.setURL(url.getFullUrl());
+        return webUrl;
+    };
+
+    private CrawlConfig config;
+
+    public Net(CrawlConfig config, TLDList tldList) {
+        this.config = config;
         this.tldList = tldList;
     }
 
     public Set<WebURL> extractUrls(String input) {
-        Set<WebURL> extractedUrls = new HashSet<>();
-
-        if (input != null) {
-            Matcher matcher = pattern.matcher(input);
-            while (matcher.find()) {
-                WebURL webURL = new WebURL();
-                String urlStr = matcher.group();
-                if (!urlStr.startsWith("http")) {
-                    urlStr = "http://" + urlStr;
-                }
-
-                webURL.setTldList(tldList);
-                webURL.setURL(urlStr);
-                extractedUrls.add(webURL);
-            }
+        if (input == null) {
+            return Collections.emptySet();
+        } else {
+            UrlDetector detector = new UrlDetector(input, getOptions());
+            List<Url> urls = detector.detect();
+            return urls.stream().map(urlMapper).collect(Collectors.toSet());
         }
-
-        return extractedUrls;
     }
 
-    /** Singleton like one time call to initialize the Pattern */
-    private static Pattern initializePattern() {
-        return Pattern.compile("\\b(((ht|f)tp(s?)\\:\\/\\/|~\\/|\\/)|www.)" +
-                               "(\\w+:\\w+@)?(([-\\w]+\\.)+(com|org|net|gov" +
-                               "|mil|biz|info|mobi|name|aero|jobs|museum" +
-                               "|travel|[a-z]{2}))(:[\\d]{1,5})?" +
-                               "(((\\/([-\\w~!$+|.,=]|%[a-f\\d]{2})+)+|\\/)+|\\?|#)?" +
-                               "((\\?([-\\w~!$+|.,*:]|%[a-f\\d{2}])+=?" +
-                               "([-\\w~!$+|.,*:=]|%[a-f\\d]{2})*)" +
-                               "(&(?:[-\\w~!$+|.,*:]|%[a-f\\d{2}])+=?" +
-                               "([-\\w~!$+|.,*:=]|%[a-f\\d]{2})*)*)*" +
-                               "(#([-\\w~!$+|.,*:=]|%[a-f\\d]{2})*)?\\b");
+    private UrlDetectorOptions getOptions() {
+        if (config.isAllowSingleLevelDomain()) {
+            return UrlDetectorOptions.ALLOW_SINGLE_LEVEL_DOMAIN;
+        } else {
+            return UrlDetectorOptions.Default;
+        }
     }
+
 }
