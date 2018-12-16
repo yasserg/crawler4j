@@ -70,6 +70,7 @@
         <public.suffix.list.version>2.2.0</public.suffix.list.version>
         <slf4j.version>1.7.22</slf4j.version>
         <spock.version>1.1-groovy-2.4</spock.version>
+        <url-detector.version>0.1.20</url-detector.version>
         <wiremock.version>2.14.0</wiremock.version>
 
         <!-- Maven specific settings -->
@@ -97,6 +98,7 @@
         <maven.versions.version>2.5</maven.versions.version>
         <maven.forbiddenapis.version>2.4.1</maven.forbiddenapis.version>
         <maven.surefire.version>2.22.1</maven.surefire.version>
+        <maven.enforcer.version>3.0.0-M2</maven.enforcer.version>
     </properties>
 
     <dependencyManagement>
@@ -135,9 +137,25 @@
                 <version>${guava.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>jcl-over-slf4j</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>jul-to-slf4j</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpclient</artifactId>
                 <version>${apache.http.components.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>com.sleepycat</groupId>
@@ -189,10 +207,6 @@
                 <artifactId>tika-parsers</artifactId>
                 <version>${apache.tika.version}</version>
                 <exclusions>
-                    <exclusion>
-                        <groupId>org.apache.poi</groupId>
-                        <artifactId>poi</artifactId>
-                    </exclusion>
                     <exclusion>
                         <groupId>org.apache.poi</groupId>
                         <artifactId>poi-ooxml</artifactId>
@@ -370,6 +384,11 @@
                         <artifactId>sentiment-analysis-parser</artifactId>
                     </exclusion>
                 </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>io.github.pgalbraith</groupId>
+                <artifactId>url-detector</artifactId>
+                <version>${url-detector.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.github.tomakehurst</groupId>
@@ -569,6 +588,42 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${maven.surefire.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-enforcer-plugin</artifactId>
+                    <version>${maven.enforcer.version}</version>
+                    <executions>
+                        <execution>
+                            <id>enforce-banned-dependencies</id>
+                            <goals>
+                                <goal>enforce</goal>
+                            </goals>
+                            <configuration>
+                                <rules>
+                                    <bannedDependencies>
+                                        <excludes>
+                                            <!-- 
+                                                Banning JCL because we use SLF4J (and jcl-over-slf4j).
+                                                If this occurs in your build you should find what 
+                                                dependency is bringing in JCL and add an exclusion 
+                                                rule to prevent it.
+                                            -->
+                                            <exclude>commons-logging</exclude>
+                                            <!--
+                                                Banning Log4j because we use SLF4J/Logback.  If you
+                                                come across this, exclude the Log4j dependency and 
+                                                add the log4j-over-slf4j library to replace it.
+                                            -->
+                                            <exclude>log4j</exclude>
+                                            <exclude>org.apache.logging.log4j</exclude>
+                                        </excludes>
+                                    </bannedDependencies>
+                                </rules>
+                                <fail>true</fail>
+                            </configuration>
+                        </execution>
+                    </executions>
                 </plugin>
                 <plugin>
                     <groupId>org.jacoco</groupId>

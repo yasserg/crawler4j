@@ -39,7 +39,7 @@ public class Parser {
 
     private final HtmlParser htmlContentParser;
 
-    private Net net;
+    private final Net net;
 
     @Deprecated
     public Parser(CrawlConfig config) throws IllegalAccessException, InstantiationException {
@@ -58,16 +58,23 @@ public class Parser {
     public Parser(CrawlConfig config, HtmlParser htmlParser, TLDList tldList) {
         this.config = config;
         this.htmlContentParser = htmlParser;
-        this.net = new Net(tldList);
+        this.net = new Net(config, tldList);
     }
 
-    public void parse(Page page, String contextURL)
-        throws NotAllowedContentException, ParseException {
+    public void parse(Page page, String contextURL) throws NotAllowedContentException, ParseException {
         if (Util.hasBinaryContent(page.getContentType())) { // BINARY
             BinaryParseData parseData = new BinaryParseData();
             if (config.isIncludeBinaryContentInCrawling()) {
                 if (config.isProcessBinaryContentInCrawling()) {
-                    parseData.setBinaryContent(page.getContentData());
+                    try {
+                        parseData.setBinaryContent(page.getContentData());
+                    } catch (Exception e) {
+                        if (config.isHaltOnError()) {
+                            throw new ParseException(e);
+                        } else {
+                            logger.error("Error parsing file", e);
+                        }
+                    }
                 } else {
                     parseData.setHtml("<html></html>");
                 }
@@ -78,6 +85,21 @@ public class Parser {
                 parseData.setOutgoingUrls(net.extractUrls(parseData.getHtml()));
             } else {
                 throw new NotAllowedContentException();
+            }
+        } else if (Util.hasCssTextContent(page.getContentType())) { // text/css
+            try {
+                CssParseData parseData = new CssParseData();
+                if (page.getContentCharset() == null) {
+                    parseData.setTextContent(new String(page.getContentData()));
+                } else {
+                    parseData.setTextContent(
+                        new String(page.getContentData(), page.getContentCharset()));
+                }
+                parseData.setOutgoingUrls(page.getWebURL());
+                page.setParseData(parseData);
+            } catch (Exception e) {
+                logger.error("{}, while parsing css: {}", e.getMessage(), page.getWebURL().getURL());
+                throw new ParseException();
             }
         } else if (Util.hasPlainTextContent(page.getContentType())) { // plain Text
             try {
@@ -92,7 +114,7 @@ public class Parser {
                 page.setParseData(parseData);
             } catch (Exception e) {
                 logger.error("{}, while parsing: {}", e.getMessage(), page.getWebURL().getURL());
-                throw new ParseException();
+                throw new ParseException(e);
             }
         } else { // isHTML
 

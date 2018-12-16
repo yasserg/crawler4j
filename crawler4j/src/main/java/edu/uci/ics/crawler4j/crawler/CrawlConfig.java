@@ -226,6 +226,10 @@ public class CrawlConfig {
 
     private DnsResolver dnsResolver = new SystemDefaultDnsResolver();
 
+    private boolean haltOnError = false;
+
+    private boolean allowSingleLevelDomain = false;
+
     /*
      * number of pages to fetch/process from the database in a single read
      */
@@ -680,6 +684,44 @@ public class CrawlConfig {
     }
 
     /**
+     * Indicates if all crawling will stop if an unexpected error occurs.
+     */
+    public boolean isHaltOnError() {
+        return haltOnError;
+    }
+
+    /**
+     * Should all crawling stop if an unexpected error occurs? Default is
+     * {@code false}.
+     *
+     * @param haltOnError
+     *            {@code true} if all crawling should be halted
+     */
+    public void setHaltOnError(boolean haltOnError) {
+        this.haltOnError = haltOnError;
+    }
+
+    /**
+     * Are single level domains (e.g. http://localhost) considered valid?
+     *
+     * @return
+     */
+    public boolean isAllowSingleLevelDomain() {
+        return allowSingleLevelDomain;
+    }
+
+    /**
+     * Allow single level domains (e.g. http://localhost). This is very useful for
+     * testing especially when you may be using localhost.
+     *
+     * @param allowSingleLevelDomain
+     *            {@code true} if single level domain should be considered valid
+     */
+    public void setAllowSingleLevelDomain(boolean allowSingleLevelDomain) {
+        this.allowSingleLevelDomain = allowSingleLevelDomain;
+    }
+
+    /**
      * Number of pages to fetch/process from the database in a single read transaction.
      *
      * @return the batch read size
@@ -718,6 +760,8 @@ public class CrawlConfig {
         sb.append("Cookie policy: " + getCookiePolicy() + "\n");
         sb.append("Respect nofollow: " + isRespectNoFollow() + "\n");
         sb.append("Respect noindex: " + isRespectNoIndex() + "\n");
+        sb.append("Halt on error: " + isHaltOnError() + "\n");
+        sb.append("Allow single level domain:" + isAllowSingleLevelDomain() + "\n");
         sb.append("Batch read size: " + getBatchReadSize() + "\n");
         return sb.toString();
     }
