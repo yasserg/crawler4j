@@ -167,6 +167,21 @@ public class CrawlController {
         T newInstance() throws Exception;
     }
 
+    private static class SingleInstanceFactory<T extends WebCrawler>
+        implements WebCrawlerFactory<T> {
+
+        final T instance;
+
+        SingleInstanceFactory(T instance) {
+            this.instance = instance;
+        }
+
+        @Override
+        public T newInstance() throws Exception {
+            return this.instance;
+        }
+    }
+
     private static class DefaultWebCrawlerFactory<T extends WebCrawler>
         implements WebCrawlerFactory<T> {
         final Class<T> clazz;
@@ -198,6 +213,18 @@ public class CrawlController {
      */
     public <T extends WebCrawler> void start(Class<T> clazz, int numberOfCrawlers) {
         this.start(new DefaultWebCrawlerFactory<>(clazz), numberOfCrawlers, true);
+    }
+
+    /**
+     * Start the crawling session and wait for it to finish.
+     * This method depends on a single instance of a crawler. Only that instance will be used for crawling.
+     *
+     * @param instance
+     *            the instance of a class that implements the logic for crawler threads
+     * @param <T> Your class extending WebCrawler
+     */
+    public <T extends WebCrawler> void start(T instance) {
+        this.start(new SingleInstanceFactory<>(instance), 1, true);
     }
 
     /**

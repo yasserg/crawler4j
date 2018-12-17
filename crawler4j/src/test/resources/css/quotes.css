@@ -1,0 +1,11 @@
+.double {
+    background-image: url("//css/quotes/double.jpg");
+}
+
+.single {
+    background-image: url('//css/quotes/single.jpg');
+}
+
+.noquote {
+    background-image: url(//pix/quotes/none.jpg);
+}

@@ -1,0 +1,17 @@
+.absolute_with_domain {
+    background-image: url("http://example.com/css/absolute_with_domain.png");
+}
+
+.absolute_no_proto {
+    background-image: url("//example.com/css/absolute_no_proto.png");
+}
+
+
+.absolute_path {
+    background-image: url("/css/absolute_path.png");
+}
+
+
+.data {
+    background: url(data:image/gif;base64,IGNORETHISURL) no-repeat left center;
+}
