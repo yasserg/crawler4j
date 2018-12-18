@@ -3,6 +3,8 @@
 On popular demand here and example of integration with Spring Boot. It has been designed to be the most idiomatic as possible
 (`@Service`, `@Async`, hibernate-validator etc).
 
+Run it:
+
 ```bash
 $ mvn spring-boot:run -Dspring.profiles.active=dev
 ```
