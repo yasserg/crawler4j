@@ -318,38 +318,34 @@ public class WebCrawler implements Runnable {
             setError(null);
             boolean finished = false;
             while (!finished) {
-                try {
-                    if (Thread.interrupted()) {
-                        throw new InterruptedException();
+                if (Thread.interrupted()) {
+                    throw new InterruptedException();
+                }
+                List<WebURL> assignedURLs = new ArrayList<>(batchReadSize);
+                frontier.getNextURLs(batchReadSize, assignedURLs);
+                if (assignedURLs.isEmpty()) {
+                    isWaitingForNewURLs = true;
+                    myController.awaitCompletion(this);
+                    isWaitingForNewURLs = false;
+                    if (myController.isFinished()) {
+                        finished = true;
+                        break;
                     }
-                    List<WebURL> assignedURLs = new ArrayList<>(batchReadSize);
-                    frontier.getNextURLs(batchReadSize, assignedURLs);
-                    if (assignedURLs.isEmpty()) {
-                        isWaitingForNewURLs = true;
-                        myController.awaitCompletion(this);
-                        isWaitingForNewURLs = false;
-                        if (myController.isFinished()) {
-                            finished = true;
-                            break;
+                } else {
+                    for (WebURL curURL : assignedURLs) {
+                        if (Thread.interrupted()) {
+                            throw new InterruptedException();
                         }
-                    } else {
-                        for (WebURL curURL : assignedURLs) {
-                            if (Thread.interrupted()) {
-                                throw new InterruptedException();
-                            }
-                            if (curURL != null) {
-                                curURL = handleUrlBeforeProcess(curURL);
-                                processPage(curURL);
-                                frontier.setProcessed(curURL);
-                            }
+                        if (curURL != null) {
+                            curURL = handleUrlBeforeProcess(curURL);
+                            processPage(curURL);
+                            frontier.setProcessed(curURL);
                         }
                     }
-                } catch (InterruptedException e) {
-                    logger.debug("interrupted", e);
-                    finished = true;
-                    break;
                 }
             }
+        } catch (InterruptedException e) {
+            logger.debug("interrupted", e);
         } catch (Throwable t) {
             setError(t);
         } finally {
