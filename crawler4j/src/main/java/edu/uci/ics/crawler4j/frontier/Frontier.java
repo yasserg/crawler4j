@@ -175,7 +175,11 @@ public class Frontier {
     }
 
     public long getNumberOfAssignedPages() {
-        return inProcessPages.getLength();
+        if (inProcessPages != null) {
+            return inProcessPages.getLength();
+        } else {
+            return 0;
+        }
     }
 
     public long getNumberOfProcessedPages() {
