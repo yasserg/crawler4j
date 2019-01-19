@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package edu.uci.ics.crawler4j.frontier;
+package edu.uci.ics.crawler4j.frontier.je;
 
 import java.util.HashMap;
 import java.util.Map;

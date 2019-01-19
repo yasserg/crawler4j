@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package edu.uci.ics.crawler4j.frontier;
+package edu.uci.ics.crawler4j.frontier.je;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

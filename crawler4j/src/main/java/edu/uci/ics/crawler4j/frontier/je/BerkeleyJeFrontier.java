@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package edu.uci.ics.crawler4j.frontier;
+package edu.uci.ics.crawler4j.frontier.je;
 
 import java.io.File;
 import java.util.List;
@@ -37,6 +37,7 @@ import com.sleepycat.je.Transaction;
 
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.crawler.CrawlController;
+import edu.uci.ics.crawler4j.frontier.Frontier;
 import edu.uci.ics.crawler4j.url.WebURL;
 
 /**
