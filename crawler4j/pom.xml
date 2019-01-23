@@ -421,7 +421,7 @@
 		</exclusions>
 	</dependency>
     <dependency>
-        <groupId>io.github.pgalbraith</groupId>
+        <groupId>io.github.url-detector</groupId>
         <artifactId>url-detector</artifactId>
         <version>${url-detector.version}</version>
     </dependency>
