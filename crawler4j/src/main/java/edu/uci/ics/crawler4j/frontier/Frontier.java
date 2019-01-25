@@ -53,7 +53,7 @@ public interface Frontier {
      * @param result
      * @throws InterruptedException
      */
-    void getNextURLs(int max, List<WebURL> result) throws InterruptedException;
+    void getNextURLs(int max, List<WebURL> result);
 
     /**
      * @param url

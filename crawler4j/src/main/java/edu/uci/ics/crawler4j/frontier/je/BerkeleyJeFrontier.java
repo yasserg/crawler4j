@@ -177,7 +177,7 @@ public class BerkeleyJeFrontier implements Frontier {
     }
 
     @Override
-    public void getNextURLs(int max, List<WebURL> result) throws InterruptedException {
+    public void getNextURLs(int max, List<WebURL> result) {
         try {
             List<WebURL> curResults = workQueues.get(max);
             workQueues.delete(curResults.size());
