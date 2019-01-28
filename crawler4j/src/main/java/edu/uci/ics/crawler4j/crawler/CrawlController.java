@@ -304,9 +304,11 @@ public class CrawlController {
                 waitUntilFinish();
             }
 
-        } catch (Exception e) {
+        } catch (Throwable e) {
             if (config.isHaltOnError()) {
-                if (e instanceof RuntimeException) {
+                if (e instanceof Error) {
+                    throw (Error) e;
+                } else if (e instanceof RuntimeException) {
                     throw (RuntimeException)e;
                 } else {
                     throw new RuntimeException("error starting crawler(s)", e);
@@ -322,18 +324,6 @@ public class CrawlController {
      */
     public void waitUntilFinish() {
         shutdown(false);
-        if (config.isHaltOnError()) {
-            Throwable t = getError();
-            if (t != null && config.isHaltOnError()) {
-                if (t instanceof RuntimeException) {
-                    throw (RuntimeException)t;
-                } else if (t instanceof Error) {
-                    throw (Error)t;
-                } else {
-                    throw new RuntimeException("error on monitor thread", t);
-                }
-            }
-        }
     }
 
     /**
@@ -542,23 +532,40 @@ public class CrawlController {
         } else {
             logger.info("waiting for crawl to finish...");
         }
-        this.shuttingDown = true;
 
-        if (!interrupt && Thread.interrupted()) {
-            interrupt = true;
+        if (interrupt) {
+            interrupt();
         }
 
         for (Thread t : threads) {
             while (t.isAlive()) {
                 try {
-                    if (interrupt && !t.isInterrupted()) {
-                        t.interrupt();
-                    }
-
                     t.join();
                 } catch (InterruptedException e) {
-                    interrupt = true;
+                    // ignore
                 }
+            }
+        }
+
+        if (config.isHaltOnError()) {
+            Throwable t = getError();
+            if (t != null && config.isHaltOnError()) {
+                if (t instanceof RuntimeException) {
+                    throw (RuntimeException)t;
+                } else if (t instanceof Error) {
+                    throw (Error)t;
+                } else {
+                    throw new RuntimeException("terminating because of exception:", t);
+                }
+            }
+        }
+    }
+
+    public void interrupt() {
+        shuttingDown = true;
+        for (Thread t : threads) {
+            if (t.isAlive() && !t.isInterrupted()) {
+                t.interrupt();
             }
         }
     }
@@ -584,8 +591,10 @@ public class CrawlController {
         return error;
     }
 
-    private synchronized void setError(Throwable e) {
-        this.error = e;
+    protected synchronized void setError(Throwable e) {
+        if (e == null || this.error == null) {
+            this.error = e;
+        }
     }
 
     /**

@@ -267,7 +267,13 @@ public class WebCrawler implements Runnable {
      */
     protected void onUnhandledException(WebURL webUrl, Throwable e) {
         if (myController.getConfig().isHaltOnError() && !(e instanceof IOException)) {
-            throw new RuntimeException("unhandled exception", e);
+            if (e instanceof Error) {
+                throw (Error) e;
+            } else if (e instanceof RuntimeException) {
+                throw (RuntimeException) e;
+            } else {
+                throw new RuntimeException("unhandled exception", e);
+            }
         } else {
             String urlStr = (webUrl == null ? "NULL" : webUrl.getURL());
             logger.warn("Unhandled exception while fetching {}: {}", urlStr, e.getMessage());
@@ -348,6 +354,7 @@ public class WebCrawler implements Runnable {
             logger.debug("interrupted", e);
         } catch (Throwable t) {
             setError(t);
+            myController.interrupt();
         } finally {
             myController.unregisterCrawler(this);
         }
@@ -602,11 +609,12 @@ public class WebCrawler implements Runnable {
         return !isWaitingForNewURLs;
     }
 
-    protected synchronized Throwable getError() {
+    protected Throwable getError() {
         return error;
     }
 
-    private synchronized void setError(Throwable error) {
+    protected void setError(Throwable error) {
         this.error = error;
+        myController.setError(error);
     }
 }
