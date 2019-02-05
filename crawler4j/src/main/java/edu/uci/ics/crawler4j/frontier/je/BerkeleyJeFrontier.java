@@ -27,7 +27,6 @@ import org.slf4j.LoggerFactory;
 
 import com.sleepycat.je.Database;
 import com.sleepycat.je.DatabaseEntry;
-import com.sleepycat.je.DatabaseException;
 import com.sleepycat.je.DiskOrderedCursor;
 import com.sleepycat.je.DiskOrderedCursorConfig;
 import com.sleepycat.je.Environment;
@@ -37,6 +36,7 @@ import com.sleepycat.je.Transaction;
 
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.crawler.CrawlController;
+import edu.uci.ics.crawler4j.frontier.DatabaseException;
 import edu.uci.ics.crawler4j.frontier.Frontier;
 import edu.uci.ics.crawler4j.url.WebURL;
 
@@ -69,13 +69,13 @@ public class BerkeleyJeFrontier implements Frontier {
 
     private EnvironmentConfig envConfig;
 
-    public BerkeleyJeFrontier(CrawlConfig config, CrawlController controller) {
+    public BerkeleyJeFrontier(CrawlConfig config, CrawlController controller) throws DatabaseException {
         File folder = new File(config.getCrawlStorageFolder());
         if (!folder.exists()) {
             if (folder.mkdirs()) {
                 logger.debug("Created folder: " + folder.getAbsolutePath());
             } else {
-                throw new RuntimeException(
+                throw new DatabaseException(
                     "couldn't create the storage folder: " + folder.getAbsolutePath() +
                     " does it already exist ?");
             }
@@ -94,7 +94,7 @@ public class BerkeleyJeFrontier implements Frontier {
             if (envHome.mkdir()) {
                 logger.debug("Created folder: " + envHome.getAbsolutePath());
             } else {
-                throw new RuntimeException(
+                throw new DatabaseException(
                     "Failed creating the frontier folder: " + envHome.getAbsolutePath());
             }
         }
@@ -127,14 +127,13 @@ public class BerkeleyJeFrontier implements Frontier {
                 inProcessPages = null;
                 scheduledPages = 0;
             }
-        } catch (DatabaseException e) {
-            logger.error("Error while initializing the Frontier", e);
-            workQueues = null;
+        } catch (RuntimeException e) {
+            throw new DatabaseException("Error while initializing the Frontier", e);
         }
     }
 
     @Override
-    public void scheduleAll(List<WebURL> urls) {
+    public void scheduleAll(List<WebURL> urls) throws DatabaseException {
         int maxPagesToFetch = config.getMaxPagesToFetch();
         synchronized (mutex) {
             int newScheduledPage = 0;
@@ -147,8 +146,8 @@ public class BerkeleyJeFrontier implements Frontier {
                 try {
                     workQueues.put(url);
                     newScheduledPage++;
-                } catch (DatabaseException e) {
-                    logger.error("Error while putting the url in the work queue", e);
+                } catch (RuntimeException e) {
+                    throw new DatabaseException("Error while putting the url in the work queue", e);
                 }
             }
             if (newScheduledPage > 0) {
@@ -160,7 +159,7 @@ public class BerkeleyJeFrontier implements Frontier {
     }
 
     @Override
-    public void schedule(WebURL url) {
+    public void schedule(WebURL url) throws DatabaseException {
         int maxPagesToFetch = config.getMaxPagesToFetch();
         synchronized (mutex) {
             try {
@@ -169,15 +168,15 @@ public class BerkeleyJeFrontier implements Frontier {
                     scheduledPages++;
                     counters.increment(Counters.ReservedCounterNames.SCHEDULED_PAGES);
                 }
-            } catch (DatabaseException e) {
-                logger.error("Error while putting the url in the work queue", e);
+            } catch (RuntimeException e) {
+                throw new DatabaseException("Error while putting the url in the work queue", e);
             }
         }
         controller.foundMorePages();
     }
 
     @Override
-    public void getNextURLs(int max, List<WebURL> result) {
+    public void getNextURLs(int max, List<WebURL> result) throws DatabaseException {
         try {
             List<WebURL> curResults = workQueues.get(max);
             workQueues.delete(curResults.size());
@@ -187,8 +186,8 @@ public class BerkeleyJeFrontier implements Frontier {
                 }
             }
             result.addAll(curResults);
-        } catch (DatabaseException e) {
-            logger.error("Error while getting next urls", e);
+        } catch (RuntimeException e) {
+            throw new DatabaseException("Error while getting next urls", e);
         }
     }
 
@@ -219,28 +218,36 @@ public class BerkeleyJeFrontier implements Frontier {
     }
 
     @Override
-    public void close() {
-        workQueues.close();
-        counters.close();
-        if (inProcessPages != null) {
-            inProcessPages.close();
+    public void close() throws DatabaseException {
+        try {
+            workQueues.close();
+            counters.close();
+            if (inProcessPages != null) {
+                inProcessPages.close();
+            }
+            docIdServer.close();
+            env.close();
+        } catch (RuntimeException e) {
+            throw new DatabaseException(e);
         }
-        docIdServer.close();
-        env.close();
     }
 
     /* (non-Javadoc)
      * @see edu.uci.ics.crawler4j.frontier.Frontier#reset()
      */
     @Override
-    public void reset() {
-        workQueues.process(clearDb);
-        counters.process(clearDb);
-        if (inProcessPages != null) {
-            inProcessPages.process(clearDb);
+    public void reset() throws DatabaseException {
+        try {
+            workQueues.process(clearDb);
+            counters.process(clearDb);
+            if (inProcessPages != null) {
+                inProcessPages.process(clearDb);
+            }
+            docIdServer.process(clearDb);
+            scheduledPages = 0;
+        } catch (RuntimeException e) {
+            throw new DatabaseException(e);
         }
-        docIdServer.process(clearDb);
-        scheduledPages = 0;
     }
 
     public Consumer<Database> clearDb = db -> {

@@ -33,6 +33,7 @@ import edu.uci.ics.crawler4j.crawler.exceptions.PageBiggerThanMaxSizeException;
 import edu.uci.ics.crawler4j.crawler.exceptions.ParseException;
 import edu.uci.ics.crawler4j.fetcher.PageFetchResult;
 import edu.uci.ics.crawler4j.fetcher.PageFetcher;
+import edu.uci.ics.crawler4j.frontier.DatabaseException;
 import edu.uci.ics.crawler4j.frontier.Frontier;
 import edu.uci.ics.crawler4j.parser.HtmlParseData;
 import edu.uci.ics.crawler4j.parser.NotAllowedContentException;
@@ -342,7 +343,11 @@ public class WebCrawler implements Runnable {
         } catch (Throwable t) {
             setError(t);
         } finally {
-            myController.unregisterCrawler(this);
+            try {
+                myController.unregisterCrawler(this);
+            } catch (Exception e) {
+                logger.error("could not unregister crawler", e);
+            }
         }
         onBeforeExit();
         myController.getCrawlersLocalData().add(getMyLocalData());
@@ -406,7 +411,7 @@ public class WebCrawler implements Runnable {
         // Sub-classed should override this to add their custom functionality
     }
 
-    private void processPage(WebURL curURL) throws IOException, InterruptedException, ParseException {
+    private void processPage(WebURL curURL) throws InterruptedException, ParseException {
         PageFetchResult fetchResult = null;
         Page page = new Page(curURL);
         try {
@@ -573,7 +578,7 @@ public class WebCrawler implements Runnable {
                 curURL.getURL());
         } catch (InterruptedException e) {
             throw e;
-        } catch (IOException | RuntimeException e) {
+        } catch (DatabaseException | IOException | RuntimeException e) {
             onUnhandledException(curURL, e);
         } finally {
             if (fetchResult != null) {

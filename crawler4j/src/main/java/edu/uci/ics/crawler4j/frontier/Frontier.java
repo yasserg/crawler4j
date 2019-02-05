@@ -30,9 +30,9 @@ public interface Frontier {
      * @param url
      * @param docId
      */
-    void addUrlAndDocId(String url, int docId);
+    void addUrlAndDocId(String url, int docId) throws DatabaseException;
 
-    void close();
+    void close() throws DatabaseException;
 
     /**
      * Returns the docid of an already seen url.
@@ -40,45 +40,45 @@ public interface Frontier {
      * @param url the URL for which the docid is returned.
      * @return the docid of the url if it is seen before. Otherwise -1 is returned.
      */
-    int getDocId(String url);
+    int getDocId(String url) throws DatabaseException;
 
     /**
      * @param url
      * @return
      */
-    int getNewDocID(String url);
+    int getNewDocID(String url) throws DatabaseException;
 
     /**
      * @param max
      * @param result
      * @throws InterruptedException
      */
-    void getNextURLs(int max, List<WebURL> result);
+    void getNextURLs(int max, List<WebURL> result) throws DatabaseException;
 
     /**
      * @param url
      * @return
      */
-    boolean isSeenBefore(String url);
+    boolean isSeenBefore(String url) throws DatabaseException;
 
     /**
      * Clear all stored crawl tracking data in preparation for a new crawl.
      */
-    void reset();
+    void reset() throws DatabaseException;
 
     /**
      * @param url
      */
-    void schedule(WebURL url);
+    void schedule(WebURL url) throws DatabaseException;
 
     /**
      * @param urls
      */
-    void scheduleAll(List<WebURL> urls);
+    void scheduleAll(List<WebURL> urls) throws DatabaseException;
 
     /**
      * @param url
      */
-    void setProcessed(WebURL url);
+    void setProcessed(WebURL url) throws DatabaseException;
 
 }
