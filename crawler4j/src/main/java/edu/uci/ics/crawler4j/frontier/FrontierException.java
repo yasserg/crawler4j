@@ -19,17 +19,17 @@ package edu.uci.ics.crawler4j.frontier;
 /**
  * A generic exception in the underlying {@link Frontier} datastore.
  */
-public class DatabaseException extends Exception {
+public class FrontierException extends Exception {
 
-    public DatabaseException(String message) {
+    public FrontierException(String message) {
         super(message);
     }
 
-    public DatabaseException(Throwable cause) {
+    public FrontierException(Throwable cause) {
         super(cause);
     }
 
-    public DatabaseException(String message, Throwable cause) {
+    public FrontierException(String message, Throwable cause) {
         super(message, cause);
     }
 

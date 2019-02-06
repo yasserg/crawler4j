@@ -33,8 +33,8 @@ import edu.uci.ics.crawler4j.crawler.exceptions.PageBiggerThanMaxSizeException;
 import edu.uci.ics.crawler4j.crawler.exceptions.ParseException;
 import edu.uci.ics.crawler4j.fetcher.PageFetchResult;
 import edu.uci.ics.crawler4j.fetcher.PageFetcher;
-import edu.uci.ics.crawler4j.frontier.DatabaseException;
 import edu.uci.ics.crawler4j.frontier.Frontier;
+import edu.uci.ics.crawler4j.frontier.FrontierException;
 import edu.uci.ics.crawler4j.parser.HtmlParseData;
 import edu.uci.ics.crawler4j.parser.NotAllowedContentException;
 import edu.uci.ics.crawler4j.parser.ParseData;
@@ -578,7 +578,7 @@ public class WebCrawler implements Runnable {
                 curURL.getURL());
         } catch (InterruptedException e) {
             throw e;
-        } catch (DatabaseException | IOException | RuntimeException e) {
+        } catch (FrontierException | IOException | RuntimeException e) {
             onUnhandledException(curURL, e);
         } finally {
             if (fetchResult != null) {
