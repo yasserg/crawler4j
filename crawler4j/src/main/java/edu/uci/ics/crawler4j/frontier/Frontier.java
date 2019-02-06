@@ -135,7 +135,7 @@ public class Frontier {
         controller.foundMorePages();
     }
 
-    public void getNextURLs(int max, List<WebURL> result) throws InterruptedException {
+    public synchronized void getNextURLs(int max, List<WebURL> result) throws InterruptedException {
         try {
             List<WebURL> curResults = workQueues.get(max);
             workQueues.delete(curResults.size());
