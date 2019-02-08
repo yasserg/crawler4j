@@ -149,8 +149,12 @@ public class DocIDServer {
         try {
             return (int) docIDsDB.count();
         } catch (DatabaseException e) {
-            logger.error("Exception thrown while getting DOC Count", e);
-            return -1;
+            if (config.isHaltOnError()) {
+                throw e;
+            } else {
+                logger.error("Exception thrown while getting DOC Count", e);
+                return -1;
+            }
         }
     }
 
@@ -158,7 +162,11 @@ public class DocIDServer {
         try {
             docIDsDB.close();
         } catch (DatabaseException e) {
-            logger.error("Exception thrown while closing DocIDServer", e);
+            if (config.isHaltOnError()) {
+                throw e;
+            } else {
+                logger.error("Exception thrown while closing DocIDServer", e);
+            }
         }
     }
 

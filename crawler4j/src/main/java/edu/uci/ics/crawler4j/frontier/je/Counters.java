@@ -140,7 +140,11 @@ public class Counters {
                 statisticsDB.close();
             }
         } catch (DatabaseException e) {
-            logger.error("Exception thrown while trying to close statisticsDB", e);
+            if (config.isHaltOnError()) {
+                throw e;
+            } else {
+                logger.error("Exception thrown while trying to close statisticsDB", e);
+            }
         }
     }
 

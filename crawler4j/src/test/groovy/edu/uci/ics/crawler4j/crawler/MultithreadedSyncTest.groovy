@@ -45,8 +45,8 @@ class MultithreadedSyncTest extends Specification {
     @Shared participatedThreads = Collections.synchronizedSet(new HashSet())
     @Shared transformer = new ResponseTransformer() {
         def page = 0
-        public String getName() { return "infinite-website" }
-        public Response transform(Request request, Response response, FileSource files, Parameters parameters) {
+        String getName() { return "infinite-website" }
+        Response transform(Request request, Response response, FileSource files, Parameters parameters) {
             if (startedThreads.size() < numThreads || initializingThreads.size() > 0) {
                 return Response.Builder.like(response).but().body(
                     "Link 1: http://localhost:8080/page/" + page++ + "\n" +
@@ -64,39 +64,39 @@ class MultithreadedSyncTest extends Specification {
     def "multiple threads start and run to completion"() {
         
         given: "basic crawler setup that throws all unexpected exceptions (haltOnError)"
-            def config = new CrawlConfig(crawlStorageFolder: folder.root, haltOnError: true, allowSingleLevelDomain: true, politenessDelay: 0)
-            def fetcher = new PageFetcher(config)
-            def robots = new RobotstxtServer(new RobotstxtConfig(enabled: false), fetcher)
-            def controller = new CrawlController(config, fetcher, robots)
-            def factory = new WebCrawlerFactory() {
-                @Override public WebCrawler newInstance() {
-                    return new WebCrawler() {
-                        @Override public void onStart() { 
-                            startedThreads.add(thread) 
-                            initializingThreads.add(thread) 
-                        }
-                        @Override public void visit(Page page) { 
-                            initializingThreads.remove(thread)
-                            participatedThreads.add(thread)
-                            logger.info(page.webURL.url)
-                        }
-                        @Override public void onBeforeExit() {
-                            initializingThreads.remove(thread)
-                        }
+        def config = new CrawlConfig(crawlStorageFolder: folder.root, haltOnError: true, allowSingleLevelDomain: true, politenessDelay: 0)
+        def fetcher = new PageFetcher(config)
+        def robots = new RobotstxtServer(new RobotstxtConfig(enabled: false), fetcher)
+        def controller = new CrawlController(config, fetcher, robots)
+        def factory = new WebCrawlerFactory() {
+            @Override WebCrawler newInstance() {
+                return new WebCrawler() {
+                    @Override void onStart() {
+                        startedThreads.add(Thread.currentThread())
+                        initializingThreads.add(Thread.currentThread())
+                    }
+                    @Override void visit(Page page) {
+                        initializingThreads.remove(Thread.currentThread())
+                        participatedThreads.add(Thread.currentThread())
+                        logger.info(page.webURL.url)
+                    }
+                    @Override void onBeforeExit() {
+                        initializingThreads.remove(Thread.currentThread())
                     }
                 }
             }
+        }
             
         and: "mock website that runs out of pages once all threads are running"
-            givenThat(get(urlMatching("/.*")).willReturn(aResponse().withHeader("Content-Type", "text/plain; charset=utf-8")))
+        givenThat(get(urlMatching("/.*")).willReturn(aResponse().withHeader("Content-Type", "text/plain; charset=utf-8")))
             
         when: "start crawl and wait until finished"
-            controller.addSeed("http://localhost:8080/page/0")
-            controller.start(factory, numThreads)
+        controller.addSeed("http://localhost:8080/page/0")
+        controller.start(factory, numThreads)
         
         then: "all threads participated"
-            // make sure threads didn't just start and immediately finish without participating
-            assert(participatedThreads.size() == numThreads)
+        // make sure threads didn't just start and immediately finish without participating
+        assert(participatedThreads.size() == numThreads)
             
     }
 
