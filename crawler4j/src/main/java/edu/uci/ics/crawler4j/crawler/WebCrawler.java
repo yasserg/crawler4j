@@ -65,6 +65,12 @@ public class WebCrawler implements Callable<Void> {
     protected CrawlController myController;
 
     /**
+     * The thread within which this crawler instance is running.
+     */
+    @Deprecated
+    private Thread myThread;
+
+    /**
      * The parser that is used by this crawler instance to parse the content of the fetched pages.
      */
     private Parser parser;
@@ -313,6 +319,7 @@ public class WebCrawler implements Callable<Void> {
 
     @Override
     public Void call() throws Exception {
+        myThread = Thread.currentThread();
         try {
             onStart();
             boolean finished = false;
@@ -320,14 +327,14 @@ public class WebCrawler implements Callable<Void> {
                 if (Thread.interrupted()) {
                     throw new InterruptedException();
                 }
-                if (myController.isHalt()) {
+                if (myController.isShuttingDown()) {
                     finished = true;
                 } else {
                     List<WebURL> assignedURLs = new ArrayList<>(batchReadSize);
                     frontier.getNextURLs(batchReadSize, assignedURLs);
                     if (assignedURLs.isEmpty()) {
                         isWaitingForNewURLs = true;
-                        myController.awaitCompletion(this);
+                        myController.crawlerAwaitingCompletion(this);
                         isWaitingForNewURLs = false;
                         if (myController.isFinished()) {
                             finished = true;
@@ -347,7 +354,7 @@ public class WebCrawler implements Callable<Void> {
                 }
             }
         } catch (Throwable t) {
-            myController.setHalt(true);
+            myController.shutdown();
             throw t;
         } finally {
             myController.unregisterCrawler(this);
@@ -592,6 +599,15 @@ public class WebCrawler implements Callable<Void> {
     }
 
     @Deprecated
+    public Thread getThread() {
+        return myThread;
+    }
+
+    @Deprecated
+    public void setThread(Thread myThread) {
+        this.myThread = myThread;
+    }
+
     public boolean isNotWaitingForNewURLs() {
         return !isWaitingForNewURLs;
     }

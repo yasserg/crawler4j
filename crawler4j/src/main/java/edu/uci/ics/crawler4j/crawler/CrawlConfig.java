@@ -230,6 +230,7 @@ public class CrawlConfig {
     private DnsResolver dnsResolver = new SystemDefaultDnsResolver();
 
     private boolean haltOnError = false;
+
     private boolean allowSingleLevelDomain = false;
 
     /*

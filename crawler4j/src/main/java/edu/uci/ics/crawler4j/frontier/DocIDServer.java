@@ -26,7 +26,6 @@ import com.sleepycat.je.DatabaseEntry;
 import com.sleepycat.je.DatabaseException;
 import com.sleepycat.je.Environment;
 import com.sleepycat.je.OperationStatus;
-import com.sleepycat.je.ThreadInterruptedException;
 
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.util.Util;
@@ -160,10 +159,12 @@ public class DocIDServer {
     public void close() {
         try {
             docIDsDB.close();
-        } catch (ThreadInterruptedException e) {
-            // ignore
-        } catch (Throwable t) {
-            logger.error("error while closing", t);
+        } catch (DatabaseException e) {
+            if (config.isHaltOnError()) {
+                throw e;
+            } else {
+                logger.error("Exception thrown while closing DocIDServer", e);
+            }
         }
     }
 }
