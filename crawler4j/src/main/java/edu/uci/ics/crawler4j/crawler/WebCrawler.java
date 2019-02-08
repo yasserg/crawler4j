@@ -22,6 +22,7 @@ import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.Callable;
 
 import org.apache.http.HttpStatus;
 import org.apache.http.impl.EnglishReasonPhraseCatalog;
@@ -47,7 +48,7 @@ import edu.uci.ics.crawler4j.url.WebURL;
  *
  * @author Yasser Ganjisaffar
  */
-public class WebCrawler implements Runnable {
+public class WebCrawler implements Callable<Void> {
 
     protected static final Logger logger = LoggerFactory.getLogger(WebCrawler.class);
 
@@ -62,11 +63,6 @@ public class WebCrawler implements Runnable {
      * current crawl or adding new seeds during runtime.
      */
     protected CrawlController myController;
-
-    /**
-     * The thread within which this crawler instance is running.
-     */
-    private Thread myThread;
 
     /**
      * The parser that is used by this crawler instance to parse the content of the fetched pages.
@@ -102,8 +98,6 @@ public class WebCrawler implements Runnable {
      */
     @Deprecated
     private boolean isWaitingForNewURLs;
-
-    private Throwable error;
 
     private int batchReadSize;
 
@@ -318,10 +312,9 @@ public class WebCrawler implements Runnable {
     }
 
     @Override
-    public void run() {
+    public Void call() throws Exception {
         try {
             onStart();
-            setError(null);
             boolean finished = false;
             while (!finished) {
                 if (Thread.interrupted()) {
@@ -354,13 +347,14 @@ public class WebCrawler implements Runnable {
                 }
             }
         } catch (Throwable t) {
-            setError(t);
             myController.setHalt(true);
+            throw t;
         } finally {
             myController.unregisterCrawler(this);
         }
         onBeforeExit();
         myController.getCrawlersLocalData().add(getMyLocalData());
+        return null;
     }
 
     /**
@@ -597,25 +591,9 @@ public class WebCrawler implements Runnable {
         }
     }
 
-    public Thread getThread() {
-        return myThread;
-    }
-
-    public void setThread(Thread myThread) {
-        this.myThread = myThread;
-    }
-
     @Deprecated
     public boolean isNotWaitingForNewURLs() {
         return !isWaitingForNewURLs;
     }
 
-    protected Throwable getError() {
-        return error;
-    }
-
-    protected void setError(Throwable error) {
-        this.error = error;
-        myController.setError(error);
-    }
 }

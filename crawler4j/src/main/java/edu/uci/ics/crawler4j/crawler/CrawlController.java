@@ -24,6 +24,9 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
@@ -53,7 +56,6 @@ public class CrawlController {
     static final Logger logger = LoggerFactory.getLogger(CrawlController.class);
     private final CrawlConfig config;
     private final Set<WebCrawler> workers = new HashSet<>();
-    private final List<Thread> threads = new ArrayList<>();
     private final List<WebCrawler> crawlers = new ArrayList<>();
 
     /**
@@ -73,7 +75,6 @@ public class CrawlController {
      */
     protected boolean finished;
     protected boolean closed;
-    private Throwable error;
     private boolean halt = false;
 
     /**
@@ -91,6 +92,9 @@ public class CrawlController {
     protected final Environment env;
 
     protected Parser parser;
+
+    private ExecutorService executor;
+    private List<Future<Void>> futures;
 
     public CrawlController(CrawlConfig config, PageFetcher pageFetcher,
                            RobotstxtServer robotstxtServer) throws Exception {
@@ -289,17 +293,16 @@ public class CrawlController {
 
         try {
             finished = false;
-            setError(null);
             crawlersLocalData.clear();
+
+            executor = Executors.newFixedThreadPool(numberOfCrawlers);
+            futures = new ArrayList<>();
 
             for (int i = 1; i <= numberOfCrawlers; i++) {
                 T crawler = crawlerFactory.newInstance();
-                Thread thread = new Thread(crawler, "Crawler " + i);
-                crawler.setThread(thread);
                 crawler.init(i, this);
-                thread.start();
                 crawlers.add(crawler);
-                threads.add(thread);
+                futures.add(executor.submit(crawler));
                 logger.info("Crawler {} started", i);
             }
 
@@ -540,37 +543,30 @@ public class CrawlController {
             this.halt = true;
         }
 
-        for (Thread t : threads) {
-            while (t.isAlive()) {
-                try {
-                    t.join();
-                } catch (InterruptedException e) {
-                    // ignore
-                }
-            }
+        if (!executor.isShutdown()) {
+            executor.shutdown();
         }
 
-        if (config.isHaltOnError()) {
-            Throwable t = getError();
-            if (t != null && config.isHaltOnError()) {
-                if (t instanceof RuntimeException) {
-                    throw (RuntimeException)t;
-                } else if (t instanceof Error) {
-                    throw (Error)t;
-                } else {
-                    throw new RuntimeException("terminating because of exception:", t);
-                }
+        try {
+            while (!executor.isTerminated()) {
+                executor.awaitTermination(10, TimeUnit.SECONDS);
+            }
+        } catch (InterruptedException e) {
+            logger.warn("interrupted");
+        }
+
+        for (Future<Void> future : futures) {
+            try {
+                future.get();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
         }
     }
 
     public void interrupt() {
         halt = true;
-        for (Thread t : threads) {
-            if (t.isAlive() && !t.isInterrupted()) {
-                t.interrupt();
-            }
-        }
+        executor.shutdownNow();
     }
 
     /**
@@ -588,16 +584,6 @@ public class CrawlController {
 
     public CrawlConfig getConfig() {
         return config;
-    }
-
-    protected synchronized Throwable getError() {
-        return error;
-    }
-
-    protected synchronized void setError(Throwable e) {
-        if (e == null || this.error == null) {
-            this.error = e;
-        }
     }
 
     /**
