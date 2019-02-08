@@ -67,7 +67,7 @@
                     </plugin>
                 </plugins>
             </build>
-        </profile> 
+        </profile>
         <profile>
             <id>custom-docker-compose-location</id>
             <activation>
@@ -88,6 +88,6 @@
                     </plugin>
                 </plugins>
             </build>
-        </profile> 
+        </profile>
     </profiles>
 </project>

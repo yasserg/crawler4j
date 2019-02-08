@@ -57,7 +57,7 @@
         <!-- dependency versions -->
         <apache.http.components.version>4.5.5</apache.http.components.version>
         <apache.tika.version>1.17</apache.tika.version>
-        <c3p0.version>0.9.5.2</c3p0.version>
+        <c3p0.version>0.9.5.3</c3p0.version>
         <checkstyle.version>8.12</checkstyle.version>
         <docker.compose.rule.version>0.33.0</docker.compose.rule.version>
         <flyway.db.version>5.0.7</flyway.db.version>
