@@ -97,7 +97,7 @@ public class BasicCrawlController {
      * rootFolder manually.
      */
         config.setResumableCrawling(false);
-        
+
         /*
          * Set this to true if you want crawling to stop whenever an unexpected error
          * occurs. You'll probably want this set to true when you first start testing

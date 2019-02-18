@@ -1,0 +1,9 @@
+rootProject.name = 'crawler4j-parent'
+
+include ':crawler4j'
+include ':crawler4j-examples-base'
+include ':crawler4j-examples-postgres'
+
+project(':crawler4j').projectDir = "$rootDir/crawler4j" as File
+project(':crawler4j-examples-base').projectDir = "$rootDir/crawler4j-examples/crawler4j-examples-base" as File
+project(':crawler4j-examples-postgres').projectDir = "$rootDir/crawler4j-examples/crawler4j-examples-postgres" as File

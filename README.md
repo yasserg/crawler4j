@@ -29,40 +29,6 @@ To use the latest release of crawler4j, please use the following snippet in your
     </dependency>
 ```
 
-#### Snapshot
-
-You can add the following to use the next SNAPSHOT release
-
-```xml
-    <repositories>
-        <repository>
-            <id>onebeartoe</id>
-            <name>onebeartoe</name>
-            <url>https://repository-onebeartoe.forge.cloudbees.com/snapshot/</url>
-        </repository>
-    </repositories>
-    
-    <dependencies>
-        <dependency>
-            <groupId>edu.uci.ics</groupId>
-            <artifactId>crawler4j</artifactId>
-            <version>4.5.0-SNAPSHOT</version>
-        </dependency>
-    </dependencies>
-```
-
-### Without Maven
-
-From 4.3 if you need a jar that includes all dependencies (aka fatjar) you have to build it yourself. Clone the repo and
-run:
-
-```bash
-    $ mvn package -Pfatjar
-```
-
-you will find in `target/` folder a jar named like `crawler4j-X.Y-with-dependencies.jar`.
-
-
 ### Using Gradle
 
 Please include the following dependency in the build.gradle file to use crawler4j
@@ -72,8 +38,8 @@ Please include the following dependency in the build.gradle file to use crawler4
 Also, add the following repository url in build.gradle, for the dependency [sleepycat](https://mvnrepository.com/artifact/com.sleepycat/je/5.0.84)
 
         maven {
-                url "https://repo.boundlessgeo.com/main/"
-            }
+            url "https://repo.boundlessgeo.com/main/"
+        }
 
 ## Quickstart
 You need to create a crawler class that extends WebCrawler. This class decides which URLs

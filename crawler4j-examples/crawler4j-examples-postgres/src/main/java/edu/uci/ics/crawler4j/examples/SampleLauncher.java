@@ -1,21 +1,23 @@
 package edu.uci.ics.crawler4j.examples;
 
+import org.flywaydb.core.Flyway;
+
 import com.google.common.io.Files;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
+
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.crawler.CrawlController;
 import edu.uci.ics.crawler4j.examples.crawler.PostgresCrawlerFactory;
 import edu.uci.ics.crawler4j.fetcher.PageFetcher;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtConfig;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
-import org.flywaydb.core.Flyway;
 
 public class SampleLauncher {
 
     public static void main(String[] args) throws Exception {
 
         String crawlStorageFolder = Files.createTempDir().getAbsolutePath();
-        int numberOfCrawlers = Integer.valueOf(args[2]);
+        final int numberOfCrawlers = Integer.valueOf(args[2]);
 
         CrawlConfig config = new CrawlConfig();
 
@@ -44,11 +46,9 @@ public class SampleLauncher {
         controller.addSeed("https://pt.wikipedia.org/wiki/Protocolo");
         controller.addSeed("https://de.wikipedia.org/wiki/Datenbank");
 
-
         Flyway flyway = new Flyway();
         flyway.setDataSource(args[1], "crawler4j", "crawler4j");
         flyway.migrate();
-
 
         ComboPooledDataSource pool = new ComboPooledDataSource();
         pool.setDriverClass("org.postgresql.Driver");

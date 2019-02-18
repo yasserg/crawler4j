@@ -53,8 +53,6 @@ public class WebURL implements Serializable {
      * Set the TLDList if you want {@linkplain #getDomain()} and
      * {@link #getSubDomain()} to properly identify effective top level registeredDomain as
      * defined at <a href="https://publicsuffix.org">publicsuffix.org</a>
-     *
-     * @param tldList
      */
     public void setTldList(TLDList tldList) {
         this.tldList = tldList;

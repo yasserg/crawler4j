@@ -1,0 +1,17 @@
+
+repositories {
+    mavenCentral()
+    // Needed for 'com.palantir.docker.compose'
+    maven { url "https://palantir.bintray.com/releases" }
+}
+
+dependencies {
+    compile project(':crawler4j')
+
+    compile group: 'org.postgresql', name: 'postgresql', version: '42.2.1'
+    compile group: 'com.mchange', name: 'c3p0', version: '0.9.5.3'
+    compile group: 'org.flywaydb', name: 'flyway-core', version: '5.0.7'
+    compile group: 'com.google.guava', name: 'guava', version: '24.0-jre'
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    testCompile group: 'com.palantir.docker.compose', name: 'docker-compose-rule-junit4', version: '0.33.0'
+}

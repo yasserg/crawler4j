@@ -1,19 +1,20 @@
 package edu.uci.ics.crawler4j.examples;
 
-import com.mchange.v2.c3p0.ComboPooledDataSource;
-import com.palantir.docker.compose.DockerComposeRule;
-import com.palantir.docker.compose.configuration.ProjectName;
-import com.palantir.docker.compose.connection.DockerMachine;
-import com.palantir.docker.compose.connection.waiting.HealthChecks;
+import java.beans.PropertyVetoException;
+import java.net.ServerSocket;
+import java.sql.Connection;
+import java.sql.ResultSet;
+
 import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.ClassRule;
 import org.junit.Test;
 
-import java.beans.PropertyVetoException;
-import java.net.ServerSocket;
-import java.sql.Connection;
-import java.sql.ResultSet;
+import com.mchange.v2.c3p0.ComboPooledDataSource;
+import com.palantir.docker.compose.DockerComposeRule;
+import com.palantir.docker.compose.configuration.ProjectName;
+import com.palantir.docker.compose.connection.DockerMachine;
+import com.palantir.docker.compose.connection.waiting.HealthChecks;
 
 public class PgsqlTest {
 
@@ -31,7 +32,7 @@ public class PgsqlTest {
             .build();
 
     @Test
-    public void crawler4j_postgres_repository() throws Exception {
+    public void testPostgresRepository() throws Exception {
         String jdbcurl = String.format("jdbc:postgresql://%s:%d/crawler4j",
                 docker.containers().container("db").port(5432).getIp(), port);
 
@@ -42,7 +43,7 @@ public class PgsqlTest {
         ComboPooledDataSource pool = getTestPool(jdbcurl);
 
         int count = 0;
-        try(Connection connection = pool.getConnection()) {
+        try (Connection connection = pool.getConnection()) {
             ResultSet rs = connection.prepareStatement("SELECT COUNT (1) FROM webpage;").executeQuery();
             rs.next();
             count = rs.getInt(1);

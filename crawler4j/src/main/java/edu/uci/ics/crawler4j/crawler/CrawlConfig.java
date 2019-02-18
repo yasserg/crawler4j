@@ -214,7 +214,7 @@ public class CrawlConfig {
     private CookieStore cookieStore;
 
     /**
-     * DNS resolver to use, #{@link SystemDefaultDnsResolver()} is default.
+     * DNS resolver to use, {@link SystemDefaultDnsResolver} is default.
      */
     public void setDnsResolver(final DnsResolver dnsResolver) {
         this.dnsResolver = dnsResolver;
@@ -703,8 +703,6 @@ public class CrawlConfig {
 
     /**
      * Are single level domains (e.g. http://localhost) considered valid?
-     *
-     * @return
      */
     public boolean isAllowSingleLevelDomain() {
         return allowSingleLevelDomain;
