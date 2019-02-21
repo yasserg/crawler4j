@@ -1,20 +1,21 @@
 package edu.uci.ics.crawler4j.examples.crawler;
 
+import java.util.Set;
+import java.util.regex.Pattern;
+
+import org.slf4j.Logger;
+
 import edu.uci.ics.crawler4j.crawler.Page;
 import edu.uci.ics.crawler4j.crawler.WebCrawler;
 import edu.uci.ics.crawler4j.examples.db.PostgresDBService;
 import edu.uci.ics.crawler4j.parser.HtmlParseData;
 import edu.uci.ics.crawler4j.url.WebURL;
-import org.slf4j.Logger;
-
-import java.util.Set;
-import java.util.regex.Pattern;
 
 public class PostgresWebCrawler extends WebCrawler {
 
     private static final Logger logger = org.slf4j.LoggerFactory.getLogger(PostgresWebCrawler.class);
 
-    private static Pattern FILE_ENDING_EXCLUSION_PATTERN = Pattern.compile(".*(\\.(" +
+    private static final Pattern FILE_ENDING_EXCLUSION_PATTERN = Pattern.compile(".*(\\.(" +
             "css|js" +
             "|bmp|gif|jpe?g|JPE?G|png|tiff?|ico|nef|raw" +
             "|mid|mp2|mp3|mp4|wav|wma|flv|mpe?g" +
@@ -24,7 +25,6 @@ public class PostgresWebCrawler extends WebCrawler {
             "|zip|rar|gz|bz2|7z|bin" +
             "|xml|txt|java|c|cpp|exe" +
             "))$");
-
 
     private final PostgresDBService postgresDBService;
 
