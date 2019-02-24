@@ -1,6 +1,7 @@
 package edu.uci.ics.crawler4j.examples.basic;
 
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
 import org.apache.http.Header;
@@ -14,6 +15,19 @@ public class BasicCrawler extends WebCrawler {
 
     private static final Pattern IMAGE_EXTENSIONS = Pattern.compile(".*\\.(bmp|gif|jpg|png)$");
 
+    private final AtomicInteger numSeenImages;
+
+    /**
+     * Creates a new crawler instance.
+     *
+     * @param numSeenImages This is just an example to demonstrate how you can pass objects to crawlers. In this
+     * example, we pass an AtomicInteger to all crawlers and they increment it whenever they see a url which points
+     * to an image.
+     */
+    public BasicCrawler(AtomicInteger numSeenImages) {
+        this.numSeenImages = numSeenImages;
+    }
+
     /**
      * You should implement this function to specify whether the given url
      * should be crawled or not (based on your crawling logic).
@@ -23,6 +37,7 @@ public class BasicCrawler extends WebCrawler {
         String href = url.getURL().toLowerCase();
         // Ignore the url if it has an extension that matches our defined set of image extensions.
         if (IMAGE_EXTENSIONS.matcher(href).matches()) {
+            numSeenImages.incrementAndGet();
             return false;
         }
 

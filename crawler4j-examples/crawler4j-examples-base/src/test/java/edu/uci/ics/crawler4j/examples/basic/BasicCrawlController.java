@@ -1,5 +1,7 @@
 package edu.uci.ics.crawler4j.examples.basic;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.crawler.CrawlController;
 import edu.uci.ics.crawler4j.fetcher.PageFetcher;
@@ -66,9 +68,16 @@ public class BasicCrawlController {
         // threads works best for you.
         int numberOfCrawlers = 8;
 
+        // To demonstrate an example of how you can pass objects to crawlers, we use an AtomicInteger that crawlers
+        // increment whenever they see a url which points to an image.
+        AtomicInteger numSeenImages = new AtomicInteger();
+
+        // The factory which creates instances of crawlers.
+        CrawlController.WebCrawlerFactory<BasicCrawler> factory = () -> new BasicCrawler(numSeenImages);
+
         // Start the crawl. This is a blocking operation, meaning that your code
         // will reach the line after this only when crawling is finished.
-        controller.start(BasicCrawler.class, numberOfCrawlers);
+        controller.start(factory, numberOfCrawlers);
     }
 
 }
