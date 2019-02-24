@@ -10,7 +10,6 @@ crawling the Web. Using it, you can setup a multi-threaded web crawler in few mi
 
 - [Installation](#installation)
 - [Quickstart](#quickstart)   
-- [Using a factory](#using-a-factory) (for Spring or Guice)
 - [More Examples](#more-examples)
 - [Configuration Details](#configuration-details)
 - [License](#license)
@@ -105,56 +104,27 @@ public class Controller {
         CrawlConfig config = new CrawlConfig();
         config.setCrawlStorageFolder(crawlStorageFolder);
 
-        /*
-         * Instantiate the controller for this crawl.
-         */
+        // Instantiate the controller for this crawl.
         PageFetcher pageFetcher = new PageFetcher(config);
         RobotstxtConfig robotstxtConfig = new RobotstxtConfig();
         RobotstxtServer robotstxtServer = new RobotstxtServer(robotstxtConfig, pageFetcher);
         CrawlController controller = new CrawlController(config, pageFetcher, robotstxtServer);
 
-        /*
-         * For each crawl, you need to add some seed urls. These are the first
-         * URLs that are fetched and then the crawler starts following links
-         * which are found in these pages
-         */
+        // For each crawl, you need to add some seed urls. These are the first
+        // URLs that are fetched and then the crawler starts following links
+        // which are found in these pages
         controller.addSeed("https://www.ics.uci.edu/~lopes/");
         controller.addSeed("https://www.ics.uci.edu/~welling/");
     	controller.addSeed("https://www.ics.uci.edu/");
-
-        /*
-         * Start the crawl. This is a blocking operation, meaning that your code
-         * will reach the line after this only when crawling is finished.
-         */
-        controller.start(MyCrawler.class, numberOfCrawlers);
+    	
+    	// The factory which creates instances of crawlers.
+        CrawlController.WebCrawlerFactory<BasicCrawler> factory = MyCrawler::new;
+        
+        // Start the crawl. This is a blocking operation, meaning that your code
+        // will reach the line after this only when crawling is finished.
+        controller.start(factory, numberOfCrawlers);
     }
 }
-```
-## Using a factory
-Using a factory can be convenient to integrate crawler4j in a IoC environement (like Spring, Guice) 
-or to pass information or a collaborator to each `WebCrawler` instance.
-
-```java
-public class CsiCrawlerCrawlerControllerFactory implements CrawlController.WebCrawlerFactory {
-
-    Map<String, String> metadata;
-    SqlRepository repository;
-
-    public CsiCrawlerCrawlerControllerFactory(Map<String, String> metadata, SqlRepository repository) {
-        this.metadata = metadata;
-        this.repository = repository;
-    }
-
-    @Override
-    public WebCrawler newInstance() {
-        return new MyCrawler(metadata, repository);
-    }
-}
-```
-To use a factory just call the right method in the `CrawlController` (probably you will want to use the `startNonBlocking` if you are in Spring or Guice):
-```java
-            MyCrawlerFactory factory = new MyCrawlerFactory(metadata, repository);
-            controller.startNonBlocking(factory, numberOfCrawlers);
 ```
 ## More Examples
 - [Basic crawler](crawler4j-examples/crawler4j-examples-base/src/test/java/edu/uci/ics/crawler4j/examples/basic/): the full source code of the above example with more details.
