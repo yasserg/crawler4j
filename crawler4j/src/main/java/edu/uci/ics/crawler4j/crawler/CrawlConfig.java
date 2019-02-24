@@ -262,10 +262,10 @@ public class CrawlConfig {
     }
 
     /**
-     * The folder which will be used by crawler for storing the intermediate
-     * crawl data. The content of this folder should not be modified manually.
-     *
-     * @param crawlStorageFolder The folder for the crawler's storage
+     * Sets the folder which will be used by crawler for storing the
+     * intermediate crawl data (e.g. list of urls that are extracted
+     * from previously fetched pages and need to be crawled later).
+     * Content of this folder should not be modified manually.
      */
     public void setCrawlStorageFolder(String crawlStorageFolder) {
         this.crawlStorageFolder = crawlStorageFolder;
