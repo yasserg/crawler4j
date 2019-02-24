@@ -19,7 +19,7 @@ crawling the Web. Using it, you can setup a multi-threaded web crawler in few mi
 
 ### Using Maven
 
-To use the latest release of crawler4j, please use the following snippet in your pom.xml
+Add the following dependency to your pom.xml:
 
 ```xml
     <dependency>
@@ -31,15 +31,9 @@ To use the latest release of crawler4j, please use the following snippet in your
 
 ### Using Gradle
 
-Please include the following dependency in the build.gradle file to use crawler4j
+Add the following dependency to your build.gradle file:
 
     compile group: 'edu.uci.ics', name: 'crawler4j', version: '4.4.0'
-    
-Also, add the following repository url in build.gradle, for the dependency [sleepycat](https://mvnrepository.com/artifact/com.sleepycat/je/5.0.84)
-
-        maven {
-            url "https://repo.boundlessgeo.com/main/"
-        }
 
 ## Quickstart
 You need to create a crawler class that extends WebCrawler. This class decides which URLs
