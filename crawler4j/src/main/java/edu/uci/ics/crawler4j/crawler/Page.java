@@ -279,7 +279,7 @@ public class Page {
     public String getContentChecksum() {
         return contentChecksum;
     }
-    
+
     /**
      * @return ContentType of this page.
      * For example: "text/html; charset=UTF-8"
