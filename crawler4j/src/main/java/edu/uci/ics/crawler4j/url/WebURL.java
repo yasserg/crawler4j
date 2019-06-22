@@ -18,7 +18,10 @@
 package edu.uci.ics.crawler4j.url;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Map;
+
+import org.apache.http.message.BasicNameValuePair;
 
 import com.google.common.net.InternetDomainName;
 import com.sleepycat.persist.model.Entity;
@@ -48,8 +51,28 @@ public class WebURL implements Serializable {
     private String tag;
     private Map<String, String> attributes;
     private TLDList tldList;
+    
+    private boolean post;
 
-    /**
+	List<BasicNameValuePair> paramsPost;
+
+	public List<BasicNameValuePair> getParamsPost() {
+		return paramsPost;
+	}
+
+	public void setParamsPost(List<BasicNameValuePair> paramsPost) {
+		this.paramsPost = paramsPost;
+	}
+
+    public boolean isPost() {
+		return post;
+	}
+
+	public void setPost(boolean post) {
+		this.post = post;
+	}
+
+	/**
      * Set the TLDList if you want {@linkplain #getDomain()} and
      * {@link #getSubDomain()} to properly identify effective top level registeredDomain as
      * defined at <a href="https://publicsuffix.org">publicsuffix.org</a>

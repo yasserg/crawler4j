@@ -18,6 +18,7 @@
 package edu.uci.ics.crawler4j.fetcher;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
@@ -359,7 +360,13 @@ public class PageFetcher {
      * @return the HttpUriRequest for the given url
      */
     protected HttpUriRequest newHttpUriRequest(WebURL url) {
-        return this.newHttpUriRequest(url.getURL());
+        if(!url.isPost()) return this.newHttpUriRequest(url.getURL());
+    	HttpPost req = new HttpPost(url.getURL());
+    	List<BasicNameValuePair> pairs = url.getParamsPost();
+    	if(pairs!=null && pairs.size() > 0) {
+    		req.setEntity(new UrlEncodedFormEntity(pairs, StandardCharsets.UTF_8));
+    	}
+    	return req;
     }
 
     protected CrawlConfig getConfig() {
