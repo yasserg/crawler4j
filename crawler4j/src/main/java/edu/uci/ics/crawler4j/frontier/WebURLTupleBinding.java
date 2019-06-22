@@ -47,15 +47,17 @@ public class WebURLTupleBinding extends TupleBinding<WebURL> {
         if (webURL.isPost()) {
             List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
             try {
-                while(true) {
+                while (true) {
                     String name = input.readString();
                     String value = input.readString();
                     params.add(new BasicNameValuePair(name, value));
                 }
-            } catch(IndexOutOfBoundsException e) {
+            } catch (IndexOutOfBoundsException e) {
                 // Do nothing, no more parameters to fetch
             }
-            if(params.size() > 0) webURL.setParamsPost(params);
+            if (params.size() > 0) {
+            	webURL.setParamsPost(params);
+            }
         }
         return webURL;
     }
@@ -69,9 +71,9 @@ public class WebURLTupleBinding extends TupleBinding<WebURL> {
         output.writeShort(url.getDepth());
         output.writeByte(url.getPriority());
         output.writeString(url.getAnchor());
-        output.writeBoolean(url.isPost());  
+        output.writeBoolean(url.isPost());
         if (url.isPost() && url.getParamsPost() != null) {
-            for(BasicNameValuePair param : url.getParamsPost()) {
+            for (BasicNameValuePair param : url.getParamsPost()) {
                 output.writeString(param.getName());
                 output.writeString(param.getValue());
             }
