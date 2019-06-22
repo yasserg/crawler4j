@@ -225,12 +225,27 @@ public class WebCrawler implements Runnable {
      * @param contentType Type of Content
      * @param description Error Description
      */
+    @Deprecated
     protected void onUnexpectedStatusCode(String urlStr, int statusCode, String contentType,
                                           String description) {
         logger.warn("Skipping URL: {}, StatusCode: {}, {}, {}", urlStr, statusCode, contentType,
                     description);
         // Do nothing by default (except basic logging)
         // Sub-classed can override this to add their custom functionality
+    }
+    
+    /**
+     * This function is called if the crawler encountered an unexpected http status code ( a
+     * status code other than 3xx)
+     *
+     * @param urlStr URL in which an unexpected error was encountered while crawling
+     * @param statusCode Html StatusCode
+     * @param contentType Type of Content
+     * @param description Error Description
+     */
+    protected void onUnexpectedStatusCode(WebURL webUrl, int statusCode, String contentType,
+                                          String description) {
+        this.onUnexpectedStatusCode(webUrl.getURL(), statusCode, contentType, description);
     }
 
     /**
@@ -292,6 +307,18 @@ public class WebCrawler implements Runnable {
     @Deprecated
     protected void onParseError(WebURL webUrl) {
         logger.warn("Parsing error of: {}", webUrl.getURL());
+        // Do nothing by default (Except logging)
+        // Sub-classed can override this to add their custom functionality
+    }
+    
+    /**
+     * This function is called if the max configured depth is reached in page pointing to
+     * webURL
+     *
+     * @param webUrl URL which failed on parsing
+     */
+    protected void onMaxDepthReached(Page page, WebURL webURL) {
+    	logger.debug("Not looking into: {} as per \"maxDepthOfCrawling\" policy", webURL.getURL());
         // Do nothing by default (Except logging)
         // Sub-classed can override this to add their custom functionality
     }
@@ -410,7 +437,7 @@ public class WebCrawler implements Runnable {
         // Sub-classed should override this to add their custom functionality
     }
 
-    private void processPage(WebURL curURL) throws IOException, InterruptedException, ParseException {
+    protected void processPage(WebURL curURL) throws IOException, InterruptedException, ParseException {
         PageFetchResult fetchResult = null;
         Page page = new Page(curURL);
         try {
@@ -448,33 +475,7 @@ public class WebCrawler implements Runnable {
                     onRedirectedStatusCode(page);
 
                     if (myController.getConfig().isFollowRedirects()) {
-                        int newDocId = docIdServer.getDocId(movedToUrl);
-                        if (newDocId > 0) {
-                            logger.debug("Redirect page: {} is already seen", curURL);
-                            return;
-                        }
-
-                        WebURL webURL = new WebURL();
-                        webURL.setTldList(myController.getTldList());
-                        webURL.setURL(movedToUrl);
-                        webURL.setParentDocid(curURL.getParentDocid());
-                        webURL.setParentUrl(curURL.getParentUrl());
-                        webURL.setDepth(curURL.getDepth());
-                        webURL.setDocid(-1);
-                        webURL.setAnchor(curURL.getAnchor());
-                        if (shouldVisit(page, webURL)) {
-                            if (!shouldFollowLinksIn(webURL) || robotstxtServer.allows(webURL)) {
-                                webURL.setDocid(docIdServer.getNewDocID(movedToUrl));
-                                frontier.schedule(webURL);
-                            } else {
-                                logger.debug(
-                                    "Not visiting: {} as per the server's \"robots.txt\" policy",
-                                    webURL.getURL());
-                            }
-                        } else {
-                            logger.debug("Not visiting: {} as per your \"shouldVisit\" policy",
-                                         webURL.getURL());
-                        }
+                    	followRedirection(page, curURL, movedToUrl);
                     }
                 } else { // All other http codes other than 3xx & 200
                     String description =
@@ -484,7 +485,7 @@ public class WebCrawler implements Runnable {
                     String contentType = fetchResult.getEntity() == null ? "" :
                                          fetchResult.getEntity().getContentType() == null ? "" :
                                          fetchResult.getEntity().getContentType().getValue();
-                    onUnexpectedStatusCode(curURL.getURL(), fetchResult.getStatusCode(),
+                    onUnexpectedStatusCode(curURL, fetchResult.getStatusCode(),
                                            contentType, description);
                 }
 
@@ -513,40 +514,7 @@ public class WebCrawler implements Runnable {
                 parser.parse(page, curURL.getURL());
 
                 if (shouldFollowLinksIn(page.getWebURL())) {
-                    ParseData parseData = page.getParseData();
-                    List<WebURL> toSchedule = new ArrayList<>();
-                    int maxCrawlDepth = myController.getConfig().getMaxDepthOfCrawling();
-                    for (WebURL webURL : parseData.getOutgoingUrls()) {
-                        webURL.setParentDocid(curURL.getDocid());
-                        webURL.setParentUrl(curURL.getURL());
-                        int newdocid = docIdServer.getDocId(webURL.getURL());
-                        if (newdocid > 0) {
-                            // This is not the first time that this Url is visited. So, we set the
-                            // depth to a negative number.
-                            webURL.setDepth((short) -1);
-                            webURL.setDocid(newdocid);
-                        } else {
-                            webURL.setDocid(-1);
-                            webURL.setDepth((short) (curURL.getDepth() + 1));
-                            if ((maxCrawlDepth == -1) || (curURL.getDepth() < maxCrawlDepth)) {
-                                if (shouldVisit(page, webURL)) {
-                                    if (robotstxtServer.allows(webURL)) {
-                                        webURL.setDocid(docIdServer.getNewDocID(webURL.getURL()));
-                                        toSchedule.add(webURL);
-                                    } else {
-                                        logger.debug(
-                                            "Not visiting: {} as per the server's \"robots.txt\" " +
-                                            "policy", webURL.getURL());
-                                    }
-                                } else {
-                                    logger.debug(
-                                        "Not visiting: {} as per your \"shouldVisit\" policy",
-                                        webURL.getURL());
-                                }
-                            }
-                        }
-                    }
-                    frontier.scheduleAll(toSchedule);
+                	followLinks(page, curURL);
                 } else {
                     logger.debug("Not looking for links in page {}, "
                                  + "as per your \"shouldFollowLinksInPage\" policy",
@@ -581,6 +549,98 @@ public class WebCrawler implements Runnable {
             if (fetchResult != null) {
                 fetchResult.discardContentIfNotConsumed();
             }
+        }
+    }
+    
+    /**
+     * Adds all the outgoing links from page fetched from curURL to the scheduler.
+     * @param page
+     * 		the page object that is just fetched and parsed.
+     * @param curURL
+     * 		current URL
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    protected void followLinks(Page page, WebURL curURL) 
+    		throws IOException, InterruptedException {
+    	ParseData parseData = page.getParseData();
+        List<WebURL> toSchedule = new ArrayList<>();
+        int maxCrawlDepth = myController.getConfig().getMaxDepthOfCrawling();
+        for (WebURL webURL : parseData.getOutgoingUrls()) {
+            webURL.setParentDocid(curURL.getDocid());
+            webURL.setParentUrl(curURL.getURL());
+            int newdocid = docIdServer.getDocId(webURL.getURL());
+            if (newdocid > 0) {
+                // This is not the first time that this Url is visited. So, we set the
+                // depth to a negative number.
+                webURL.setDepth((short) -1);
+                webURL.setDocid(newdocid);
+            } else {
+                webURL.setDocid(-1);
+                webURL.setDepth((short) (curURL.getDepth() + 1));
+                if ((maxCrawlDepth == -1) || (curURL.getDepth() < maxCrawlDepth)) {
+                    if (shouldVisit(page, webURL)) {
+                        if (robotstxtServer.allows(webURL)) {
+                            webURL.setDocid(docIdServer.getNewDocID(webURL.getURL()));
+                            toSchedule.add(webURL);
+                        } else {
+                            logger.debug(
+                                "Not visiting: {} as per the server's \"robots.txt\" " +
+                                "policy", webURL.getURL());
+                        }
+                    } else {
+                        logger.debug(
+                            "Not visiting: {} as per your \"shouldVisit\" policy",
+                            webURL.getURL());
+                    }
+                } else {
+                	onMaxDepthReached(page, webURL);
+                }
+            }
+        }
+        frontier.scheduleAll(toSchedule);
+    }
+    
+    /**
+     * Adds the redirection destiny to the scheduler.
+     * 
+     * @param page 
+     * 		the page object that is just fetched and parsed.
+     * @param curURL
+     * 		current URL
+     * @param movedToUrl
+     * 		destiny URL
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    protected void followRedirection(Page page, WebURL curURL, String movedToUrl) 
+    		throws IOException, InterruptedException {
+    	int newDocId = docIdServer.getDocId(movedToUrl);
+        if (newDocId > 0) {
+            logger.debug("Redirect page: {} is already seen", curURL);
+            return;
+        }
+
+        WebURL webURL = new WebURL();
+        webURL.setTldList(myController.getTldList());
+        webURL.setURL(movedToUrl);
+        webURL.setParentDocid(curURL.getParentDocid());
+        webURL.setParentUrl(curURL.getParentUrl());
+        webURL.setDepth(curURL.getDepth());
+        webURL.setDocid(-1);
+        webURL.setAnchor(curURL.getAnchor());
+        if (shouldVisit(page, webURL)) {
+            if (shouldFollowLinksIn(webURL) && robotstxtServer.allows(webURL)) {
+                webURL.setDocid(docIdServer.getNewDocID(movedToUrl));
+                frontier.schedule(webURL);
+            } else {
+                logger.debug(
+                    "Not visiting: {} as per the server's \"robots.txt\" policy",
+                    webURL.getURL());
+            }
+        } else {
+            logger.debug("Not visiting: {} as per your \"shouldVisit\" policy",
+                         webURL.getURL());
         }
     }
 
