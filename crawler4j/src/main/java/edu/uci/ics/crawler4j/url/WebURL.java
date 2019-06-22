@@ -51,28 +51,26 @@ public class WebURL implements Serializable {
     private String tag;
     private Map<String, String> attributes;
     private TLDList tldList;
-    
     private boolean post;
+    List<BasicNameValuePair> paramsPost;
 
-	List<BasicNameValuePair> paramsPost;
+    public List<BasicNameValuePair> getParamsPost() {
+        return paramsPost;
+    }
 
-	public List<BasicNameValuePair> getParamsPost() {
-		return paramsPost;
-	}
-
-	public void setParamsPost(List<BasicNameValuePair> paramsPost) {
-		this.paramsPost = paramsPost;
-	}
+    public void setParamsPost(List<BasicNameValuePair> paramsPost) {
+        this.paramsPost = paramsPost;
+    }
 
     public boolean isPost() {
-		return post;
-	}
+        return post;
+    }
 
-	public void setPost(boolean post) {
-		this.post = post;
-	}
+    public void setPost(boolean post) {
+        this.post = post;
+    }
 
-	/**
+    /**
      * Set the TLDList if you want {@linkplain #getDomain()} and
      * {@link #getSubDomain()} to properly identify effective top level registeredDomain as
      * defined at <a href="https://publicsuffix.org">publicsuffix.org</a>
