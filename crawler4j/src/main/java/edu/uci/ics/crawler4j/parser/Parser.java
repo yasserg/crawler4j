@@ -33,13 +33,13 @@ import edu.uci.ics.crawler4j.util.Util;
  */
 public class Parser {
 
-    private static final Logger logger = LoggerFactory.getLogger(Parser.class);
+    protected static final Logger logger = LoggerFactory.getLogger(Parser.class);
 
-    private final CrawlConfig config;
+    protected final CrawlConfig config;
 
-    private final HtmlParser htmlContentParser;
+    protected final HtmlParser htmlContentParser;
 
-    private final Net net;
+    protected final Net net;
 
     @Deprecated
     public Parser(CrawlConfig config) throws IllegalAccessException, InstantiationException {
