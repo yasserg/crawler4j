@@ -317,7 +317,7 @@ public class WebCrawler implements Runnable {
      *
      * @param page
      *         the source page
-     * @param webURL 
+     * @param webURL
      *         URL which failed on parsing
      */
     protected void onMaxDepthReached(Page page, WebURL webURL) {
@@ -554,7 +554,7 @@ public class WebCrawler implements Runnable {
             }
         }
     }
-    
+
     /**
      * Adds all the outgoing links from page fetched from curURL to the scheduler.
      * @param page
@@ -606,8 +606,8 @@ public class WebCrawler implements Runnable {
 
     /**
      * Adds the redirection destiny to the scheduler.
-     * 
-     * @param page 
+     *
+     * @param page
      *         the page object that is just fetched and parsed.
      * @param curURL
      *         current URL
@@ -616,7 +616,7 @@ public class WebCrawler implements Runnable {
      * @throws IOException
      * @throws InterruptedException
      */
-    protected void followRedirection(Page page, WebURL curURL, String movedToUrl) 
+    protected void followRedirection(Page page, WebURL curURL, String movedToUrl)
             throws IOException, InterruptedException {
         int newDocId = docIdServer.getDocId(movedToUrl);
         if (newDocId > 0) {

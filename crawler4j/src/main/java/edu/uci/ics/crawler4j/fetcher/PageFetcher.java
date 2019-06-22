@@ -255,11 +255,11 @@ public class PageFetcher {
             throws InterruptedException, IOException, PageBiggerThanMaxSizeException {
         // Getting URL, setting headers & content
         PageFetchResult fetchResult = new PageFetchResult(config.isHaltOnError());
-        String toFetchURL = null;
+        String toFetchURL;
         HttpUriRequest request = null;
         try {
             request = newHttpUriRequest(webUrl);
-            toFetchURL = request.getURI().toString();;
+            toFetchURL = request.getURI().toString();
             if (config.getPolitenessDelay() > 0) {
                 // Applying Politeness delay
                 synchronized (mutex) {
