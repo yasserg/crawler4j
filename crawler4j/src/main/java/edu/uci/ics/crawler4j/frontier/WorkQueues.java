@@ -40,7 +40,7 @@ public class WorkQueues {
 
     private final boolean resumable;
 
-    private final WebURLTupleBinding webURLBinding;
+    protected final WebURLTupleBinding webURLBinding;
 
     protected final Object mutex = new Object();
 
