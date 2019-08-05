@@ -58,10 +58,10 @@ public class Util {
     }
 
     public static long byteArray2Long(byte[] b) {
-        int value = 0;
+        long value = 0;
         for (int i = 0; i < 8; i++) {
             int shift = (8 - 1 - i) * 8;
-            value += (b[i] & 0x000000FF) << shift;
+            value += (b[i] & 0x000000FFL) << shift;
         }
         return value;
     }
