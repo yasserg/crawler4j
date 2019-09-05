@@ -54,6 +54,17 @@ public class WorkQueues {
         urlsDB = env.openDatabase(null, dbName, dbConfig);
         webURLBinding = new WebURLTupleBinding();
     }
+    
+    protected WorkQueues(Environment env, String dbName, boolean resumable, WebURLTupleBinding webURLBinding) {
+    	this.env = env;
+        this.resumable = resumable;
+        DatabaseConfig dbConfig = new DatabaseConfig();
+        dbConfig.setAllowCreate(true);
+        dbConfig.setTransactional(resumable);
+        dbConfig.setDeferredWrite(!resumable);
+        urlsDB = env.openDatabase(null, dbName, dbConfig);
+        this.webURLBinding = webURLBinding;
+    }
 
     protected Transaction beginTransaction() {
         return resumable ? env.beginTransaction(null, null) : null;
