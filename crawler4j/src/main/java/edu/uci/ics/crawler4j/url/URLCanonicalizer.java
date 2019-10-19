@@ -74,13 +74,14 @@ public class URLCanonicalizer {
              * ".", and no segments equal to ".." that are preceded by a segment
              * not equal to "..".
              */
-            path = new URI(path.replace("\\", "/")
-                               .replace(String.valueOf((char) 12288), "%E3%80%80")
-                               .replace(String.valueOf((char) 32), "%20")).normalize().toString();
+
+            path = new URI(StringUtils.replaceEach(path, new String[] {"\\", String.valueOf((char) 12288),
+                                                                       String.valueOf((char) 32)},
+                                                   new String[] {"/", "%E3%80%80", "%20"})).normalize().toString();
 
             int idx = path.indexOf("//");
             while (idx >= 0) {
-                path = path.replace("//", "/");
+                path = StringUtils.replace(path, "//", "/");
                 idx = path.indexOf("//");
             }
 
