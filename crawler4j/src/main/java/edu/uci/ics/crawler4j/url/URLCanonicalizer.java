@@ -30,6 +30,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import org.apache.commons.lang3.StringUtils;
+import org.checkerframework.checker.units.qual.A;
+
 /**
  * See http://en.wikipedia.org/wiki/URL_normalization for a reference Note: some
  * parts of the code are adapted from: http://stackoverflow.com/a/4057470/405418
@@ -53,11 +56,10 @@ public class URLCanonicalizer {
     }
 
     public static String getCanonicalURL(String href, String context, Charset charset)
-            throws UnsupportedEncodingException {
+        throws UnsupportedEncodingException {
 
         try {
-            URL canonicalURL =
-                new URL(UrlResolver.resolveUrl((context == null) ? "" : context, href));
+            URL canonicalURL = new URL(UrlResolver.resolveUrl((context == null) ? "" : context, href));
 
             String host = canonicalURL.getHost().toLowerCase();
             if (Objects.equals(host, "")) {
@@ -67,14 +69,14 @@ public class URLCanonicalizer {
 
             String path = canonicalURL.getPath();
 
-      /*
-       * Normalize: no empty segments (i.e., "//"), no segments equal to
-       * ".", and no segments equal to ".." that are preceded by a segment
-       * not equal to "..".
-       */
+            /*
+             * Normalize: no empty segments (i.e., "//"), no segments equal to
+             * ".", and no segments equal to ".." that are preceded by a segment
+             * not equal to "..".
+             */
             path = new URI(path.replace("\\", "/")
-                    .replace(String.valueOf((char)12288), "%E3%80%80")
-                    .replace(String.valueOf((char)32), "%20")).normalize().toString();
+                               .replace(String.valueOf((char) 12288), "%E3%80%80")
+                               .replace(String.valueOf((char) 32), "%20")).normalize().toString();
 
             int idx = path.indexOf("//");
             while (idx >= 0) {
@@ -165,7 +167,7 @@ public class URLCanonicalizer {
      * @throws UnsupportedEncodingException
      */
     private static String canonicalize(Map<String, String> paramsMap, Charset charset)
-            throws UnsupportedEncodingException {
+        throws UnsupportedEncodingException {
         if ((paramsMap == null) || paramsMap.isEmpty()) {
             return "";
         }
@@ -188,16 +190,16 @@ public class URLCanonicalizer {
         return sb.toString();
     }
 
-    private static String normalizePath(final String path) {
-        return path.replace("%7E", "~").replace(" ", "%20");
+    private static String normalizePath(String path) {
+        return StringUtils.replaceEach(path, new String[] {"%7E", " "}, new String[] {"~", "%20"});
     }
 
     private static String percentEncodeRfc3986(String string, Charset charset) throws UnsupportedEncodingException {
         try {
-            string = string.replace("+", "%2B");
+            string = StringUtils.replace(string, "+", "%2B");
             string = URLDecoder.decode(string, "UTF-8");
             string = URLEncoder.encode(string, charset.name());
-            return string.replace("+", "%20").replace("*", "%2A").replace("%7E", "~");
+            return StringUtils.replaceEach(string, new String[] {"+", "*", "%7E"}, new String[] {"%20", "%2A", "~"});
         } catch (UnsupportedEncodingException | RuntimeException e) {
             if (haltOnError) {
                 throw e;
