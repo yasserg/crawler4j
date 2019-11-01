@@ -135,8 +135,8 @@ public class RobotstxtServer {
             if (fetchResult.getStatusCode() == HttpStatus.SC_OK) {
                 Page page = new Page(robotsTxtUrl);
                 // Most recent answer on robots.txt max size is
-                // https://goo.gl/OqpKbP
-                fetchResult.fetchContent(page, 10_000 * 1024);
+                // https://developers.google.com/search/reference/robots_txt
+                fetchResult.fetchContent(page, 500 * 1024);
                 if (Util.hasPlainTextContent(page.getContentType())) {
                     String content;
                     if (page.getContentCharset() == null) {
