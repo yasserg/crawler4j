@@ -260,6 +260,7 @@ public class PageFetcher {
         try {
             request = newHttpUriRequest(webUrl);
             toFetchURL = request.getURI().toString();
+            webUrl.setURL(toFetchURL);
             if (config.getPolitenessDelay() > 0) {
                 // Applying Politeness delay
                 synchronized (mutex) {
@@ -294,11 +295,12 @@ public class PageFetcher {
                     fetchResult.setMovedToUrl(movedToUrl);
                 }
             } else if (statusCode >= 200 && statusCode <= 299) { // is 2XX, everything looks ok
-                fetchResult.setFetchedUrl(toFetchURL);
+                fetchResult.setFetchedWebUrl(webUrl);
                 String uri = request.getURI().toString();
                 if (!uri.equals(toFetchURL)) {
                     if (!URLCanonicalizer.getCanonicalURL(uri).equals(toFetchURL)) {
-                        fetchResult.setFetchedUrl(uri);
+                        webUrl.setURL(uri);
+                        fetchResult.setFetchedWebUrl(webUrl);
                     }
                 }
 

@@ -514,7 +514,7 @@ public class CrawlController {
         WebURL webUrl = new WebURL();
         webUrl.setURL(pageUrl);
         webUrl.setDocid(docId);
-    	addSeed(webUrl);
+        addSeed(webUrl);
     }
 
     /**
@@ -546,8 +546,8 @@ public class CrawlController {
         if (canonicalUrl == null) {
             logger.error("Invalid seed URL: {}", pageUrl);
         } else {
-        	int docId = pageUrl.getDocid();
-        	pageUrl.setURL(canonicalUrl);
+            int docId = pageUrl.getDocid();
+            pageUrl.setURL(canonicalUrl);
             if (docId < 0) {
                 docId = docIdServer.getDocId(pageUrl);
                 if (docId > 0) {
@@ -598,9 +598,9 @@ public class CrawlController {
      *
      */
     public void addSeenUrl(String url, int docId) throws UnsupportedEncodingException {
-    	WebURL webUrl = new WebURL();
-    	webUrl.setURL(url);
-    	webUrl.setDocid(docId);
+        WebURL webUrl = new WebURL();
+        webUrl.setURL(url);
+        webUrl.setDocid(docId);
         addSeenUrl(webUrl);
     }
 

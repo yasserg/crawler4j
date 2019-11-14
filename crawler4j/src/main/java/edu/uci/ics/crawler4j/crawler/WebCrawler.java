@@ -448,7 +448,7 @@ public class WebCrawler implements Runnable {
                     onRedirectedStatusCode(page);
 
                     if (myController.getConfig().isFollowRedirects()) {
-                    	WebURL webURL = new WebURL();
+                        WebURL webURL = new WebURL();
                         webURL.setURL(movedToUrl);
 
                         int newDocId = docIdServer.getDocId(webURL);
@@ -491,12 +491,12 @@ public class WebCrawler implements Runnable {
 
             } else { // if status code is 200
                 if (!curURL.getURL().equals(fetchResult.getFetchedUrl())) {
-                    if (docIdServer.isSeenBefore(fetchResult.getFetchedUrl())) {
+                    if (docIdServer.isSeenBefore(fetchResult.getFetchedWebUrl())) {
                         logger.debug("Redirect page: {} has already been seen", curURL);
                         return;
                     }
                     curURL.setURL(fetchResult.getFetchedUrl());
-                    curURL.setDocid(docIdServer.getNewDocID(fetchResult.getFetchedUrl()));
+                    curURL.setDocid(docIdServer.getNewDocID(fetchResult.getFetchedWebUrl()));
                 }
 
                 if (!fetchResult.fetchContent(page,

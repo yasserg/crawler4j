@@ -39,9 +39,9 @@ public class WebURL implements Serializable {
 
     public static final String POST_SEPARATOR = "<<<POST_DATA>>>";
 
-	public static final String PAIR_SEPARATOR = "``--``";
+    public static final String PAIR_SEPARATOR = "``--``";
 
-	public static final String VALUE_SEPARATOR = "=";
+    public static final String VALUE_SEPARATOR = "=";
 
     @PrimaryKey
     private String url;
@@ -302,25 +302,25 @@ public class WebURL implements Serializable {
     }
 
     public String encode() {
-    	return encodeWebURL(this);
+        return encodeWebURL(this);
     }
 
     public static String encodeWebURL(WebURL url) {
-    	if(url==null || url.getURL()==null) {
-    		return null;
-    	}
-    	if(!url.isPost()) return url.getURL();
-    	String urlFinal = url.getURL() + POST_SEPARATOR + encodePostAttributes(url.getParamsPost());
-    	return urlFinal;
+        if(url==null || url.getURL()==null) {
+            return null;
+        }
+        if(!url.isPost()) return url.getURL();
+        String urlFinal = url.getURL() + POST_SEPARATOR + encodePostAttributes(url.getParamsPost());
+        return urlFinal;
     }
 
     protected static String encodePostAttributes(List<BasicNameValuePair> atributosPost) {
-    	if(atributosPost==null || atributosPost.isEmpty()) return "";
-    	List<String> pares = new ArrayList<String>();
-    	for(BasicNameValuePair par : atributosPost) {
-    		if(par==null) continue;
-    		pares.add(par.getName() + VALUE_SEPARATOR + par.getValue());
-    	}
-    	return String.join(PAIR_SEPARATOR, pares);
+        if(atributosPost==null || atributosPost.isEmpty()) return "";
+        List<String> pares = new ArrayList<String>();
+        for(BasicNameValuePair par : atributosPost) {
+            if(par==null) continue;
+            pares.add(par.getName() + VALUE_SEPARATOR + par.getValue());
+        }
+        return String.join(PAIR_SEPARATOR, pares);
     }
 }
