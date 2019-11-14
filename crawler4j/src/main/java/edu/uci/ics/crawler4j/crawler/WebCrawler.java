@@ -490,12 +490,19 @@ public class WebCrawler implements Runnable {
                 }
 
             } else { // if status code is 200
-                if (!curURL.getURL().equals(fetchResult.getFetchedUrl())) {
+                String fetchedUrl;
+                WebURL fetchedWebURL = fetchResult.getFetchedWebUrl();
+                if(fetchedWebURL != null) {
+                	fetchedUrl = fetchedWebURL.getURL();
+                }else {
+                	fetchedUrl = null;
+                }
+                if (!curURL.getURL().equals(fetchedUrl)) {
                     if (docIdServer.isSeenBefore(fetchResult.getFetchedWebUrl())) {
                         logger.debug("Redirect page: {} has already been seen", curURL);
                         return;
                     }
-                    curURL.setURL(fetchResult.getFetchedUrl());
+                    curURL.setURL(fetchedUrl);
                     curURL.setDocid(docIdServer.getNewDocID(fetchResult.getFetchedWebUrl()));
                 }
 
