@@ -306,7 +306,7 @@ public class WebURL implements Serializable {
     }
 
     public static String encodeWebURL(WebURL url) {
-        if(url==null || url.getURL()==null) {
+        if(url == null || url.getURL() == null) {
             return null;
         }
         if(!url.isPost()) return url.getURL();
@@ -314,11 +314,11 @@ public class WebURL implements Serializable {
         return urlFinal;
     }
 
-    protected static String encodePostAttributes(List<BasicNameValuePair> atributosPost) {
-        if(atributosPost==null || atributosPost.isEmpty()) return "";
+    protected static String encodePostAttributes(List<BasicNameValuePair> postAttributes) {
+        if(postAttributes == null || postAttributes.isEmpty()) return "";
         List<String> pares = new ArrayList<String>();
-        for(BasicNameValuePair par : atributosPost) {
-            if(par==null) continue;
+        for(BasicNameValuePair par : postAttributes) {
+            if(par == null) continue;
             pares.add(par.getName() + VALUE_SEPARATOR + par.getValue());
         }
         return String.join(PAIR_SEPARATOR, pares);

@@ -80,7 +80,6 @@ public class PageFetchResult {
 
     @Deprecated
     public void setFetchedUrl(String fetchedUrl) {
-        this.fetchedUrl = fetchedUrl;
         WebURL fetchedWebURL = new WebURL();
         fetchedWebURL.setURL(fetchedUrl);
         setFetchedWebUrl(fetchedWebURL);
@@ -93,10 +92,10 @@ public class PageFetchResult {
     public void setFetchedWebUrl(WebURL fetchedWebUrl) {
         this.fetchedWebUrl = fetchedWebUrl;
         // Compatibility until deprecated methods are deleted
-        if(fetchedWebUrl!=null) {
-            setFetchedUrl(fetchedWebUrl.getURL());
+        if(fetchedWebUrl != null) {
+        	this.fetchedUrl = fetchedWebUrl.getURL();
         }else {
-            setFetchedUrl(null);
+        	this.fetchedUrl = null;
         }
     }
 
