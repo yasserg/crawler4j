@@ -511,41 +511,10 @@ public class CrawlController {
      * @throws IOException
      */
     public void addSeed(String pageUrl, int docId) throws IOException, InterruptedException {
-        String canonicalUrl = URLCanonicalizer.getCanonicalURL(pageUrl);
-        if (canonicalUrl == null) {
-            logger.error("Invalid seed URL: {}", pageUrl);
-        } else {
-            if (docId < 0) {
-                docId = docIdServer.getDocId(canonicalUrl);
-                if (docId > 0) {
-                    logger.trace("This URL is already seen.");
-                    return;
-                }
-                docId = docIdServer.getNewDocID(canonicalUrl);
-            } else {
-                try {
-                    docIdServer.addUrlAndDocId(canonicalUrl, docId);
-                } catch (RuntimeException e) {
-                    if (config.isHaltOnError()) {
-                        throw e;
-                    } else {
-                        logger.error("Could not add seed: {}", e.getMessage());
-                    }
-                }
-            }
-
-            WebURL webUrl = new WebURL();
-            webUrl.setTldList(tldList);
-            webUrl.setURL(canonicalUrl);
-            webUrl.setDocid(docId);
-            webUrl.setDepth((short) 0);
-            if (robotstxtServer.allows(webUrl)) {
-                frontier.schedule(webUrl);
-            } else {
-                // using the WARN level here, as the user specifically asked to add this seed
-                logger.warn("Robots.txt does not allow this seed: {}", pageUrl);
-            }
-        }
+        WebURL webUrl = new WebURL();
+        webUrl.setURL(pageUrl);
+        webUrl.setDocid(docId);
+    	addSeed(webUrl);
     }
 
     /**
@@ -625,23 +594,14 @@ public class CrawlController {
      * @param docId
      *            the document id that you want to be assigned to this URL.
      * @throws UnsupportedEncodingException
+     * 
      *
      */
     public void addSeenUrl(String url, int docId) throws UnsupportedEncodingException {
-        String canonicalUrl = URLCanonicalizer.getCanonicalURL(url);
-        if (canonicalUrl == null) {
-            logger.error("Invalid Url: {} (can't cannonicalize it!)", url);
-        } else {
-            try {
-                docIdServer.addUrlAndDocId(canonicalUrl, docId);
-            } catch (RuntimeException e) {
-                if (config.isHaltOnError()) {
-                    throw e;
-                } else {
-                    logger.error("Could not add seen url: {}", e.getMessage());
-                }
-            }
-        }
+    	WebURL webUrl = new WebURL();
+    	webUrl.setURL(url);
+    	webUrl.setDocid(docId);
+        addSeenUrl(webUrl);
     }
 
     /**
