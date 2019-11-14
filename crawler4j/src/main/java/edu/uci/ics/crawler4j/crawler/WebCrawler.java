@@ -448,15 +448,16 @@ public class WebCrawler implements Runnable {
                     onRedirectedStatusCode(page);
 
                     if (myController.getConfig().isFollowRedirects()) {
-                        int newDocId = docIdServer.getDocId(movedToUrl);
+                    	WebURL webURL = new WebURL();
+                        webURL.setURL(movedToUrl);
+
+                        int newDocId = docIdServer.getDocId(webURL);
                         if (newDocId > 0) {
                             logger.debug("Redirect page: {} is already seen", curURL);
                             return;
                         }
 
-                        WebURL webURL = new WebURL();
                         webURL.setTldList(myController.getTldList());
-                        webURL.setURL(movedToUrl);
                         webURL.setParentDocid(curURL.getParentDocid());
                         webURL.setParentUrl(curURL.getParentUrl());
                         webURL.setDepth(curURL.getDepth());
@@ -464,7 +465,7 @@ public class WebCrawler implements Runnable {
                         webURL.setAnchor(curURL.getAnchor());
                         if (shouldVisit(page, webURL)) {
                             if (!shouldFollowLinksIn(webURL) || robotstxtServer.allows(webURL)) {
-                                webURL.setDocid(docIdServer.getNewDocID(movedToUrl));
+                                webURL.setDocid(docIdServer.getNewDocID(webURL));
                                 frontier.schedule(webURL);
                             } else {
                                 logger.debug(
@@ -519,7 +520,7 @@ public class WebCrawler implements Runnable {
                     for (WebURL webURL : parseData.getOutgoingUrls()) {
                         webURL.setParentDocid(curURL.getDocid());
                         webURL.setParentUrl(curURL.getURL());
-                        int newdocid = docIdServer.getDocId(webURL.getURL());
+                        int newdocid = docIdServer.getDocId(webURL);
                         if (newdocid > 0) {
                             // This is not the first time that this Url is visited. So, we set the
                             // depth to a negative number.
@@ -531,7 +532,7 @@ public class WebCrawler implements Runnable {
                             if ((maxCrawlDepth == -1) || (curURL.getDepth() < maxCrawlDepth)) {
                                 if (shouldVisit(page, webURL)) {
                                     if (robotstxtServer.allows(webURL)) {
-                                        webURL.setDocid(docIdServer.getNewDocID(webURL.getURL()));
+                                        webURL.setDocid(docIdServer.getNewDocID(webURL));
                                         toSchedule.add(webURL);
                                     } else {
                                         logger.debug(
