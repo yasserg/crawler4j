@@ -310,7 +310,7 @@ public class WebURL implements Serializable {
             return null;
         }
         if (!url.isPost()) {
-        	return url.getURL();
+           return url.getURL();
         }
         String urlFinal = url.getURL() + POST_SEPARATOR + encodePostAttributes(url.getParamsPost());
         return urlFinal;
@@ -318,7 +318,7 @@ public class WebURL implements Serializable {
 
     protected static String encodePostAttributes(List<BasicNameValuePair> postAttributes) {
         if (postAttributes == null || postAttributes.isEmpty()) {
-        	return "";
+            return "";
         }
         List<String> pares = new ArrayList<String>();
         for (BasicNameValuePair par : postAttributes) {

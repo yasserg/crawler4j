@@ -492,7 +492,7 @@ public class WebCrawler implements Runnable {
             } else { // if status code is 200
                 String fetchedUrl;
                 WebURL fetchedWebURL = fetchResult.getFetchedWebUrl();
-                if(fetchedWebURL != null) {
+                if (fetchedWebURL != null) {
                     fetchedUrl = fetchedWebURL.getURL();
                 } else {
                     fetchedUrl = null;
