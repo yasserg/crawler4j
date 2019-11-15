@@ -306,19 +306,25 @@ public class WebURL implements Serializable {
     }
 
     public static String encodeWebURL(WebURL url) {
-        if(url == null || url.getURL() == null) {
+        if (url == null || url.getURL() == null) {
             return null;
         }
-        if(!url.isPost()) return url.getURL();
+        if (!url.isPost()) {
+        	return url.getURL();
+        }
         String urlFinal = url.getURL() + POST_SEPARATOR + encodePostAttributes(url.getParamsPost());
         return urlFinal;
     }
 
     protected static String encodePostAttributes(List<BasicNameValuePair> postAttributes) {
-        if(postAttributes == null || postAttributes.isEmpty()) return "";
+        if (postAttributes == null || postAttributes.isEmpty()) {
+        	return "";
+        }
         List<String> pares = new ArrayList<String>();
-        for(BasicNameValuePair par : postAttributes) {
-            if(par == null) continue;
+        for (BasicNameValuePair par : postAttributes) {
+            if (par == null) {
+            	continue;
+            }
             pares.add(par.getName() + VALUE_SEPARATOR + par.getValue());
         }
         return String.join(PAIR_SEPARATOR, pares);

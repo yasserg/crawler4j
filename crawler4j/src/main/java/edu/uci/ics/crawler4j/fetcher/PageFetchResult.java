@@ -91,10 +91,10 @@ public class PageFetchResult {
     public void setFetchedWebUrl(WebURL fetchedWebUrl) {
         this.fetchedWebUrl = fetchedWebUrl;
         // Compatibility until deprecated methods are deleted
-        if(fetchedWebUrl != null) {
-        	this.fetchedUrl = fetchedWebUrl.getURL();
-        }else {
-        	this.fetchedUrl = null;
+        if (fetchedWebUrl != null) {
+            this.fetchedUrl = fetchedWebUrl.getURL();
+        } else {
+            this.fetchedUrl = null;
         }
     }
 

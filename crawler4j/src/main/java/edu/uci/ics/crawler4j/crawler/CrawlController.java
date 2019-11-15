@@ -529,14 +529,12 @@ public class CrawlController {
      * Specifying doc ids is mainly useful when you have had a previous crawl
      * and have stored the results and want to start a new crawl with seeds
      * which get the same document ids as the previous crawl.
-     * 
+     *
      * NOTE: It will modify the provided URL to set it to a canonical form.
      * It will also set depth 0 and add the tldList to the WebURL.
      *
      * @param pageUrl
      *            the URL of the seed
-     * @param docId
-     *            the document id that you want to be assigned to this seed URL.
      *
      * @throws InterruptedException
      * @throws IOException
@@ -594,7 +592,7 @@ public class CrawlController {
      * @param docId
      *            the document id that you want to be assigned to this URL.
      * @throws UnsupportedEncodingException
-     * 
+     *
      *
      */
     public void addSeenUrl(String url, int docId) throws UnsupportedEncodingException {
@@ -616,8 +614,6 @@ public class CrawlController {
      *
      * @param url
      *            the URL of the page
-     * @param docId
-     *            the document id that you want to be assigned to this URL.
      * @throws UnsupportedEncodingException
      *
      */

@@ -493,9 +493,9 @@ public class WebCrawler implements Runnable {
                 String fetchedUrl;
                 WebURL fetchedWebURL = fetchResult.getFetchedWebUrl();
                 if(fetchedWebURL != null) {
-                	fetchedUrl = fetchedWebURL.getURL();
-                }else {
-                	fetchedUrl = null;
+                    fetchedUrl = fetchedWebURL.getURL();
+                } else {
+                    fetchedUrl = null;
                 }
                 if (!curURL.getURL().equals(fetchedUrl)) {
                     if (docIdServer.isSeenBefore(fetchResult.getFetchedWebUrl())) {
