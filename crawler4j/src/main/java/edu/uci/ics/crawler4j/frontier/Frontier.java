@@ -52,10 +52,18 @@ public class Frontier {
     protected Counters counters;
 
     public Frontier(Environment env, CrawlConfig config) {
+        this(env, config, null);
+    }
+
+    public Frontier(Environment env, CrawlConfig config, String dbName) {
         this.config = config;
         this.counters = new Counters(env, config);
         try {
-            workQueues = new WorkQueues(env, DATABASE_NAME, config.isResumableCrawling());
+            if (dbName == null) {
+                workQueues = new WorkQueues(env, DATABASE_NAME, config.isResumableCrawling());
+            } else {
+                workQueues = new WorkQueues(env, dbName, config.isResumableCrawling());
+            }
             if (config.isResumableCrawling()) {
                 scheduledPages = counters.getValue(Counters.ReservedCounterNames.SCHEDULED_PAGES);
                 inProcessPages = new InProcessPagesDB(env);

@@ -88,16 +88,21 @@ public class CrawlController {
 
     public CrawlController(CrawlConfig config, PageFetcher pageFetcher,
                            RobotstxtServer robotstxtServer) throws Exception {
-        this(config, pageFetcher, null, robotstxtServer, null);
+        this(config, pageFetcher, null, robotstxtServer, null, null, null);
     }
 
     public CrawlController(CrawlConfig config, PageFetcher pageFetcher,
             RobotstxtServer robotstxtServer, TLDList tldList) throws Exception {
-        this(config, pageFetcher, null, robotstxtServer, tldList);
+        this(config, pageFetcher, null, robotstxtServer, tldList, null, null);
     }
 
     public CrawlController(CrawlConfig config, PageFetcher pageFetcher, Parser parser,
-                           RobotstxtServer robotstxtServer, TLDList tldList) throws Exception {
+            RobotstxtServer robotstxtServer, TLDList tldList) throws Exception {
+        this(config, pageFetcher, parser, robotstxtServer, tldList, null, null);
+    }
+
+    public CrawlController(CrawlConfig config, PageFetcher pageFetcher, Parser parser,
+                           RobotstxtServer robotstxtServer, TLDList tldList, String docIdDbName, String pendingDbName) throws Exception {
         config.validate();
         this.config = config;
 
@@ -140,8 +145,8 @@ public class CrawlController {
         }
 
         env = new Environment(envHome, envConfig);
-        docIdServer = new DocIDServer(env, config);
-        frontier = new Frontier(env, config);
+        docIdServer = new DocIDServer(env, config, docIdDbName);
+        frontier = new Frontier(env, config, pendingDbName);
 
         this.pageFetcher = pageFetcher;
         this.parser = parser == null ? new Parser(config, tldList) : parser;

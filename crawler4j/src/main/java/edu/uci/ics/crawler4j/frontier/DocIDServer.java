@@ -45,14 +45,18 @@ public class DocIDServer {
     private CrawlConfig config;
     private int lastDocID;
 
-    public DocIDServer(Environment env, CrawlConfig config) {
+    public DocIDServer(Environment env, CrawlConfig config, String dbName) {
         this.config = config;
         DatabaseConfig dbConfig = new DatabaseConfig();
         dbConfig.setAllowCreate(true);
         dbConfig.setTransactional(config.isResumableCrawling());
         dbConfig.setDeferredWrite(!config.isResumableCrawling());
         lastDocID = 0;
-        docIDsDB = env.openDatabase(null, DATABASE_NAME, dbConfig);
+        if (dbName == null) {
+            docIDsDB = env.openDatabase(null, DATABASE_NAME, dbConfig);
+        } else {
+            docIDsDB = env.openDatabase(null, dbName, dbConfig);
+        }
         if (config.isResumableCrawling()) {
             int docCount = getDocCount();
             if (docCount > 0) {
@@ -60,6 +64,10 @@ public class DocIDServer {
                 lastDocID = docCount;
             }
         }
+    }
+
+    public DocIDServer(Environment env, CrawlConfig config) {
+        this(env, config, null);
     }
 
     /**
