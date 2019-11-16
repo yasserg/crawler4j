@@ -32,13 +32,13 @@ import edu.uci.ics.crawler4j.crawler.exceptions.ContentFetchException;
 import edu.uci.ics.crawler4j.crawler.exceptions.PageBiggerThanMaxSizeException;
 import edu.uci.ics.crawler4j.crawler.exceptions.ParseException;
 import edu.uci.ics.crawler4j.fetcher.PageFetchResult;
-import edu.uci.ics.crawler4j.fetcher.PageFetcher;
+import edu.uci.ics.crawler4j.fetcher.PageFetcherInterface;
 import edu.uci.ics.crawler4j.frontier.DocIDServer;
 import edu.uci.ics.crawler4j.frontier.Frontier;
 import edu.uci.ics.crawler4j.parser.HtmlParseData;
 import edu.uci.ics.crawler4j.parser.NotAllowedContentException;
 import edu.uci.ics.crawler4j.parser.ParseData;
-import edu.uci.ics.crawler4j.parser.Parser;
+import edu.uci.ics.crawler4j.parser.ParserInterface;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
 import edu.uci.ics.crawler4j.url.WebURL;
 
@@ -71,12 +71,12 @@ public class WebCrawler implements Runnable {
     /**
      * The parser that is used by this crawler instance to parse the content of the fetched pages.
      */
-    private Parser parser;
+    private ParserInterface parser;
 
     /**
      * The fetcher that is used by this crawler instance to fetch the content of pages from the web.
      */
-    private PageFetcher pageFetcher;
+    private PageFetcherInterface pageFetcher;
 
     /**
      * The RobotstxtServer instance that is used by this crawler instance to
