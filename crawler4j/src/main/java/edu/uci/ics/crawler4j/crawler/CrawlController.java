@@ -97,9 +97,8 @@ public class CrawlController {
         this(config, pageFetcher, null, robotstxtServer, tldList);
     }
 
-    public CrawlController(CrawlConfig config, PageFetcherInterface pageFetcher,
-    		ParserInterface parser, RobotstxtServer robotstxtServer, TLDList tldList)
-    				throws Exception {
+    public CrawlController(CrawlConfig config, PageFetcherInterface pageFetcher, ParserInterface parser, 
+                           RobotstxtServer robotstxtServer, TLDList tldList) throws Exception {
         config.validate();
         this.config = config;
 
