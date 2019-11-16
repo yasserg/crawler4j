@@ -102,7 +102,8 @@ public class CrawlController {
     }
 
     public CrawlController(CrawlConfig config, PageFetcher pageFetcher, Parser parser,
-                           RobotstxtServer robotstxtServer, TLDList tldList, String docIdDbName, String pendingDbName) throws Exception {
+                           RobotstxtServer robotstxtServer, TLDList tldList,
+                           String docIdDbName, String pendingDbName) throws Exception {
         config.validate();
         this.config = config;
 
