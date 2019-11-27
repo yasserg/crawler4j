@@ -1,23 +1,7 @@
-/**
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package edu.uci.ics.crawler4j.examples.basic;
 
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
 import org.apache.http.Header;
@@ -27,12 +11,22 @@ import edu.uci.ics.crawler4j.crawler.WebCrawler;
 import edu.uci.ics.crawler4j.parser.HtmlParseData;
 import edu.uci.ics.crawler4j.url.WebURL;
 
-/**
- * @author Yasser Ganjisaffar
- */
 public class BasicCrawler extends WebCrawler {
 
     private static final Pattern IMAGE_EXTENSIONS = Pattern.compile(".*\\.(bmp|gif|jpg|png)$");
+
+    private final AtomicInteger numSeenImages;
+
+    /**
+     * Creates a new crawler instance.
+     *
+     * @param numSeenImages This is just an example to demonstrate how you can pass objects to crawlers. In this
+     * example, we pass an AtomicInteger to all crawlers and they increment it whenever they see a url which points
+     * to an image.
+     */
+    public BasicCrawler(AtomicInteger numSeenImages) {
+        this.numSeenImages = numSeenImages;
+    }
 
     /**
      * You should implement this function to specify whether the given url
@@ -43,6 +37,7 @@ public class BasicCrawler extends WebCrawler {
         String href = url.getURL().toLowerCase();
         // Ignore the url if it has an extension that matches our defined set of image extensions.
         if (IMAGE_EXTENSIONS.matcher(href).matches()) {
+            numSeenImages.incrementAndGet();
             return false;
         }
 

@@ -1,13 +1,16 @@
 package edu.uci.ics.crawler4j.examples.db.impl;
 
-import com.mchange.v2.c3p0.ComboPooledDataSource;
-import edu.uci.ics.crawler4j.crawler.Page;
-import edu.uci.ics.crawler4j.examples.db.PostgresDBService;
-import edu.uci.ics.crawler4j.parser.HtmlParseData;
-import org.slf4j.Logger;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+
+import org.slf4j.Logger;
+
+import com.mchange.v2.c3p0.ComboPooledDataSource;
+
+import edu.uci.ics.crawler4j.crawler.Page;
+import edu.uci.ics.crawler4j.examples.db.PostgresDBService;
+import edu.uci.ics.crawler4j.parser.HtmlParseData;
 
 public class PostgresDBServiceImpl implements PostgresDBService {
 

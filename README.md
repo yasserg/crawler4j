@@ -10,7 +10,6 @@ crawling the Web. Using it, you can setup a multi-threaded web crawler in few mi
 
 - [Installation](#installation)
 - [Quickstart](#quickstart)   
-- [Using a factory](#using-a-factory) (for Spring or Guice)
 - [More Examples](#more-examples)
 - [Configuration Details](#configuration-details)
 - [License](#license)
@@ -19,7 +18,7 @@ crawling the Web. Using it, you can setup a multi-threaded web crawler in few mi
 
 ### Using Maven
 
-To use the latest release of crawler4j, please use the following snippet in your pom.xml
+Add the following dependency to your pom.xml:
 
 ```xml
     <dependency>
@@ -29,51 +28,11 @@ To use the latest release of crawler4j, please use the following snippet in your
     </dependency>
 ```
 
-#### Snapshot
-
-You can add the following to use the next SNAPSHOT release
-
-```xml
-    <repositories>
-        <repository>
-            <id>onebeartoe</id>
-            <name>onebeartoe</name>
-            <url>https://repository-onebeartoe.forge.cloudbees.com/snapshot/</url>
-        </repository>
-    </repositories>
-    
-    <dependencies>
-        <dependency>
-            <groupId>edu.uci.ics</groupId>
-            <artifactId>crawler4j</artifactId>
-            <version>4.5.0-SNAPSHOT</version>
-        </dependency>
-    </dependencies>
-```
-
-### Without Maven
-
-From 4.3 if you need a jar that includes all dependencies (aka fatjar) you have to build it yourself. Clone the repo and
-run:
-
-```bash
-    $ mvn package -Pfatjar
-```
-
-you will find in `target/` folder a jar named like `crawler4j-X.Y-with-dependencies.jar`.
-
-
 ### Using Gradle
 
-Please include the following dependency in the build.gradle file to use crawler4j
+Add the following dependency to your build.gradle file:
 
     compile group: 'edu.uci.ics', name: 'crawler4j', version: '4.4.0'
-    
-Also, add the following repository url in build.gradle, for the dependency [sleepycat](https://mvnrepository.com/artifact/com.sleepycat/je/5.0.84)
-
-        maven {
-                url "https://repo.boundlessgeo.com/main/"
-            }
 
 ## Quickstart
 You need to create a crawler class that extends WebCrawler. This class decides which URLs
@@ -145,56 +104,27 @@ public class Controller {
         CrawlConfig config = new CrawlConfig();
         config.setCrawlStorageFolder(crawlStorageFolder);
 
-        /*
-         * Instantiate the controller for this crawl.
-         */
+        // Instantiate the controller for this crawl.
         PageFetcher pageFetcher = new PageFetcher(config);
         RobotstxtConfig robotstxtConfig = new RobotstxtConfig();
         RobotstxtServer robotstxtServer = new RobotstxtServer(robotstxtConfig, pageFetcher);
         CrawlController controller = new CrawlController(config, pageFetcher, robotstxtServer);
 
-        /*
-         * For each crawl, you need to add some seed urls. These are the first
-         * URLs that are fetched and then the crawler starts following links
-         * which are found in these pages
-         */
+        // For each crawl, you need to add some seed urls. These are the first
+        // URLs that are fetched and then the crawler starts following links
+        // which are found in these pages
         controller.addSeed("https://www.ics.uci.edu/~lopes/");
         controller.addSeed("https://www.ics.uci.edu/~welling/");
     	controller.addSeed("https://www.ics.uci.edu/");
-
-        /*
-         * Start the crawl. This is a blocking operation, meaning that your code
-         * will reach the line after this only when crawling is finished.
-         */
-        controller.start(MyCrawler.class, numberOfCrawlers);
+    	
+    	// The factory which creates instances of crawlers.
+        CrawlController.WebCrawlerFactory<BasicCrawler> factory = MyCrawler::new;
+        
+        // Start the crawl. This is a blocking operation, meaning that your code
+        // will reach the line after this only when crawling is finished.
+        controller.start(factory, numberOfCrawlers);
     }
 }
-```
-## Using a factory
-Using a factory can be convenient to integrate crawler4j in a IoC environement (like Spring, Guice) 
-or to pass information or a collaborator to each `WebCrawler` instance.
-
-```java
-public class CsiCrawlerCrawlerControllerFactory implements CrawlController.WebCrawlerFactory {
-
-    Map<String, String> metadata;
-    SqlRepository repository;
-
-    public CsiCrawlerCrawlerControllerFactory(Map<String, String> metadata, SqlRepository repository) {
-        this.metadata = metadata;
-        this.repository = repository;
-    }
-
-    @Override
-    public WebCrawler newInstance() {
-        return new MyCrawler(metadata, repository);
-    }
-}
-```
-To use a factory just call the right method in the `CrawlController` (probably you will want to use the `startNonBlocking` if you are in Spring or Guice):
-```java
-            MyCrawlerFactory factory = new MyCrawlerFactory(metadata, repository);
-            controller.startNonBlocking(factory, numberOfCrawlers);
 ```
 ## More Examples
 - [Basic crawler](crawler4j-examples/crawler4j-examples-base/src/test/java/edu/uci/ics/crawler4j/examples/basic/): the full source code of the above example with more details.

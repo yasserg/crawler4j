@@ -1,0 +1,83 @@
+plugins {
+    id 'com.github.johnrengelman.shadow' version '4.0.4' apply false
+}
+
+wrapper {
+    gradleVersion = '5.2.1'
+    distributionType = Wrapper.DistributionType.ALL
+}
+
+allprojects {
+    apply plugin: 'idea'
+    apply plugin: 'eclipse'
+
+    group = 'edu.uci.ics'
+    version = '4.5.0-SNAPSHOT'
+}
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'checkstyle'
+
+    repositories {
+        mavenCentral()
+    }
+
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+    tasks.withType(JavaCompile) {
+        options.encoding = 'UTF-8'
+        options.fork = true
+        options.incremental = true
+    }
+
+    tasks.withType(Javadoc) {
+        options.addStringOption('Xdoclint:none', '-quiet')
+    }
+
+    checkstyle {
+        toolVersion = '8.17'
+        configFile = new File(rootDir, 'config/checkstyle.xml')
+    }
+
+    tasks.withType(Checkstyle) {
+        reports {
+            xml.enabled false
+            html.enabled false
+        }
+    }
+
+    task checkstyle {
+        dependsOn checkstyleMain
+        dependsOn checkstyleTest
+    }
+
+    def projectName = it.name
+    tasks.withType(Test) {
+        testLogging {
+            exceptionFormat 'full'
+            testLogging { events 'skipped', 'failed', 'standardError' }
+            afterSuite { desc, result ->
+                if (!desc.parent) { // will match the outermost suite
+                    print "Results: ${result.resultType} (${result.testCount} tests,"
+                    print " ${result.successfulTestCount} successes,"
+                    print " ${result.failedTestCount} failures,"
+                    println " ${result.skippedTestCount} skipped)"
+                }
+            }
+        }
+
+        beforeTest { descriptor ->
+            logger.lifecycle("Starting Test: " + descriptor)
+        }
+
+        reports {
+            junitXml.enabled = false
+            html.enabled = true
+        }
+
+        outputs.upToDateWhen { false }
+
+        jvmArgs '-Xmx2g'
+    }
+}

@@ -1,0 +1,192 @@
+description 'crawler4j: Open Source Web Crawler for Java'
+
+apply plugin: 'java'
+apply plugin: 'signing'
+apply plugin: 'maven-publish'
+apply plugin: 'com.github.johnrengelman.shadow'
+
+ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
+
+configurations.all {
+    it.exclude group: 'commons-logging'
+    it.exclude group: 'log4j'
+    it.exclude group: 'org.apache.logging.log4j'
+}
+
+dependencies {
+    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.26'
+    compile group: 'org.slf4j', name: 'jcl-over-slf4j', version: '1.7.26'
+    compile group: 'org.slf4j', name: 'jul-to-slf4j', version: '1.7.26'
+    compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.7'
+    compile group: 'com.sleepycat', name: 'je', version: '18.3.12'
+    compile(group: 'org.apache.tika', name: 'tika-parsers', version: '1.20') {
+        exclude(module: 'poi-ooxml')
+        exclude(module: 'poi-scratchpad')
+        exclude(module: 'poi-ooxml')
+        exclude(module: 'poi-ooxml-schemas')
+        exclude(module: 'pdfbox')
+        exclude(module: 'pdfbox-tools')
+        exclude(module: 'jempbox')
+        exclude(module: 'jmatio')
+        exclude(module: 'jackcess')
+        exclude(module: 'jackcess-encrypt')
+        exclude(module: 'xz')
+        exclude(module: 'junrar')
+        exclude(module: 'opennlp-tools')
+        exclude(module: 'sis-utility')
+        exclude(module: 'sis-netcdf')
+        exclude(module: 'sis-metadata')
+        exclude(module: 'geoapi')
+        exclude(module: 'java-libpst')
+        exclude(module: 'rome')
+        exclude(module: 'json')
+        exclude(module: 'netcdf4')
+        exclude(module: 'grib')
+        exclude(module: 'cdm')
+        exclude(module: 'httpservices')
+        exclude(module: 'vorbis-java-tika')
+        exclude(module: 'vorbis-java-core')
+        exclude(module: 'asm')
+        exclude(module: 'isoparser')
+        exclude(module: 'metadata-extractor')
+        exclude(module: 'commons-csv')
+        exclude(module: 'commons-exec')
+        exclude(module: 'commons-compress')
+        exclude(module: 'commons-codec')
+        exclude(module: 'json-simple')
+        exclude(module: 'gson')
+        exclude(module: 'boilerpipe')
+        exclude(module: 'juniversalchardet')
+        exclude(module: 'jhighlight')
+        exclude(module: 'bcmail-jdk15on')
+        exclude(module: 'bcprov-jdk15on')
+        exclude(module: 'cxf-rt-rs-client')
+        exclude(module: 'jackson-core')
+        exclude(module: 'json')
+        exclude(module: 'sentiment-analysis-parser')
+    }
+    compile group: 'io.github.pgalbraith', name: 'url-detector', version: '0.1.20'
+    compile group: 'com.google.guava', name: 'guava', version: '27.0.1-jre'
+    compile group: 'de.malkusch.whois-server-list', name: 'public-suffix-list', version: '2.2.0'
+    runtime group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
+
+    testCompile group: 'junit', name: 'junit', version: '4.2'
+    testCompile group: 'com.github.tomakehurst', name: 'wiremock', version: '2.21.0'
+    testCompile group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.5.6'
+    testCompile group: 'org.spockframework', name: 'spock-core', version: '1.2-groovy-2.5'
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allJava
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives sourcesJar
+    archives javadocJar
+}
+
+signing {
+    sign configurations.archives
+}
+
+tasks.withType(Sign) {
+    onlyIf { isReleaseVersion }
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            customizePom(pom)
+            from components.java
+
+            artifact sourcesJar
+            artifact javadocJar
+
+            // Sign the pom
+            pom.withXml {
+                def pomFile = file("${project.buildDir}/generated-pom.xml")
+                writeTo(pomFile)
+                def pomAscFile = signing.sign(pomFile).signatureFiles[0]
+                artifact(pomAscFile) {
+                    classifier = null
+                    extension = 'pom.asc'
+                }
+                pomFile.delete()
+            }
+
+            // Sign the artifacts
+            project.tasks.signArchives.signatureFiles.each {
+                artifact(it) {
+                    def matcher = it.file =~ /-(sources|javadoc)\.jar\.asc$/
+                    if (matcher.find()) {
+                        classifier = matcher.group(1)
+                    } else {
+                        classifier = null
+                    }
+                    extension = 'jar.asc'
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+            def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots"
+            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+            credentials {
+                username "$sonatypeUsername"
+                password "$sonatypePassword"
+            }
+        }
+    }
+}
+
+def customizePom(pom) {
+    pom.withXml {
+        def root = asNode()
+
+        root.dependencies.removeAll { dep ->
+            dep.scope == 'test'
+        }
+
+        root.children().last() + {
+            resolveStrategy = Closure.DELEGATE_FIRST
+
+            name 'crawler4j'
+            description 'crawler4j: Open Source Web Crawler for Java'
+            url 'https://github.com/yasserg/crawler4j'
+            licenses {
+                license {
+                    name 'The Apache Software License, Version 2.0'
+                    url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                }
+            }
+            developers {
+                developer {
+                    id 'yasserg'
+                    name 'Yasser Ganjisaffar'
+                }
+            }
+            scm {
+                connection 'scm:git:git@github.com:yasserg/crawler4j.git'
+                developerConnection 'scm:git:git@github.com:yasserg/crawler4j.git'
+                url 'https://github.com/yasserg/crawler4j'
+            }
+        }
+    }
+}
+
+model {
+    tasks.publishMavenJavaPublicationToMavenLocal {
+        dependsOn(project.tasks.signArchives)
+    }
+    tasks.publishMavenJavaPublicationToMavenRepository {
+        dependsOn(project.tasks.signArchives)
+    }
+}
