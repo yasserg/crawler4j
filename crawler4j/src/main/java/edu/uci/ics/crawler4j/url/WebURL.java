@@ -46,7 +46,7 @@ public class WebURL implements Serializable {
     @PrimaryKey
     private String url;
 
-    private int docid;
+    private int docid = -1;
     private int parentDocid;
     private String parentUrl;
     private short depth;
