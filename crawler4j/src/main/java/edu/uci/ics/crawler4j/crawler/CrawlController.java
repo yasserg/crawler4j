@@ -30,10 +30,11 @@ import org.slf4j.LoggerFactory;
 import com.sleepycat.je.Environment;
 import com.sleepycat.je.EnvironmentConfig;
 
-import edu.uci.ics.crawler4j.fetcher.PageFetcher;
+import edu.uci.ics.crawler4j.fetcher.PageFetcherInterface;
 import edu.uci.ics.crawler4j.frontier.DocIDServer;
 import edu.uci.ics.crawler4j.frontier.Frontier;
 import edu.uci.ics.crawler4j.parser.Parser;
+import edu.uci.ics.crawler4j.parser.ParserInterface;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
 import edu.uci.ics.crawler4j.url.TLDList;
 import edu.uci.ics.crawler4j.url.URLCanonicalizer;
@@ -75,7 +76,7 @@ public class CrawlController {
      */
     protected boolean shuttingDown;
 
-    protected PageFetcher pageFetcher;
+    protected PageFetcherInterface pageFetcher;
     protected RobotstxtServer robotstxtServer;
     protected Frontier frontier;
     protected DocIDServer docIdServer;
@@ -84,19 +85,19 @@ public class CrawlController {
     protected final Object waitingLock = new Object();
     protected final Environment env;
 
-    protected Parser parser;
+    protected ParserInterface parser;
 
-    public CrawlController(CrawlConfig config, PageFetcher pageFetcher,
+    public CrawlController(CrawlConfig config, PageFetcherInterface pageFetcher,
                            RobotstxtServer robotstxtServer) throws Exception {
         this(config, pageFetcher, null, robotstxtServer, null);
     }
 
-    public CrawlController(CrawlConfig config, PageFetcher pageFetcher,
+    public CrawlController(CrawlConfig config, PageFetcherInterface pageFetcher,
             RobotstxtServer robotstxtServer, TLDList tldList) throws Exception {
         this(config, pageFetcher, null, robotstxtServer, tldList);
     }
 
-    public CrawlController(CrawlConfig config, PageFetcher pageFetcher, Parser parser,
+    public CrawlController(CrawlConfig config, PageFetcherInterface pageFetcher, ParserInterface parser,
                            RobotstxtServer robotstxtServer, TLDList tldList) throws Exception {
         config.validate();
         this.config = config;
@@ -153,7 +154,7 @@ public class CrawlController {
         robotstxtServer.setCrawlConfig(config);
     }
 
-    public Parser getParser() {
+    public ParserInterface getParser() {
         return parser;
     }
 
@@ -635,11 +636,11 @@ public class CrawlController {
         }
     }
 
-    public PageFetcher getPageFetcher() {
+    public PageFetcherInterface getPageFetcher() {
         return pageFetcher;
     }
 
-    public void setPageFetcher(PageFetcher pageFetcher) {
+    public void setPageFetcher(PageFetcherInterface pageFetcher) {
         this.pageFetcher = pageFetcher;
     }
 

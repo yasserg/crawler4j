@@ -78,7 +78,7 @@ import edu.uci.ics.crawler4j.url.WebURL;
 /**
  * @author Yasser Ganjisaffar
  */
-public class PageFetcher {
+public class PageFetcher implements PageFetcherInterface {
     protected static final Logger logger = LoggerFactory.getLogger(PageFetcher.class);
     protected final Object mutex = new Object();
     /**
@@ -251,6 +251,7 @@ public class PageFetcher {
         }
     }
 
+    @Override
     public PageFetchResult fetchPage(WebURL webUrl)
             throws InterruptedException, IOException, PageBiggerThanMaxSizeException {
         // Getting URL, setting headers & content
@@ -334,6 +335,7 @@ public class PageFetcher {
         }
     }
 
+    @Override
     public synchronized void shutDown() {
         if (connectionMonitorThread != null) {
             connectionManager.shutdown();
