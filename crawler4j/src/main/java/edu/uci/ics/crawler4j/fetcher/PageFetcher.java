@@ -78,7 +78,7 @@ import edu.uci.ics.crawler4j.url.WebURL;
 /**
  * @author Yasser Ganjisaffar
  */
-public class PageFetcher {
+public class PageFetcher implements PageFetcherInterface {
     protected static final Logger logger = LoggerFactory.getLogger(PageFetcher.class);
     protected final Object mutex = new Object();
     /**
@@ -251,14 +251,17 @@ public class PageFetcher {
         }
     }
 
+    @Override
     public PageFetchResult fetchPage(WebURL webUrl)
             throws InterruptedException, IOException, PageBiggerThanMaxSizeException {
         // Getting URL, setting headers & content
         PageFetchResult fetchResult = new PageFetchResult(config.isHaltOnError());
-        String toFetchURL = webUrl.getURL();
+        String toFetchURL;
         HttpUriRequest request = null;
         try {
-            request = newHttpUriRequest(toFetchURL);
+            request = newHttpUriRequest(webUrl);
+            toFetchURL = request.getURI().toString();
+            webUrl.setURL(toFetchURL);
             if (config.getPolitenessDelay() > 0) {
                 // Applying Politeness delay
                 synchronized (mutex) {
@@ -293,11 +296,12 @@ public class PageFetcher {
                     fetchResult.setMovedToUrl(movedToUrl);
                 }
             } else if (statusCode >= 200 && statusCode <= 299) { // is 2XX, everything looks ok
-                fetchResult.setFetchedUrl(toFetchURL);
+                fetchResult.setFetchedWebUrl(webUrl);
                 String uri = request.getURI().toString();
                 if (!uri.equals(toFetchURL)) {
                     if (!URLCanonicalizer.getCanonicalURL(uri).equals(toFetchURL)) {
-                        fetchResult.setFetchedUrl(uri);
+                        webUrl.setURL(uri);
+                        fetchResult.setFetchedWebUrl(webUrl);
                     }
                 }
 
@@ -331,6 +335,7 @@ public class PageFetcher {
         }
     }
 
+    @Override
     public synchronized void shutDown() {
         if (connectionMonitorThread != null) {
             connectionManager.shutdown();
@@ -345,8 +350,28 @@ public class PageFetcher {
      * @param url the url to be fetched
      * @return the HttpUriRequest for the given url
      */
+    @Deprecated
     protected HttpUriRequest newHttpUriRequest(String url) {
         return new HttpGet(url);
+    }
+
+    /**
+     * Creates a new HttpUriRequest for the given url. The default is to create a HttpGet without
+     * any further configuration. Subclasses may override this method and provide their own logic.
+     *
+     * @param url the url to be fetched
+     * @return the HttpUriRequest for the given url
+     */
+    protected HttpUriRequest newHttpUriRequest(WebURL url) {
+        if (!url.isPost()) {
+            return this.newHttpUriRequest(url.getURL());
+        }
+        HttpPost req = new HttpPost(url.getURL());
+        List<BasicNameValuePair> pairs = url.getParamsPost();
+        if (pairs != null && pairs.size() > 0) {
+            req.setEntity(new UrlEncodedFormEntity(pairs, StandardCharsets.UTF_8));
+        }
+        return req;
     }
 
     protected CrawlConfig getConfig() {

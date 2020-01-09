@@ -28,6 +28,7 @@ import com.sleepycat.je.Environment;
 import com.sleepycat.je.OperationStatus;
 
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
+import edu.uci.ics.crawler4j.url.WebURL;
 import edu.uci.ics.crawler4j.util.Util;
 
 /**
@@ -76,6 +77,7 @@ public class DocIDServer {
      * @param url the URL for which the docid is returned.
      * @return the docid of the url if it is seen before. Otherwise -1 is returned.
      */
+    @Deprecated
     public int getDocId(String url) {
         synchronized (mutex) {
             OperationStatus result = null;
@@ -101,6 +103,17 @@ public class DocIDServer {
         }
     }
 
+    /**
+     * Returns the docid of an already seen url.
+     *
+     * @param url the URL for which the docid is returned.
+     * @return the docid of the url if it is seen before. Otherwise -1 is returned.
+     */
+    public int getDocId(WebURL url) {
+        return getDocId(url.encode());
+    }
+
+    @Deprecated
     public int getNewDocID(String url) {
         synchronized (mutex) {
             try {
@@ -125,6 +138,11 @@ public class DocIDServer {
         }
     }
 
+    public int getNewDocID(WebURL url) {
+        return getNewDocID(url.encode());
+    }
+
+    @Deprecated
     public void addUrlAndDocId(String url, int docId) {
         synchronized (mutex) {
             if (docId <= lastDocID) {
@@ -147,8 +165,17 @@ public class DocIDServer {
         }
     }
 
+    public void addUrlAndDocId(WebURL url) {
+        addUrlAndDocId(url.encode(), url.getDocid());
+    }
+
+    @Deprecated
     public boolean isSeenBefore(String url) {
         return getDocId(url) != -1;
+    }
+
+    public boolean isSeenBefore(WebURL url) {
+        return isSeenBefore(url.encode());
     }
 
     public final int getDocCount() {

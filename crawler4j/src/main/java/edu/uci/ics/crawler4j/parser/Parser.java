@@ -31,7 +31,7 @@ import edu.uci.ics.crawler4j.util.Util;
 /**
  * @author Yasser Ganjisaffar
  */
-public class Parser {
+public class Parser implements ParserInterface {
 
     private static final Logger logger = LoggerFactory.getLogger(Parser.class);
 
@@ -61,6 +61,7 @@ public class Parser {
         this.net = new Net(config, tldList);
     }
 
+    @Override
     public void parse(Page page, String contextURL) throws NotAllowedContentException, ParseException {
         if (Util.hasBinaryContent(page.getContentType())) { // BINARY
             BinaryParseData parseData = new BinaryParseData();

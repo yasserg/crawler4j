@@ -32,13 +32,13 @@ import edu.uci.ics.crawler4j.crawler.exceptions.ContentFetchException;
 import edu.uci.ics.crawler4j.crawler.exceptions.PageBiggerThanMaxSizeException;
 import edu.uci.ics.crawler4j.crawler.exceptions.ParseException;
 import edu.uci.ics.crawler4j.fetcher.PageFetchResult;
-import edu.uci.ics.crawler4j.fetcher.PageFetcher;
+import edu.uci.ics.crawler4j.fetcher.PageFetcherInterface;
 import edu.uci.ics.crawler4j.frontier.DocIDServer;
 import edu.uci.ics.crawler4j.frontier.Frontier;
 import edu.uci.ics.crawler4j.parser.HtmlParseData;
 import edu.uci.ics.crawler4j.parser.NotAllowedContentException;
 import edu.uci.ics.crawler4j.parser.ParseData;
-import edu.uci.ics.crawler4j.parser.Parser;
+import edu.uci.ics.crawler4j.parser.ParserInterface;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
 import edu.uci.ics.crawler4j.url.WebURL;
 
@@ -71,12 +71,12 @@ public class WebCrawler implements Runnable {
     /**
      * The parser that is used by this crawler instance to parse the content of the fetched pages.
      */
-    private Parser parser;
+    private ParserInterface parser;
 
     /**
      * The fetcher that is used by this crawler instance to fetch the content of pages from the web.
      */
-    private PageFetcher pageFetcher;
+    private PageFetcherInterface pageFetcher;
 
     /**
      * The RobotstxtServer instance that is used by this crawler instance to
@@ -448,15 +448,16 @@ public class WebCrawler implements Runnable {
                     onRedirectedStatusCode(page);
 
                     if (myController.getConfig().isFollowRedirects()) {
-                        int newDocId = docIdServer.getDocId(movedToUrl);
+                        WebURL webURL = new WebURL();
+                        webURL.setURL(movedToUrl);
+
+                        int newDocId = docIdServer.getDocId(webURL);
                         if (newDocId > 0) {
                             logger.debug("Redirect page: {} is already seen", curURL);
                             return;
                         }
 
-                        WebURL webURL = new WebURL();
                         webURL.setTldList(myController.getTldList());
-                        webURL.setURL(movedToUrl);
                         webURL.setParentDocid(curURL.getParentDocid());
                         webURL.setParentUrl(curURL.getParentUrl());
                         webURL.setDepth(curURL.getDepth());
@@ -464,7 +465,7 @@ public class WebCrawler implements Runnable {
                         webURL.setAnchor(curURL.getAnchor());
                         if (shouldVisit(page, webURL)) {
                             if (!shouldFollowLinksIn(webURL) || robotstxtServer.allows(webURL)) {
-                                webURL.setDocid(docIdServer.getNewDocID(movedToUrl));
+                                webURL.setDocid(docIdServer.getNewDocID(webURL));
                                 frontier.schedule(webURL);
                             } else {
                                 logger.debug(
@@ -489,13 +490,20 @@ public class WebCrawler implements Runnable {
                 }
 
             } else { // if status code is 200
-                if (!curURL.getURL().equals(fetchResult.getFetchedUrl())) {
-                    if (docIdServer.isSeenBefore(fetchResult.getFetchedUrl())) {
+                String fetchedUrl;
+                WebURL fetchedWebURL = fetchResult.getFetchedWebUrl();
+                if (fetchedWebURL != null) {
+                    fetchedUrl = fetchedWebURL.getURL();
+                } else {
+                    fetchedUrl = null;
+                }
+                if (!curURL.getURL().equals(fetchedUrl)) {
+                    if (docIdServer.isSeenBefore(fetchResult.getFetchedWebUrl())) {
                         logger.debug("Redirect page: {} has already been seen", curURL);
                         return;
                     }
-                    curURL.setURL(fetchResult.getFetchedUrl());
-                    curURL.setDocid(docIdServer.getNewDocID(fetchResult.getFetchedUrl()));
+                    curURL.setURL(fetchedUrl);
+                    curURL.setDocid(docIdServer.getNewDocID(fetchResult.getFetchedWebUrl()));
                 }
 
                 if (!fetchResult.fetchContent(page,
@@ -519,7 +527,7 @@ public class WebCrawler implements Runnable {
                     for (WebURL webURL : parseData.getOutgoingUrls()) {
                         webURL.setParentDocid(curURL.getDocid());
                         webURL.setParentUrl(curURL.getURL());
-                        int newdocid = docIdServer.getDocId(webURL.getURL());
+                        int newdocid = docIdServer.getDocId(webURL);
                         if (newdocid > 0) {
                             // This is not the first time that this Url is visited. So, we set the
                             // depth to a negative number.
@@ -531,7 +539,7 @@ public class WebCrawler implements Runnable {
                             if ((maxCrawlDepth == -1) || (curURL.getDepth() < maxCrawlDepth)) {
                                 if (shouldVisit(page, webURL)) {
                                     if (robotstxtServer.allows(webURL)) {
-                                        webURL.setDocid(docIdServer.getNewDocID(webURL.getURL()));
+                                        webURL.setDocid(docIdServer.getNewDocID(webURL));
                                         toSchedule.add(webURL);
                                     } else {
                                         logger.debug(

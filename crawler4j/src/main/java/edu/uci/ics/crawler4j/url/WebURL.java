@@ -18,7 +18,11 @@
 package edu.uci.ics.crawler4j.url;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+
+import org.apache.http.message.BasicNameValuePair;
 
 import com.google.common.net.InternetDomainName;
 import com.sleepycat.persist.model.Entity;
@@ -33,10 +37,16 @@ public class WebURL implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    public static final String POST_SEPARATOR = "<<<POST_DATA>>>";
+
+    public static final String PAIR_SEPARATOR = "``--``";
+
+    public static final String VALUE_SEPARATOR = "=";
+
     @PrimaryKey
     private String url;
 
-    private int docid;
+    private int docid = -1;
     private int parentDocid;
     private String parentUrl;
     private short depth;
@@ -48,6 +58,24 @@ public class WebURL implements Serializable {
     private String tag;
     private Map<String, String> attributes;
     private TLDList tldList;
+    private boolean post;
+    List<BasicNameValuePair> paramsPost;
+
+    public List<BasicNameValuePair> getParamsPost() {
+        return paramsPost;
+    }
+
+    public void setParamsPost(List<BasicNameValuePair> paramsPost) {
+        this.paramsPost = paramsPost;
+    }
+
+    public boolean isPost() {
+        return post;
+    }
+
+    public void setPost(boolean post) {
+        this.post = post;
+    }
 
     /**
      * Set the TLDList if you want {@linkplain #getDomain()} and
@@ -271,5 +299,34 @@ public class WebURL implements Serializable {
     @Override
     public String toString() {
         return url;
+    }
+
+    public String encode() {
+        return encodeWebURL(this);
+    }
+
+    public static String encodeWebURL(WebURL url) {
+        if (url == null || url.getURL() == null) {
+            return null;
+        }
+        if (!url.isPost()) {
+            return url.getURL();
+        }
+        String urlFinal = url.getURL() + POST_SEPARATOR + encodePostAttributes(url.getParamsPost());
+        return urlFinal;
+    }
+
+    protected static String encodePostAttributes(List<BasicNameValuePair> postAttributes) {
+        if (postAttributes == null || postAttributes.isEmpty()) {
+            return "";
+        }
+        List<String> pares = new ArrayList<String>();
+        for (BasicNameValuePair par : postAttributes) {
+            if (par == null) {
+                continue;
+            }
+            pares.add(par.getName() + VALUE_SEPARATOR + par.getValue());
+        }
+        return String.join(PAIR_SEPARATOR, pares);
     }
 }
