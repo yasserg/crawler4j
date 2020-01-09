@@ -511,20 +511,52 @@ public class CrawlController {
      * @throws IOException
      */
     public void addSeed(String pageUrl, int docId) throws IOException, InterruptedException {
-        String canonicalUrl = URLCanonicalizer.getCanonicalURL(pageUrl);
+        WebURL webUrl = new WebURL();
+        webUrl.setURL(pageUrl);
+        webUrl.setDocid(docId);
+        addSeed(webUrl);
+    }
+
+    /**
+     * Adds a new seed URL. A seed URL is a URL that is fetched by the crawler
+     * to extract new URLs in it and follow them for crawling. You can also
+     * specify a specific document id to be assigned to this seed URL. This
+     * document id needs to be unique. Also, note that if you add three seeds
+     * with document ids 1,2, and 7. Then the next URL that is found during the
+     * crawl will get a doc id of 8. Also you need to ensure to add seeds in
+     * increasing order of document ids.
+     *
+     * Specifying doc ids is mainly useful when you have had a previous crawl
+     * and have stored the results and want to start a new crawl with seeds
+     * which get the same document ids as the previous crawl.
+     *
+     * NOTE: It will modify the provided URL to set it to a canonical form.
+     * It will also set depth 0 and add the tldList to the WebURL.
+     *
+     * @param pageUrl
+     *            the URL of the seed
+     *
+     * @throws InterruptedException
+     * @throws IOException
+     */
+    public void addSeed(WebURL pageUrl) throws IOException, InterruptedException {
+        String canonicalUrl = URLCanonicalizer.getCanonicalURL(pageUrl.getURL());
         if (canonicalUrl == null) {
             logger.error("Invalid seed URL: {}", pageUrl);
         } else {
+            int docId = pageUrl.getDocid();
+            pageUrl.setURL(canonicalUrl);
             if (docId < 0) {
-                docId = docIdServer.getDocId(canonicalUrl);
+                docId = docIdServer.getDocId(pageUrl);
                 if (docId > 0) {
                     logger.trace("This URL is already seen.");
                     return;
                 }
-                docId = docIdServer.getNewDocID(canonicalUrl);
+                docId = docIdServer.getNewDocID(pageUrl);
+                pageUrl.setDocid(docId);
             } else {
                 try {
-                    docIdServer.addUrlAndDocId(canonicalUrl, docId);
+                    docIdServer.addUrlAndDocId(pageUrl);
                 } catch (RuntimeException e) {
                     if (config.isHaltOnError()) {
                         throw e;
@@ -534,13 +566,10 @@ public class CrawlController {
                 }
             }
 
-            WebURL webUrl = new WebURL();
-            webUrl.setTldList(tldList);
-            webUrl.setURL(canonicalUrl);
-            webUrl.setDocid(docId);
-            webUrl.setDepth((short) 0);
-            if (robotstxtServer.allows(webUrl)) {
-                frontier.schedule(webUrl);
+            pageUrl.setTldList(tldList);
+            pageUrl.setDepth((short) 0);
+            if (robotstxtServer.allows(pageUrl)) {
+                frontier.schedule(pageUrl);
             } else {
                 // using the WARN level here, as the user specifically asked to add this seed
                 logger.warn("Robots.txt does not allow this seed: {}", pageUrl);
@@ -564,14 +593,38 @@ public class CrawlController {
      *            the document id that you want to be assigned to this URL.
      * @throws UnsupportedEncodingException
      *
+     *
      */
     public void addSeenUrl(String url, int docId) throws UnsupportedEncodingException {
-        String canonicalUrl = URLCanonicalizer.getCanonicalURL(url);
+        WebURL webUrl = new WebURL();
+        webUrl.setURL(url);
+        webUrl.setDocid(docId);
+        addSeenUrl(webUrl);
+    }
+
+    /**
+     * This function can called to assign a specific document id to a url. This
+     * feature is useful when you have had a previous crawl and have stored the
+     * Urls and their associated document ids and want to have a new crawl which
+     * is aware of the previously seen Urls and won't re-crawl them.
+     *
+     * Note that if you add three seen Urls with document ids 1,2, and 7. Then
+     * the next URL that is found during the crawl will get a doc id of 8. Also
+     * you need to ensure to add seen Urls in increasing order of document ids.
+     *
+     * @param url
+     *            the URL of the page
+     * @throws UnsupportedEncodingException
+     *
+     */
+    public void addSeenUrl(WebURL url) throws UnsupportedEncodingException {
+        String canonicalUrl = URLCanonicalizer.getCanonicalURL(url.getURL());
         if (canonicalUrl == null) {
             logger.error("Invalid Url: {} (can't cannonicalize it!)", url);
         } else {
+            url.setURL(canonicalUrl);
             try {
-                docIdServer.addUrlAndDocId(canonicalUrl, docId);
+                docIdServer.addUrlAndDocId(url);
             } catch (RuntimeException e) {
                 if (config.isHaltOnError()) {
                     throw e;

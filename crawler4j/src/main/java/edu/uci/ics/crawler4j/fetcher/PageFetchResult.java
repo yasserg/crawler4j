@@ -27,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.uci.ics.crawler4j.crawler.Page;
+import edu.uci.ics.crawler4j.url.WebURL;
 
 /**
  * @author Yasser Ganjisaffar
@@ -40,6 +41,7 @@ public class PageFetchResult {
     protected HttpEntity entity = null;
     protected Header[] responseHeaders = null;
     protected String fetchedUrl = null;
+    protected WebURL fetchedWebUrl = null;
     protected String movedToUrl = null;
 
     public PageFetchResult(boolean haltOnError) {
@@ -70,12 +72,30 @@ public class PageFetchResult {
         this.responseHeaders = responseHeaders;
     }
 
+    @Deprecated
     public String getFetchedUrl() {
         return fetchedUrl;
     }
 
+    @Deprecated
     public void setFetchedUrl(String fetchedUrl) {
-        this.fetchedUrl = fetchedUrl;
+        WebURL fetchedWebURL = new WebURL();
+        fetchedWebURL.setURL(fetchedUrl);
+        setFetchedWebUrl(fetchedWebURL);
+    }
+
+    public WebURL getFetchedWebUrl() {
+        return fetchedWebUrl;
+    }
+
+    public void setFetchedWebUrl(WebURL fetchedWebUrl) {
+        this.fetchedWebUrl = fetchedWebUrl;
+        // Compatibility until deprecated methods are deleted
+        if (fetchedWebUrl != null) {
+            this.fetchedUrl = fetchedWebUrl.getURL();
+        } else {
+            this.fetchedUrl = null;
+        }
     }
 
     public boolean fetchContent(Page page, int maxBytes) throws SocketTimeoutException, IOException {
