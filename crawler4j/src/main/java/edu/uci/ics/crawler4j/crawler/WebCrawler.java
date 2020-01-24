@@ -517,9 +517,9 @@ public class WebCrawler implements Runnable {
                         ParseData parseData = page.getParseData();
                         List<WebURL> toSchedule = new ArrayList<>();
                         int maxCrawlDepth = myController.getConfig().getMaxDepthOfCrawling();
-                        // This is not threads safe. Other threads may reduce remaining elements
                         long remaining = frontier.numberToReachMaxPagesToFetch();
                         for (WebURL webURL : parseData.getOutgoingUrls()) {
+                            // This is not threads safe. Other threads may reduce remaining elements
                             if (remaining == 0) {
                                 logger.debug("Ignoring remaining links in page {}, "
                                         + "because maxPagesToFetch was reached",

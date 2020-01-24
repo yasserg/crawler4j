@@ -168,14 +168,14 @@ public class Frontier {
 
     public long numberToReachMaxPagesToFetch() {
         int maxPagesToFetch = config.getMaxPagesToFetch();
-    	if (maxPagesToFetch < 0) {
-    		return -1;
-    	}
-    	long remaining = maxPagesToFetch - scheduledPages;
-    	if (remaining < 0) {
-    		return 0;
-    	}
-    	return remaining;
+        if (maxPagesToFetch < 0) {
+            return -1;
+        }
+        long remaining = maxPagesToFetch - scheduledPages;
+        if (remaining < 0) {
+            return 0;
+        }
+        return remaining;
     }
 
     public void setProcessed(WebURL webURL) {
