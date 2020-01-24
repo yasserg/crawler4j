@@ -513,40 +513,56 @@ public class WebCrawler implements Runnable {
                 parser.parse(page, curURL.getURL());
 
                 if (shouldFollowLinksIn(page.getWebURL())) {
-                    ParseData parseData = page.getParseData();
-                    List<WebURL> toSchedule = new ArrayList<>();
-                    int maxCrawlDepth = myController.getConfig().getMaxDepthOfCrawling();
-                    for (WebURL webURL : parseData.getOutgoingUrls()) {
-                        webURL.setParentDocid(curURL.getDocid());
-                        webURL.setParentUrl(curURL.getURL());
-                        int newdocid = docIdServer.getDocId(webURL.getURL());
-                        if (newdocid > 0) {
-                            // This is not the first time that this Url is visited. So, we set the
-                            // depth to a negative number.
-                            webURL.setDepth((short) -1);
-                            webURL.setDocid(newdocid);
-                        } else {
-                            webURL.setDocid(-1);
-                            webURL.setDepth((short) (curURL.getDepth() + 1));
-                            if ((maxCrawlDepth == -1) || (curURL.getDepth() < maxCrawlDepth)) {
-                                if (shouldVisit(page, webURL)) {
-                                    if (robotstxtServer.allows(webURL)) {
-                                        webURL.setDocid(docIdServer.getNewDocID(webURL.getURL()));
-                                        toSchedule.add(webURL);
+                    if (frontier.canFetchPages()) {
+                        ParseData parseData = page.getParseData();
+                        List<WebURL> toSchedule = new ArrayList<>();
+                        int maxCrawlDepth = myController.getConfig().getMaxDepthOfCrawling();
+                        // This is not threads safe. Other threads may reduce remaining elements
+                        long remaining = frontier.numberToReachMaxPagesToFetch();
+                        for (WebURL webURL : parseData.getOutgoingUrls()) {
+                            if (remaining == 0) {
+                                logger.debug("Ignoring remaining links in page {}, "
+                                        + "because maxPagesToFetch was reached",
+                                        page.getWebURL().getURL());
+                                break;
+                            }
+                            webURL.setParentDocid(curURL.getDocid());
+                            webURL.setParentUrl(curURL.getURL());
+                            int newdocid = docIdServer.getDocId(webURL.getURL());
+                            if (newdocid > 0) {
+                                // This is not the first time that this Url is visited. So, we set the
+                                // depth to a negative number.
+                                webURL.setDepth((short) -1);
+                                webURL.setDocid(newdocid);
+                            } else {
+                                webURL.setDocid(-1);
+                                webURL.setDepth((short) (curURL.getDepth() + 1));
+                                if ((maxCrawlDepth == -1) || (curURL.getDepth() < maxCrawlDepth)) {
+                                    if (shouldVisit(page, webURL)) {
+                                        if (robotstxtServer.allows(webURL)) {
+                                            webURL.setDocid(docIdServer.getNewDocID(webURL.getURL()));
+                                            remaining--;
+                                            toSchedule.add(webURL);
+                                        } else {
+                                            logger.debug(
+                                                "Not visiting: {} as per the server's \"robots.txt\" " +
+                                                "policy", webURL.getURL());
+                                        }
                                     } else {
                                         logger.debug(
-                                            "Not visiting: {} as per the server's \"robots.txt\" " +
-                                            "policy", webURL.getURL());
+                                            "Not visiting: {} as per your \"shouldVisit\" policy",
+                                            webURL.getURL());
                                     }
-                                } else {
-                                    logger.debug(
-                                        "Not visiting: {} as per your \"shouldVisit\" policy",
-                                        webURL.getURL());
                                 }
                             }
                         }
+                        frontier.scheduleAll(toSchedule);
+                    } else {
+                        logger.debug("Not looking for links in page {}, "
+                                + "because maxPagesToFetch was reached",
+                                page.getWebURL().getURL());
                     }
-                    frontier.scheduleAll(toSchedule);
+
                 } else {
                     logger.debug("Not looking for links in page {}, "
                                  + "as per your \"shouldFollowLinksInPage\" policy",

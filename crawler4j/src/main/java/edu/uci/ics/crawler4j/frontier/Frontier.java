@@ -161,6 +161,23 @@ public class Frontier {
         }
     }
 
+    public boolean canFetchPages() {
+        int maxPagesToFetch = config.getMaxPagesToFetch();
+        return maxPagesToFetch < 0 || scheduledPages < maxPagesToFetch;
+    }
+
+    public long numberToReachMaxPagesToFetch() {
+        int maxPagesToFetch = config.getMaxPagesToFetch();
+    	if (maxPagesToFetch < 0) {
+    		return -1;
+    	}
+    	long remaining = maxPagesToFetch - scheduledPages;
+    	if (remaining < 0) {
+    		return 0;
+    	}
+    	return remaining;
+    }
+
     public void setProcessed(WebURL webURL) {
         counters.increment(Counters.ReservedCounterNames.PROCESSED_PAGES);
         if (inProcessPages != null) {
