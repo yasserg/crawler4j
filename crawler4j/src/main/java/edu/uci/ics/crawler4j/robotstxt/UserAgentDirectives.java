@@ -25,6 +25,10 @@ public class UserAgentDirectives {
     private Double crawlDelay = null;
     private Set<PathRule> pathRules = new HashSet<>();
 
+    private long timeout;
+    private boolean matchOnTimeout;
+    private int checkInterval;
+
     /**
      * Comparator used to order the list of matching path rules in such a way
      * that the most specific match (= longest) match comes first.
@@ -78,6 +82,32 @@ public class UserAgentDirectives {
      */
     public UserAgentDirectives(Set<String> userAgents) {
         this.userAgents = userAgents;
+        this.timeout = -1;
+        this.matchOnTimeout = false;
+        this.checkInterval = TimeoutablePathRule.defaultCheckInterval;
+    }
+
+    public UserAgentDirectives(Set<String> userAgents, long timeout, boolean matchOnTimeout) {
+    	this(userAgents, timeout, matchOnTimeout, null);
+    }
+    
+    /**
+     * Create a UserAgentDirectives clause
+     * 
+     * @param userAgents The list user agents for this rule
+     * @param timeout milliseconds before regular expressions timeout.
+     * @param matchOnTimeout if true, a timeout will mean a match. 
+     * @param checkInterval number of characters read between timeout attemps. Default: 30000000
+     */
+    public UserAgentDirectives(Set<String> userAgents, long timeout, boolean matchOnTimeout, Integer checkInterval) {
+        this.userAgents = userAgents;
+        this.timeout = timeout;
+        this.matchOnTimeout = matchOnTimeout;
+        if (checkInterval == null) {
+            this.checkInterval = TimeoutablePathRule.defaultCheckInterval;
+        } else {
+            this.checkInterval = checkInterval;
+        }
     }
 
     /**
@@ -195,9 +225,18 @@ public class UserAgentDirectives {
         } else if (rule.equals("host")) {
             this.preferredHost = value;
         } else if (rule.equals("allow")) {
-            this.pathRules.add(new PathRule(HostDirectives.ALLOWED, value));
+            if (timeout < 0) {
+                this.pathRules.add(new PathRule(HostDirectives.ALLOWED, value));
+            } else {
+                this.pathRules.add(new TimeoutablePathRule(HostDirectives.ALLOWED, value, timeout, matchOnTimeout, checkInterval));
+            }
+            
         } else if (rule.equals("disallow")) {
-            this.pathRules.add(new PathRule(HostDirectives.DISALLOWED, value));
+            if (timeout < 0) {
+                this.pathRules.add(new PathRule(HostDirectives.DISALLOWED, value));
+            } else {
+                this.pathRules.add(new TimeoutablePathRule(HostDirectives.DISALLOWED, value, timeout, matchOnTimeout, checkInterval));
+            }
         } else {
             logger.error("Invalid key in robots.txt passed to UserAgentRules: {}", rule);
         }
