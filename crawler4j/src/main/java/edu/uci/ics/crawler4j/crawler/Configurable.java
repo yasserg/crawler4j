@@ -21,7 +21,7 @@ package edu.uci.ics.crawler4j.crawler;
  * Several core components of crawler4j extend this class
  * to make them configurable.
  *
- * @deprecated This will removed without notice.
+ * @deprecated This will be removed without notice.
  * @author Yasser Ganjisaffar
  */
 @Deprecated
