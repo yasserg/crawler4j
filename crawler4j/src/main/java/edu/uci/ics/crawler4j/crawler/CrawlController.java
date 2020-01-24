@@ -106,7 +106,7 @@ public class CrawlController {
             String docIdDbName, String pendingDbName) throws Exception {
         this(config, pageFetcher, parser, robotstxtServer, tldList, null, null, null);
     }
-    
+
     public CrawlController(CrawlConfig config, PageFetcher pageFetcher, Parser parser,
                            RobotstxtServer robotstxtServer, TLDList tldList,
                            String docIdDbName, String pendingDbName, String inProcessDbName) throws Exception {
