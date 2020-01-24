@@ -46,6 +46,25 @@ public class RobotstxtConfig {
      */
     private int cacheSize = 500;
 
+    /**
+     * The milliseconds before a regexp timeouts. -1 means no timeout. This will
+     * reduce regexp performance.
+     */
+    private long timeout = -1;
+
+    /**
+     * If true, the system will consider that a timed out regexp is a matching one.
+     */
+    private boolean matchOnTimeout = false;
+    
+    /**
+     * In order to be able to timeout inside a matcher, the system check's for timeout
+     * while reading the CharSecuence. This parameter sets the number of characters that
+     * will be read between timeout checking. Higher values means less CPU overhead and
+     * less accuracy on timeout. Default value is 30000000. Null means default.
+     */
+    private Integer checkTimeoutInterval = null;
+    
     public boolean isEnabled() {
         return enabled;
     }
@@ -76,5 +95,29 @@ public class RobotstxtConfig {
 
     public boolean getIgnoreUADiscrimination() {
         return ignoreUADiscrimination;
+    }
+
+    public long getTimeout() {
+        return timeout;
+    }
+
+    public void setTimeout(long timeout) {
+        this.timeout = timeout;
+    }
+
+    public boolean isMatchOnTimeout() {
+        return matchOnTimeout;
+    }
+
+    public void setMatchOnTimeout(boolean matchOnTimeout) {
+        this.matchOnTimeout = matchOnTimeout;
+    }
+
+    public Integer getCheckTimeoutInterval() {
+        return checkTimeoutInterval;
+    }
+
+    public void setCheckTimeoutInterval(Integer checkTimeoutInterval) {
+        this.checkTimeoutInterval = checkTimeoutInterval;
     }
 }

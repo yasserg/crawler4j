@@ -69,11 +69,11 @@ public class TimeoutablePathRule extends PathRule {
         try {
             return RegularExpressionUtils.createMatcherWithTimeout(path, pattern, timeout, checkInterval).matches();
         } catch(RegexpTimeoutException e) {
-        	logger.warn(e.toString());
+            logger.warn(e.toString());
             if (matchOnTimeout) {
                 return true;
             } else {
-            	return false;
+                return false;
             }
         }
     }
