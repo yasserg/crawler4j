@@ -30,8 +30,9 @@ import org.apache.http.impl.conn.SystemDefaultDnsResolver;
 import org.apache.http.message.BasicHeader;
 
 import edu.uci.ics.crawler4j.crawler.authentication.AuthInfo;
+import edu.uci.ics.crawler4j.crawler.exceptions.ConfigException;
 
-public class CrawlConfig {
+public class CrawlConfig implements Cloneable {
 
     /**
      * The folder which will be used by crawler for storing the intermediate
@@ -238,22 +239,22 @@ public class CrawlConfig {
     /**
      * Validates the configs specified by this instance.
      *
-     * @throws Exception on Validation fail
+     * @throws ConfigException on Validation fail
      */
-    public void validate() throws Exception {
+    public void validate() throws ConfigException {
         if (crawlStorageFolder == null) {
-            throw new Exception("Crawl storage folder is not set in the CrawlConfig.");
+            throw new ConfigException("Crawl storage folder is not set in the CrawlConfig.");
         }
         if (politenessDelay < 0) {
-            throw new Exception("Invalid value for politeness delay: " + politenessDelay);
+            throw new ConfigException("Invalid value for politeness delay: " + politenessDelay);
         }
         if (maxDepthOfCrawling < -1) {
-            throw new Exception(
+            throw new ConfigException(
                 "Maximum crawl depth should be either a positive number or -1 for unlimited depth" +
                 ".");
         }
         if (maxDepthOfCrawling > Short.MAX_VALUE) {
-            throw new Exception("Maximum value for crawl depth is " + Short.MAX_VALUE);
+            throw new ConfigException("Maximum value for crawl depth is " + Short.MAX_VALUE);
         }
     }
 
@@ -763,4 +764,58 @@ public class CrawlConfig {
         sb.append("Batch read size: " + getBatchReadSize() + "\n");
         return sb.toString();
     }
+
+    /**
+     * Creates a deep copy of this configuration.
+     *
+     * CookieStore and DNS Resolver are shallow copied.
+     */
+    @Override
+    public CrawlConfig clone() {
+        CrawlConfig clone = new CrawlConfig();
+        clone.crawlStorageFolder = crawlStorageFolder;
+        clone.resumableCrawling = resumableCrawling;
+        clone.dbLockTimeout = dbLockTimeout;
+        clone.maxDepthOfCrawling = maxDepthOfCrawling;
+        clone.maxPagesToFetch = maxPagesToFetch;
+        clone.userAgentString = userAgentString;
+        if (defaultHeaders != null) {
+            clone.defaultHeaders = new HashSet<BasicHeader>(defaultHeaders);
+        }
+        clone.politenessDelay = politenessDelay;
+        clone.includeHttpsPages = includeHttpsPages;
+        clone.includeBinaryContentInCrawling = includeBinaryContentInCrawling;
+        clone.processBinaryContentInCrawling = processBinaryContentInCrawling;
+        clone.maxConnectionsPerHost = maxConnectionsPerHost;
+        clone.maxTotalConnections = maxTotalConnections;
+        clone.socketTimeout = socketTimeout;
+        clone.connectionTimeout = connectionTimeout;
+        clone.maxOutgoingLinksToFollow = maxOutgoingLinksToFollow;
+        clone.maxDownloadSize = maxDownloadSize;
+        clone.followRedirects = followRedirects;
+        clone.onlineTldListUpdate = onlineTldListUpdate;
+        clone.publicSuffixSourceUrl = publicSuffixSourceUrl;
+        clone.publicSuffixLocalFile = publicSuffixLocalFile;
+        clone.shutdownOnEmptyQueue = shutdownOnEmptyQueue;
+        clone.threadMonitoringDelaySeconds = threadMonitoringDelaySeconds;
+        clone.threadShutdownDelaySeconds = threadShutdownDelaySeconds;
+        clone.cleanupDelaySeconds = cleanupDelaySeconds;
+        clone.proxyHost = proxyHost;
+        clone.proxyPort = proxyPort;
+        clone.proxyUsername = proxyUsername;
+        clone.proxyPassword = proxyPassword;
+        if (authInfos != null) {
+            this.authInfos = new ArrayList<AuthInfo>(authInfos);
+        }
+        clone.cookiePolicy = cookiePolicy;
+        clone.respectNoFollow = respectNoFollow;
+        clone.respectNoIndex = respectNoIndex;
+        clone.cookieStore = cookieStore;
+        clone.dnsResolver = dnsResolver;
+        clone.haltOnError = haltOnError;
+        clone.allowSingleLevelDomain = allowSingleLevelDomain;
+        clone.batchReadSize = batchReadSize;
+        return clone;
+    }
+
 }
