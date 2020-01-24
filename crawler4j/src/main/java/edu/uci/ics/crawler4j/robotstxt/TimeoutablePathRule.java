@@ -22,9 +22,11 @@ public class TimeoutablePathRule extends PathRule {
      * @return True when the pattern matches, false if it does not
      * @throws RegexpTimeoutException if the regexp timeouts.
      */
-    public static boolean matchesRobotsPattern(String pattern, String path, long timeout, boolean matchOnTimeout, int checkInterval) throws RegexpTimeoutException{
+    public static boolean matchesRobotsPattern(String pattern, String path, long timeout, boolean matchOnTimeout,
+                                                int checkInterval) throws RegexpTimeoutException{
         try {
-            return RegularExpressionUtils.createMatcherWithTimeout(path, robotsPatternToRegexp(pattern), timeout, checkInterval).matches();
+            return RegularExpressionUtils.createMatcherWithTimeout(path, robotsPatternToRegexp(pattern), timeout,
+                                                                    checkInterval).matches();
         } catch(RegexpTimeoutException e) {
             if (matchOnTimeout) {
                 return true;

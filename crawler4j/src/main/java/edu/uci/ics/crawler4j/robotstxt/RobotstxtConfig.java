@@ -56,7 +56,7 @@ public class RobotstxtConfig {
      * If true, the system will consider that a timed out regexp is a matching one.
      */
     private boolean matchOnTimeout = false;
-    
+
     /**
      * In order to be able to timeout inside a matcher, the system check's for timeout
      * while reading the CharSecuence. This parameter sets the number of characters that
@@ -64,7 +64,7 @@ public class RobotstxtConfig {
      * less accuracy on timeout. Default value is 30000000. Null means default.
      */
     private Integer checkTimeoutInterval = null;
-    
+
     public boolean isEnabled() {
         return enabled;
     }

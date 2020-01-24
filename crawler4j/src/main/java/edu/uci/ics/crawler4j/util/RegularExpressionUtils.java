@@ -7,11 +7,11 @@ import edu.uci.ics.crawler4j.crawler.exceptions.RegexpTimeoutException;
 
 /**
  * Allows to create timeoutable regular expressions.
- * 
+ *
  * Limitations: Can only throw RuntimeException. Decreases performance.
  *
  * Posted by Kris in stackoverflow.
- * 
+ *
  * Modified by dgoiko to  ejecute timeout check only every n chars.
  * Now timeout < 0 means no timeout.
  *
@@ -33,15 +33,17 @@ public class RegularExpressionUtils {
         }
     }
 
-    public static Matcher createMatcherWithTimeout(String stringToMatch, String regularExpression, long timeoutMillis, int checkInterval) {
+    public static Matcher createMatcherWithTimeout(String stringToMatch, String regularExpression, long timeoutMillis,
+                                                      int checkInterval) {
         Pattern pattern = Pattern.compile(regularExpression);
         return createMatcherWithTimeout(stringToMatch, pattern, timeoutMillis, checkInterval);
     }
 
-    public static Matcher createMatcherWithTimeout(String stringToMatch, Pattern regularExpressionPattern, long timeoutMillis, int checkInterval) {
-    	if	( timeoutMillis < 0) {
-    		return regularExpressionPattern.matcher(stringToMatch);
-    	}
+    public static Matcher createMatcherWithTimeout(String stringToMatch, Pattern regularExpressionPattern,
+                                                    long timeoutMillis, int checkInterval) {
+        if    ( timeoutMillis < 0) {
+            return regularExpressionPattern.matcher(stringToMatch);
+        }
         CharSequence charSequence = new TimeoutRegexCharSequence(stringToMatch, timeoutMillis, stringToMatch,
                 regularExpressionPattern.pattern(), checkInterval);
         return regularExpressionPattern.matcher(charSequence);
@@ -63,7 +65,8 @@ public class RegularExpressionUtils {
 
         private int attemps;
 
-        public TimeoutRegexCharSequence(CharSequence inner, long timeoutMillis, String stringToMatch, String regularExpression, int checkInterval) {
+        TimeoutRegexCharSequence(CharSequence inner, long timeoutMillis, String stringToMatch,
+                                  String regularExpression, int checkInterval) {
             super();
             this.inner = inner;
             this.timeoutMillis = timeoutMillis;
@@ -92,7 +95,8 @@ public class RegularExpressionUtils {
         }
 
         public CharSequence subSequence(int start, int end) {
-            return new TimeoutRegexCharSequence(inner.subSequence(start, end), timeoutMillis, stringToMatch, regularExpression, checkInterval);
+            return new TimeoutRegexCharSequence(inner.subSequence(start, end), timeoutMillis, stringToMatch,
+                                                regularExpression, checkInterval);
         }
 
         @Override
