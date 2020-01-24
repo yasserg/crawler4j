@@ -56,6 +56,10 @@ public class Frontier {
     }
 
     public Frontier(Environment env, CrawlConfig config, String dbName) {
+        this(env, config, dbName, null);
+    }
+
+    public Frontier(Environment env, CrawlConfig config, String dbName, String inProcessDbName) {
         this.config = config;
         this.counters = new Counters(env, config);
         try {
@@ -66,7 +70,11 @@ public class Frontier {
             }
             if (config.isResumableCrawling()) {
                 scheduledPages = counters.getValue(Counters.ReservedCounterNames.SCHEDULED_PAGES);
-                inProcessPages = new InProcessPagesDB(env);
+                if (inProcessDbName == null) {
+                    inProcessPages = new InProcessPagesDB(env);
+                } else {
+                    inProcessPages = new InProcessPagesDB(env, inProcessDbName);
+                }
                 long numPreviouslyInProcessPages = inProcessPages.getLength();
                 if (numPreviouslyInProcessPages > 0) {
                     logger.info("Rescheduling {} URLs from previous crawl.",
