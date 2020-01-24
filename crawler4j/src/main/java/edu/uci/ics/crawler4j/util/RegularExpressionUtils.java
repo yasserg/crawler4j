@@ -28,8 +28,8 @@ public class RegularExpressionUtils {
                 "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", "(x+x+)+y", 2000, 30000000);
         try {
             System.out.println(matcher.matches());
-        } catch(RuntimeException e) {
-            System.out.println("Operation timed out after "+ (System.currentTimeMillis() - millis)+" milliseconds");
+        } catch (RuntimeException e) {
+            System.out.println("Operation timed out after " + (System.currentTimeMillis() - millis) + " milliseconds");
         }
     }
 
@@ -41,7 +41,7 @@ public class RegularExpressionUtils {
 
     public static Matcher createMatcherWithTimeout(String stringToMatch, Pattern regularExpressionPattern,
                                                     long timeoutMillis, int checkInterval) {
-        if    ( timeoutMillis < 0) {
+        if (timeoutMillis < 0) {
             return regularExpressionPattern.matcher(stringToMatch);
         }
         CharSequence charSequence = new TimeoutRegexCharSequence(stringToMatch, timeoutMillis, stringToMatch,

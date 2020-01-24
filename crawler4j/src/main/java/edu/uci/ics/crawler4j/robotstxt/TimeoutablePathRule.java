@@ -23,11 +23,11 @@ public class TimeoutablePathRule extends PathRule {
      * @throws RegexpTimeoutException if the regexp timeouts.
      */
     public static boolean matchesRobotsPattern(String pattern, String path, long timeout, boolean matchOnTimeout,
-                                                int checkInterval) throws RegexpTimeoutException{
+                                                int checkInterval) throws RegexpTimeoutException {
         try {
             return RegularExpressionUtils.createMatcherWithTimeout(path, robotsPatternToRegexp(pattern), timeout,
                                                                     checkInterval).matches();
-        } catch(RegexpTimeoutException e) {
+        } catch (RegexpTimeoutException e) {
             if (matchOnTimeout) {
                 return true;
             }
@@ -38,6 +38,7 @@ public class TimeoutablePathRule extends PathRule {
     public static boolean matchesRobotsPattern(String pattern, String path, long timeout, boolean matchOnTimeout) {
         return matchesRobotsPattern(pattern, path, timeout, matchOnTimeout, defaultCheckInterval);
     }
+
     /**
      * Create a new path rule, based on the specified pattern
      *
@@ -70,13 +71,9 @@ public class TimeoutablePathRule extends PathRule {
     public boolean matches(String path) {
         try {
             return RegularExpressionUtils.createMatcherWithTimeout(path, pattern, timeout, checkInterval).matches();
-        } catch(RegexpTimeoutException e) {
+        } catch (RegexpTimeoutException e) {
             logger.warn(e.toString());
-            if (matchOnTimeout) {
-                return true;
-            } else {
-                return false;
-            }
+            return matchOnTimeout;
         }
     }
 }

@@ -38,7 +38,7 @@ public class RegexpTimeoutException extends RuntimeException {
     }
 
     public RegexpTimeoutException(String regularExpression, String stringToMatch, long timeoutMillis) {
-        super("Timeout occurred after " + timeoutMillis + "ms while processing regular expression '"  
+        super("Timeout occurred after " + timeoutMillis + "ms while processing regular expression '"
                 + regularExpression + "' on input '" + stringToMatch + "'!");
         this.regularExpression = regularExpression;
         this.stringToMatch = stringToMatch;
