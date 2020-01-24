@@ -30,6 +30,7 @@ import org.apache.http.impl.conn.SystemDefaultDnsResolver;
 import org.apache.http.message.BasicHeader;
 
 import edu.uci.ics.crawler4j.crawler.authentication.AuthInfo;
+import edu.uci.ics.crawler4j.crawler.exceptions.ConfigException;
 
 public class CrawlConfig {
 
@@ -238,22 +239,22 @@ public class CrawlConfig {
     /**
      * Validates the configs specified by this instance.
      *
-     * @throws Exception on Validation fail
+     * @throws ConfigException on Validation fail
      */
-    public void validate() throws Exception {
+    public void validate() throws ConfigException {
         if (crawlStorageFolder == null) {
-            throw new Exception("Crawl storage folder is not set in the CrawlConfig.");
+            throw new ConfigException("Crawl storage folder is not set in the CrawlConfig.");
         }
         if (politenessDelay < 0) {
-            throw new Exception("Invalid value for politeness delay: " + politenessDelay);
+            throw new ConfigException("Invalid value for politeness delay: " + politenessDelay);
         }
         if (maxDepthOfCrawling < -1) {
-            throw new Exception(
+            throw new ConfigException(
                 "Maximum crawl depth should be either a positive number or -1 for unlimited depth" +
                 ".");
         }
         if (maxDepthOfCrawling > Short.MAX_VALUE) {
-            throw new Exception("Maximum value for crawl depth is " + Short.MAX_VALUE);
+            throw new ConfigException("Maximum value for crawl depth is " + Short.MAX_VALUE);
         }
     }
 
