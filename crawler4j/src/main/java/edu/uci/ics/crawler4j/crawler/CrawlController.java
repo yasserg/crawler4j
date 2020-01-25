@@ -543,7 +543,7 @@ public class CrawlController {
                 }
             }
 
-            WebURL webUrl = new WebURL();
+            WebURL webUrl = createEmptyWebURL(pageUrl);
             webUrl.setTldList(tldList);
             webUrl.setURL(canonicalUrl);
             webUrl.setDocid(docId);
@@ -555,6 +555,15 @@ public class CrawlController {
                 logger.warn("Robots.txt does not allow this seed: {}", pageUrl);
             }
         }
+    }
+
+    /**
+     * Creates an empty WebURL. Subclases can override this to create subclases of WebURL instead.
+     * @param nonCanonicalString url before being transformed into canonical. It is ignored in default implementation
+     * @return
+     */
+    protected WebURL createEmptyWebURL(String nonCanonicalString) {
+        return new WebURL();
     }
 
     /**
