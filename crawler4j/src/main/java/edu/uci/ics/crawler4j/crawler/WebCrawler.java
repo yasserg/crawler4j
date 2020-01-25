@@ -611,7 +611,7 @@ public class WebCrawler implements Runnable {
      * @throws InterruptedException
      * @throws ParseException
      */
-    protected void followRedirectInmediatly(WebURL curURL, String movedToUrl) 
+    protected void followRedirectInmediatly(WebURL curURL, String movedToUrl)
                         throws IOException, InterruptedException, ParseException {
         WebURL webURL = createRedirectedWebURL(curURL, movedToUrl);
         webURL.setFollowRedirectsInmediatly(true);

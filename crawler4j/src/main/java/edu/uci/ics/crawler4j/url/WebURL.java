@@ -50,6 +50,7 @@ public class WebURL implements Serializable {
     private TLDList tldList;
     private boolean followRedirectsInmediatly = false;
     private short maxInmediateRedirects = 10;
+
     /**
      * Set the TLDList if you want {@linkplain #getDomain()} and
      * {@link #getSubDomain()} to properly identify effective top level registeredDomain as
