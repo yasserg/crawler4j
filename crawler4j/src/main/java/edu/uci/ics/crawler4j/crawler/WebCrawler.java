@@ -454,7 +454,7 @@ public class WebCrawler implements Runnable {
                             return;
                         }
 
-                        WebURL webURL = new WebURL();
+                        WebURL webURL = createEmptyWebURL();
                         webURL.setTldList(myController.getTldList());
                         webURL.setURL(movedToUrl);
                         webURL.setParentDocid(curURL.getParentDocid());
@@ -548,6 +548,10 @@ public class WebCrawler implements Runnable {
                 fetchResult.discardContentIfNotConsumed();
             }
         }
+    }
+
+    protected WebURL createEmptyWebURL() {
+        return new WebURL();
     }
 
     protected void scheduleOutgoingUrls(Page page, WebURL curURL) throws IOException, InterruptedException {
