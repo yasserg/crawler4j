@@ -8,7 +8,7 @@ package edu.uci.ics.crawler4j.crawler.exceptions;
 public class ConfigException extends Exception {
     private static final long serialVersionUID = -7376208295930945704L;
 
-	public ConfigException() {
+    public ConfigException() {
         super();
     }
 
