@@ -17,7 +17,6 @@
 
 package edu.uci.ics.crawler4j.crawler;
 
-
 import edu.uci.ics.crawler4j.fetcher.PageFetcher;
 import edu.uci.ics.crawler4j.parser.Parser;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
@@ -29,23 +28,21 @@ import edu.uci.ics.crawler4j.url.TLDList;
  *
  * @author Yasser Ganjisaffar
  */
-public class CrawlController extends GenericCrawlController<WebCrawler> {
+public class CrawlController extends GenericCrawlController<WebCrawler, Object> {
 
-	public CrawlController(CrawlConfig config, PageFetcher pageFetcher, Parser parser, RobotstxtServer robotstxtServer,
-			TLDList tldList) throws Exception {
-		super(config, pageFetcher, parser, robotstxtServer, tldList);
-	}
+    public CrawlController(CrawlConfig config, PageFetcher pageFetcher, Parser parser, RobotstxtServer robotstxtServer,
+            TLDList tldList) throws Exception {
+        super(config, pageFetcher, parser, robotstxtServer, tldList);
+    }
 
-	public CrawlController(CrawlConfig config, PageFetcher pageFetcher, RobotstxtServer robotstxtServer,
-			TLDList tldList) throws Exception {
-		super(config, pageFetcher, robotstxtServer, tldList);
-	}
+    public CrawlController(CrawlConfig config, PageFetcher pageFetcher, RobotstxtServer robotstxtServer,
+            TLDList tldList) throws Exception {
+        super(config, pageFetcher, robotstxtServer, tldList);
+    }
 
-	public CrawlController(CrawlConfig config, PageFetcher pageFetcher, RobotstxtServer robotstxtServer)
-			throws Exception {
-		super(config, pageFetcher, robotstxtServer);
-	}
+    public CrawlController(CrawlConfig config, PageFetcher pageFetcher, RobotstxtServer robotstxtServer)
+            throws Exception {
+        super(config, pageFetcher, robotstxtServer);
+    }
 
-    
-    
 }
