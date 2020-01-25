@@ -55,7 +55,7 @@ public class Frontier {
         this.config = config;
         this.counters = new Counters(env, config);
         try {
-            workQueues = new WorkQueues(env, DATABASE_NAME, config.isResumableCrawling());
+            workQueues = createWorkQueues(env, config, DATABASE_NAME);
             if (config.isResumableCrawling()) {
                 scheduledPages = counters.getValue(Counters.ReservedCounterNames.SCHEDULED_PAGES);
                 inProcessPages = new InProcessPagesDB(env);
@@ -207,5 +207,15 @@ public class Frontier {
         synchronized (waitingList) {
             waitingList.notifyAll();
         }
+    }
+
+    /**
+     * Creates the WorkQueues for this frontier. Can be overriden to create
+     * subclases of WorkQueues instead
+     * @return
+     * @see Environment#openDatabase
+     */
+    protected WorkQueues createWorkQueues(Environment env, CrawlConfig config, String databaseName) {
+        return new WorkQueues(env, databaseName, config.isResumableCrawling());
     }
 }
