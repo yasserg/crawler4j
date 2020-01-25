@@ -574,14 +574,7 @@ public class WebCrawler implements Runnable {
             return;
         }
 
-        WebURL webURL = createEmptyWebURL();
-        webURL.setTldList(myController.getTldList());
-        webURL.setURL(movedToUrl);
-        webURL.setParentDocid(curURL.getParentDocid());
-        webURL.setParentUrl(curURL.getParentUrl());
-        webURL.setDepth(curURL.getDepth());
-        webURL.setDocid(-1);
-        webURL.setAnchor(curURL.getAnchor());
+        WebURL webURL = createRedirectedWebURL(curURL, movedToUrl);
         if (shouldVisit(page, webURL)) {
             if (!shouldFollowLinksIn(webURL) || robotstxtServer.allows(webURL)) {
                 performRedirect(webURL, curURL);
@@ -607,6 +600,27 @@ public class WebCrawler implements Runnable {
 
     protected void scheduleAll(List<WebURL> urls) {
         frontier.scheduleAll(urls);
+    }
+
+    /**
+     * Creates a new WebURL based on provided WebURL data.
+     *
+     * Subclases may use aditional parameters or use subclasses of WebURL.
+     *
+     * @param curURL
+     * @param movedToUrl
+     * @return
+     */
+    protected WebURL createRedirectedWebURL(WebURL curURL, String movedToUrl) {
+        WebURL webURL = createEmptyWebURL();
+        webURL.setTldList(myController.getTldList());
+        webURL.setURL(movedToUrl);
+        webURL.setParentDocid(curURL.getParentDocid());
+        webURL.setParentUrl(curURL.getParentUrl());
+        webURL.setDepth(curURL.getDepth());
+        webURL.setAnchor(curURL.getAnchor());
+        webURL.setDocid(-1);
+        return webURL;
     }
 
     public Thread getThread() {
