@@ -566,7 +566,8 @@ public class WebCrawler implements Runnable {
         scheduleAll(toSchedule);
     }
 
-    protected void redirectionPhase(Page page, WebURL curURL, String movedToUrl) throws IOException, InterruptedException {
+    protected void redirectionPhase(Page page, WebURL curURL, String movedToUrl)
+                                        throws IOException, InterruptedException {
         int newDocId = docIdServer.getDocId(movedToUrl);
         if (newDocId > 0) {
             logger.debug("Redirect page: {} is already seen", curURL);
