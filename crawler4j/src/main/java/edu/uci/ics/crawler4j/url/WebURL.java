@@ -48,7 +48,8 @@ public class WebURL implements Serializable {
     private String tag;
     private Map<String, String> attributes;
     private TLDList tldList;
-
+    private boolean followRedirectsInmediatly = false;
+    private short maxInmediateRedirects = 10;
     /**
      * Set the TLDList if you want {@linkplain #getDomain()} and
      * {@link #getSubDomain()} to properly identify effective top level registeredDomain as
@@ -249,6 +250,22 @@ public class WebURL implements Serializable {
         return attributes.getOrDefault(name, "");
     }
 
+    public boolean isFollowRedirectsInmediatly() {
+        return followRedirectsInmediatly;
+    }
+
+    public void setFollowRedirectsInmediatly(boolean followRedirectsInmediatly) {
+        this.followRedirectsInmediatly = followRedirectsInmediatly;
+    }
+
+    public short getMaxInmediateRedirects() {
+        return maxInmediateRedirects;
+    }
+
+    public void setMaxInmediateRedirects(short maxInmediateRedirects) {
+        this.maxInmediateRedirects = maxInmediateRedirects;
+    }
+
     @Override
     public int hashCode() {
         return url.hashCode();
@@ -272,4 +289,5 @@ public class WebURL implements Serializable {
     public String toString() {
         return url;
     }
+
 }
