@@ -371,7 +371,7 @@ public class WebURL implements Serializable {
         }
         String[] parts = encodedUrl.split(POST_SEPARATOR);
         if (parts.length > 1) {
-            for (int i=1; i < parts.length; i++) {
+            for (int i = 1; i < parts.length; i++) {
                 if (parts[i] != null && !parts[i].isEmpty()) {
                     return true;
                 }
