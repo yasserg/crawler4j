@@ -329,4 +329,60 @@ public class WebURL implements Serializable {
         }
         return String.join(PAIR_SEPARATOR, pares);
     }
+
+    public static WebURL decodeString(String url) {
+        if (url == null) {
+        	return null;
+        }
+        WebURL result = new WebURL();
+        if (isPost(url)) {
+            result.setPost(true);
+            // Check if there's something usefull after POST_SEPARATOR.
+            if (hasPostParams(url)) {
+                // There are valid parameters.
+                String[] splitted = url.split(POST_SEPARATOR, 2);
+                result.setURL(splitted[0]);
+                if(splitted.length > 1) result.setParamsPost(decodePostAtributes(splitted[1]));
+            } else {
+                result.setURL(url.replaceAll(POST_SEPARATOR, ""));
+            }
+        }else {
+            result.setURL(url);
+        }
+
+        return result;
+    }
+
+    public static boolean isPost(String encodedUrl) {
+        if(encodedUrl==null) return false;
+        if(encodedUrl.contains(POST_SEPARATOR)) return true;
+        return false;
+    }
+
+    protected static boolean hasPostParams(String encodedUrl) {
+        // Check if the URL has post parameters
+        if(encodedUrl==null) return false;
+        String[] parts = encodedUrl.split(POST_SEPARATOR);
+        if(parts.length > 1 ) {
+            for(int i=1; i<parts.length; i++) {
+                if(parts[i]!=null && !parts[i].isEmpty()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    protected static List<BasicNameValuePair> decodePostAtributes(String encodedUrl) {
+        if(encodedUrl==null || encodedUrl.isEmpty()) return null;
+        List<BasicNameValuePair> list = new ArrayList<BasicNameValuePair>();
+        for(String pair : encodedUrl.split(PAIR_SEPARATOR)) {
+            if(pair==null) continue;
+            String[] splitted = pair.split(VALUE_SEPARATOR, 2);
+            if(splitted.length > 1) list.add(new BasicNameValuePair(splitted[0], splitted[1]));
+            else list.add(new BasicNameValuePair(splitted[0], ""));
+
+        }
+        return list;
+    }
 }
