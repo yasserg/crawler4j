@@ -61,7 +61,7 @@ public class WebCrawler implements Runnable {
      * reference to the controller can be used for getting configurations of the
      * current crawl or adding new seeds during runtime.
      */
-    protected CrawlController myController;
+    protected GenericCrawlController<?> myController;
 
     /**
      * The thread within which this crawler instance is running.
@@ -116,7 +116,7 @@ public class WebCrawler implements Runnable {
      * @throws IllegalAccessException
      * @throws InstantiationException
      */
-    public void init(int id, CrawlController crawlController)
+    public void init(int id, GenericCrawlController<?> crawlController)
         throws InstantiationException, IllegalAccessException {
         this.myId = id;
         this.pageFetcher = crawlController.getPageFetcher();
@@ -138,7 +138,7 @@ public class WebCrawler implements Runnable {
         return myId;
     }
 
-    public CrawlController getMyController() {
+    public GenericCrawlController<?> getMyController() {
         return myController;
     }
 
