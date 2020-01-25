@@ -448,32 +448,7 @@ public class WebCrawler implements Runnable {
                     onRedirectedStatusCode(page);
 
                     if (myController.getConfig().isFollowRedirects()) {
-                        int newDocId = docIdServer.getDocId(movedToUrl);
-                        if (newDocId > 0) {
-                            logger.debug("Redirect page: {} is already seen", curURL);
-                            return;
-                        }
-
-                        WebURL webURL = createEmptyWebURL();
-                        webURL.setTldList(myController.getTldList());
-                        webURL.setURL(movedToUrl);
-                        webURL.setParentDocid(curURL.getParentDocid());
-                        webURL.setParentUrl(curURL.getParentUrl());
-                        webURL.setDepth(curURL.getDepth());
-                        webURL.setDocid(-1);
-                        webURL.setAnchor(curURL.getAnchor());
-                        if (shouldVisit(page, webURL)) {
-                            if (!shouldFollowLinksIn(webURL) || robotstxtServer.allows(webURL)) {
-                                performRedirect(webURL, curURL);
-                            } else {
-                                logger.debug(
-                                    "Not visiting: {} as per the server's \"robots.txt\" policy",
-                                    webURL.getURL());
-                            }
-                        } else {
-                            logger.debug("Not visiting: {} as per your \"shouldVisit\" policy",
-                                         webURL.getURL());
-                        }
+                        redirectionPhase(page, curURL, movedToUrl);
                     }
                 } else { // All other http codes other than 3xx & 200
                     String description =
@@ -589,6 +564,35 @@ public class WebCrawler implements Runnable {
             }
         }
         scheduleAll(toSchedule);
+    }
+
+    protected void redirectionPhase(Page page, WebURL curURL, String movedToUrl) throws IOException, InterruptedException {
+        int newDocId = docIdServer.getDocId(movedToUrl);
+        if (newDocId > 0) {
+            logger.debug("Redirect page: {} is already seen", curURL);
+            return;
+        }
+
+        WebURL webURL = createEmptyWebURL();
+        webURL.setTldList(myController.getTldList());
+        webURL.setURL(movedToUrl);
+        webURL.setParentDocid(curURL.getParentDocid());
+        webURL.setParentUrl(curURL.getParentUrl());
+        webURL.setDepth(curURL.getDepth());
+        webURL.setDocid(-1);
+        webURL.setAnchor(curURL.getAnchor());
+        if (shouldVisit(page, webURL)) {
+            if (!shouldFollowLinksIn(webURL) || robotstxtServer.allows(webURL)) {
+                performRedirect(webURL, curURL);
+            } else {
+                logger.debug(
+                    "Not visiting: {} as per the server's \"robots.txt\" policy",
+                    webURL.getURL());
+            }
+        } else {
+            logger.debug("Not visiting: {} as per your \"shouldVisit\" policy",
+                         webURL.getURL());
+        }
     }
 
     protected void performRedirect(WebURL target, WebURL currURL) {
