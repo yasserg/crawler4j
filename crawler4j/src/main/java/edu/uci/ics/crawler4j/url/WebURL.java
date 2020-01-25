@@ -366,13 +366,13 @@ public class WebURL implements Serializable {
 
     protected static boolean hasPostParams(String encodedUrl) {
         // Check if the URL has post parameters
-        if (encodedUrl==null) {
+        if (encodedUrl == null) {
             return false;
         }
         String[] parts = encodedUrl.split(POST_SEPARATOR);
-        if (parts.length > 1 ) {
-            for (int i=1; i<parts.length; i++) {
-                if (parts[i]!=null && !parts[i].isEmpty()) {
+        if (parts.length > 1) {
+            for (int i=1; i < parts.length; i++) {
+                if (parts[i] != null && !parts[i].isEmpty()) {
                     return true;
                 }
             }
