@@ -43,7 +43,7 @@ public class PageFetcherHtmlOnly extends PageFetcher {
             HttpResponse response = httpClient.execute(head);
             fetchResult.setEntity(response.getEntity());
             fetchResult.setResponseHeaders(response.getAllHeaders());
-            fetchResult.setFetchedUrl(toFetchURL);
+            fetchResult.setFetchedWebUrl(webUrl);
             fetchResult.setStatusCode(response.getStatusLine().getStatusCode());
 
             String contentType = response.containsHeader("Content-Type") ?
