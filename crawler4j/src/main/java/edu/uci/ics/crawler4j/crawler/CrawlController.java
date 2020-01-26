@@ -33,6 +33,7 @@ import com.sleepycat.je.EnvironmentConfig;
 import edu.uci.ics.crawler4j.fetcher.PageFetcherInterface;
 import edu.uci.ics.crawler4j.frontier.DocIDServer;
 import edu.uci.ics.crawler4j.frontier.Frontier;
+import edu.uci.ics.crawler4j.frontier.FrontierInterface;
 import edu.uci.ics.crawler4j.parser.Parser;
 import edu.uci.ics.crawler4j.parser.ParserInterface;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
@@ -78,7 +79,7 @@ public class CrawlController {
 
     protected PageFetcherInterface pageFetcher;
     protected RobotstxtServer robotstxtServer;
-    protected Frontier frontier;
+    protected FrontierInterface frontier;
     protected DocIDServer docIdServer;
     protected TLDList tldList;
 
@@ -599,11 +600,11 @@ public class CrawlController {
         this.robotstxtServer = robotstxtServer;
     }
 
-    public Frontier getFrontier() {
+    public FrontierInterface getFrontier() {
         return frontier;
     }
 
-    public void setFrontier(Frontier frontier) {
+    public void setFrontier(FrontierInterface frontier) {
         this.frontier = frontier;
     }
 
