@@ -18,11 +18,7 @@
 package edu.uci.ics.crawler4j.url;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-
-import org.apache.http.message.BasicNameValuePair;
 
 import com.google.common.net.InternetDomainName;
 import com.sleepycat.persist.model.Entity;
@@ -38,10 +34,6 @@ public class WebURL implements Serializable {
     private static final long serialVersionUID = 1L;
 
     public static final String POST_SEPARATOR = "<<<POST_DATA>>>";
-
-    public static final String PAIR_SEPARATOR = "``--``";
-
-    public static final String VALUE_SEPARATOR = "=";
 
     @PrimaryKey
     private String url;
@@ -59,20 +51,45 @@ public class WebURL implements Serializable {
     private Map<String, String> attributes;
     private TLDList tldList;
     private boolean post;
-    List<BasicNameValuePair> paramsPost;
+    private PostParameters paramsPost;
 
-    public List<BasicNameValuePair> getParamsPost() {
+    public PostParameters getParamsPost() {
         return paramsPost;
     }
 
-    public void setParamsPost(List<BasicNameValuePair> paramsPost) {
+    public void setParamsPost(PostParameters paramsPost) {
         this.paramsPost = paramsPost;
     }
 
+    /**
+     * Adds a POST key / value pair. Subclases may override this behaviour for optimization.
+     *
+     * @param key
+     * @param value
+     * @return
+     * @throws IllegalArgumentException if <code>key</code> is <code>null</code>
+     * @see PostParameters#addParameter(String, String)
+     */
+    public boolean addPostParameter(String key, String value) throws IllegalArgumentException {
+        if (paramsPost == null) {
+            paramsPost = createEmptyPostParams();
+        }
+        return paramsPost.addParameter(key, value);
+    }
+
+    /**
+     * Returns true if this WebURL represents a POST request.
+     *
+     * @return
+     */
     public boolean isPost() {
         return post;
     }
 
+    /**
+     * Configures the HTTP request type to be POST (true) or GET(false)
+     * @param post <code>true</code> to configure POST request, <code>false</code> for a GET request.
+     */
     public void setPost(boolean post) {
         this.post = post;
     }
@@ -277,6 +294,10 @@ public class WebURL implements Serializable {
         return attributes.getOrDefault(name, "");
     }
 
+    protected PostParameters createEmptyPostParams() {
+        return new SimplePostParameters();
+    }
+
     @Override
     public int hashCode() {
         return url.hashCode();
@@ -301,10 +322,23 @@ public class WebURL implements Serializable {
         return url;
     }
 
+    /**
+     * Encodes the URL and the post parameters in a string to store in the DocIDServer.
+     *
+     * This is what identifies this URL as already visited or new.
+     * @return
+     */
     public String encode() {
         return encodeWebURL(this);
     }
 
+    /**
+     *    Encodes the URL and the post parameters in a string to store in the DocIDServer.
+     *
+     * This is what identifies this URL as already visited or new.
+     * @param url
+     * @return
+     */
     public static String encodeWebURL(WebURL url) {
         if (url == null || url.getURL() == null) {
             return null;
@@ -312,24 +346,21 @@ public class WebURL implements Serializable {
         if (!url.isPost()) {
             return url.getURL();
         }
-        String urlFinal = url.getURL() + POST_SEPARATOR + encodePostAttributes(url.getParamsPost());
-        return urlFinal;
+        if (url.getParamsPost() != null) {
+            return url.getURL() + POST_SEPARATOR + url.getParamsPost().encode();
+        } else {
+            return url.getURL() + POST_SEPARATOR;
+        }
     }
 
-    protected static String encodePostAttributes(List<BasicNameValuePair> postAttributes) {
-        if (postAttributes == null || postAttributes.isEmpty()) {
-            return "";
-        }
-        List<String> pares = new ArrayList<String>();
-        for (BasicNameValuePair par : postAttributes) {
-            if (par == null) {
-                continue;
-            }
-            pares.add(par.getName() + VALUE_SEPARATOR + par.getValue());
-        }
-        return String.join(PAIR_SEPARATOR, pares);
-    }
-
+    /**
+     * Converts an encoded String in an instance of WebURL.
+     *
+     * String encoded by subclases of WebURL may not be compatible.
+     *
+     * @param url string with the URL and POST parameters included
+     * @return the {@link WebURL} that represents the string provided
+     */
     public static WebURL decodeString(String url) {
         if (url == null) {
             return null;
@@ -343,7 +374,7 @@ public class WebURL implements Serializable {
                 String[] splitted = url.split(POST_SEPARATOR, 2);
                 result.setURL(splitted[0]);
                 if (splitted.length > 1) {
-                    result.setParamsPost(decodePostAtributes(splitted[1]));
+                    result.setParamsPost(SimplePostParameters.decodePostAtributes(splitted[1]));
                 }
             } else {
                 result.setURL(url.replaceAll(POST_SEPARATOR, ""));
@@ -380,23 +411,4 @@ public class WebURL implements Serializable {
         return false;
     }
 
-    protected static List<BasicNameValuePair> decodePostAtributes(String encodedUrl) {
-        if (encodedUrl == null || encodedUrl.isEmpty()) {
-            return null;
-        }
-        List<BasicNameValuePair> list = new ArrayList<BasicNameValuePair>();
-        for (String pair : encodedUrl.split(PAIR_SEPARATOR)) {
-            if (pair == null) {
-                continue;
-            }
-            String[] splitted = pair.split(VALUE_SEPARATOR, 2);
-            if (splitted.length > 1) {
-                list.add(new BasicNameValuePair(splitted[0], splitted[1]));
-            } else {
-                list.add(new BasicNameValuePair(splitted[0], ""));
-            }
-
-        }
-        return list;
-    }
 }

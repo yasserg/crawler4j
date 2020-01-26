@@ -365,8 +365,12 @@ public class PageFetcher {
             return this.newHttpUriRequest(url.getURL());
         }
         HttpPost req = new HttpPost(url.getURL());
-        List<BasicNameValuePair> pairs = url.getParamsPost();
+        if (url.getParamsPost() == null || url.getParamsPost().isEmpty()) {
+            return req;
+        }
+        List<BasicNameValuePair> pairs = url.getParamsPost().getAsList();
         if (pairs != null && pairs.size() > 0) {
+            // Unnecesary comprobaion.
             req.setEntity(new UrlEncodedFormEntity(pairs, StandardCharsets.UTF_8));
         }
         return req;
