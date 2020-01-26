@@ -33,7 +33,7 @@ import edu.uci.ics.crawler4j.crawler.exceptions.PageBiggerThanMaxSizeException;
 import edu.uci.ics.crawler4j.crawler.exceptions.ParseException;
 import edu.uci.ics.crawler4j.fetcher.PageFetchResult;
 import edu.uci.ics.crawler4j.fetcher.PageFetcherInterface;
-import edu.uci.ics.crawler4j.frontier.DocIDServer;
+import edu.uci.ics.crawler4j.frontier.DocIDServerInterface;
 import edu.uci.ics.crawler4j.frontier.FrontierInterface;
 import edu.uci.ics.crawler4j.parser.HtmlParseData;
 import edu.uci.ics.crawler4j.parser.NotAllowedContentException;
@@ -87,7 +87,7 @@ public class WebCrawler implements Runnable {
     /**
      * The DocIDServer that is used by this crawler instance to map each URL to a unique docid.
      */
-    private DocIDServer docIdServer;
+    private DocIDServerInterface docIdServer;
 
     /**
      * The Frontier object that manages the crawl queue.

@@ -32,6 +32,7 @@ import com.sleepycat.je.EnvironmentConfig;
 
 import edu.uci.ics.crawler4j.fetcher.PageFetcherInterface;
 import edu.uci.ics.crawler4j.frontier.DocIDServer;
+import edu.uci.ics.crawler4j.frontier.DocIDServerInterface;
 import edu.uci.ics.crawler4j.frontier.Frontier;
 import edu.uci.ics.crawler4j.frontier.FrontierInterface;
 import edu.uci.ics.crawler4j.parser.Parser;
@@ -80,7 +81,7 @@ public class CrawlController {
     protected PageFetcherInterface pageFetcher;
     protected RobotstxtServer robotstxtServer;
     protected FrontierInterface frontier;
-    protected DocIDServer docIdServer;
+    protected DocIDServerInterface docIdServer;
     protected TLDList tldList;
 
     protected final Object waitingLock = new Object();
@@ -608,11 +609,11 @@ public class CrawlController {
         this.frontier = frontier;
     }
 
-    public DocIDServer getDocIdServer() {
+    public DocIDServerInterface getDocIdServer() {
         return docIdServer;
     }
 
-    public void setDocIdServer(DocIDServer docIdServer) {
+    public void setDocIdServer(DocIDServerInterface docIdServer) {
         this.docIdServer = docIdServer;
     }
 
