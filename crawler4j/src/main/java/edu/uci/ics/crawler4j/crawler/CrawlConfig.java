@@ -220,6 +220,11 @@ public class CrawlConfig {
     private int maxRetries = 0;
 
     /**
+     * If true, it will retry non-responding servers while maxRetries requeriment it met.
+     */
+    private boolean allowRetryConnectionError = false;
+
+    /**
      * DNS resolver to use, {@link SystemDefaultDnsResolver} is default.
      */
     public void setDnsResolver(final DnsResolver dnsResolver) {
@@ -744,6 +749,14 @@ public class CrawlConfig {
 
     public void setMaxRetries(int maxRetries) {
         this.maxRetries = maxRetries;
+    }
+
+    public boolean isAllowRetryConnectionError() {
+        return allowRetryConnectionError;
+    }
+
+    public void setAllowRetryConnectionError(boolean allowRetryConnectionError) {
+        this.allowRetryConnectionError = allowRetryConnectionError;
     }
 
     @Override

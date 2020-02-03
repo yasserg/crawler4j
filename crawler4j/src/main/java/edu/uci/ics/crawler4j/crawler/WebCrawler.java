@@ -18,12 +18,15 @@
 package edu.uci.ics.crawler4j.crawler;
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
 import org.apache.http.HttpStatus;
+import org.apache.http.conn.HttpHostConnectException;
 import org.apache.http.impl.EnglishReasonPhraseCatalog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -108,6 +111,8 @@ public class WebCrawler implements Runnable {
 
     private int maxRetries;
 
+    private boolean allowRetryConnectionError;
+
     /**
      * Initializes the current instance of the crawler
      *
@@ -130,6 +135,7 @@ public class WebCrawler implements Runnable {
         this.isWaitingForNewURLs = false;
         this.batchReadSize = crawlController.getConfig().getBatchReadSize();
         this.maxRetries = crawlController.getConfig().getMaxRetries();
+        this.allowRetryConnectionError = crawlController.getConfig().isAllowRetryConnectionError();
     }
 
     /**
@@ -325,6 +331,40 @@ public class WebCrawler implements Runnable {
         logger.warn("Parsing error of: {}", webUrl.getURL());
         // Do nothing by default (Except logging)
         // Sub-classed can override this to add their custom functionality
+    }
+
+    /**
+     * This function is called if there's a connection error
+     *
+     * @param page constructed around failing URL which failed on parsing
+     * @param e Exception thrown
+     */
+    protected void onConnectionError(Page page, ConnectException e) {
+        logger.warn("Connection error. URL: {} . Error: {}", page.getWebURL().getURL(), e.toString());
+    }
+
+    /**
+     * This function is called if there's a connection error
+     * Subclases may override to decide if it should discard a re-schedule
+     * based on Page or Exception. Returning false means it should not schedul
+     *
+     * @param page constructed around failing URL which failed on parsing
+     * @param e Exception thrown
+     * @returns true if the URL sgould be scheduled again, false otherwise
+     */
+    protected boolean onConnectionErrorNotFinal(Page page, ConnectException e) {
+        logger.warn("Connection error. Scheduling again. URL: {}. Error: {}", page.getWebURL().getURL(), e.toString());
+        return true;
+    }
+
+    /**
+     * This function is called if there's an UnknownHostException
+     *
+     * @param page constructed around failing URL which failed on parsing
+     * @param e Exception thrown
+     */
+    protected void onUnknownHost(Page page, UnknownHostException e) {
+        logger.warn("Unknown host for URL: {}", page.getWebURL().getURL());
     }
 
     /**
@@ -602,8 +642,7 @@ public class WebCrawler implements Runnable {
         } catch (ContentFetchException | SocketTimeoutException cfe) {
             if (curURL.getFailedFetches() < maxRetries) {
                 if (onContentFetchErrorNotFinal(page, cfe)) {
-                    curURL.incrementFailedFetches();
-                    frontier.schedule(curURL);
+                    scheduleAgain0(curURL);
                 }
             } else {
                 onContentFetchError(page, cfe);
@@ -612,6 +651,16 @@ public class WebCrawler implements Runnable {
             logger.debug(
                 "Skipping: {} as it contains binary content which you configured not to crawl",
                 curURL.getURL());
+        } catch (HttpHostConnectException e) {
+            if (allowRetryConnectionError && curURL.getFailedFetches() < maxRetries) {
+                if (onConnectionErrorNotFinal(page, e)) {
+                    scheduleAgain0(curURL);
+                }
+            } else {
+                onConnectionError(page, e);
+            }
+        } catch (UnknownHostException e) {
+            onUnknownHost(page, e);
         } catch (IOException | InterruptedException | RuntimeException e) {
             onUnhandledException(curURL, e);
         } finally {
@@ -619,6 +668,30 @@ public class WebCrawler implements Runnable {
                 fetchResult.discardContentIfNotConsumed();
             }
         }
+    }
+
+    /**
+     * Schedules an URL that failed somehow if getFailedFetches < maxRetries.
+     *
+     * True return doesn't guarantee that the URL was scheduled: It may have been rejected by frontier.
+     * @param curURL
+     * @return true if the url was passed to the frontier, false otherwise
+     */
+    protected boolean scheduleAgain(WebURL curURL) {
+        if (curURL.getFailedFetches() < maxRetries) {
+            scheduleAgain0(curURL);
+            return true;
+        }
+        return false;
+    }
+
+    private void scheduleAgain0(WebURL curURL) {
+        curURL.incrementFailedFetches();
+        frontier.schedule(curURL);
+    }
+
+    protected int getMaxRetries() {
+        return maxRetries;
     }
 
     public Thread getThread() {
