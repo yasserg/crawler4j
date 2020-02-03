@@ -277,13 +277,16 @@ public class WebCrawler implements Runnable {
 
     /**
      * This function is called if the content of a url could not be fetched.
+     * Subclases may override to decide if it should discard a re-schedule
+     * based on Page or Exception. Returning false means it should not schedule.
      *
      * @param page Partial page object
+     * @return true to allow scheduling the WebURL again, false to abort schedule
      */
-    protected void onContentFetchErrorFinal(Page page, Throwable exception) {
-        // Call onContentFetchError for retrocompatibility.
+    protected boolean onContentFetchErrorNotFinal(Page page, Throwable exception) {
+        // Call onContentFetchError for retrocompatibility. Should be removed
         onContentFetchError(page, exception);
-        logger.warn("Discarding: {}", page.getWebURL().getURL());
+        return true;
     }
 
     /**
@@ -598,11 +601,12 @@ public class WebCrawler implements Runnable {
             onParseError(curURL, pe);
         } catch (ContentFetchException | SocketTimeoutException cfe) {
             if (curURL.getFailedFetches() < maxRetries) {
-                curURL.incrementFailedFetches();
-                frontier.schedule(curURL);
-                onContentFetchError(page, cfe);
+                if (onContentFetchErrorNotFinal(page, cfe)) {
+                    curURL.incrementFailedFetches();
+                    frontier.schedule(curURL);
+                }
             } else {
-                onContentFetchErrorFinal(page, cfe);
+                onContentFetchError(page, cfe);
             }
         } catch (NotAllowedContentException nace) {
             logger.debug(
