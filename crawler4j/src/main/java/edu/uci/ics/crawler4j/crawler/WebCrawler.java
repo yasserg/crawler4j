@@ -109,7 +109,7 @@ public class WebCrawler implements Runnable {
 
     private int batchReadSize;
 
-    private int maxRetries;
+    private short maxRetries;
 
     private boolean allowRetryConnectionError;
 
@@ -690,7 +690,7 @@ public class WebCrawler implements Runnable {
         frontier.schedule(curURL);
     }
 
-    protected int getMaxRetries() {
+    protected short getMaxRetries() {
         return maxRetries;
     }
 

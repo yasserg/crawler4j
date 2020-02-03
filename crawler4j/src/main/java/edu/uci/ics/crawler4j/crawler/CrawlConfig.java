@@ -217,7 +217,7 @@ public class CrawlConfig {
      * Maximun number of times a failing WebURL will be tried again before giving up.
      * Default value is zero.
      */
-    private int maxRetries = 0;
+    private short maxRetries = 0;
 
     /**
      * If true, it will retry non-responding servers while maxRetries requeriment it met.
@@ -743,11 +743,11 @@ public class CrawlConfig {
         this.batchReadSize = batchReadSize;
     }
 
-    public int getMaxRetries() {
+    public short getMaxRetries() {
         return maxRetries;
     }
 
-    public void setMaxRetries(int maxRetries) {
+    public void setMaxRetries(short maxRetries) {
         this.maxRetries = maxRetries;
     }
 
