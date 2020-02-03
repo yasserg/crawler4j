@@ -214,6 +214,12 @@ public class CrawlConfig {
     private CookieStore cookieStore;
 
     /**
+     * Maximun number of times a failing WebURL will be tried again before giving up.
+     * Default value is zero.
+     */
+    private int maxRetries = 0;
+
+    /**
      * DNS resolver to use, {@link SystemDefaultDnsResolver} is default.
      */
     public void setDnsResolver(final DnsResolver dnsResolver) {
@@ -730,6 +736,14 @@ public class CrawlConfig {
 
     public void setBatchReadSize(int batchReadSize) {
         this.batchReadSize = batchReadSize;
+    }
+
+    public int getMaxRetries() {
+        return maxRetries;
+    }
+
+    public void setMaxRetries(int maxRetries) {
+        this.maxRetries = maxRetries;
     }
 
     @Override

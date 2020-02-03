@@ -106,6 +106,8 @@ public class WebCrawler implements Runnable {
 
     private int batchReadSize;
 
+    private int maxRetries;
+
     /**
      * Initializes the current instance of the crawler
      *
@@ -127,6 +129,7 @@ public class WebCrawler implements Runnable {
         this.myController = crawlController;
         this.isWaitingForNewURLs = false;
         this.batchReadSize = crawlController.getConfig().getBatchReadSize();
+        this.maxRetries = crawlController.getConfig().getMaxRetries();
     }
 
     /**
@@ -238,7 +241,7 @@ public class WebCrawler implements Runnable {
      *
      * @param webUrl URL which content failed to be fetched
      *
-     * @deprecated use {@link #onContentFetchError(Page)}
+     * @deprecated use {@link #onContentFetchError(Page, Throwable)}
      */
     @Deprecated
     protected void onContentFetchError(WebURL webUrl) {
@@ -251,11 +254,36 @@ public class WebCrawler implements Runnable {
      * This function is called if the content of a url could not be fetched.
      *
      * @param page Partial page object
+     *
+     * @deprecated use {@link #onContentFetchError(Page, Throwable)}
      */
+    @Deprecated
     protected void onContentFetchError(Page page) {
-        logger.warn("Can't fetch content of: {}", page.getWebURL().getURL());
+        onContentFetchError(page.getWebURL());
         // Do nothing by default (except basic logging)
         // Sub-classed can override this to add their custom functionality
+    }
+
+    /**
+     * This function is called if the content of a url could not be fetched.
+     *
+     * @param page Partial page object
+     */
+    protected void onContentFetchError(Page page, Throwable exception) {
+        onContentFetchError(page);
+        // Do nothing by default (except basic logging)
+        // Sub-classed can override this to add their custom functionality
+    }
+
+    /**
+     * This function is called if the content of a url could not be fetched.
+     *
+     * @param page Partial page object
+     */
+    protected void onContentFetchErrorFinal(Page page, Throwable exception) {
+        // Call onContentFetchError for retrocompatibility.
+        onContentFetchError(page, exception);
+        logger.warn("Discarding: {}", page.getWebURL().getURL());
     }
 
     /**
@@ -569,8 +597,13 @@ public class WebCrawler implements Runnable {
         } catch (ParseException pe) {
             onParseError(curURL, pe);
         } catch (ContentFetchException | SocketTimeoutException cfe) {
-            onContentFetchError(curURL);
-            onContentFetchError(page);
+            if (curURL.getFailedFetches() < maxRetries) {
+                curURL.incrementFailedFetches();
+                frontier.schedule(curURL);
+                onContentFetchError(page, cfe);
+            } else {
+                onContentFetchErrorFinal(page, cfe);
+            }
         } catch (NotAllowedContentException nace) {
             logger.debug(
                 "Skipping: {} as it contains binary content which you configured not to crawl",
