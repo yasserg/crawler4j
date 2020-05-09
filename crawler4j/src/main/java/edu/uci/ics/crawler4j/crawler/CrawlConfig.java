@@ -772,7 +772,7 @@ public class CrawlConfig implements Cloneable {
      */
     @Override
     public CrawlConfig clone() {
-        CrawlConfig clone = new CrawlConfig();
+        CrawlConfig clone = createInstance();
         clone.crawlStorageFolder = crawlStorageFolder;
         clone.resumableCrawling = resumableCrawling;
         clone.dbLockTimeout = dbLockTimeout;
@@ -818,4 +818,7 @@ public class CrawlConfig implements Cloneable {
         return clone;
     }
 
+    protected CrawlConfig createInstance() {
+        return new CrawlConfig();
+    }
 }
