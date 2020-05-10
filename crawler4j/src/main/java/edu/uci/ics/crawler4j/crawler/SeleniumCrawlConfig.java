@@ -20,6 +20,8 @@ public class SeleniumCrawlConfig extends CrawlConfig {
      */
     private List<String> seleniumIncludes;
 
+    private boolean cookiesSelemiun;
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -50,6 +52,7 @@ public class SeleniumCrawlConfig extends CrawlConfig {
         sb.append("Allow single level domain:" + isAllowSingleLevelDomain() + "\n");
         sb.append("Batch read size: " + getBatchReadSize() + "\n");
         sb.append("Default to selenium: " + isDefaultToSelenium() + "\n");
+        sb.append("Cookies to selenium: " + isCookiesSelemiun() + "\n");
         sb.append("Selenium inclussion patterns: " + getSeleniumIncludes() + "\n");
         sb.append("Selenium exclussion patterns: " + getSeleniumExcludes() + "\n");
         return sb.toString();
@@ -77,5 +80,13 @@ public class SeleniumCrawlConfig extends CrawlConfig {
 
     public void setSeleniumIncludes(List<String> seleniumIncludes) {
         this.seleniumIncludes = seleniumIncludes;
+    }
+
+    public boolean isCookiesSelemiun() {
+        return cookiesSelemiun;
+    }
+
+    public void setCookiesSelemiun(boolean cookiesSelemiun) {
+        this.cookiesSelemiun = cookiesSelemiun;
     }
 }

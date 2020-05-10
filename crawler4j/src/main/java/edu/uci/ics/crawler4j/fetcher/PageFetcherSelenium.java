@@ -43,6 +43,7 @@ import org.apache.http.auth.Credentials;
 import org.apache.http.auth.NTCredentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.CookieStore;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -57,6 +58,7 @@ import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustStrategy;
+import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -67,15 +69,16 @@ import org.openqa.selenium.NoSuchElementException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.machinepublishers.jbrowserdriver.JBrowserDriver;
 import com.machinepublishers.jbrowserdriver.Settings;
 
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
+import edu.uci.ics.crawler4j.crawler.SeleniumCrawlConfig;
 import edu.uci.ics.crawler4j.crawler.authentication.AuthInfo;
 import edu.uci.ics.crawler4j.crawler.authentication.BasicAuthInfo;
 import edu.uci.ics.crawler4j.crawler.authentication.FormAuthInfo;
 import edu.uci.ics.crawler4j.crawler.authentication.NtAuthInfo;
 import edu.uci.ics.crawler4j.crawler.exceptions.PageBiggerThanMaxSizeException;
+import edu.uci.ics.crawler4j.selenium.SeleniumWebDriver;
 import edu.uci.ics.crawler4j.url.URLCanonicalizer;
 import edu.uci.ics.crawler4j.url.WebURL;
 
@@ -104,14 +107,15 @@ public class PageFetcherSelenium implements PageFetcherInterface {
      * This field is protected for retro compatibility. Please use the getter method: getConfig() to
      * read this field;
      */
-    protected final CrawlConfig config;
+    protected final SeleniumCrawlConfig config;
     protected PoolingHttpClientConnectionManager connectionManager;
     protected CloseableHttpClient httpClient;
     protected long lastFetchTime = 0;
     protected IdleConnectionMonitorThread connectionMonitorThread = null;
     protected final Settings configSelenium;
+    protected final CookieStore cookieStore;
 
-    public PageFetcherSelenium(CrawlConfig config) throws NoSuchAlgorithmException, KeyManagementException,
+    public PageFetcherSelenium(SeleniumCrawlConfig config) throws NoSuchAlgorithmException, KeyManagementException,
                                                             KeyStoreException {
         this.config = config;
         if (config.getSeleniumConfig() == null) {
@@ -160,8 +164,12 @@ public class PageFetcherSelenium implements PageFetcherInterface {
 
         HttpClientBuilder clientBuilder = HttpClientBuilder.create();
         if (config.getCookieStore() != null) {
-            clientBuilder.setDefaultCookieStore(config.getCookieStore());
+            this.cookieStore = config.getCookieStore();
+        } else {
+            // This is what HttpClientBuilder would do anyways.
+            this.cookieStore = new BasicCookieStore();
         }
+        clientBuilder.setDefaultCookieStore(this.cookieStore);
         clientBuilder.setDefaultRequestConfig(requestConfig);
         clientBuilder.setConnectionManager(connectionManager);
         clientBuilder.setUserAgent(config.getUserAgentString());
@@ -283,7 +291,12 @@ public class PageFetcherSelenium implements PageFetcherInterface {
         String toFetchURL = webUrl.getURL();
         if (webUrl.isSelenium()) {
             PageFetchResultSelenium fetchResult = new PageFetchResultSelenium(config.isHaltOnError());
-            JBrowserDriver driver = new JBrowserDriver(configSelenium);
+            SeleniumWebDriver driver;
+            if (config.isCookiesSelemiun()) {
+                driver = new SeleniumWebDriver(cookieStore, configSelenium);
+            } else {
+                driver = new SeleniumWebDriver(configSelenium);
+            }
             try {
                 if (config.getPolitenessDelay() > 0) {
                     // Applying Politeness delay
@@ -295,7 +308,8 @@ public class PageFetcherSelenium implements PageFetcherInterface {
                         lastFetchTime = (new Date()).getTime();
                     }
                 }
-                driver.get(toFetchURL);
+
+                driver.get(webUrl);
 
                 fetchResult.setDriver(driver);
                 fetchResult.setFetchedUrl(toFetchURL);
