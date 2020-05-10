@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package edu.uci.ics.crawler4j.parser;
+package edu.uci.ics.crawler4j.selenium;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,8 +28,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.uci.ics.crawler4j.crawler.Page;
-import edu.uci.ics.crawler4j.crawler.SeleniumCrawlConfig;
 import edu.uci.ics.crawler4j.crawler.exceptions.ParseException;
+import edu.uci.ics.crawler4j.parser.BinaryParseData;
+import edu.uci.ics.crawler4j.parser.CssParseData;
+import edu.uci.ics.crawler4j.parser.HtmlParseData;
+import edu.uci.ics.crawler4j.parser.HtmlParser;
+import edu.uci.ics.crawler4j.parser.NotAllowedContentException;
+import edu.uci.ics.crawler4j.parser.ParserInterface;
+import edu.uci.ics.crawler4j.parser.TextParseData;
+import edu.uci.ics.crawler4j.parser.TikaHtmlParser;
 import edu.uci.ics.crawler4j.url.TLDList;
 import edu.uci.ics.crawler4j.url.WebURL;
 import edu.uci.ics.crawler4j.util.Net;

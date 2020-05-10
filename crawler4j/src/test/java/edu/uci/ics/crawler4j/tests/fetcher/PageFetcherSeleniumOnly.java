@@ -32,8 +32,8 @@ import com.machinepublishers.jbrowserdriver.JBrowserDriver;
 import com.machinepublishers.jbrowserdriver.Settings;
 
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
-import edu.uci.ics.crawler4j.fetcher.PageFetchResultSelenium;
 import edu.uci.ics.crawler4j.fetcher.PageFetcherInterface;
+import edu.uci.ics.crawler4j.selenium.PageFetchResultSelenium;
 import edu.uci.ics.crawler4j.url.URLCanonicalizer;
 import edu.uci.ics.crawler4j.url.WebURL;
 

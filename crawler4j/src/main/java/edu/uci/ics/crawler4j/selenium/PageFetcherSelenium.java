@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package edu.uci.ics.crawler4j.fetcher;
+package edu.uci.ics.crawler4j.selenium;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -72,13 +72,18 @@ import org.slf4j.LoggerFactory;
 import com.machinepublishers.jbrowserdriver.Settings;
 
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
-import edu.uci.ics.crawler4j.crawler.SeleniumCrawlConfig;
 import edu.uci.ics.crawler4j.crawler.authentication.AuthInfo;
 import edu.uci.ics.crawler4j.crawler.authentication.BasicAuthInfo;
 import edu.uci.ics.crawler4j.crawler.authentication.FormAuthInfo;
 import edu.uci.ics.crawler4j.crawler.authentication.NtAuthInfo;
 import edu.uci.ics.crawler4j.crawler.exceptions.PageBiggerThanMaxSizeException;
-import edu.uci.ics.crawler4j.selenium.SeleniumWebDriver;
+import edu.uci.ics.crawler4j.fetcher.BasicAuthHttpRequestInterceptor;
+import edu.uci.ics.crawler4j.fetcher.IdleConnectionMonitorThread;
+import edu.uci.ics.crawler4j.fetcher.PageFetchResult;
+import edu.uci.ics.crawler4j.fetcher.PageFetchResultInterface;
+import edu.uci.ics.crawler4j.fetcher.PageFetcherInterface;
+import edu.uci.ics.crawler4j.fetcher.SniPoolingHttpClientConnectionManager;
+import edu.uci.ics.crawler4j.fetcher.SniSSLConnectionSocketFactory;
 import edu.uci.ics.crawler4j.url.URLCanonicalizer;
 import edu.uci.ics.crawler4j.url.WebURL;
 

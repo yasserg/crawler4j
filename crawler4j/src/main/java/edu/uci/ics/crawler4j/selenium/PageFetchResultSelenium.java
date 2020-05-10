@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package edu.uci.ics.crawler4j.fetcher;
+package edu.uci.ics.crawler4j.selenium;
 
 import java.io.IOException;
 import java.net.SocketTimeoutException;
@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import com.machinepublishers.jbrowserdriver.JBrowserDriver;
 
 import edu.uci.ics.crawler4j.crawler.Page;
+import edu.uci.ics.crawler4j.fetcher.PageFetchResultInterface;
 
 /**
  * @author Dario Goikoetxea
