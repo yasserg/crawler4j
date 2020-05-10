@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 import edu.uci.ics.crawler4j.crawler.exceptions.ContentFetchException;
 import edu.uci.ics.crawler4j.crawler.exceptions.PageBiggerThanMaxSizeException;
 import edu.uci.ics.crawler4j.crawler.exceptions.ParseException;
-import edu.uci.ics.crawler4j.fetcher.PageFetchResult;
+import edu.uci.ics.crawler4j.fetcher.PageFetchResultInterface;
 import edu.uci.ics.crawler4j.fetcher.PageFetcherInterface;
 import edu.uci.ics.crawler4j.frontier.DocIDServerInterface;
 import edu.uci.ics.crawler4j.frontier.FrontierInterface;
@@ -411,7 +411,7 @@ public class WebCrawler implements Runnable {
     }
 
     private void processPage(WebURL curURL) throws IOException, InterruptedException, ParseException {
-        PageFetchResult fetchResult = null;
+        PageFetchResultInterface fetchResult = null;
         Page page = new Page(curURL);
         try {
             if (curURL == null) {

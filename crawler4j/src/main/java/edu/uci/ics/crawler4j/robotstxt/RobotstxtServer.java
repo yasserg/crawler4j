@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.crawler.Page;
 import edu.uci.ics.crawler4j.crawler.exceptions.PageBiggerThanMaxSizeException;
-import edu.uci.ics.crawler4j.fetcher.PageFetchResult;
+import edu.uci.ics.crawler4j.fetcher.PageFetchResultInterface;
 import edu.uci.ics.crawler4j.fetcher.PageFetcherInterface;
 import edu.uci.ics.crawler4j.url.WebURL;
 import edu.uci.ics.crawler4j.util.Util;
@@ -111,7 +111,7 @@ public class RobotstxtServer {
         String proto = url.getProtocol();
         robotsTxtUrl.setURL(proto + "://" + host + port + "/robots.txt");
         HostDirectives directives = null;
-        PageFetchResult fetchResult = null;
+        PageFetchResultInterface fetchResult = null;
         try {
             for (int redir = 0; redir < 3; ++redir) {
                 fetchResult = pageFetcher.fetchPage(robotsTxtUrl);
