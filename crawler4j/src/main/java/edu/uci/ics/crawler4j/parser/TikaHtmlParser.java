@@ -101,8 +101,12 @@ public class TikaHtmlParser implements edu.uci.ics.crawler4j.parser.HtmlParser {
             }
 
             String hrefLoweredCase = href.trim().toLowerCase();
-            if (!hrefLoweredCase.contains("javascript:") &&
-                    !hrefLoweredCase.contains("mailto:") && !hrefLoweredCase.contains("@")) {
+            if (!hrefLoweredCase.contains("about:") && !hrefLoweredCase.contains("tel:") &&
+                !hrefLoweredCase.contains("data:")  && !hrefLoweredCase.contains("whatsapp:") &&
+                !hrefLoweredCase.contains("javascript:") && !hrefLoweredCase.contains("viber:") &&
+                !hrefLoweredCase.contains("sms:") && !hrefLoweredCase.contains("android-app:") &&
+                !hrefLoweredCase.contains("fb-messenger:") && !hrefLoweredCase.contains("mailto:") &&
+                !hrefLoweredCase.contains("@") && !hrefLoweredCase.contains("fb-messenger:")) {
                 // Prefer page's content charset to encode href url
                 Charset hrefCharset = ((contentCharset == null) || contentCharset.isEmpty()) ?
                         StandardCharsets.UTF_8 : Charset.forName(contentCharset);
