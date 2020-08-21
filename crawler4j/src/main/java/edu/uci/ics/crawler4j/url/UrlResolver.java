@@ -202,7 +202,7 @@ public final class UrlResolver {
             // location/login (<net_loc>) of the URL.
             locationEndIndex = endIndex;
         } else if (startIndex < endIndex) {
-            url.path = spec.substring(startIndex, endIndex);
+            url.path = spec.substring(startIndex, endIndex).replaceAll("\\\\", "/");
         }
         // Set the network location/login (<net_loc>) of the URL.
         if ((locationStartIndex >= 0) && (locationEndIndex >= 0)) {
