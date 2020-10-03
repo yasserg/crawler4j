@@ -131,7 +131,7 @@ public class Controller {
 - [Image crawler](crawler4j-examples/crawler4j-examples-base/src/test/java/edu/uci/ics/crawler4j/examples/imagecrawler/): a simple image crawler that downloads image content from the crawling domain and stores them in a folder. This example demonstrates how binary content can be fetched using crawler4j.
 - [Collecting data from threads](crawler4j-examples/crawler4j-examples-base/src/test/java/edu/uci/ics/crawler4j/examples/localdata/): this example demonstrates how the controller can collect data/statistics from crawling threads.
 - [Multiple crawlers](crawler4j-examples/crawler4j-examples-base/src/test/java/edu/uci/ics/crawler4j/examples/multiple/): this is a sample that shows how two distinct crawlers can run concurrently. For example, you might want to split your crawling into different domains and then take different crawling policies for each group. Each crawling controller can have its own configurations.
-- [Shutdown crawling](crawler4j-examples/crawler4j-examples-base/src/test/java/edu/uci/ics/crawler4j/examples/shutdown/): this example shows have crawling can be terminated gracefully by sending the 'shutdown' command to the controller.
+- [Shutdown crawling](crawler4j-examples/crawler4j-examples-base/src/test/java/edu/uci/ics/crawler4j/examples/shutdown/): this example shows how crawling can be terminated gracefully by sending the 'shutdown' command to the controller.
 - [Postgres/JDBC integration](crawler4j-examples/crawler4j-examples-postgres/): this shows how to save the crawled content into a Postgres database (or any other JDBC repository), thanks [rzo1](https://github.com/rzo1/).
 
 ## Configuration Details
