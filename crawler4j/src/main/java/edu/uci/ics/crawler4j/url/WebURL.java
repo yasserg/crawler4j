@@ -33,10 +33,12 @@ public class WebURL implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    public static final String POST_SEPARATOR = "<<<POST_DATA>>>";
+
     @PrimaryKey
     private String url;
 
-    private int docid;
+    private int docid = -1;
     private int parentDocid;
     private String parentUrl;
     private short depth;
@@ -48,6 +50,49 @@ public class WebURL implements Serializable {
     private String tag;
     private Map<String, String> attributes;
     private TLDList tldList;
+    private boolean post;
+    private PostParameters paramsPost;
+
+    public PostParameters getParamsPost() {
+        return paramsPost;
+    }
+
+    public void setParamsPost(PostParameters paramsPost) {
+        this.paramsPost = paramsPost;
+    }
+
+    /**
+     * Adds a POST key / value pair. Subclases may override this behaviour for optimization.
+     *
+     * @param key
+     * @param value
+     * @return
+     * @throws IllegalArgumentException if <code>key</code> is <code>null</code>
+     * @see PostParameters#addParameter(String, String)
+     */
+    public boolean addPostParameter(String key, String value) throws IllegalArgumentException {
+        if (paramsPost == null) {
+            paramsPost = createEmptyPostParams();
+        }
+        return paramsPost.addParameter(key, value);
+    }
+
+    /**
+     * Returns true if this WebURL represents a POST request.
+     *
+     * @return
+     */
+    public boolean isPost() {
+        return post;
+    }
+
+    /**
+     * Configures the HTTP request type to be POST (true) or GET(false)
+     * @param post <code>true</code> to configure POST request, <code>false</code> for a GET request.
+     */
+    public void setPost(boolean post) {
+        this.post = post;
+    }
 
     /**
      * Set the TLDList if you want {@linkplain #getDomain()} and
@@ -249,6 +294,10 @@ public class WebURL implements Serializable {
         return attributes.getOrDefault(name, "");
     }
 
+    protected PostParameters createEmptyPostParams() {
+        return new SimplePostParameters();
+    }
+
     @Override
     public int hashCode() {
         return url.hashCode();
@@ -272,4 +321,94 @@ public class WebURL implements Serializable {
     public String toString() {
         return url;
     }
+
+    /**
+     * Encodes the URL and the post parameters in a string to store in the DocIDServer.
+     *
+     * This is what identifies this URL as already visited or new.
+     * @return
+     */
+    public String encode() {
+        return encodeWebURL(this);
+    }
+
+    /**
+     *    Encodes the URL and the post parameters in a string to store in the DocIDServer.
+     *
+     * This is what identifies this URL as already visited or new.
+     * @param url
+     * @return
+     */
+    public static String encodeWebURL(WebURL url) {
+        if (url == null || url.getURL() == null) {
+            return null;
+        }
+        if (!url.isPost()) {
+            return url.getURL();
+        }
+        if (url.getParamsPost() != null) {
+            return url.getURL() + POST_SEPARATOR + url.getParamsPost().encode();
+        } else {
+            return url.getURL() + POST_SEPARATOR;
+        }
+    }
+
+    /**
+     * Converts an encoded String in an instance of WebURL.
+     *
+     * String encoded by subclases of WebURL may not be compatible.
+     *
+     * @param url string with the URL and POST parameters included
+     * @return the {@link WebURL} that represents the string provided
+     */
+    public static WebURL decodeString(String url) {
+        if (url == null) {
+            return null;
+        }
+        WebURL result = new WebURL();
+        if (isPost(url)) {
+            result.setPost(true);
+            // Check if there's something usefull after POST_SEPARATOR.
+            if (hasPostParams(url)) {
+                // There are valid parameters.
+                String[] splitted = url.split(POST_SEPARATOR, 2);
+                result.setURL(splitted[0]);
+                if (splitted.length > 1) {
+                    result.setParamsPost(SimplePostParameters.decodePostAtributes(splitted[1]));
+                }
+            } else {
+                result.setURL(url.replaceAll(POST_SEPARATOR, ""));
+            }
+        } else {
+            result.setURL(url);
+        }
+        return result;
+    }
+
+    public static boolean isPost(String encodedUrl) {
+        if (encodedUrl == null) {
+            return false;
+        }
+        if (encodedUrl.contains(POST_SEPARATOR)) {
+            return true;
+        }
+        return false;
+    }
+
+    protected static boolean hasPostParams(String encodedUrl) {
+        // Check if the URL has post parameters
+        if (encodedUrl == null) {
+            return false;
+        }
+        String[] parts = encodedUrl.split(POST_SEPARATOR);
+        if (parts.length > 1) {
+            for (int i = 1; i < parts.length; i++) {
+                if (parts[i] != null && !parts[i].isEmpty()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
 }

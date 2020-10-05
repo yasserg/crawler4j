@@ -17,6 +17,8 @@
 
 package edu.uci.ics.crawler4j.frontier;
 
+import org.apache.http.message.BasicNameValuePair;
+
 import com.sleepycat.bind.tuple.TupleBinding;
 import com.sleepycat.bind.tuple.TupleInput;
 import com.sleepycat.bind.tuple.TupleOutput;
@@ -38,6 +40,18 @@ public class WebURLTupleBinding extends TupleBinding<WebURL> {
         webURL.setDepth(input.readShort());
         webURL.setPriority(input.readByte());
         webURL.setAnchor(input.readString());
+        webURL.setPost(input.readBoolean());
+        if (webURL.isPost()) {
+            try {
+                while (true) {
+                    String name = input.readString();
+                    String value = input.readString();
+                    webURL.addPostParameter(name, value);
+                }
+            } catch (IndexOutOfBoundsException e) {
+                // Do nothing, no more parameters to fetch
+            }
+        }
         return webURL;
     }
 
@@ -50,5 +64,12 @@ public class WebURLTupleBinding extends TupleBinding<WebURL> {
         output.writeShort(url.getDepth());
         output.writeByte(url.getPriority());
         output.writeString(url.getAnchor());
+        output.writeBoolean(url.isPost());
+        if (url.isPost() && url.getParamsPost() != null) {
+            for (BasicNameValuePair param : url.getParamsPost().getAsList()) {
+                output.writeString(param.getName());
+                output.writeString(param.getValue());
+            }
+        }
     }
 }
