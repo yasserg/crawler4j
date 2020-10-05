@@ -20,11 +20,13 @@ package edu.uci.ics.crawler4j.crawler;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.util.ByteArrayBuffer;
+import org.openqa.selenium.WebDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -187,6 +189,19 @@ public class Page {
         }
 
         contentData = toByteArray(entity, maxBytes);
+    }
+
+    /**
+     * Loads the content of this page from a fetched Selenium request.
+     *
+     * @param entity HttpEntity
+     */
+    public void load(WebDriver entity) {
+
+        contentType = null;
+        contentEncoding = null;
+        contentData = entity.getPageSource().getBytes(StandardCharsets.UTF_8);
+        contentCharset = StandardCharsets.UTF_8.displayName();
     }
 
     public WebURL getWebURL() {

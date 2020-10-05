@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package edu.uci.ics.crawler4j.fetcher;
+package edu.uci.ics.crawler4j.selenium;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -43,6 +43,7 @@ import org.apache.http.auth.Credentials;
 import org.apache.http.auth.NTCredentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.CookieStore;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -57,14 +58,18 @@ import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustStrategy;
+import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.ssl.SSLContexts;
+import org.openqa.selenium.NoSuchElementException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.machinepublishers.jbrowserdriver.Settings;
 
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.crawler.authentication.AuthInfo;
@@ -72,28 +77,57 @@ import edu.uci.ics.crawler4j.crawler.authentication.BasicAuthInfo;
 import edu.uci.ics.crawler4j.crawler.authentication.FormAuthInfo;
 import edu.uci.ics.crawler4j.crawler.authentication.NtAuthInfo;
 import edu.uci.ics.crawler4j.crawler.exceptions.PageBiggerThanMaxSizeException;
+import edu.uci.ics.crawler4j.fetcher.BasicAuthHttpRequestInterceptor;
+import edu.uci.ics.crawler4j.fetcher.IdleConnectionMonitorThread;
+import edu.uci.ics.crawler4j.fetcher.PageFetchResult;
+import edu.uci.ics.crawler4j.fetcher.PageFetchResultInterface;
+import edu.uci.ics.crawler4j.fetcher.PageFetcherInterface;
+import edu.uci.ics.crawler4j.fetcher.SniPoolingHttpClientConnectionManager;
+import edu.uci.ics.crawler4j.fetcher.SniSSLConnectionSocketFactory;
 import edu.uci.ics.crawler4j.url.URLCanonicalizer;
 import edu.uci.ics.crawler4j.url.WebURL;
 
 /**
- * @author Yasser Ganjisaffar
+ *
+ * Page fetcher that adds SIMPLE selenium integration.
+ *
+ * Selenium requests do not share cookies with normal request, and do not support any of the
+ * provided forms of authentication.
+ *
+ * If you want to maintain browser status / cookies, navigation must be manually done via visit.
+ *
+ * Future versions will try to maintain cookies between pages and integrate with Form authentication.
+ *
+ * BASIC_AUTHENTICATION and NT_AUTHENTICATION do not seem to be simple to implement using WebDriver and Selenium.
+ *
+ * Please, note that crawler4j will allways schedule URLs as non-selenium by default. You need either a custom parser
+ * or using the visit() mode to schedule URLs as Selenium.
+ *
+ * @author Dario Goikoetxea
  */
-public class PageFetcher implements PageFetcherInterface {
-    protected static final Logger logger = LoggerFactory.getLogger(PageFetcher.class);
+public class PageFetcherSelenium implements PageFetcherInterface {
+    protected static final Logger logger = LoggerFactory.getLogger(PageFetcherSelenium.class);
     protected final Object mutex = new Object();
     /**
      * This field is protected for retro compatibility. Please use the getter method: getConfig() to
      * read this field;
      */
-    protected final CrawlConfig config;
+    protected final SeleniumCrawlConfig config;
     protected PoolingHttpClientConnectionManager connectionManager;
     protected CloseableHttpClient httpClient;
     protected long lastFetchTime = 0;
     protected IdleConnectionMonitorThread connectionMonitorThread = null;
+    protected final Settings configSelenium;
+    protected final CookieStore cookieStore;
 
-    public PageFetcher(CrawlConfig config) throws NoSuchAlgorithmException, KeyManagementException, KeyStoreException {
+    public PageFetcherSelenium(SeleniumCrawlConfig config) throws NoSuchAlgorithmException, KeyManagementException,
+                                                            KeyStoreException {
         this.config = config;
-
+        if (config.getSeleniumConfig() == null) {
+            configSelenium = Settings.builder().javascript(true).build();
+        } else {
+            configSelenium = config.getSeleniumConfig();
+        }
         RequestConfig requestConfig = RequestConfig.custom()
                 .setExpectContinueEnabled(false)
                 .setCookieSpec(config.getCookiePolicy())
@@ -135,8 +169,12 @@ public class PageFetcher implements PageFetcherInterface {
 
         HttpClientBuilder clientBuilder = HttpClientBuilder.create();
         if (config.getCookieStore() != null) {
-            clientBuilder.setDefaultCookieStore(config.getCookieStore());
+            this.cookieStore = config.getCookieStore();
+        } else {
+            // This is what HttpClientBuilder would do anyways.
+            this.cookieStore = new BasicCookieStore();
         }
+        clientBuilder.setDefaultCookieStore(this.cookieStore);
         clientBuilder.setDefaultRequestConfig(requestConfig);
         clientBuilder.setConnectionManager(connectionManager);
         clientBuilder.setUserAgent(config.getUserAgentString());
@@ -252,82 +290,151 @@ public class PageFetcher implements PageFetcherInterface {
     }
 
     @Override
-    public PageFetchResult fetchPage(WebURL webUrl)
+    public PageFetchResultInterface fetchPage(WebURL webUrl)
             throws InterruptedException, IOException, PageBiggerThanMaxSizeException {
         // Getting URL, setting headers & content
-        PageFetchResult fetchResult = new PageFetchResult(config.isHaltOnError());
         String toFetchURL = webUrl.getURL();
-        HttpUriRequest request = null;
-        try {
-            request = newHttpUriRequest(toFetchURL);
-            if (config.getPolitenessDelay() > 0) {
-                // Applying Politeness delay
-                synchronized (mutex) {
-                    long now = (new Date()).getTime();
-                    if ((now - lastFetchTime) < config.getPolitenessDelay()) {
-                        Thread.sleep(config.getPolitenessDelay() - (now - lastFetchTime));
-                    }
-                    lastFetchTime = (new Date()).getTime();
-                }
+        if (webUrl.isSelenium()) {
+            PageFetchResultSelenium fetchResult = new PageFetchResultSelenium(config.isHaltOnError());
+            SeleniumWebDriver driver;
+            if (config.isCookiesSelemiun()) {
+                driver = new SeleniumWebDriver(cookieStore, configSelenium);
+            } else {
+                driver = new SeleniumWebDriver(configSelenium);
             }
-
-            CloseableHttpResponse response = httpClient.execute(request);
-            fetchResult.setEntity(response.getEntity());
-            fetchResult.setResponseHeaders(response.getAllHeaders());
-
-            // Setting HttpStatus
-            int statusCode = response.getStatusLine().getStatusCode();
-
-            // If Redirect ( 3xx )
-            if (statusCode == HttpStatus.SC_MOVED_PERMANENTLY ||
-                    statusCode == HttpStatus.SC_MOVED_TEMPORARILY ||
-                    statusCode == HttpStatus.SC_MULTIPLE_CHOICES ||
-                    statusCode == HttpStatus.SC_SEE_OTHER ||
-                    statusCode == HttpStatus.SC_TEMPORARY_REDIRECT ||
-                    statusCode == 308) { // todo follow
-                // https://issues.apache.org/jira/browse/HTTPCORE-389
-
-                Header header = response.getFirstHeader(HttpHeaders.LOCATION);
-                if (header != null) {
-                    String movedToUrl =
-                            URLCanonicalizer.getCanonicalURL(header.getValue(), toFetchURL);
-                    fetchResult.setMovedToUrl(movedToUrl);
+            try {
+                if (config.getPolitenessDelay() > 0) {
+                    // Applying Politeness delay
+                    synchronized (mutex) {
+                        long now = (new Date()).getTime();
+                        if ((now - lastFetchTime) < config.getPolitenessDelay()) {
+                            Thread.sleep(config.getPolitenessDelay() - (now - lastFetchTime));
+                        }
+                        lastFetchTime = (new Date()).getTime();
+                    }
                 }
-            } else if (statusCode >= 200 && statusCode <= 299) { // is 2XX, everything looks ok
+
+                driver.get(webUrl);
+
+                fetchResult.setDriver(driver);
                 fetchResult.setFetchedUrl(toFetchURL);
-                String uri = request.getURI().toString();
-                if (!uri.equals(toFetchURL)) {
-                    if (!URLCanonicalizer.getCanonicalURL(uri).equals(toFetchURL)) {
-                        fetchResult.setFetchedUrl(uri);
+                // Setting HttpStatus
+                int statusCode = driver.getStatusCode();
+
+                if (statusCode == 499) {
+                    // Sometimes JBrowserDriver is not properly detecting status
+                    try {
+                        if (driver.getPageSource() != null) {
+                            statusCode = 200;
+                        }
+                    } catch (NoSuchElementException e) {
+                        // It is a real 499.
+                        e.printStackTrace();
                     }
                 }
 
-                // Checking maximum size
-                if (fetchResult.getEntity() != null) {
-                    long size = fetchResult.getEntity().getContentLength();
-                    if (size == -1) {
-                        Header length = response.getLastHeader(HttpHeaders.CONTENT_LENGTH);
-                        if (length == null) {
-                            length = response.getLastHeader("Content-length");
-                        }
-                        if (length != null) {
-                            size = Integer.parseInt(length.getValue());
+                // If Redirect ( 3xx )
+                if (statusCode == HttpStatus.SC_MOVED_PERMANENTLY ||
+                        statusCode == HttpStatus.SC_MOVED_TEMPORARILY ||
+                        statusCode == HttpStatus.SC_MULTIPLE_CHOICES ||
+                        statusCode == HttpStatus.SC_SEE_OTHER ||
+                        statusCode == HttpStatus.SC_TEMPORARY_REDIRECT ||
+                        statusCode == 308) { // todo follow
+                    // https://issues.apache.org/jira/browse/HTTPCORE-389
+
+                    throw new IOException("Redirection not supported for Selenium. It should follow it automatically");
+                } else if (statusCode >= 200 && statusCode <= 299) { // is 2XX, everything looks ok
+                    fetchResult.setFetchedUrl(toFetchURL);
+                    String uri = driver.getCurrentUrl();
+                    if (!uri.equals(toFetchURL)) {
+                        if (!URLCanonicalizer.getCanonicalURL(uri).equals(toFetchURL)) {
+                            fetchResult.setFetchedUrl(uri);
                         }
                     }
-                    if (size > config.getMaxDownloadSize()) {
-                        //fix issue #52 - consume entity
-                        response.close();
-                        throw new PageBiggerThanMaxSizeException(size);
-                    }
+
                 }
+
+                fetchResult.setStatusCode(statusCode);
+                return fetchResult;
+
+            } catch (InterruptedException | IOException | RuntimeException e) {
+                driver.quit();
+                throw e;
             }
+        } else {
+            PageFetchResult fetchResult = new PageFetchResult(config.isHaltOnError());
+            HttpUriRequest request = null;
+            try {
+                request = newHttpUriRequest(toFetchURL);
+                if (config.getPolitenessDelay() > 0) {
+                    // Applying Politeness delay
+                    synchronized (mutex) {
+                        long now = (new Date()).getTime();
+                        if ((now - lastFetchTime) < config.getPolitenessDelay()) {
+                            Thread.sleep(config.getPolitenessDelay() - (now - lastFetchTime));
+                        }
+                        lastFetchTime = (new Date()).getTime();
+                    }
+                }
 
-            fetchResult.setStatusCode(statusCode);
-            return fetchResult;
+                CloseableHttpResponse response = httpClient.execute(request);
+                fetchResult.setEntity(response.getEntity());
+                fetchResult.setResponseHeaders(response.getAllHeaders());
 
-        } finally { // occurs also with thrown exceptions
-            if ((fetchResult.getEntity() == null) && (request != null)) {
-                request.abort();
+                // Setting HttpStatus
+                int statusCode = response.getStatusLine().getStatusCode();
+
+                // If Redirect ( 3xx )
+                if (statusCode == HttpStatus.SC_MOVED_PERMANENTLY ||
+                        statusCode == HttpStatus.SC_MOVED_TEMPORARILY ||
+                        statusCode == HttpStatus.SC_MULTIPLE_CHOICES ||
+                        statusCode == HttpStatus.SC_SEE_OTHER ||
+                        statusCode == HttpStatus.SC_TEMPORARY_REDIRECT ||
+                        statusCode == 308) { // todo follow
+                    // https://issues.apache.org/jira/browse/HTTPCORE-389
+
+                    Header header = response.getFirstHeader(HttpHeaders.LOCATION);
+                    if (header != null) {
+                        String movedToUrl =
+                                URLCanonicalizer.getCanonicalURL(header.getValue(), toFetchURL);
+                        fetchResult.setMovedToUrl(movedToUrl);
+                    }
+                } else if (statusCode >= 200 && statusCode <= 299) { // is 2XX, everything looks ok
+                    fetchResult.setFetchedUrl(toFetchURL);
+                    String uri = request.getURI().toString();
+                    if (!uri.equals(toFetchURL)) {
+                        if (!URLCanonicalizer.getCanonicalURL(uri).equals(toFetchURL)) {
+                            fetchResult.setFetchedUrl(uri);
+                        }
+                    }
+
+                    // Checking maximum size
+                    if (fetchResult.getEntity() != null) {
+                        long size = fetchResult.getEntity().getContentLength();
+                        if (size == -1) {
+                            Header length = response.getLastHeader(HttpHeaders.CONTENT_LENGTH);
+                            if (length == null) {
+                                length = response.getLastHeader("Content-length");
+                            }
+                            if (length != null) {
+                                size = Integer.parseInt(length.getValue());
+                            }
+                        }
+                        if (size > config.getMaxDownloadSize()) {
+                            //fix issue #52 - consume entity
+                            response.close();
+                            throw new PageBiggerThanMaxSizeException(size);
+                        }
+                    }
+                }
+
+                fetchResult.setStatusCode(statusCode);
+                return fetchResult;
+
+            } finally { // occurs also with thrown exceptions
+                if ((fetchResult.getEntity() == null) && (request != null)) {
+                    request.abort();
+                }
             }
         }
     }

@@ -15,50 +15,76 @@
  * limitations under the License.
  */
 
-package edu.uci.ics.crawler4j.parser;
+package edu.uci.ics.crawler4j.selenium;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import org.apache.tika.language.LanguageIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.crawler.Page;
 import edu.uci.ics.crawler4j.crawler.exceptions.ParseException;
+import edu.uci.ics.crawler4j.parser.BinaryParseData;
+import edu.uci.ics.crawler4j.parser.CssParseData;
+import edu.uci.ics.crawler4j.parser.HtmlParseData;
+import edu.uci.ics.crawler4j.parser.HtmlParser;
+import edu.uci.ics.crawler4j.parser.NotAllowedContentException;
+import edu.uci.ics.crawler4j.parser.ParserInterface;
+import edu.uci.ics.crawler4j.parser.TextParseData;
+import edu.uci.ics.crawler4j.parser.TikaHtmlParser;
 import edu.uci.ics.crawler4j.url.TLDList;
+import edu.uci.ics.crawler4j.url.WebURL;
 import edu.uci.ics.crawler4j.util.Net;
 import edu.uci.ics.crawler4j.util.Util;
 
 /**
- * @author Yasser Ganjisaffar
+ * Simple parser. Allows to set regular expressions for inclussion / exclussion for selenium driver.
+ *
+ *
+ *
+ * @author Dario Goikoetxea
  */
-public class Parser implements ParserInterface {
+public class ParserSelenium implements ParserInterface {
 
-    private static final Logger logger = LoggerFactory.getLogger(Parser.class);
+    private static final Logger logger = LoggerFactory.getLogger(ParserSelenium.class);
 
-    private final CrawlConfig config;
+    private final SeleniumCrawlConfig config;
 
     private final HtmlParser htmlContentParser;
 
     private final Net net;
 
-    @Deprecated
-    public Parser(CrawlConfig config) throws IllegalAccessException, InstantiationException {
-        this(config, new TikaHtmlParser(config, null));
-    }
+    private List<Pattern> exclussions;
 
-    public Parser(CrawlConfig config, TLDList tldList) throws IllegalAccessException, InstantiationException {
+    private List<Pattern> includes;
+
+    public ParserSelenium(SeleniumCrawlConfig config, TLDList tldList) throws IllegalAccessException,
+            InstantiationException, PatternSyntaxException {
         this(config, new TikaHtmlParser(config, tldList), tldList);
     }
 
-    @Deprecated
-    public Parser(CrawlConfig config, HtmlParser htmlParser) {
-        this(config, htmlParser, null);
-    }
-
-    public Parser(CrawlConfig config, HtmlParser htmlParser, TLDList tldList) {
+    public ParserSelenium(SeleniumCrawlConfig config, HtmlParser htmlParser, TLDList tldList)
+            throws PatternSyntaxException {
         this.config = config;
         this.htmlContentParser = htmlParser;
         this.net = new Net(config, tldList);
+        includes = new ArrayList<Pattern>();
+        exclussions = new ArrayList<Pattern>();
+        if (config.getSeleniumExcludes() != null) {
+            for (String pattern : config.getSeleniumExcludes()) {
+                exclussions.add(Pattern.compile(pattern));
+            }
+        }
+        if (config.getSeleniumIncludes() != null) {
+            for (String pattern : config.getSeleniumIncludes()) {
+                includes.add(Pattern.compile(pattern));
+            }
+        }
     }
 
     @Override
@@ -83,7 +109,7 @@ public class Parser implements ParserInterface {
                 if (parseData.getHtml() == null) {
                     throw new ParseException();
                 }
-                parseData.setOutgoingUrls(net.extractUrls(parseData.getHtml()));
+                parseData.setOutgoingUrls(processSelenium(net.extractUrls(parseData.getHtml())));
             } else {
                 throw new NotAllowedContentException();
             }
@@ -97,6 +123,7 @@ public class Parser implements ParserInterface {
                         new String(page.getContentData(), page.getContentCharset()));
                 }
                 parseData.setOutgoingUrls(page.getWebURL());
+                parseData.setOutgoingUrls(processSelenium(parseData.getOutgoingUrls()));
                 page.setParseData(parseData);
             } catch (Exception e) {
                 logger.error("{}, while parsing css: {}", e.getMessage(), page.getWebURL().getURL());
@@ -111,7 +138,7 @@ public class Parser implements ParserInterface {
                     parseData.setTextContent(
                         new String(page.getContentData(), page.getContentCharset()));
                 }
-                parseData.setOutgoingUrls(net.extractUrls(parseData.getTextContent()));
+                parseData.setOutgoingUrls(processSelenium(net.extractUrls(parseData.getTextContent())));
                 page.setParseData(parseData);
             } catch (Exception e) {
                 logger.error("{}, while parsing: {}", e.getMessage(), page.getWebURL().getURL());
@@ -120,7 +147,7 @@ public class Parser implements ParserInterface {
         } else { // isHTML
 
             HtmlParseData parsedData = this.htmlContentParser.parse(page, contextURL);
-
+            parsedData.setOutgoingUrls(processSelenium(parsedData.getOutgoingUrls()));
             if (page.getContentCharset() == null) {
                 page.setContentCharset(parsedData.getContentCharset());
             }
@@ -132,5 +159,36 @@ public class Parser implements ParserInterface {
             page.setParseData(parsedData);
 
         }
+    }
+
+    private Set<WebURL> processSelenium(Set<WebURL> urls) {
+        if (urls == null) {
+            return null;
+        }
+        outer_loop: for (WebURL url : urls) {
+            if (config.isDefaultToSelenium()) {
+                url.setSelenium(true);
+            } else {
+                for (Pattern pattern : includes) {
+                    if (pattern.matcher(url.getURL()).matches()) {
+                        url.setSelenium(true);
+                        continue outer_loop;
+                    }
+                }
+            }
+
+        }
+        outer_loop: for (WebURL current : urls) {
+            if (!current.isSelenium()) {
+                continue;
+            }
+            for (Pattern pattern : exclussions) {
+                if (pattern.matcher(current.getURL()).matches()) {
+                    current.setSelenium(false);
+                    continue outer_loop;
+                }
+            }
+        }
+        return urls;
     }
 }

@@ -48,6 +48,7 @@ public class WebURL implements Serializable {
     private String tag;
     private Map<String, String> attributes;
     private TLDList tldList;
+    private boolean selenium = false;
 
     /**
      * Set the TLDList if you want {@linkplain #getDomain()} and
@@ -247,6 +248,14 @@ public class WebURL implements Serializable {
             return "";
         }
         return attributes.getOrDefault(name, "");
+    }
+
+    public boolean isSelenium() {
+        return selenium;
+    }
+
+    public void setSelenium(boolean selenium) {
+        this.selenium = selenium;
     }
 
     @Override

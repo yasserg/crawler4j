@@ -19,6 +19,8 @@ dependencies {
     compile group: 'org.slf4j', name: 'jul-to-slf4j', version: '1.7.26'
     compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.7'
     compile group: 'com.sleepycat', name: 'je', version: '18.3.12'
+    compile group: 'org.seleniumhq.selenium', name: 'selenium-java', version: '3.141.59'
+    compile group: 'com.machinepublishers', name: 'jbrowserdriver', version: '1.1.1'
     compile(group: 'org.apache.tika', name: 'tika-parsers', version: '1.20') {
         exclude(module: 'poi-ooxml')
         exclude(module: 'poi-scratchpad')

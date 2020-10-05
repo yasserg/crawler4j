@@ -32,8 +32,8 @@ import org.slf4j.LoggerFactory;
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.crawler.Page;
 import edu.uci.ics.crawler4j.crawler.exceptions.PageBiggerThanMaxSizeException;
-import edu.uci.ics.crawler4j.fetcher.PageFetchResult;
-import edu.uci.ics.crawler4j.fetcher.PageFetcher;
+import edu.uci.ics.crawler4j.fetcher.PageFetchResultInterface;
+import edu.uci.ics.crawler4j.fetcher.PageFetcherInterface;
 import edu.uci.ics.crawler4j.url.WebURL;
 import edu.uci.ics.crawler4j.util.Util;
 
@@ -50,15 +50,15 @@ public class RobotstxtServer {
 
     protected final Map<String, HostDirectives> host2directivesCache = new HashMap<>();
 
-    protected PageFetcher pageFetcher;
+    protected PageFetcherInterface pageFetcher;
 
     private final int maxBytes;
 
-    public RobotstxtServer(RobotstxtConfig config, PageFetcher pageFetcher) {
+    public RobotstxtServer(RobotstxtConfig config, PageFetcherInterface pageFetcher) {
         this(config, pageFetcher, 16384);
     }
 
-    public RobotstxtServer(RobotstxtConfig config, PageFetcher pageFetcher, int maxBytes) {
+    public RobotstxtServer(RobotstxtConfig config, PageFetcherInterface pageFetcher, int maxBytes) {
         this.config = config;
         this.pageFetcher = pageFetcher;
         this.maxBytes = maxBytes;
@@ -111,7 +111,7 @@ public class RobotstxtServer {
         String proto = url.getProtocol();
         robotsTxtUrl.setURL(proto + "://" + host + port + "/robots.txt");
         HostDirectives directives = null;
-        PageFetchResult fetchResult = null;
+        PageFetchResultInterface fetchResult = null;
         try {
             for (int redir = 0; redir < 3; ++redir) {
                 fetchResult = pageFetcher.fetchPage(robotsTxtUrl);

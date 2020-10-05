@@ -13,6 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
 package edu.uci.ics.crawler4j.crawler;
@@ -21,7 +22,7 @@ package edu.uci.ics.crawler4j.crawler;
  * Several core components of crawler4j extend this class
  * to make them configurable.
  *
- * @deprecated This will removed without notice.
+ * @deprecated This will be removed without notice.
  * @author Yasser Ganjisaffar
  */
 @Deprecated

@@ -29,6 +29,8 @@ import org.apache.http.conn.DnsResolver;
 import org.apache.http.impl.conn.SystemDefaultDnsResolver;
 import org.apache.http.message.BasicHeader;
 
+import com.machinepublishers.jbrowserdriver.Settings;
+
 import edu.uci.ics.crawler4j.crawler.authentication.AuthInfo;
 
 public class CrawlConfig {
@@ -234,6 +236,11 @@ public class CrawlConfig {
      * number of pages to fetch/process from the database in a single read
      */
     private int batchReadSize = 50;
+
+    /**
+     *  Confguration for Selenium
+     */
+    private Settings seleniumConfig;
 
     /**
      * Validates the configs specified by this instance.
@@ -730,6 +737,14 @@ public class CrawlConfig {
 
     public void setBatchReadSize(int batchReadSize) {
         this.batchReadSize = batchReadSize;
+    }
+
+    public Settings getSeleniumConfig() {
+        return seleniumConfig;
+    }
+
+    public void setSeleniumConfig(Settings seleniumConfig) {
+        this.seleniumConfig = seleniumConfig;
     }
 
     @Override
