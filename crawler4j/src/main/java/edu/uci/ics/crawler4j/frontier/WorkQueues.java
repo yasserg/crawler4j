@@ -20,6 +20,9 @@ package edu.uci.ics.crawler4j.frontier;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sleepycat.je.Cursor;
 import com.sleepycat.je.Database;
 import com.sleepycat.je.DatabaseConfig;
@@ -35,6 +38,8 @@ import edu.uci.ics.crawler4j.util.Util;
  * @author Yasser Ganjisaffar
  */
 public class WorkQueues {
+    private final Logger logger = LoggerFactory.getLogger(WorkQueues.class);
+
     private final Database urlsDB;
     private final Environment env;
 

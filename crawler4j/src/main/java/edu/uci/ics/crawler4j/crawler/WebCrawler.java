@@ -22,6 +22,7 @@ import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.Callable;
 
 import org.apache.http.HttpStatus;
 import org.apache.http.impl.EnglishReasonPhraseCatalog;
@@ -47,7 +48,7 @@ import edu.uci.ics.crawler4j.url.WebURL;
  *
  * @author Yasser Ganjisaffar
  */
-public class WebCrawler implements Runnable {
+public class WebCrawler implements Callable<Void> {
 
     protected static final Logger logger = LoggerFactory.getLogger(WebCrawler.class);
 
@@ -66,6 +67,7 @@ public class WebCrawler implements Runnable {
     /**
      * The thread within which this crawler instance is running.
      */
+    @Deprecated
     private Thread myThread;
 
     /**
@@ -100,9 +102,8 @@ public class WebCrawler implements Runnable {
      * instances are waiting for new URLs and therefore there is no more work
      * and crawling can be stopped.
      */
+    @Deprecated
     private boolean isWaitingForNewURLs;
-
-    private Throwable error;
 
     private int batchReadSize;
 
@@ -127,6 +128,7 @@ public class WebCrawler implements Runnable {
         this.myController = crawlController;
         this.isWaitingForNewURLs = false;
         this.batchReadSize = crawlController.getConfig().getBatchReadSize();
+        myController.registerCrawler(this);
     }
 
     /**
@@ -265,7 +267,13 @@ public class WebCrawler implements Runnable {
      */
     protected void onUnhandledException(WebURL webUrl, Throwable e) {
         if (myController.getConfig().isHaltOnError() && !(e instanceof IOException)) {
-            throw new RuntimeException("unhandled exception", e);
+            if (e instanceof Error) {
+                throw (Error) e;
+            } else if (e instanceof RuntimeException) {
+                throw (RuntimeException) e;
+            } else {
+                throw new RuntimeException("unhandled exception", e);
+            }
         } else {
             String urlStr = (webUrl == null ? "NULL" : webUrl.getURL());
             logger.warn("Unhandled exception while fetching {}: {}", urlStr, e.getMessage());
@@ -310,46 +318,50 @@ public class WebCrawler implements Runnable {
     }
 
     @Override
-    public void run() {
+    public Void call() throws Exception {
+        myThread = Thread.currentThread();
         try {
             onStart();
-            setError(null);
-            boolean halt = false;
-            while (!halt) {
-                List<WebURL> assignedURLs = new ArrayList<>(batchReadSize);
-                isWaitingForNewURLs = true;
-                frontier.getNextURLs(batchReadSize, assignedURLs);
-                isWaitingForNewURLs = false;
-                if (assignedURLs.isEmpty()) {
-                    if (frontier.isFinished()) {
-                        return;
-                    }
-                    try {
-                        Thread.sleep(3000);
-                    } catch (InterruptedException e) {
-                        logger.error("Error occurred", e);
-                    }
-                } else {
-                    for (WebURL curURL : assignedURLs) {
-                        if (myController.isShuttingDown()) {
-                            logger.info("Exiting because of controller shutdown.");
-                            return;
-                        }
-                        if (curURL != null) {
-                            curURL = handleUrlBeforeProcess(curURL);
-                            processPage(curURL);
-                            frontier.setProcessed(curURL);
-                        }
-                    }
+            boolean finished = false;
+            while (!finished) {
+                if (Thread.interrupted()) {
+                    throw new InterruptedException();
                 }
-                if (myController.getConfig().isHaltOnError() && myController.getError() != null) {
-                    halt = true;
-                    logger.info("halting because an error has occurred on another thread");
+                if (myController.isShuttingDown()) {
+                    finished = true;
+                } else {
+                    List<WebURL> assignedURLs = new ArrayList<>(batchReadSize);
+                    frontier.getNextURLs(batchReadSize, assignedURLs);
+                    if (assignedURLs.isEmpty()) {
+                        isWaitingForNewURLs = true;
+                        myController.crawlerAwaitingCompletion(this);
+                        isWaitingForNewURLs = false;
+                        if (myController.isFinished()) {
+                            finished = true;
+                        }
+                    } else {
+                        for (WebURL curURL : assignedURLs) {
+                            if (Thread.interrupted()) {
+                                throw new InterruptedException();
+                            }
+                            if (curURL != null) {
+                                curURL = handleUrlBeforeProcess(curURL);
+                                processPage(curURL);
+                                frontier.setProcessed(curURL);
+                            }
+                        }
+                    }
                 }
             }
         } catch (Throwable t) {
-            setError(t);
+            myController.shutdown();
+            throw t;
+        } finally {
+            myController.unregisterCrawler(this);
         }
+        onBeforeExit();
+        myController.getCrawlersLocalData().add(getMyLocalData());
+        return null;
     }
 
     /**
@@ -575,7 +587,9 @@ public class WebCrawler implements Runnable {
             logger.debug(
                 "Skipping: {} as it contains binary content which you configured not to crawl",
                 curURL.getURL());
-        } catch (IOException | InterruptedException | RuntimeException e) {
+        } catch (InterruptedException e) {
+            throw e;
+        } catch (IOException | RuntimeException e) {
             onUnhandledException(curURL, e);
         } finally {
             if (fetchResult != null) {
@@ -584,10 +598,12 @@ public class WebCrawler implements Runnable {
         }
     }
 
+    @Deprecated
     public Thread getThread() {
         return myThread;
     }
 
+    @Deprecated
     public void setThread(Thread myThread) {
         this.myThread = myThread;
     }
@@ -596,11 +612,4 @@ public class WebCrawler implements Runnable {
         return !isWaitingForNewURLs;
     }
 
-    protected synchronized Throwable getError() {
-        return error;
-    }
-
-    private synchronized void setError(Throwable error) {
-        this.error = error;
-    }
 }
