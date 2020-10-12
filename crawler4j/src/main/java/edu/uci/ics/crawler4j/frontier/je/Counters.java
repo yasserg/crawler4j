@@ -15,10 +15,11 @@
  * limitations under the License.
  */
 
-package edu.uci.ics.crawler4j.frontier;
+package edu.uci.ics.crawler4j.frontier.je;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -139,7 +140,18 @@ public class Counters {
                 statisticsDB.close();
             }
         } catch (DatabaseException e) {
-            logger.error("Exception thrown while trying to close statisticsDB", e);
+            if (config.isHaltOnError()) {
+                throw e;
+            } else {
+                logger.error("Exception thrown while trying to close statisticsDB", e);
+            }
         }
+    }
+
+    /**
+     * @param consumer
+     */
+    public void process(Consumer<Database> consumer) {
+        consumer.accept(statisticsDB);
     }
 }

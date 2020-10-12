@@ -1,10 +1,9 @@
-/**
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+/*
+ * Copyright 2018 Paul Galbraith <paul.d.galbraith@gmail.com>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -19,193 +18,67 @@ package edu.uci.ics.crawler4j.frontier;
 
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.sleepycat.je.DatabaseException;
-import com.sleepycat.je.Environment;
-
-import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.url.WebURL;
 
 /**
- * @author Yasser Ganjisaffar
+ * @author Paul Galbraith <paul.d.galbraith@gmail.com>
+ *
  */
+public interface Frontier {
 
-public class Frontier {
-    protected static final Logger logger = LoggerFactory.getLogger(Frontier.class);
+    /**
+     * @param url
+     * @param docId
+     */
+    void addUrlAndDocId(String url, int docId) throws FrontierException;
 
-    private static final String DATABASE_NAME = "PendingURLsDB";
-    private static final int IN_PROCESS_RESCHEDULE_BATCH_SIZE = 100;
-    private final CrawlConfig config;
-    protected WorkQueues workQueues;
+    void close() throws FrontierException;
 
-    protected InProcessPagesDB inProcessPages;
+    /**
+     * Returns the docid of an already seen url.
+     *
+     * @param url the URL for which the docid is returned.
+     * @return the docid of the url if it is seen before. Otherwise -1 is returned.
+     */
+    int getDocId(String url) throws FrontierException;
 
-    protected final Object mutex = new Object();
-    protected final Object waitingList = new Object();
+    /**
+     * @param url
+     * @return
+     */
+    int getNewDocID(String url) throws FrontierException;
 
-    protected boolean isFinished = false;
+    /**
+     * @param max
+     * @param result
+     * @throws InterruptedException
+     */
+    void getNextURLs(int max, List<WebURL> result) throws FrontierException;
 
-    protected long scheduledPages;
+    /**
+     * @param url
+     * @return
+     */
+    boolean isSeenBefore(String url) throws FrontierException;
 
-    protected Counters counters;
+    /**
+     * Clear all stored crawl tracking data in preparation for a new crawl.
+     */
+    void reset() throws FrontierException;
 
-    public Frontier(Environment env, CrawlConfig config) {
-        this.config = config;
-        this.counters = new Counters(env, config);
-        try {
-            workQueues = new WorkQueues(env, DATABASE_NAME, config.isResumableCrawling());
-            if (config.isResumableCrawling()) {
-                scheduledPages = counters.getValue(Counters.ReservedCounterNames.SCHEDULED_PAGES);
-                inProcessPages = new InProcessPagesDB(env);
-                long numPreviouslyInProcessPages = inProcessPages.getLength();
-                if (numPreviouslyInProcessPages > 0) {
-                    logger.info("Rescheduling {} URLs from previous crawl.",
-                                numPreviouslyInProcessPages);
-                    scheduledPages -= numPreviouslyInProcessPages;
+    /**
+     * @param url
+     */
+    void schedule(WebURL url) throws FrontierException;
 
-                    List<WebURL> urls = inProcessPages.get(IN_PROCESS_RESCHEDULE_BATCH_SIZE);
-                    while (!urls.isEmpty()) {
-                        scheduleAll(urls);
-                        inProcessPages.delete(urls.size());
-                        urls = inProcessPages.get(IN_PROCESS_RESCHEDULE_BATCH_SIZE);
-                    }
-                }
-            } else {
-                inProcessPages = null;
-                scheduledPages = 0;
-            }
-        } catch (DatabaseException e) {
-            logger.error("Error while initializing the Frontier", e);
-            workQueues = null;
-        }
-    }
+    /**
+     * @param urls
+     */
+    void scheduleAll(List<WebURL> urls) throws FrontierException;
 
-    public void scheduleAll(List<WebURL> urls) {
-        int maxPagesToFetch = config.getMaxPagesToFetch();
-        synchronized (mutex) {
-            int newScheduledPage = 0;
-            for (WebURL url : urls) {
-                if ((maxPagesToFetch > 0) &&
-                    ((scheduledPages + newScheduledPage) >= maxPagesToFetch)) {
-                    break;
-                }
+    /**
+     * @param url
+     */
+    void setProcessed(WebURL url) throws FrontierException;
 
-                try {
-                    workQueues.put(url);
-                    newScheduledPage++;
-                } catch (DatabaseException e) {
-                    logger.error("Error while putting the url in the work queue", e);
-                }
-            }
-            if (newScheduledPage > 0) {
-                scheduledPages += newScheduledPage;
-                counters.increment(Counters.ReservedCounterNames.SCHEDULED_PAGES, newScheduledPage);
-            }
-            synchronized (waitingList) {
-                waitingList.notifyAll();
-            }
-        }
-    }
-
-    public void schedule(WebURL url) {
-        int maxPagesToFetch = config.getMaxPagesToFetch();
-        synchronized (mutex) {
-            try {
-                if (maxPagesToFetch < 0 || scheduledPages < maxPagesToFetch) {
-                    workQueues.put(url);
-                    scheduledPages++;
-                    counters.increment(Counters.ReservedCounterNames.SCHEDULED_PAGES);
-                }
-            } catch (DatabaseException e) {
-                logger.error("Error while putting the url in the work queue", e);
-            }
-        }
-    }
-
-    public void getNextURLs(int max, List<WebURL> result) {
-        while (true) {
-            synchronized (mutex) {
-                if (isFinished) {
-                    return;
-                }
-                try {
-                    List<WebURL> curResults = workQueues.get(max);
-                    workQueues.delete(curResults.size());
-                    if (inProcessPages != null) {
-                        for (WebURL curPage : curResults) {
-                            inProcessPages.put(curPage);
-                        }
-                    }
-                    result.addAll(curResults);
-                } catch (DatabaseException e) {
-                    logger.error("Error while getting next urls", e);
-                }
-
-                if (result.size() > 0) {
-                    return;
-                }
-            }
-
-            try {
-                synchronized (waitingList) {
-                    waitingList.wait();
-                }
-            } catch (InterruptedException ignored) {
-                // Do nothing
-            }
-            if (isFinished) {
-                return;
-            }
-        }
-    }
-
-    public void setProcessed(WebURL webURL) {
-        counters.increment(Counters.ReservedCounterNames.PROCESSED_PAGES);
-        if (inProcessPages != null) {
-            if (!inProcessPages.removeURL(webURL)) {
-                logger.warn("Could not remove: {} from list of processed pages.", webURL.getURL());
-            }
-        }
-    }
-
-    public long getQueueLength() {
-        return workQueues.getLength();
-    }
-
-    public long getNumberOfAssignedPages() {
-        if (inProcessPages != null) {
-            return inProcessPages.getLength();
-        } else {
-            return 0;
-        }
-    }
-
-    public long getNumberOfProcessedPages() {
-        return counters.getValue(Counters.ReservedCounterNames.PROCESSED_PAGES);
-    }
-
-    public long getNumberOfScheduledPages() {
-        return counters.getValue(Counters.ReservedCounterNames.SCHEDULED_PAGES);
-    }
-
-    public boolean isFinished() {
-        return isFinished;
-    }
-
-    public void close() {
-        workQueues.close();
-        counters.close();
-        if (inProcessPages != null) {
-            inProcessPages.close();
-        }
-    }
-
-    public void finish() {
-        isFinished = true;
-        synchronized (waitingList) {
-            waitingList.notifyAll();
-        }
-    }
 }

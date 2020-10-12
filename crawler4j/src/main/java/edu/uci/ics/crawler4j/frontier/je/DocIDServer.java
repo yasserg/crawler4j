@@ -15,7 +15,9 @@
  * limitations under the License.
  */
 
-package edu.uci.ics.crawler4j.frontier;
+package edu.uci.ics.crawler4j.frontier.je;
+
+import java.util.function.Consumer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -147,8 +149,12 @@ public class DocIDServer {
         try {
             return (int) docIDsDB.count();
         } catch (DatabaseException e) {
-            logger.error("Exception thrown while getting DOC Count", e);
-            return -1;
+            if (config.isHaltOnError()) {
+                throw e;
+            } else {
+                logger.error("Exception thrown while getting DOC Count", e);
+                return -1;
+            }
         }
     }
 
@@ -156,7 +162,18 @@ public class DocIDServer {
         try {
             docIDsDB.close();
         } catch (DatabaseException e) {
-            logger.error("Exception thrown while closing DocIDServer", e);
+            if (config.isHaltOnError()) {
+                throw e;
+            } else {
+                logger.error("Exception thrown while closing DocIDServer", e);
+            }
         }
+    }
+
+    /**
+     * @param consumer
+     */
+    public void process(Consumer<Database> consumer) {
+        consumer.accept(docIDsDB);
     }
 }

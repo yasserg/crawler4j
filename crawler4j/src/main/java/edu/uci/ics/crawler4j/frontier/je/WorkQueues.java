@@ -15,10 +15,14 @@
  * limitations under the License.
  */
 
-package edu.uci.ics.crawler4j.frontier;
+package edu.uci.ics.crawler4j.frontier.je;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.sleepycat.je.Cursor;
 import com.sleepycat.je.Database;
@@ -35,6 +39,8 @@ import edu.uci.ics.crawler4j.util.Util;
  * @author Yasser Ganjisaffar
  */
 public class WorkQueues {
+    private final Logger logger = LoggerFactory.getLogger(WorkQueues.class);
+
     private final Database urlsDB;
     private final Environment env;
 
@@ -142,5 +148,12 @@ public class WorkQueues {
 
     public void close() {
         urlsDB.close();
+    }
+
+    /**
+     * @param consumer
+     */
+    public void process(Consumer<Database> consumer) {
+        consumer.accept(urlsDB);
     }
 }

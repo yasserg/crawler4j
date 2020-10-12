@@ -168,9 +168,11 @@ public class RobotstxtServer {
         } catch (PageBiggerThanMaxSizeException pbtms) {
             logger.error("Error occurred while fetching (robots) url: {}, {}",
                          robotsTxtUrl.getURL(), pbtms.getMessage());
+        } catch (InterruptedException e) {
+            throw e;
         } catch (IOException e) {
             logger.error("Error occurred while fetching (robots) url: " + robotsTxtUrl.getURL(), e);
-        } catch (InterruptedException | RuntimeException e) {
+        } catch (RuntimeException e) {
             if (crawlConfig.isHaltOnError()) {
                 throw e;
             } else {
