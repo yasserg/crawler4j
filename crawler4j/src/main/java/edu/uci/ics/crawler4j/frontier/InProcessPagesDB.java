@@ -41,7 +41,11 @@ public class InProcessPagesDB extends WorkQueues {
     private static final String DATABASE_NAME = "InProcessPagesDB";
 
     public InProcessPagesDB(Environment env) {
-        super(env, DATABASE_NAME, true);
+        this(env, DATABASE_NAME);
+    }
+
+    public InProcessPagesDB(Environment env, String dbName) {
+        super(env, dbName, true);
         long docCount = getLength();
         if (docCount > 0) {
             logger.info("Loaded {} URLs that have been in process in the previous crawl.",
