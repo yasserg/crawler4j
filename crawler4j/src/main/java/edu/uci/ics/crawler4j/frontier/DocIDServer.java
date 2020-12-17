@@ -34,7 +34,7 @@ import edu.uci.ics.crawler4j.util.Util;
  * @author Yasser Ganjisaffar
  */
 
-public class DocIDServer {
+public class DocIDServer implements DocIDServerInterface {
     private static final Logger logger = LoggerFactory.getLogger(DocIDServer.class);
 
     private final Database docIDsDB;
@@ -68,6 +68,7 @@ public class DocIDServer {
      * @param url the URL for which the docid is returned.
      * @return the docid of the url if it is seen before. Otherwise -1 is returned.
      */
+    @Override
     public int getDocId(String url) {
         synchronized (mutex) {
             OperationStatus result = null;
@@ -93,6 +94,7 @@ public class DocIDServer {
         }
     }
 
+    @Override
     public int getNewDocID(String url) {
         synchronized (mutex) {
             try {
@@ -117,6 +119,7 @@ public class DocIDServer {
         }
     }
 
+    @Override
     public void addUrlAndDocId(String url, int docId) {
         synchronized (mutex) {
             if (docId <= lastDocID) {
@@ -139,10 +142,12 @@ public class DocIDServer {
         }
     }
 
+    @Override
     public boolean isSeenBefore(String url) {
         return getDocId(url) != -1;
     }
 
+    @Override
     public final int getDocCount() {
         try {
             return (int) docIDsDB.count();
@@ -152,6 +157,7 @@ public class DocIDServer {
         }
     }
 
+    @Override
     public void close() {
         try {
             docIDsDB.close();
