@@ -106,7 +106,7 @@ public class CrawlController {
             if (folder.mkdirs()) {
                 logger.debug("Created folder: " + folder.getAbsolutePath());
             } else {
-                throw new Exception(
+                throw new IOException(
                     "couldn't create the storage folder: " + folder.getAbsolutePath() +
                     " does it already exist ?");
             }
@@ -128,7 +128,7 @@ public class CrawlController {
             if (envHome.mkdir()) {
                 logger.debug("Created folder: " + envHome.getAbsolutePath());
             } else {
-                throw new Exception(
+                throw new IOException(
                     "Failed creating the frontier folder: " + envHome.getAbsolutePath());
             }
         }
