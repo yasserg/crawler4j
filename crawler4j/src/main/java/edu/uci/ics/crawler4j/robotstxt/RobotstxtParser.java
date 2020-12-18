@@ -84,7 +84,8 @@ public class RobotstxtParser {
                             if (userAgents.isEmpty()) {
                                 userAgents.add("*");
                             }
-                            uaDirectives = new UserAgentDirectives(userAgents);
+                            uaDirectives = new UserAgentDirectives(userAgents, config.getTimeout(),
+                                                       config.isMatchOnTimeout(), config.getCheckTimeoutInterval());
                         }
                         uaDirectives.add(rule, value);
                     }
