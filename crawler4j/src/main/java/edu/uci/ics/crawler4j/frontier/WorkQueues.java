@@ -45,6 +45,10 @@ public class WorkQueues {
     protected final Object mutex = new Object();
 
     public WorkQueues(Environment env, String dbName, boolean resumable) {
+        this(env, dbName, resumable, new WebURLTupleBinding());
+    }
+
+    protected WorkQueues(Environment env, String dbName, boolean resumable, WebURLTupleBinding webURLBinding) {
         this.env = env;
         this.resumable = resumable;
         DatabaseConfig dbConfig = new DatabaseConfig();
@@ -52,7 +56,7 @@ public class WorkQueues {
         dbConfig.setTransactional(resumable);
         dbConfig.setDeferredWrite(!resumable);
         urlsDB = env.openDatabase(null, dbName, dbConfig);
-        webURLBinding = new WebURLTupleBinding();
+        this.webURLBinding = webURLBinding;
     }
 
     protected Transaction beginTransaction() {

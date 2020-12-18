@@ -141,7 +141,7 @@ public class CrawlController {
 
         env = new Environment(envHome, envConfig);
         docIdServer = new DocIDServer(env, config);
-        frontier = new Frontier(env, config);
+        frontier = createFrontier(config);
 
         this.pageFetcher = pageFetcher;
         this.parser = parser == null ? new Parser(config, tldList) : parser;
@@ -151,6 +151,15 @@ public class CrawlController {
         shuttingDown = false;
 
         robotstxtServer.setCrawlConfig(config);
+    }
+
+    /**
+     * Creates the Frontier for this instance. Subclasses can create custom Frontiers
+     * @param config configuration procided to the CrawlController
+     * @return
+     */
+    protected Frontier createFrontier(CrawlConfig config) {
+        return new Frontier(env, config);
     }
 
     public Parser getParser() {
@@ -534,7 +543,7 @@ public class CrawlController {
                 }
             }
 
-            WebURL webUrl = new WebURL();
+            WebURL webUrl = createEmptyWebURL(pageUrl);
             webUrl.setTldList(tldList);
             webUrl.setURL(canonicalUrl);
             webUrl.setDocid(docId);
@@ -546,6 +555,15 @@ public class CrawlController {
                 logger.warn("Robots.txt does not allow this seed: {}", pageUrl);
             }
         }
+    }
+
+    /**
+     * Creates an empty WebURL. Subclases can override this to create subclases of WebURL instead.
+     * @param nonCanonicalString url before being transformed into canonical. It is ignored in default implementation
+     * @return
+     */
+    protected WebURL createEmptyWebURL(String nonCanonicalString) {
+        return new WebURL();
     }
 
     /**
