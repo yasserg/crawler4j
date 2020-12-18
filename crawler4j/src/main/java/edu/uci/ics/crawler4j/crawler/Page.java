@@ -20,7 +20,11 @@ package edu.uci.ics.crawler4j.crawler;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.security.DigestInputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.entity.ContentType;
@@ -64,6 +68,11 @@ public class Page {
      * The content of this page in binary format.
      */
     protected byte[] contentData;
+
+    /**
+     * The checksum of this page's content.
+     */
+    protected String contentChecksum;
 
     /**
      * The ContentType of this page.
@@ -121,7 +130,13 @@ public class Page {
         if (entity == null) {
             return new byte[0];
         }
-        try (InputStream is = entity.getContent()) {
+        MessageDigest md;
+        try {
+            md = MessageDigest.getInstance("MD5");
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("Cannot calculate checksum", e);
+        }
+        try (InputStream is = new DigestInputStream(entity.getContent(), md)) {
             int size = (int) entity.getContentLength();
             int readBufferLength = size;
 
@@ -150,6 +165,8 @@ public class Page {
                 }
             }
             return buffer.toByteArray();
+        } finally {
+            contentChecksum = DigestUtils.md5Hex(md.digest());
         }
     }
 
@@ -254,6 +271,13 @@ public class Page {
 
     public void setContentData(byte[] contentData) {
         this.contentData = contentData;
+    }
+
+    /**
+     * @return checksum of this page's content.
+     */
+    public String getContentChecksum() {
+        return contentChecksum;
     }
 
     /**
