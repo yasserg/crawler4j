@@ -65,7 +65,7 @@ dependencies {
         exclude(module: 'json')
         exclude(module: 'sentiment-analysis-parser')
     }
-    compile group: 'io.github.pgalbraith', name: 'url-detector', version: '0.1.20'
+    compile group: 'io.github.url-detector', name: 'url-detector', version: '0.1.21'
     compile group: 'com.google.guava', name: 'guava', version: '27.0.1-jre'
     compile group: 'de.malkusch.whois-server-list', name: 'public-suffix-list', version: '2.2.0'
     runtime group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
