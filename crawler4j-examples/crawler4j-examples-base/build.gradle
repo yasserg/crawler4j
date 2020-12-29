@@ -1,3 +1,6 @@
 dependencies {
-    compile project(':crawler4j')
+    implementation project(':crawler4j')
+
+    implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.26'
+    implementation group: 'com.google.guava', name: 'guava', version: '27.0.1-jre'
 }
