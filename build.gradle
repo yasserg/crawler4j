@@ -2,11 +2,6 @@ plugins {
     id 'com.github.johnrengelman.shadow' version '4.0.4' apply false
 }
 
-wrapper {
-    gradleVersion = '5.2.1'
-    distributionType = Wrapper.DistributionType.ALL
-}
-
 allprojects {
     apply plugin: 'idea'
     apply plugin: 'eclipse'
