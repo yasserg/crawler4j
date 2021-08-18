@@ -15,3 +15,8 @@ branches:
 
 script:
     - ./gradlew testClasses checkstyle
+
+cache:
+  directories:
+  - $HOME/.gradle/caches/
+  - $HOME/.gradle/wrapper/
